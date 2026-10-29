@@ -29,7 +29,7 @@
 
 - 판·알·배경·조명: 코드 기본 도형, Poly Haven, ambientCG
 - UI: Kenney
-- 증강 아이콘: AI 생성, game-icons.net
+- 방해요소 아이콘: AI 생성, game-icons.net
 - 효과음: Freesound, Kenney, jsfxr, ChipTone, Pixabay
 
 아트 방향과 필요한 효과음은 [화면 요구사항](../PRD.md#화면별-요구사항)에서 합의한다. 소스·도구의 이용 조건은 채택 시 확인한다. 출처·라이선스·AI 도구·약관 확인일을 docs/CREDITS.md에 기록하는 방안과 텍스처·아이콘 해상도·용량 제한은 미정이다. 배경음악의 MVP 제외 여부는 [PRD](../PRD.md)를 따른다.
