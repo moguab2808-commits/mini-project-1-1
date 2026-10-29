@@ -22,8 +22,8 @@
 | POST | `/api/auth/login` | 로그인 |
 | POST | `/api/auth/logout` | 로그아웃 |
 | GET | `/api/me` | 내 정보 |
-| PATCH | `/api/me/nickname` | 닉네임 변경 |
-| PATCH | `/api/me/password` | 비밀번호 변경 |
+| PATCH | `/api/me/password` | 비밀번호 변경 (닉네임은 변경 불가) |
+| PATCH | `/api/me/character` | 캐릭터 변경 |
 | GET | `/api/me/matches` | 최근 전적 |
 | GET | `/api/ranking` | 랭킹 목록 |
 | POST | `/api/suggestions` | 건의 등록 |
@@ -38,6 +38,7 @@
 |---|---|---|
 | C → S | `room:create` | 방 생성 |
 | C → S | `room:join` | 방 입장 (공개 방은 방 id, 비공개 방은 방 코드) |
+| C → S | `room:quickJoin` | 즉시 참가 (방 선택 기준·빈 목록 처리는 [로비](../PRD.md#로비) 미정) |
 | C → S | `room:leave` | 방 나가기 |
 | C → S | `room:start` | 게임 시작 (방장만, 상대 입장 시) |
 | C → S | `lobby:subscribe` | 공개 방 목록 구독 |
@@ -54,6 +55,8 @@
 | S → C | `turn:change` | 턴 변경 (남은 시간 포함). 쌍발이면 같은 플레이어의 추가 발사 기회로 전송 |
 | C → S | `game:forfeit` | 기권 |
 | S → C | `game:over` | 게임 종료 (승 / 패 / 무, 레이팅 변화) |
+| C → S | `rematch:request` | 재도전하기 |
+| S → C | `rematch:state` | 재도전 진행 상태 (동의·방 유지 규칙은 [게임 화면](../PRD.md#게임-화면) 미정) |
 | S → C | `session:replaced` | 다른 접속으로 대체되어 로그아웃됨 |
 
 ---
@@ -65,5 +68,7 @@
 - 발사·증강 요청과 턴 변경의 경합, 시간초과와 입력의 우선순위
 - 플레이어별 공개·비공개 필드, 로비 구독·해제와 방 만료
 - 호환성·버전 변경, 속도 제한의 단위와 실패 형식
+- 로그인 5회 연속 실패 제한의 응답 형식: [인증 설계](AUTH.md)
+- AI 대전의 시작 요청과 진행 위치(클라이언트·서버)
 
 기존 이벤트명은 미정이다. 후보 표에 있는 30초 등의 제품 값은 [게임 규칙](../PRD.md#게임-규칙)을 참조하며 여기서 새로 결정하지 않는다.

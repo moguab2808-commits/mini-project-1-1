@@ -16,7 +16,7 @@
 | --- | --- | --- |
 | 언어·화면 | TypeScript, React, Vite | [LOCAL](LOCAL.md) |
 | 화면 보조 | React Router, TanStack Query, Zustand, Tailwind CSS | [LOCAL](LOCAL.md) |
-| 렌더링 | Three.js, React Three Fiber, drei, 2D/3D 표현 | [GAME](GAME.md) |
+| 렌더링 | Three.js, React Three Fiber, drei (3D 표현은 [PRD](../PRD.md#게임-화면)에서 확정, 라이브러리는 미정) | [GAME](GAME.md) |
 | 런타임·통신 | Node.js, Express, Socket.IO | [API](API.md) |
 | 물리 | 직접 구현, Matter.js, 물리 차원 | [GAME](GAME.md) |
 | 검증·인증 | Zod, express-session, argon2, @node-rs/argon2, connect-pg-simple | [AUTH](AUTH.md) |

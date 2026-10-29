@@ -17,10 +17,10 @@
 ```
 users
   id              serial PK
-  login_id        varchar(20) unique not null   -- 변경 불가
-  nickname        varchar(12) unique not null
+  nickname        varchar(12) unique not null   -- 로그인 식별자, 변경 불가
   password_hash   text not null
-  rating          integer not null default 1000
+  character_id    varchar not null              -- 캐릭터 변경, 계정 저장 여부는 PRD 미정
+  rating          integer not null default 1000 -- 경기마다 반올림한 정수
   wins            integer not null default 0
   losses          integer not null default 0
   draws           integer not null default 0
@@ -58,8 +58,10 @@ sessions
 ## 미정 사항
 
 - DB·드라이버·ORM·세션 저장소: [기술 후보](TECH_STACK.md)
-- 아이디·닉네임의 정규화와 유니크 제약
-- 랭킹 정렬을 위한 점수 도달 시각·인덱스, 레이팅 반올림·하한의 표현
+- 로그인 식별자인 닉네임의 정규화와 유니크 제약, 사용자별 캐릭터 저장 여부 ([회원등록](../PRD.md#회원등록)·[캐릭터 변경](../PRD.md#캐릭터-변경))
+- 랭킹 정렬(레이팅·승수) 인덱스, 레이팅 하한의 표현
+- AI 대전 경기의 저장 여부와 상대 표현([게임 미정 사항](../PRD.md#게임-미정-사항))
+- 로그인 실패 횟수의 저장 위치([인증 설계](AUTH.md))
 - 경기 결과 중복 저장 방지, 원자적 전적·레이팅 갱신, 행 잠금·잠금 순서
 - 마이그레이션·백업·복구 절차, 승인된 삭제 정책의 저장소 반영
 
