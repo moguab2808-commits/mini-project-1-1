@@ -37,7 +37,7 @@
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 완료 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
-| [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 진행 중 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
+| [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 완료 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
@@ -365,7 +365,7 @@ Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 ## ASSET-001 에셋 조달 계획
 
 우선순위: P2
-상태: 진행 중
+상태: 완료
 담당: 개발자 A
 의존성: DOC-010
 범위: 판·알·동물 캐릭터 6종 3D 모델·방해요소 아이콘·효과음의 출처와 제작 방법, 라이선스 기록 위치(docs/CREDITS.md 여부), 용량 한도를 정한다.
@@ -375,7 +375,7 @@ Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
 수용 기준:
 - [x] 에셋 종류마다 출처 또는 제작 방법과 라이선스 확인일이 정해졌다.
 - [x] 출처·라이선스 기록 위치와 텍스처·오디오 용량 한도가 정해졌다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
 1번 해석: 이용 조건 확인일이 "미확인"인 항목(Claude·jsfxr·ChipTone·Jua)은 사용자가 구현 단계(반입 시)로 미뤘고([DEC-033](DECISIONS.md#결정-색인)), 방식이 정해졌으면 충족으로 보았다. 미확인 항목은 TECH_STACK 미정에 남아 있다.
 
