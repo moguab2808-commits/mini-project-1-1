@@ -25,6 +25,8 @@ GAME-001에 대한 개발자 B의 검토를 반영했다. 명령·종료·전송
 개발자 B는 [API-001](TASKS.md#api-001-api실시간-이벤트-계약-확정)·[DB-001](TASKS.md#db-001-db-스키마-확정)·[AUTH-001](TASKS.md#auth-001-인증-상세-설계-확정)·[OPS-001](TASKS.md#ops-001-운영-설계-확정)의 확정안을 [API](design/API.md)·[DATABASE](design/DATABASE.md)·[AUTH](design/AUTH.md)·[OPERATIONS](design/OPERATIONS.md)에 작성했다([DEC-027~029](DECISIONS.md#결정-색인)). 네 작업 모두 진행 중이며 확정안은 개발자 A의 검토와 제안 항목의 B 확인을 기다린다. 실제 구현·무료 조건 재확인·측정은 하지 않았다. 상세는 [2026-10-30 worklog](worklogs/2026-10-30.md#api-001db-001auth-001ops-001-개발자-b-설계-확정안)를 따른다.
 개발자 A는 `docs/local-001`에서 [LOCAL-001](TASKS.md#local-001-로컬-2인-모드-설계-확정) 초안을 작성했다. 로컬 2인은 브라우저 창 2개와 로컬 권한 측 SharedWorker로 진행하고, 방해요소는 내 프로필 옆 칸·E 키로 쓰며, AI 대전은 브라우저 Web Worker에서 실행한다([DEC-020·021](DECISIONS.md#결정-색인), PRD v0.18). `GameSession` 이름·명령 필드는 개발자 B가 API-001과 맞음을 확인했다. B 검토에 따라 경기 실행을 공통 패키지 `game-runtime`으로 묶고, PlayerId를 좌석 값 0/1로, 방·접속 이벤트를 `RoomClient`로 분리했다([DEC-030](DECISIONS.md#결정-색인)). PR #18 리뷰 중이다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#local-001-로컬-2인-모드-설계-초안)를 따른다.
 
+개발자 B는 [PLAN-001](TASKS.md#plan-001-구현-작업-등록)에서 구현 작업을 12묶음으로 나눈 초안과 담당 제안을 작성했다. 모노레포 도구는 ADR-0003의 npm workspaces로 확인했고 `game-runtime` 패키지를 TECH_STACK에 추가했다. 별도 작업 등록은 API-001·DB-001·AUTH-001 확정 후이며 PLAN-001은 진행 중이다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)를 따른다.
+
 ## 남은 일과 한계
 
 - 상세 계약 확정: 게임 상태 전이·물리([GAME](design/GAME.md)), API 이벤트·필드([API](design/API.md)), DB 스키마([DATABASE](design/DATABASE.md)), 인증 세부([AUTH](design/AUTH.md)), 운영 세부([OPERATIONS](design/OPERATIONS.md))
