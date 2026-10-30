@@ -45,8 +45,21 @@
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
-| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
-| [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현 | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
+| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
+| [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 예정 | 개발자 B | 미생성 |
+| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A | 미생성 |
+| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입출력 시그니처 | 예정 | 개발자 B | 미생성 |
+| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | 미생성 |
+| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | 미생성 |
+| [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 예정 | 개발자 B | 미생성 |
+| [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 예정 | 개발자 B | 미생성 |
+| [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | 미생성 |
+| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 예정 | 개발자 B | 미생성 |
+| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | 미생성 |
+| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 예정 | 개발자 B | 미생성 |
+| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 A | 미생성 |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | 미생성 |
+| [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -515,48 +528,289 @@ Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## PLAN-001 구현 작업 등록
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: GAME-001, LOCAL-001, API-001, DB-001, AUTH-001
-범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)). 모노레포 도구는 [ADR-0003](adr/0003-tech-stack-and-architecture.md)의 npm workspaces로 정해져 있어 별도 결정이 필요 없고, `game-runtime`을 패키지에 추가한다. 아래 작업 분해를 기준으로 하며, 별도 작업 항목과 Issue는 해당 설계가 확정된 뒤 이 분해에서 하나씩 등록한다.
+범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)). 모노레포 도구는 [ADR-0003](adr/0003-tech-stack-and-architecture.md)의 npm workspaces로 정해져 있어 별도 결정이 필요 없고, `game-runtime`을 패키지에 추가한다. 선행 설계(API-001·DB-001·AUTH-001·OPS-001)가 모두 완료돼 아래 작업 분해의 13묶음을 IMPL-001~013으로 등록했다. Issue는 착수할 때 하나씩 만든다.
 관련 문서: [PRD 수용 기준 작성 예시](PRD.md#수용-기준-작성-예시) / [DESIGN](DESIGN.md) / [LOCAL 패키지 구성](design/LOCAL.md#패키지-구성-승인)·[GAME 구현 경계](design/GAME.md#구현-경계-ab) / [DEC-030](DECISIONS.md#결정-색인)
 Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)
 
-작업 분해 (초안): 담당의 "(제안)"은 개발자 A 확인 전이다. 순서는 위에서 아래이며 선행 설계는 TASKS의 해당 작업을 가리킨다.
+작업 분해: 담당은 개발자 A가 PR #32에서 수락했다. 순서는 위에서 아래이며 선행 설계는 TASKS의 해당 작업을 가리킨다. 묶음 N은 [IMPL-00N](#impl-001-프로젝트-골격)(N은 세 자리로 0을 채움)로 등록했다.
 
 | 묶음 | 내용 | 담당 | 선행 설계 |
 | --- | --- | --- | --- |
 | 1. 프로젝트 골격 | npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`), 패키지 의존 경계 린트, 테스트·빌드 스크립트, `.env.example` | B | DOC-010 |
-| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A (제안) | GAME-001, GAME-002(수치 기본값) |
+| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A | GAME-001, GAME-002(수치 기본값) |
 | 3. `game-runtime` | 명령 큐·고정 틱 스케줄러·뷰 배포, 시계·전송·로거·종료 콜백 주입 | B | GAME-001, LOCAL-001, 묶음 2의 입력·출력 시그니처 선공개 |
-| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A (제안) | LOCAL-001, UI-002, ASSET-001 |
-| 5. AI 대전 | `AiGameSession`, AI 컨트롤러 | A (제안) | LOCAL-001 |
+| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A | LOCAL-001, UI-002, ASSET-001 |
+| 5. AI 대전 | `AiGameSession`, AI 컨트롤러 | A | LOCAL-001 |
 | 6. DB·마이그레이션 | Drizzle 스키마(users·rooms·세션), 마이그레이션, 연결 풀 | B | DB-001 |
 | 7. 인증 | 가입·로그인·세션·요청 빈도 제한·비밀번호·캐릭터 변경 | B | AUTH-001, API-001 |
 | 8. 로비·방 (서버) | 방 목록 조회, 방 이벤트, `rooms` 상태 갱신 | B | API-001, DB-001 |
 | 9. 온라인 대전 (서버) | 서버 전송 연결, 이탈·중복 접속 처리 | B | API-001, 묶음 3 |
-| 10. 온라인 대전 (클라이언트) | `RemoteGameSession`·`RoomClient` | A (제안) | API-001, 묶음 3 |
+| 10. 온라인 대전 (클라이언트) | `RemoteGameSession`·`RoomClient` | A | API-001, 묶음 3 |
 | 11. 경기 종료 전적 | `finishOnce`, 전적 갱신 트랜잭션 | B | DB-001, 묶음 3 |
-| 12. 계정·로비·대기실·결과 화면 | 로그인·가입·로비·방 목록·방 생성·대기실·결과 화면 (PRD 화면 요구사항 구현. 방 관련 화면은 여기에 포함) | A (제안) | UI-002, API-001 |
+| 12. 계정·로비·대기실·결과 화면 | 로그인·가입·로비·방 목록·방 생성·대기실·결과 화면 (PRD 화면 요구사항 구현. 방 관련 화면은 여기에 포함) | A | UI-002, API-001 |
 | 13. 배포 | Render·Neon 설정, 헬스체크, 로그, 수동 배포·롤백 | B | OPS-001 |
 
 의존성 순서는 골격 → `game-core`·`game-runtime`(묶음 3은 묶음 2의 입력·출력 시그니처를 먼저 공유한 뒤 병행) → 로컬 2인 모드·AI 대전 → DB·인증·로비·방(서버) → 온라인 대전(서버·클라이언트) → 전적 → 배포이다. 각 묶음의 정상·오류·예외 수용 기준은 별도 작업으로 등록할 때 PRD 수용 기준 예시(`ROOM-JOIN`·`HAZARD-GRANT`·`HAZARD-USE`·`TURN-TIMEOUT`·`LEAVE-FORFEIT`)에 맞춰 쓴다.
 
 수용 기준:
-- [ ] 로컬 2인 모드부터 온라인 배포까지의 구현 작업이 의존성 순서로 등록됐다.
-- [ ] 각 작업에 검증 가능한 수용 기준과 담당이 있다.
+- [x] 로컬 2인 모드부터 온라인 배포까지의 구현 작업이 의존성 순서로 등록됐다. (IMPL-001~013. [작업 목록](#작업-목록)의 순서가 의존성 순서이며 로컬 2인 모드(IMPL-004)가 온라인(IMPL-008~)보다 앞이다)
+- [x] 각 작업에 검증 가능한 수용 기준과 담당이 있다. (IMPL-001~013 각 절에 정상·오류·예외 기준과 담당. A 몫 5건은 개발자 A가 PR #32에서 수락했다)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #32. 개발자 A 검토를 반영하며, 병합 전에 체크했다. PR #20은 앞서 병합된 분해 초안 PR이다)
+
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)·[구현 작업 등록](worklogs/2026-10-30.md#plan-001-구현-작업-13건-등록)
+
+결정: 개발자 A가 PR #32 재검토에서 A 몫 5건(IMPL-002·004·005·010·012)을 수락하고 B 몫 8건의 분량·우선순위·의존 순서에 동의했다. VAL-002의 "게임 화면 구현"은 IMPL-004로 보며, 연결은 이 PR 병합 후 별도 문서 변경으로 한다. 각 IMPL의 수용 기준은 착수 전에 해당 PRD 절과 대조해 보완할 수 있다.
+
+## IMPL-001 프로젝트 골격
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: DOC-010
+범위: npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`)와 공통 빌드·테스트·린트 구성, `.env.example`을 만든다. 라이브러리 버전은 이때 고정하고 lock 파일로 관리한다.
+관련 문서: [TECH_STACK](design/TECH_STACK.md#채택한-기술) / [LOCAL 패키지 구성](design/LOCAL.md#패키지-구성-승인) / [ADR-0003](adr/0003-tech-stack-and-architecture.md)·[DEC-030](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 클론 직후 루트에서 설치·빌드·테스트·린트 명령이 오류 없이 끝난다. 실행한 명령과 결과를 worklog에 적는다.
+- [ ] (오류) 패키지 의존 경계 린트가 `client`↔`server` 상호 의존과 `game-core`의 네트워크·DB·DOM 참조를 실패로 잡는다. 위반 예시로 실패를 확인한다.
+- [ ] (예외) `.env.example`에는 변수 이름(`DATABASE_URL`·`SESSION_SECRET`·`PORT`·`NODE_ENV`)만 있고 값·비밀정보가 없다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
 
-남은 조건: 담당 "(제안)" 항목과 B의 분량(묶음 1·3·6·7·8·9·11·13)은 개발자 A의 확인을 받는다. API-001·DB-001·AUTH-001이 확정되기 전이라 인증·로비·방·온라인 대전·전적 묶음의 상세는 설계 확정 후 정한다. 이 PR은 중간 PR이라 위 수용 기준은 체크하지 않는다.
+## IMPL-002 `game-core`
+
+우선순위: P0
+상태: 예정
+담당: 개발자 A
+의존성: GAME-001, GAME-002, IMPL-001
+범위: 규칙·물리·상태 머신·방해요소 훅·시드 PRNG·`getViewFor`를 순수 TypeScript로 구현한다. 시간·명령·난수는 외부에서 주입받는다. 입력·출력 시그니처는 IMPL-003 착수 전에 먼저 공개한다. `shared`의 Zod 스키마·`Seat` 값의 `…Id` 이름도 여기서 정한다.
+관련 문서: [GAME](design/GAME.md#상세-계약-초안-game-001)·[기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [API 공통 타입](design/API.md#공통-타입)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `HAZARD-GRANT`) 게임 시작과 3·5·7·9라운드 시작에 각 플레이어의 보유 방해요소 1개가 새 것으로 교체되고 누적되지 않는다. 단위 테스트가 확인한다.
+- [ ] (정상, `TURN-TIMEOUT`) 주입한 시간으로 30초가 지나면 턴이 넘어가고, 같은 사용자의 연속 시간초과 3회에 기권패 결과가 나온다. 정확히 마감 시각의 발사는 시간초과가 우선이다.
+- [ ] (정상, 판정) 모든 알이 멈춘 뒤 승패를 판정하고, 동시 제거는 무승부이며 최종 라운드는 남은 알 수로 비교한다. 판 이탈·떠오름 착지 판정이 기술 초기값의 허용 오차 안에서 같은 입력에 같은 결과를 낸다(시드 고정).
+- [ ] (오류) 거부된 명령은 상태와 난수를 바꾸지 않고 [API 오류 코드](design/API.md#오류-형식과-코드)의 해당 코드를 돌려준다. 발사·방해요소의 검사 순서는 [AUTH 검증 경계](design/AUTH.md#검증-경계)와 같다.
+- [ ] (예외, 비공개) `getViewFor`가 만든 뷰에 상대 보유 방해요소·게이지·쿨타임·시드·`users.id`가 없다. 허용 목록 방식 테스트가 [API 비공개 점검표](design/API.md#상대-비공개-필드-점검)의 필드와 일치한다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-003 `game-runtime`
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입력·출력 시그니처
+범위: 방별 단일 명령 큐(`ingressSeq`·`observedAtMs` 부여), 단조 시계 고정 틱 스케줄러, 플레이어별 뷰 배포를 구현하고 시계·전송·로거·종료 콜백을 주입받게 한다. 주입 인터페이스의 형태를 이 작업에서 정한다([DEC-030](DECISIONS.md#결정-색인)).
+관련 문서: [GAME 명령 경합과 시간](design/GAME.md#명령-경합과-시간)·[구현 경계](design/GAME.md#구현-경계-ab)·[전송과 표시](design/GAME.md#전송과-표시-초안) / [LOCAL](design/LOCAL.md#로컬온라인-모드-경계-승인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 가짜 시계·가짜 전송을 주입해 틱 진행, 같은 틱 명령의 `ingressSeq` 순서 처리, 플레이어별 뷰 전송이 테스트로 확인된다. 서버·워커가 같은 코드를 쓰며 시계·전송만 다르다.
+- [ ] (정상) 알 이동 중 스냅샷은 volatile, 모든 알 정지 뒤 최종 스냅샷·`turn:change`·`hazard:triggered`·`game:over`는 신뢰 전송으로 나간다. `revision`이 오래된 상태를 만들지 않는다.
+- [ ] (오류) 틱이 지연되면 따라잡기 상한까지만 처리하고 넘긴 시간을 `tick_skipped`로 로거에 남긴다. 거부된 명령은 큐 순서만 소비하고 상태를 바꾸지 않는다.
+- [ ] (예외, `LEAVE-FORFEIT` 기반) 이탈·기권·접속 대체가 같은 큐의 기권 명령으로 처리되고, 동시 이탈은 `ingressSeq`가 작은 쪽을 기권패로 한다. 시작 커밋보다 앞선 이탈은 대기실 처리다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-004 로컬 2인 모드
+
+우선순위: P0
+상태: 예정
+담당: 개발자 A
+의존성: LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001
+범위: `LocalGameSession`, SharedWorker 로컬 권한 측(`game-runtime` + `game-core`), 개발용 `/local` 경로(창 2개, `seat` 0·1), 3D 인게임 화면, 방해요소 입력(E 키·벽·끈끈이 배치)을 구현한다. 서버·DB·로그인은 쓰지 않는다.
+관련 문서: [LOCAL](design/LOCAL.md#상세-계약-초안-local-001) / [게임 화면](PRD.md#게임-화면)·[방해요소 규칙](PRD.md#방해요소-규칙) / [DEC-020](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `HAZARD-USE`) 두 창이 모두 연결되면 경기가 시작되고, 사용 제한을 충족한 방해요소를 쓰면 양쪽 화면에 발동 안내가 표시되고 효과가 적용된다. 알이 움직이는 중에도 쓸 수 있다.
+- [ ] (정상, `HAZARD-GRANT` 비공개) 받은 방해요소는 본인 창의 방해요소 칸에만 표시되고 상대 창·상대 창이 받는 메시지에는 없다.
+- [ ] (오류) 쿨타임·과열·잘못된 위치(빨간 후보)의 사용은 거부되고 사용 횟수·게이지·쿨타임이 바뀌지 않는다. 같은 좌석의 두 번째 연결은 거부된다.
+- [ ] (예외) 창을 닫거나 새로고침하면 그 좌석이 기권패이고, `SharedWorker` 미지원 브라우저에서는 `/local`이 미지원 안내를 표시한다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-005 AI 대전
+
+우선순위: P1
+상태: 예정
+담당: 개발자 A
+의존성: LOCAL-001, IMPL-004
+범위: `AiGameSession`(mode `ai`)과 전용 Web Worker, AI 컨트롤러를 구현한다. 서버 연결·저장은 없다.
+관련 문서: [LOCAL AI 대전](design/LOCAL.md#ai-대전) / [AI 대전](PRD.md#ai-대전) / [GAME AI](design/GAME.md#ai-대전) / [DEC-021](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 방 생성 창에서 AI·판·알 개수(5·7·9)를 고르면 서버 요청 없이 경기가 시작되고 끝까지 진행된다.
+- [ ] (오류) AI 컨트롤러가 자기 `GameView`만 읽고 사람과 같은 명령 검증을 거친다. 검증에 걸린 명령은 상태를 바꾸지 않는다.
+- [ ] (예외) AI 대전 결과가 서버로 전송되지 않고 전적이 바뀌지 않으며 방 목록에 나타나지 않는다. 네트워크 요청이 없음을 확인한다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-006 DB·마이그레이션
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: DB-001, IMPL-001
+범위: Drizzle 스키마(`users`·`rooms`), 세션 테이블, 마이그레이션 파일, 연결 풀을 구현한다.
+관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록) / [DEC-022·023·027](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 빈 DB에 마이그레이션을 적용하면 `users`·`rooms`·세션 테이블이 [DATABASE](design/DATABASE.md)의 컬럼·제약대로 생긴다. 생성된 SQL의 `lower(nickname)` 유니크 인덱스를 확인했다.
+- [ ] (오류) 제약 위반(닉네임 대소문자 중복, 공개 방의 코드, 비공개 방의 코드 없음, 음수 전적, `wins + losses > total_games`, 자기 방 입장)이 DB에서 거부된다.
+- [ ] (예외) 마이그레이션을 두 번 적용해도 오류가 없고, 연결 풀의 유휴 시간이 [OPERATIONS](design/OPERATIONS.md#사용량부하-확인)대로 짧게 설정된다. 세션 테이블 스키마를 connect-pg-simple 공식 문서와 대조했다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-007 인증
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: AUTH-001, API-001, IMPL-006
+범위: 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 요청 빈도 제한, argon2id 해시, Socket.IO 연결 인증을 구현한다.
+관련 문서: [AUTH](design/AUTH.md) / [API REST](design/API.md#rest-api) / [로그인](PRD.md#로그인)·[회원등록](PRD.md#회원등록)·[캐릭터 변경](PRD.md#캐릭터-변경) / [DEC-025·028](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 가입은 세션을 만들지 않고 `201`만 응답하며, 로그인하면 세션 쿠키(`httpOnly`, 브라우저 종료 시 만료)와 `Me`가 돌아온다. 비밀번호 변경 뒤 현재 세션만 남고 다른 세션과 그 Socket.IO 연결이 끝난다.
+- [ ] (오류) 입력 오류 `INVALID_INPUT`, 닉네임 중복 `NICKNAME_TAKEN`(NFC·대소문자 무시), 닉네임 없음과 비밀번호 틀림이 같은 `INVALID_CREDENTIALS`, 세션 없음 `UNAUTHENTICATED`를 [API](design/API.md#rest-api)의 상태 코드로 돌려준다.
+- [ ] (예외) `/api/auth/*`가 IP당 분당 20회를 넘으면 `429 RATE_LIMITED`와 `Retry-After`가 응답되고, 로그인 연속 실패로는 잠기지 않는다. 같은 계정의 새 연결은 기존 연결에 `session:replaced`를 보내고 끊는다.
+- [ ] argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남겼고, 만료·정리 기본값을 공식 문서로 확인했다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-008 로비·방 (서버)
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: API-001, DB-001, IMPL-007
+범위: `GET /api/rooms`, `room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start` 이벤트, `room:state`·`room:closed`, `rooms` 상태 갱신, 서버 시작 시 `rooms` 정리를 구현한다.
+관련 문서: [API 방 이벤트](design/API.md#방-이벤트-필드) / [DATABASE 방 생명주기](design/DATABASE.md#방-생명주기) / [로비](PRD.md#로비)·[방 생성](PRD.md#방-생성)·[대기실](PRD.md#대기실)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `ROOM-JOIN`) 대기 중인 공개 방에 참여하면 양쪽에 `room:state`로 두 사용자가 담기고 방장만 `room:start`를 보낼 수 있다. 즉시 참가는 대기 중인 공개 방 중 하나를 고른다.
+- [ ] (정상) `GET /api/rooms`는 공개·비공개 방을 모두 `status`와 함께 돌려주고 비공개 방의 `code`·사용자 번호가 응답에 없다. `code`는 방장의 `room:state`에만 있다.
+- [ ] (오류) `INVALID_CODE`·`ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`·`CODE_TAKEN`·`ALREADY_IN_ROOM`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY`가 [API](design/API.md#오류-형식과-코드)의 조건대로 ack로 응답된다. `room:join`이 연결당 분당 30회를 넘으면 `RATE_LIMITED`다.
+- [ ] (예외) 두 사용자가 동시에 같은 방에 입장하면 한 명만 성공한다. 방장이 나가면 방이 삭제되고 `room:closed`가 가며, 참여자가 나가면 `guest_id`만 비워진다. 서버 시작 때 `rooms`가 전부 삭제된다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-009 온라인 대전 (서버)
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: API-001, IMPL-003, IMPL-008
+범위: 서버가 `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 경기를 진행한다. 이탈·중복 접속의 기권 명령 변환, 재도전 15초 처리, 서버 로그를 구현한다.
+관련 문서: [API 경기 이벤트](design/API.md#경기-이벤트-필드)·[이벤트 순서](design/API.md#이벤트-순서) / [AUTH 검증 경계](design/AUTH.md#검증-경계) / [OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그) / [연결 끊김과 중복 접속](PRD.md#연결-끊김과-중복-접속)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `HAZARD-GRANT`·`HAZARD-USE`) 게임 시작과 교체 라운드에 `hazard:granted`가 받은 플레이어에게만 가고, `hazard:use`는 조건을 충족하면 양쪽에 `hazard:triggered`가 간다. 이벤트 순서가 [순서 규칙](design/API.md#이벤트-순서)과 같다.
+- [ ] (정상, `TURN-TIMEOUT`) 30초 동안 발사하지 않으면 `turn:change`(`timeout`)가 가고 연속 3회에 `game:over`(`timeout_forfeit`)가 간다.
+- [ ] (오류) 사용자 번호를 입력으로 받지 않고 세션 사용자만 좌석으로 바꾼다. 경기 중이 아닌 사용자의 명령은 `GAME_NOT_ACTIVE`, 낡은 명령은 `STALE_TURN`·`STALE_HAZARD`다.
+- [ ] (예외, `LEAVE-FORFEIT`) 경기 중 연결이 끊기거나 `room:leave`·`session:replaced`가 일어나면 그 플레이어가 기권패다. 동시 이탈은 먼저 관찰된 쪽, 시작 커밋 전 이탈은 대기실 처리이며 `leave`·`start_commit` 로그의 `ingressSeq`로 판정할 수 있다. 로그에 세션·쿠키·상대 보유 방해요소가 없다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-010 온라인 대전 (클라이언트)
+
+우선순위: P0
+상태: 예정
+담당: 개발자 A
+의존성: API-001, IMPL-003, IMPL-004
+범위: `RemoteGameSession`(이벤트 변환 없이 전달)과 `RoomClient`(`room:*`·`session:replaced`)를 구현해 `LocalGameSession`을 바꿔 끼울 수 있게 한다.
+관련 문서: [LOCAL GameSession](design/LOCAL.md#gamesession-시그니처) / [API](design/API.md#socketio-이벤트) / [DEC-030](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 화면 코드를 바꾸지 않고 `LocalGameSession` 대신 `RemoteGameSession`으로 경기가 진행된다. 재도전 경기를 같은 세션이 이어 간다.
+- [ ] (오류) ack 오류 코드를 `CommandResult`로 그대로 전달하고 `gameId`가 현재 경기와 다른 이벤트·`revision`이 오래된 `game:state`를 버린다.
+- [ ] (예외) `session:replaced`를 받으면 로그인 화면으로 이동하고, 연결이 끊기면 재접속을 시도하지 않고 로그인 화면으로 간다. `dispose()`는 `room:leave`를 보낸다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-011 경기 종료 전적
+
+우선순위: P0
+상태: 예정
+담당: 개발자 B
+의존성: DB-001, IMPL-009
+범위: `finishOnce`와 전적 갱신 트랜잭션, 경기 종료 뒤 `rooms` 상태 갱신을 구현한다.
+관련 문서: [DATABASE 경기 종료 저장](design/DATABASE.md#경기-종료-저장) / [전적](PRD.md#전적) / [GAME 명령 경합](design/GAME.md#명령-경합과-시간)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `LEAVE-FORFEIT`) 정상 종료·기권 종료 뒤 양쪽 전적이 갱신된다. 승자는 `total_games`·`wins`, 패자는 `total_games`·`losses`가 오르고 무승부는 `total_games`만 오른다.
+- [ ] (오류) 트랜잭션이 실패하면 오류를 로그에 남기고 전적 반영을 포기하며 같은 경기가 두 번 반영되지 않는다. 방 정리는 계속된다.
+- [ ] (예외) 이탈·시간초과·정상 종료가 겹쳐도 `finishOnce`가 한 번만 실행된다. 두 `users` 행을 `id` 오름차순으로 잠가 동시 종료에서 교착이 나지 않는다. AI 대전과 시작 커밋 전 이탈은 전적을 바꾸지 않는다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-012 계정·로비·대기실·결과 화면
+
+우선순위: P0
+상태: 예정
+담당: 개발자 A
+의존성: UI-002, API-001, IMPL-007, IMPL-008
+범위: 로그인·가입·로비(방 목록·새로고침·방 생성·즉시 참가·코드 입력)·캐릭터 변경·환경설정·대기실·결과(재도전하기·나가기) 화면을 PRD 화면 요구사항대로 구현한다.
+관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) / [API](design/API.md)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `ROOM-JOIN`) 로그인 → 로비 → 방 생성 또는 참여 → 대기실 → 인게임 → 결과(재도전하기·나가기) 흐름이 두 계정으로 이어진다. 비공개 방은 자물쇠 표시와 코드 입력 뒤 입장한다.
+- [ ] (오류) API 오류 코드마다 PRD 안내 문구가 표시된다(닉네임 중복, 로그인 실패, 방이 가득 참, 이미 게임 중, 코드 오류 시 창 유지, 요청 제한 안내).
+- [ ] (예외) 목록이 오래된 채 입장해도 서버 오류를 안내하고, 방장이 나가 방이 닫히면 로비로 이동한다. 재도전 15초가 지나면 대기실로 돌아간다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## IMPL-013 배포
+
+우선순위: P1
+상태: 예정
+담당: 개발자 B
+의존성: OPS-001, IMPL-009, IMPL-011
+범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
+관련 문서: [OPERATIONS](design/OPERATIONS.md#세부-절차-확정안) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다. 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다.
+- [ ] (오류) `/api`·`/socket.io`·`/health` 밖 확장자 없는 GET은 `index.html`, 없는 정적 자산은 404를 돌려준다. 롤백 절차로 직전 배포를 복원해 확인했다.
+- [ ] (예외) 서버 시작 때 `rooms` 정리가 실패하면 서버가 시작하지 않는다. 절전 방지 요청 사용 여부와 Render 로그 보관 기간을 구현 단계에서 정해 기록했다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
 
 ## DOC-011 README 설치·실행 절차
 
 우선순위: P2
 상태: 예정
 담당: 개발자 B
-의존성: PLAN-001 이후 실행 구성 구현
+의존성: PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013)
 범위: 실행 구성이 생긴 뒤 README에 준비 조건·설치·로컬 실행·테스트·배포 접속 절차를 실제 검증 결과와 함께 추가한다.
 관련 문서: [README](../README.md) / [LOCAL](design/LOCAL.md)·[OPERATIONS](design/OPERATIONS.md)
 Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13)
