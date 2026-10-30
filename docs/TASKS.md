@@ -39,26 +39,26 @@
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)·[PR #25](https://github.com/moguab2808-commits/mini-project-1-1/pull/25) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 완료 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 완료 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)·[PR #30](https://github.com/moguab2808-commits/mini-project-1-1/pull/30) |
-| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 진행 중 | 개발자 A | 미생성 |
+| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 진행 중 | 개발자 A | [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
-| [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 리뷰 중 | 개발자 A | 미생성 |
+| [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 완료 | 개발자 A | [PR #33](https://github.com/moguab2808-commits/mini-project-1-1/pull/33) |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32) |
-| [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 예정 | 개발자 B | 미생성 |
-| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A | 미생성 |
-| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입출력 시그니처 | 예정 | 개발자 B | 미생성 |
-| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | 미생성 |
-| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | 미생성 |
-| [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 예정 | 개발자 B | 미생성 |
-| [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 예정 | 개발자 B | 미생성 |
-| [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | 미생성 |
-| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 예정 | 개발자 B | 미생성 |
-| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | 미생성 |
-| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 예정 | 개발자 B | 미생성 |
-| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 A | 미생성 |
-| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | 미생성 |
+| [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 예정 | 개발자 B | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35) |
+| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36) |
+| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입출력 시그니처 | 예정 | 개발자 B | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
+| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
+| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
+| [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 예정 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40) |
+| [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 예정 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41) |
+| [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42) |
+| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 예정 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43) |
+| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44) |
+| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 예정 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45) |
+| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 A | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46) |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -420,7 +420,7 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 의존성: IMPL-004 (게임 화면 구현. 기록 모듈은 화면 없이 먼저 만들었고, 화면 연결은 IMPL-004 이후)
 범위: [fps 측정 절차](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001)가 요구하는 판 전체의 프레임 간격(ms) 원자료를 개발 중에만 기록·내보내는 코드를 만든다. VAL-001 완료 때 남긴 후속이다. 기록 모듈(`packages/client/src/dev/frame-recorder.ts`)은 화면 없이 만들 수 있어 먼저 만들었고, 실제 화면에 붙이는 일과 운영 빌드 제외 확인은 게임 화면(IMPL-004)이 있어야 한다.
 관련 문서: [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001) / [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식)
-Issue·PR: 미생성
+Issue·PR: [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34)
 
 수용 기준:
 - [ ] 개발 환경에서만 켜지고 운영 빌드에는 영향이 없다. (미충족: 모듈은 DOM·프레임워크를 참조하지 않고 켜는 책임을 호출 쪽에 두었다. 화면에서 `import.meta.env.DEV`일 때만 동적 import하고 운영 빌드에 들어가지 않음을 확인하는 일은 IMPL-004 이후)
@@ -455,17 +455,17 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 ## API-002 API 이름·식별자 확인과 private 뷰 필드 확정
 
 우선순위: P1
-상태: 리뷰 중
+상태: 완료
 담당: 개발자 A
 의존성: API-001
 범위: API-001 완료 때 남긴 후속이다. 개발자 B가 정하고 A가 확인하지 않은 이름을 확인하고, 본인 private 뷰의 게이지·쿨타임 필드 이름을 A가 GAME에서 정한 뒤 API에 반영한다. 새 제품 정책을 정하지 않는다.
 관련 문서: [API](design/API.md) / [GAME](design/GAME.md#상태-위치와-플레이어별-뷰)·[LOCAL](design/LOCAL.md) / [API-001](#api-001-api실시간-이벤트-계약-확정)
-Issue·PR: 미생성
+Issue·PR: [PR #33](https://github.com/moguab2808-commits/mini-project-1-1/pull/33)
 
 수용 기준:
 - [x] 새 오류 코드 9종(`ALREADY_IN_ROOM`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY`·`GAME_NOT_ACTIVE`·`NOT_YOUR_TURN`·`INVALID_STONE`·`PLAYER_STUNNED`·`REMATCH_NOT_AVAILABLE`)과 `HAZARD_*` 4종, `HazardKind`·`CharacterId`·`BoardId` 식별자, `game:over.reason` 값을 A가 확인하고 바꿀 이름이 있으면 API·LOCAL·GAME에 반영됐다. (바꿀 이름 없음. 이름·값이 API·GAME·LOCAL·OPERATIONS·PRD와 일치함을 worklog에 대조)
 - [x] 본인 private 뷰의 게이지·쿨타임·사용 가능 여부 필드 이름이 GAME에 정해지고 API의 `GameView.private`에 반영됐다. ([GAME](design/GAME.md#상태-위치와-플레이어별-뷰)의 `fatigueGauge`·`overheated`·`cooldownEndsAtMs`·`usable`, [API](design/API.md#경기-이벤트-필드)의 `GameView.private`)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (worklog는 기록했고 병합 전이다. 병합 후 체크하고 완료로 바꾼다)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #33, `main` a1fa237)
 
 검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#api-002-이름식별자-확인과-private-뷰-필드-확정)
 
@@ -572,7 +572,7 @@ Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 의존성: DOC-010
 범위: npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`)와 공통 빌드·테스트·린트 구성, `.env.example`을 만든다. 라이브러리 버전은 이때 고정하고 lock 파일로 관리한다.
 관련 문서: [TECH_STACK](design/TECH_STACK.md#채택한-기술) / [LOCAL 패키지 구성](design/LOCAL.md#패키지-구성-승인) / [ADR-0003](adr/0003-tech-stack-and-architecture.md)·[DEC-030](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35)
 
 수용 기준:
 - [ ] (정상) 클론 직후 루트에서 설치·빌드·테스트·린트 명령이 오류 없이 끝난다. 실행한 명령과 결과를 worklog에 적는다.
@@ -590,7 +590,7 @@ Issue·PR: 미생성
 의존성: GAME-001, GAME-002, IMPL-001
 범위: 규칙·물리·상태 머신·방해요소 훅·시드 PRNG·`getViewFor`를 순수 TypeScript로 구현한다. 시간·명령·난수는 외부에서 주입받는다. 입력·출력 시그니처는 IMPL-003 착수 전에 먼저 공개한다. `shared`의 Zod 스키마·`Seat` 값의 `…Id` 이름도 여기서 정한다.
 관련 문서: [GAME](design/GAME.md#상세-계약-초안-game-001)·[기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [API 공통 타입](design/API.md#공통-타입)
-Issue·PR: 미생성
+Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)
 
 수용 기준:
 - [ ] (정상, `HAZARD-GRANT`) 게임 시작과 3·5·7·9라운드 시작에 각 플레이어의 보유 방해요소 1개가 새 것으로 교체되고 누적되지 않는다. 단위 테스트가 확인한다.
@@ -610,7 +610,7 @@ Issue·PR: 미생성
 의존성: GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입력·출력 시그니처
 범위: 방별 단일 명령 큐(`ingressSeq`·`observedAtMs` 부여), 단조 시계 고정 틱 스케줄러, 플레이어별 뷰 배포를 구현하고 시계·전송·로거·종료 콜백을 주입받게 한다. 주입 인터페이스의 형태를 이 작업에서 정한다([DEC-030](DECISIONS.md#결정-색인)).
 관련 문서: [GAME 명령 경합과 시간](design/GAME.md#명령-경합과-시간)·[구현 경계](design/GAME.md#구현-경계-ab)·[전송과 표시](design/GAME.md#전송과-표시-초안) / [LOCAL](design/LOCAL.md#로컬온라인-모드-경계-승인)
-Issue·PR: 미생성
+Issue·PR: [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)
 
 수용 기준:
 - [ ] (정상) 가짜 시계·가짜 전송을 주입해 틱 진행, 같은 틱 명령의 `ingressSeq` 순서 처리, 플레이어별 뷰 전송이 테스트로 확인된다. 서버·워커가 같은 코드를 쓰며 시계·전송만 다르다.
@@ -629,7 +629,7 @@ Issue·PR: 미생성
 의존성: LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001
 범위: `LocalGameSession`, SharedWorker 로컬 권한 측(`game-runtime` + `game-core`), 개발용 `/local` 경로(창 2개, `seat` 0·1), 3D 인게임 화면, 방해요소 입력(E 키·벽·끈끈이 배치)을 구현한다. 서버·DB·로그인은 쓰지 않는다.
 관련 문서: [LOCAL](design/LOCAL.md#상세-계약-초안-local-001) / [게임 화면](PRD.md#게임-화면)·[방해요소 규칙](PRD.md#방해요소-규칙) / [DEC-020](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38)
 
 수용 기준:
 - [ ] (정상, `HAZARD-USE`) 두 창이 모두 연결되면 경기가 시작되고, 사용 제한을 충족한 방해요소를 쓰면 양쪽 화면에 발동 안내가 표시되고 효과가 적용된다. 알이 움직이는 중에도 쓸 수 있다.
@@ -648,7 +648,7 @@ Issue·PR: 미생성
 의존성: LOCAL-001, IMPL-004
 범위: `AiGameSession`(mode `ai`)과 전용 Web Worker, AI 컨트롤러를 구현한다. 서버 연결·저장은 없다.
 관련 문서: [LOCAL AI 대전](design/LOCAL.md#ai-대전) / [AI 대전](PRD.md#ai-대전) / [GAME AI](design/GAME.md#ai-대전) / [DEC-021](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39)
 
 수용 기준:
 - [ ] (정상) 방 생성 창에서 AI·판·알 개수(5·7·9)를 고르면 서버 요청 없이 경기가 시작되고 끝까지 진행된다.
@@ -666,7 +666,7 @@ Issue·PR: 미생성
 의존성: DB-001, IMPL-001
 범위: Drizzle 스키마(`users`·`rooms`), 세션 테이블, 마이그레이션 파일, 연결 풀을 구현한다.
 관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록) / [DEC-022·023·027](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)
 
 수용 기준:
 - [ ] (정상) 빈 DB에 마이그레이션을 적용하면 `users`·`rooms`·세션 테이블이 [DATABASE](design/DATABASE.md)의 컬럼·제약대로 생긴다. 생성된 SQL의 `lower(nickname)` 유니크 인덱스를 확인했다.
@@ -684,7 +684,7 @@ Issue·PR: 미생성
 의존성: AUTH-001, API-001, IMPL-006
 범위: 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 요청 빈도 제한, argon2id 해시, Socket.IO 연결 인증을 구현한다.
 관련 문서: [AUTH](design/AUTH.md) / [API REST](design/API.md#rest-api) / [로그인](PRD.md#로그인)·[회원등록](PRD.md#회원등록)·[캐릭터 변경](PRD.md#캐릭터-변경) / [DEC-025·028](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)
 
 수용 기준:
 - [ ] (정상) 가입은 세션을 만들지 않고 `201`만 응답하며, 로그인하면 세션 쿠키(`httpOnly`, 브라우저 종료 시 만료)와 `Me`가 돌아온다. 비밀번호 변경 뒤 현재 세션만 남고 다른 세션과 그 Socket.IO 연결이 끝난다.
@@ -703,7 +703,7 @@ Issue·PR: 미생성
 의존성: API-001, DB-001, IMPL-007
 범위: `GET /api/rooms`, `room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start` 이벤트, `room:state`·`room:closed`, `rooms` 상태 갱신, 서버 시작 시 `rooms` 정리를 구현한다.
 관련 문서: [API 방 이벤트](design/API.md#방-이벤트-필드) / [DATABASE 방 생명주기](design/DATABASE.md#방-생명주기) / [로비](PRD.md#로비)·[방 생성](PRD.md#방-생성)·[대기실](PRD.md#대기실)
-Issue·PR: 미생성
+Issue·PR: [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42)
 
 수용 기준:
 - [ ] (정상, `ROOM-JOIN`) 대기 중인 공개 방에 참여하면 양쪽에 `room:state`로 두 사용자가 담기고 방장만 `room:start`를 보낼 수 있다. 즉시 참가는 대기 중인 공개 방 중 하나를 고른다.
@@ -722,7 +722,7 @@ Issue·PR: 미생성
 의존성: API-001, IMPL-003, IMPL-008
 범위: 서버가 `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 경기를 진행한다. 이탈·중복 접속의 기권 명령 변환, 재도전 15초 처리, 서버 로그를 구현한다.
 관련 문서: [API 경기 이벤트](design/API.md#경기-이벤트-필드)·[이벤트 순서](design/API.md#이벤트-순서) / [AUTH 검증 경계](design/AUTH.md#검증-경계) / [OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그) / [연결 끊김과 중복 접속](PRD.md#연결-끊김과-중복-접속)
-Issue·PR: 미생성
+Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)
 
 수용 기준:
 - [ ] (정상, `HAZARD-GRANT`·`HAZARD-USE`) 게임 시작과 교체 라운드에 `hazard:granted`가 받은 플레이어에게만 가고, `hazard:use`는 조건을 충족하면 양쪽에 `hazard:triggered`가 간다. 이벤트 순서가 [순서 규칙](design/API.md#이벤트-순서)과 같다.
@@ -741,7 +741,7 @@ Issue·PR: 미생성
 의존성: API-001, IMPL-003, IMPL-004
 범위: `RemoteGameSession`(이벤트 변환 없이 전달)과 `RoomClient`(`room:*`·`session:replaced`)를 구현해 `LocalGameSession`을 바꿔 끼울 수 있게 한다.
 관련 문서: [LOCAL GameSession](design/LOCAL.md#gamesession-시그니처) / [API](design/API.md#socketio-이벤트) / [DEC-030](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)
 
 수용 기준:
 - [ ] (정상) 화면 코드를 바꾸지 않고 `LocalGameSession` 대신 `RemoteGameSession`으로 경기가 진행된다. 재도전 경기를 같은 세션이 이어 간다.
@@ -759,7 +759,7 @@ Issue·PR: 미생성
 의존성: DB-001, IMPL-009
 범위: `finishOnce`와 전적 갱신 트랜잭션, 경기 종료 뒤 `rooms` 상태 갱신을 구현한다.
 관련 문서: [DATABASE 경기 종료 저장](design/DATABASE.md#경기-종료-저장) / [전적](PRD.md#전적) / [GAME 명령 경합](design/GAME.md#명령-경합과-시간)
-Issue·PR: 미생성
+Issue·PR: [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)
 
 수용 기준:
 - [ ] (정상, `LEAVE-FORFEIT`) 정상 종료·기권 종료 뒤 양쪽 전적이 갱신된다. 승자는 `total_games`·`wins`, 패자는 `total_games`·`losses`가 오르고 무승부는 `total_games`만 오른다.
@@ -777,7 +777,7 @@ Issue·PR: 미생성
 의존성: UI-002, API-001, IMPL-007, IMPL-008
 범위: 로그인·가입·로비(방 목록·새로고침·방 생성·즉시 참가·코드 입력)·캐릭터 변경·환경설정·대기실·결과(재도전하기·나가기) 화면을 PRD 화면 요구사항대로 구현한다.
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) / [API](design/API.md)
-Issue·PR: 미생성
+Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)
 
 수용 기준:
 - [ ] (정상, `ROOM-JOIN`) 로그인 → 로비 → 방 생성 또는 참여 → 대기실 → 인게임 → 결과(재도전하기·나가기) 흐름이 두 계정으로 이어진다. 비공개 방은 자물쇠 표시와 코드 입력 뒤 입장한다.
@@ -795,7 +795,7 @@ Issue·PR: 미생성
 의존성: OPS-001, IMPL-009, IMPL-011
 범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
 관련 문서: [OPERATIONS](design/OPERATIONS.md#세부-절차-확정안) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)
 
 수용 기준:
 - [ ] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다. 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다.
