@@ -69,7 +69,7 @@
 | `NOT_IN_ROOM` | 방에 없는 사용자의 `room:start` |
 | `NOT_HOST` | 방장이 아닌 사용자의 `room:start` |
 | `ROOM_NOT_READY` | 상대가 입장하지 않은 방의 `room:start` |
-| `GAME_NOT_ACTIVE` | 진행 중인 경기가 없거나 `game:forfeit`의 gameId가 현재 경기와 다름 |
+| `GAME_NOT_ACTIVE` | 진행 중인 경기가 없음(경기 시작 전·종료 후)에 `shot:submit`·`hazard:use`·`game:forfeit`을 보냄. `game:forfeit`은 gameId가 현재 경기와 달라도 이 코드를 쓴다. 진행 중인 경기가 있는데 gameId·turnId·hazardInstanceId만 낡은 `shot:submit`·`hazard:use`는 `STALE_TURN`·`STALE_HAZARD`를 쓴다 |
 | `STALE_TURN` | 발사 명령의 gameId·turnId가 현재 경기·턴과 다름. 같은 턴의 두 번째 발사에는 쓰지 않는다 ([DEC-026](../DECISIONS.md#결정-색인)) |
 | `SHOT_ALREADY_SUBMITTED` | 같은 턴에 이미 발사해 `shotCommitted`로 두 번째 발사가 거부됨 ([GAME](GAME.md#명령-경합과-시간)). turnId가 맞는 요청이라 낡은 요청과 구분한다 |
 | `NOT_YOUR_TURN` | gameId·turnId는 맞지만 현재 턴의 플레이어가 아님 |
@@ -79,7 +79,7 @@
 | `HAZARD_COOLDOWN` | 쿨타임 중인 쿨타임형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | `HAZARD_OVERHEATED` | 과열 중에 피로도 게이지형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | `HAZARD_INVALID_TARGET` | 벽·끈끈이의 위치·방향이 없거나 판 밖이거나 알·기존 벽·끈끈이와 겹침 ([GAME 방해요소별 처리](GAME.md#방해요소별-처리)) |
-| `HAZARD_NOT_USABLE` | 경기 시작 전이나 종료 후의 입력, 또는 랜덤형 방해요소를 직접 사용함 ([GAME 상태 전이](GAME.md#상태-전이와-순서), [PRD 사용](../PRD.md#사용)) |
+| `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
 
 방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A 검토 전이다. 목록은 이 절 한 곳에서 관리한다.
@@ -115,6 +115,7 @@
 | S → C | `session:replaced` | 다른 접속으로 대체되어 로그아웃됨 |
 
 `sim:result`(일괄 기록 이벤트)는 두지 않는다. 실시간 진행은 `game:state`로, 방해요소 발동은 `hazard:triggered`로 전달한다 ([ADR-0004](../adr/0004-realtime-hazards.md), [DEC-016](../DECISIONS.md#결정-색인)).
+
 ### 방 이벤트 필드
 
 | 이벤트 | 요청 | 응답(ack) 또는 오류 |
@@ -140,10 +141,10 @@
 | --- | --- | --- |
 | `game:start` (S → C) | — | `{ gameId, seat: Seat, players: [{ seat, nickname, characterId }, { seat, nickname, characterId }], board: BoardId, pieceCount, finalRound, turnSeconds, view: GameView }`. `seat`는 받는 사람의 좌석이다. `view`는 받는 사람의 초기 `GameView`다. `finalRound`(10)와 `turnSeconds`(30)는 [PRD](../PRD.md#게임-규칙) 값이다 |
 | `hazard:granted` (S → C) | — | `{ gameId, hazardInstanceId, kind: HazardKind, round, replaced }`. 받은 플레이어에게만 보낸다. `replaced`는 이전 보유를 교체했는지 여부다. 게이지·쿨타임 상태는 `game:state`의 `private`로 받는다 |
-| `hazard:use` (C → S) | `{ gameId, hazardInstanceId, target? }`. `target`은 `wall`·`sticky`에만 필수이며 `{ x, y, orientation? }`다. `orientation`(`horizontal`·`vertical`)은 `wall`에만 필수다. 좌표는 판 좌표계다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_HAZARD`, `HAZARD_COOLDOWN`, `HAZARD_OVERHEATED`, `HAZARD_INVALID_TARGET`, `HAZARD_NOT_USABLE`. 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용한다. 랜덤형은 서버가 자동 발동한다 (DEC-015·017·031) |
+| `hazard:use` (C → S) | `{ gameId, hazardInstanceId, target? }`. `target`은 `wall`·`sticky`에만 필수이며 `{ x, y, orientation? }`다. `orientation`(`horizontal`·`vertical`)은 `wall`에만 필수다. 좌표는 판 좌표계다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_HAZARD`, `HAZARD_COOLDOWN`, `HAZARD_OVERHEATED`, `HAZARD_INVALID_TARGET`, `HAZARD_NOT_USABLE`, `GAME_NOT_ACTIVE`. 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용한다. 랜덤형은 서버가 자동 발동한다 (DEC-015·017·031) |
 | `hazard:triggered` (S → C) | — | `{ gameId, kind, phase, sourceSeat, targetSeat, startsAtMs, expiresAtMs, params? }`. `phase`는 `start`·`end`. `params`는 `wall`·`sticky`의 `{ x, y, orientation? }`, `wind`의 `{ directionRad }`, `bar_speed`의 `{ multiplier }`, `board_spin`의 `{ angleDeg }`이며 양쪽에 같게 보낸다. 시야 가림(`flashlight`·`water_gun`)의 가림 모양은 넣지 않고 대상의 `game:state`로만 보낸다 |
 | `game:state` (S → C) | — | `GameView`(아래). 알이 움직이는 동안은 volatile, 조준 중에는 바뀔 때만, 알이 모두 멈춘 최종 스냅샷은 신뢰 전송이다 ([GAME](GAME.md#전송과-표시-초안)) |
-| `shot:submit` (C → S) | `{ gameId, turnId, stoneId, angle, power }`. 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), `angle`은 판 좌표계 라디안. 각도 범위는 구현 때 정한다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_TURN`, `SHOT_ALREADY_SUBMITTED`, `NOT_YOUR_TURN`, `INVALID_STONE`, `PLAYER_STUNNED` ([DEC-026](../DECISIONS.md#결정-색인)). 적용 결과는 `game:state`로 받는다 |
+| `shot:submit` (C → S) | `{ gameId, turnId, stoneId, angle, power }`. 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), `angle`은 판 좌표계 라디안. 각도 범위는 구현 때 정한다 | `{ ok: true }`. `INVALID_INPUT`, `GAME_NOT_ACTIVE`, `STALE_TURN`, `SHOT_ALREADY_SUBMITTED`, `NOT_YOUR_TURN`, `INVALID_STONE`, `PLAYER_STUNNED` ([DEC-026](../DECISIONS.md#결정-색인)). 적용 결과는 `game:state`로 받는다 |
 | `turn:change` (S → C) | — | `{ gameId, turnId, round, activePlayerId: Seat, deadlineMs, serverNowMs, reason }`. `reason`은 `start`(경기 첫 턴)·`resolved`(발사 처리 뒤)·`timeout`(시간초과) |
 | `game:forfeit` (C → S) | `{ gameId }` | `{ ok: true }`. `GAME_NOT_ACTIVE`, `INVALID_INPUT` |
 | `game:over` (S → C) | — | `{ gameId, winnerId: Seat \| null, reason, remainingStones: [n0, n1], rematchDeadlineMs: number \| null }`. `winnerId`가 `null`이면 무승부다. `reason`은 `all_stones_out`(알 모두 제거)·`final_round`(최종 라운드 알 수 비교)·`forfeit`(기권·이탈)·`timeout_forfeit`(연속 시간초과 강제 기권). 상대가 나가 재도전할 수 없으면 `rematchDeadlineMs`는 `null`이다. 레이팅은 없다 ([DEC-022](../DECISIONS.md#결정-색인)) |
@@ -202,12 +203,12 @@ sequenceDiagram
             S-->>H: hazard:triggered
             S-->>G: hazard:triggered
         end
-        S-->>H: game:state (최종 스냅샷, 신뢰 전송)
-        S-->>G: game:state (최종 스냅샷, 신뢰 전송)
-        opt 1·3·5·7·9라운드 시작
+        opt 3·5·7·9라운드 시작 (교체 지급)
             S-->>H: hazard:granted (교체)
             S-->>G: hazard:granted (교체)
         end
+        S-->>H: game:state (최종 스냅샷, 신뢰 전송)
+        S-->>G: game:state (최종 스냅샷, 신뢰 전송)
         S-->>H: turn:change
         S-->>G: turn:change
     end
@@ -229,10 +230,10 @@ sequenceDiagram
 
 1. 한 연결 안에서 신뢰 전송 이벤트는 보낸 순서대로 도착한다(Socket.IO). 클라이언트는 `gameId`가 현재 경기와 다른 이벤트를 버린다.
 2. `room:start`는 시작 커밋 → `game:start` 전송 → 방장 ack 순서다. 시작 커밋보다 먼저 관찰된 이탈은 대기실 처리, 뒤의 이탈은 기권패다([GAME](GAME.md#상태-전이와-순서)).
-3. 경기 시작 때의 `hazard:granted`는 `game:start` 뒤, 첫 `turn:change` 앞에 온다. 라운드 교체 지급은 종료 판정 → 교체 → 다음 턴 주인 변경 순에 따라 `turn:change` 앞에 온다([GAME](GAME.md#상태-전이와-순서)).
+3. 경기 시작 때의 `hazard:granted`는 `game:start` 뒤, 첫 `turn:change` 앞에 온다. 라운드 교체 지급은 [GAME](GAME.md#상태-전이와-순서)의 종료 판정 → 교체 → 다음 턴 주인 변경 → 뷰·`turn:change` 순에 따라 그 턴의 최종 `game:state`보다 먼저 보낸다. 최종 스냅샷의 `private.held`가 교체 뒤의 값이 되며, 교체가 없는 턴은 최종 `game:state` → `turn:change` 순이다.
 4. 발사 ack는 명령 수락·거부만 뜻한다. 결과는 이후 `game:state`·`hazard:triggered`로 받는다.
 5. `game:state`는 `revision`이 커지는 순서로만 적용한다. volatile 스냅샷이 유실돼도 마지막 신뢰 전송 스냅샷이 서버 상태로 수렴시킨다. 연결이 끊기면 재접속 복구는 없다.
-6. `game:over` 뒤에는 `game:state`·`hazard:triggered`·`turn:change`를 보내지 않으며 이후 `shot:submit`·`hazard:use`는 `STALE_TURN`·`HAZARD_NOT_USABLE`로 거부한다.
+6. `game:over` 뒤에는 `game:state`·`hazard:triggered`·`turn:change`를 보내지 않으며 이후 `shot:submit`·`hazard:use`·`game:forfeit`은 `GAME_NOT_ACTIVE`로 거부한다. 재도전으로 새 경기가 시작된 뒤 이전 경기의 명령은 `STALE_TURN`·`STALE_HAZARD`(`game:forfeit`은 `GAME_NOT_ACTIVE`)다.
 7. 재도전이 성립해도 `rooms.status`는 `playing`으로 유지하며, 만료·한쪽 나가기면 `room:state`로 대기실 상태를 보낸다([DATABASE](DATABASE.md#방-생명주기)).
 
 ### 상대 비공개 필드 점검
