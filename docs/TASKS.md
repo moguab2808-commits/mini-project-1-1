@@ -33,7 +33,7 @@
 | [DOC-008](#doc-008-prd-보완-의견과-상태-문구-최신화) | PRD 보완 의견과 상태 문구 최신화 | P1 | DOC-007 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-009](#doc-009-prd-미정-항목-위임-결정) | PRD 미정 항목 위임 결정 | P0 | DOC-008 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
-| [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 리뷰 중 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
+| [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 예정 | 개발자 A | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 예정 | 개발자 A | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
@@ -289,7 +289,7 @@ Issue·PR: [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 ## GAME-001 게임 처리 상세 설계 확정
 
 우선순위: P0
-상태: 리뷰 중
+상태: 완료
 담당: 개발자 A (Codex)
 의존성: DOC-010
 범위: 게임 단계·턴·시뮬레이션·종료·이탈의 상태 전이와 경합 처리, 충돌·판 이탈 훅 구조, 떠오름 계산, 초 단위 방해요소 효과와 시뮬레이션 시간의 연결, 피로도·쿨타임·랜덤 발동의 상태 위치, AI 봇 실행 위치를 확정한다. AI 봇 실행 위치는 DEC-021(브라우저)로 정했다. 수치 기본값은 GAME-002에서 다룬다.
@@ -297,14 +297,14 @@ Issue·PR: [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15)
 
 수용 기준:
-- [ ] GAME 미정 사항의 상태 전이·경합(시간초과와 발사 입력, 동시 이탈)이 상태 표나 다이어그램으로 정의됐다.
-- [ ] 방해요소 9종의 처리 시점(조준 중·시뮬레이션 중)과 상태 위치가 정의되고, 플레이어별 뷰에 들어갈 필드가 정해졌다.
 - [x] API-001 담당자가 상태 전이를 검토했다. (개발자 B의 PR #15 검토 의견에 대한 답변을 [DEC-026](DECISIONS.md#결정-색인)으로 반영. B 제안대로 질문 1·3·4·5 답변 후 체크)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #15, `main` aa179d0)
 
-검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)
+수용 기준 중 "상태 전이·경합 정의"와 "방해요소 9종 처리 시점·상태 위치·플레이어별 뷰 필드" 2개는 2026-10-30 사용자 결정으로 삭제하고 완료 처리했다.
 
-남은 조건: DEC-014·015·017의 남은 효과 세부 합의. ADR-0004 실시간 방식은 사용자와 B가 합의했고, B의 검토 질문(commandId·시작 커밋·재도전 전이·조준 권한·전송 주기)은 DEC-026으로, 문서 충돌 7건은 사용자가 B의 의견대로 정해 DEC-022~025로 반영했다. 이벤트 이름·필드는 API-001에서 확정한다. 상세 계약은 검토 초안이며 나머지 수용 기준은 확정 후 체크한다.
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)·[완료 처리](worklogs/2026-10-30.md#game-001-완료-처리)
+
+후속: DEC-014·015·017의 남은 효과 세부와 수치는 [GAME-002](#game-002-물리방해요소-수치-기본값-제안), 이벤트 이름·필드는 [API-001](#api-001-api실시간-이벤트-계약-확정)에서 다룬다. GAME 문서의 미정 표시는 그대로 둔다.
 
 ## LOCAL-001 로컬 2인 모드 설계 확정
 
