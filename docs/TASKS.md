@@ -32,8 +32,8 @@
 | [DOC-007](#doc-007-보관장애규모-정책과-방해요소-지급-보완) | 보관·장애·규모 정책과 방해요소 지급 보완 | P0 | DOC-006 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-008](#doc-008-prd-보완-의견과-상태-문구-최신화) | PRD 보완 의견과 상태 문구 최신화 | P1 | DOC-007 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-009](#doc-009-prd-미정-항목-위임-결정) | PRD 미정 항목 위임 결정 | P0 | DOC-008 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
-| [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
-| [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 예정 | 개발자 A | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2) |
+| [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
+| [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 예정 | 개발자 A | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 예정 | 개발자 A | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
@@ -265,12 +265,12 @@ Issue·PR: [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1
 ## DOC-010 기술 스택과 아키텍처 결정
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: DOC-009
 범위: 사용자가 승인한 추천안대로 기술 스택과 아키텍처를 ADR로 기록하고, DESIGN과 상세 설계의 "후보" 상태를 승인·초안·미정으로 나눈다. API 이벤트·DB 스키마·상태 전이의 상세 계약은 확정하지 않는다. PR #1 병합에 따라 DOC-001~009의 상태를 갱신한다.
 관련 문서: [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DESIGN](DESIGN.md)·[TECH_STACK](design/TECH_STACK.md)·[GAME](design/GAME.md)·[LOCAL](design/LOCAL.md)·[API](design/API.md)·[AUTH](design/AUTH.md)·[DATABASE](design/DATABASE.md)·[OPERATIONS](design/OPERATIONS.md) / [DEC-013](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14)
 
 수용 기준:
 - [x] ADR-0003에 배경·선택·대안·위험·재검토 조건과 무료 플랜 확인 근거가 있고, DEC-013이 이를 가리킨다.
@@ -278,7 +278,7 @@ Issue·PR: 미생성
 - [x] 무료 운영 조건(Render 절전 방지, Neon 유휴 연결)이 운영 설계에 반영됐다.
 - [x] DOC-001~009의 병합 항목과 상태가 PR #1 병합에 맞게 갱신됐다.
 - [x] 링크·앵커 검사와 `git diff --check`를 통과했다.
-- [ ] 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-10-29 worklog](worklogs/2026-10-29.md#doc-010-기술-스택과-아키텍처-결정)
 
@@ -289,8 +289,8 @@ Issue·PR: 미생성
 ## GAME-001 게임 처리 상세 설계 확정
 
 우선순위: P0
-상태: 예정
-담당: 개발자 A
+상태: 진행 중
+담당: 개발자 A (Codex)
 의존성: DOC-010
 범위: 게임 단계·턴·시뮬레이션·종료·이탈의 상태 전이와 경합 처리, 충돌·판 이탈 훅 구조, 떠오름 계산, 초 단위 방해요소 효과와 시뮬레이션 시간의 연결, 피로도·쿨타임·랜덤 발동의 상태 위치, AI 봇 실행 위치를 확정한다. 수치 기본값은 GAME-002에서 다룬다.
 관련 문서: [GAME](design/GAME.md) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [ADR-0003](adr/0003-tech-stack-and-architecture.md)
@@ -302,7 +302,9 @@ Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)
 - [ ] API-001 담당자가 상태 전이를 검토했다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)
+
+남은 조건: DEC-014·015·017의 남은 효과 세부 합의, API-001 담당자의 상태 전이·실시간 이벤트 검토. ADR-0004 실시간 방식은 사용자와 B가 합의했다. 상세 계약은 검토 초안이며 수용 기준은 확정 후 체크한다.
 
 ## LOCAL-001 로컬 2인 모드 설계 확정
 

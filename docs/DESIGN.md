@@ -30,7 +30,7 @@
 
 | 책임 | 위치 | 상세 |
 | --- | --- | --- |
-| 사용자 화면·입력 | `client`. 입력을 명령으로 바꾸고 받은 뷰·시뮬레이션 기록을 3D로 재생 | [게임](design/GAME.md)·[API](design/API.md) |
+| 사용자 화면·입력 | `client`. 입력을 명령으로 바꾸고 받은 뷰를 3D로 표시. 실시간 상태 보간은 ADR-0004 승인 | [게임](design/GAME.md)·[API](design/API.md) |
 | 방·대전 진행 | `server` 메모리의 방·경기 상태, 판정은 `game-core` | [게임](design/GAME.md) |
 | 인증·권한 | `server`의 세션 미들웨어와 Socket.IO 연결 인증, 입력은 `shared`의 Zod 스키마로 검증 | [인증](design/AUTH.md) |
 | 영구 데이터 | `server` → PostgreSQL(Neon): 회원·경기 결과·세션 | [DB](design/DATABASE.md) |
@@ -40,7 +40,7 @@
 
 1. 사용자가 REST로 로그인하면 세션 쿠키를 받고, 같은 세션으로 Socket.IO에 연결한다.
 2. 방 생성·참여·시작은 Socket.IO 이벤트로 처리하고, 서버가 메모리에 방과 경기 상태를 둔다.
-3. 발사·방해요소 사용 입력을 서버가 검증한다. `game-core`로 판정·시뮬레이션한 뒤 플레이어별 뷰와 시뮬레이션 기록을 보낸다.
+3. 발사·방해요소 사용 입력을 서버가 검증한다. `game-core`로 판정한다. DEC-015에 맞춘 실시간 계산·플레이어별 상태 전송은 [ADR-0004](adr/0004-realtime-hazards.md)에 따라 진행한다.
 4. 경기가 끝나면 경기 결과 저장과 두 사용자의 전적·레이팅 갱신을 하나의 트랜잭션으로 처리한다.
 
 경합 처리(시간초과와 입력, 동시 이탈)와 상세 이벤트 순서는 [게임](design/GAME.md)·[API](design/API.md)에서 확정한다. 제품 동작·예외는 PRD를 따른다.
