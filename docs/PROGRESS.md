@@ -33,6 +33,8 @@ GAME-001에 대한 개발자 B의 검토를 반영했다. 명령·종료·전송
 
 개발자 B는 [PLAN-001](TASKS.md#plan-001-구현-작업-등록)에서 구현 작업을 13묶음으로 나눈 초안과 담당 제안을 작성했다. 모노레포 도구는 ADR-0003의 npm workspaces로 확인했고 `game-runtime` 패키지를 TECH_STACK에 추가했다. 별도 작업 등록은 API-001·DB-001·AUTH-001 확정 후이며 PLAN-001은 진행 중이다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)를 따른다.
 
+개발자 B는 `docs/auth-001`에서 [AUTH-001](TASKS.md#auth-001-인증-상세-설계-확정)의 `[제안]` 항목을 확정하고 검증 경계(연결·입력 / 사용자→좌석 변환 / 경기 규칙 3단계와 검사 순서), 인증 요청 빈도 제한의 한도·응답 형식, `room:join` 연결 빈도 제한을 [AUTH](design/AUTH.md)에 정했다. 수용 기준 4개를 모두 충족했고 개발자 A의 검토(PR #24)를 반영해 AUTH-001을 완료로 처리했다(병합 전에 체크). 검사 순서와 발사 각도 범위는 A가 확정해 GAME·API에 반영한다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#auth-001-미충족-수용-기준-보완)를 따른다.
+
 ## 남은 일과 한계
 
 - 상세 계약 확정: 게임 상태 전이·물리([GAME](design/GAME.md)), API 이벤트·필드([API](design/API.md)), DB 스키마([DATABASE](design/DATABASE.md)), 인증 세부([AUTH](design/AUTH.md)), 운영 세부([OPERATIONS](design/OPERATIONS.md))

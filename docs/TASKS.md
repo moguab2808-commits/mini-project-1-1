@@ -42,7 +42,7 @@
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
-| [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
+| [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현 | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
@@ -459,20 +459,20 @@ Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
 ## AUTH-001 인증 상세 설계 확정
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: DOC-010
-범위: 세션 만료, argon2id 파라미터, IP당 `/api/auth/*` 분당 20회 제한(DEC-025)의 저장·응답 형식, 그 밖의 요청 빈도 제한, Render 프록시 신뢰 설정, Socket.IO 연결 인증·중복 접속 처리, 인증 오류 형식을 확정한다. 세션은 브라우저 종료 시 만료하고 서버 기본 만료를 병행하며, 비밀번호를 바꾸면 다른 세션을 모두 끝낸다(DEC-028). 방해요소·턴·알 소유권 검증 경계는 GAME-001 확정 후 정한다.
+범위: 세션 만료, argon2id 파라미터, IP당 `/api/auth/*` 분당 20회 제한(DEC-025)의 저장·응답 형식, 그 밖의 요청 빈도 제한, Render 프록시 신뢰 설정, Socket.IO 연결 인증·중복 접속 처리, 인증 오류 형식을 확정한다. 세션은 브라우저 종료 시 만료하고 서버 기본 만료를 병행하며, 비밀번호를 바꾸면 다른 세션을 모두 끝낸다(DEC-028). 방해요소·턴·알 소유권 검증 경계는 GAME-001 확정 후 정했다.
 관련 문서: [AUTH](design/AUTH.md) / [로그인](PRD.md#로그인)·[연결 끊김](PRD.md#연결-끊김과-중복-접속) / [DEC-025·028](DECISIONS.md#결정-색인)
-Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)
+Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24)
 
 수용 기준:
-- [ ] AUTH의 세부 미정 항목이 모두 값이나 방식으로 정해졌다.
-- [ ] 로그인 연속 실패 제한이 없고 요청 빈도 제한의 한도·응답 형식이 API-001의 오류 코드와 일치한다.
-- [ ] 중복 접속 시 기존 연결 종료와 기권 처리 흐름이 API-001과 일치한다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] AUTH의 세부 미정 항목이 모두 값이나 방식으로 정해졌다. ([AUTH](design/AUTH.md)의 `[제안]` 표시를 확정하고 [검증 경계](design/AUTH.md#검증-경계)·`room:join` 한도(연결당 분당 30회)를 정했다. 해시 시간 측정과 connect-pg-simple 기본값 확인은 구현 때 한다)
+- [x] 로그인 연속 실패 제한이 없고 요청 빈도 제한의 한도·응답 형식이 API-001의 오류 코드와 일치한다. ([AUTH 빈도 제한](design/AUTH.md#인증-요청-빈도-제한)의 IP당 분당 20회·`429 RATE_LIMITED`가 [API 오류 코드](design/API.md#오류-형식과-코드)·REST 표의 `RATE_LIMITED` 429와 같다)
+- [x] 중복 접속 시 기존 연결 종료와 기권 처리 흐름이 API-001과 일치한다. ([AUTH 중복 접속](design/AUTH.md#socketio-인증중복-접속)의 `session:replaced`·방 큐 기권 명령이 [API `session:replaced`](design/API.md#경기-이벤트-필드)(`new_connection`·`password_changed`)·`game:over.reason: forfeit`·[GAME](design/GAME.md#명령-경합과-시간)과 같다)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #24. 개발자 A 검토를 반영했고, 병합 전에 체크했다)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#auth-001-미충족-수용-기준-보완)
 
 ## OPS-001 운영 설계 확정
 
