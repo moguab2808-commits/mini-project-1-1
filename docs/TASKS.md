@@ -356,8 +356,8 @@ Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
 Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 
 수용 기준:
-- [ ] 캔버스에서 로그인 → 로비 → 대기실 → 인게임 → 결과 흐름을 눌러 볼 수 있다.
-- [ ] 위 화면 요소가 PRD 배치대로 표시되고, PRD와 다른 부분은 worklog에 기록됐다.
+- [x] 캔버스에서 로그인 → 로비 → 대기실 → 인게임 → 결과 흐름을 눌러 볼 수 있다. (2026-10-30 사용자가 캔버스를 직접 확인하고 통과로 알림)
+- [x] 위 화면 요소가 PRD 배치대로 표시되고, PRD와 다른 부분은 worklog에 기록됐다. (사용자 확인, 차이는 worklog의 "PRD와 다른 부분")
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#ui-002-디자인-캔버스-현재-요구사항-반영)
