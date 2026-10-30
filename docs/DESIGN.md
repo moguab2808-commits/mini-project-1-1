@@ -18,8 +18,8 @@
 
 ```text
 브라우저 (client: React + R3F)
-  ├─ 로컬 모드: LocalGameSession → game-core 직접 호출
-  ├─ AI 대전: 브라우저에서 game-core 실행 (서버 미사용, DEC-021)
+  ├─ 로컬 2인: 창 2개의 LocalGameSession → SharedWorker의 game-core
+  ├─ AI 대전: AiGameSession → Web Worker의 game-core (서버 미사용)
   └─ 온라인: RemoteGameSession ──REST·Socket.IO──┐
                                                   ▼
 서버 (server: Express + Socket.IO, Render 웹 서비스 1개)

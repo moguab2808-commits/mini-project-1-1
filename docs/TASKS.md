@@ -34,7 +34,7 @@
 | [DOC-009](#doc-009-prd-미정-항목-위임-결정) | PRD 미정 항목 위임 결정 | P0 | DOC-008 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
 | [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
-| [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 예정 | 개발자 A | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3) |
+| [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 예정 | 개발자 A | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
@@ -309,19 +309,21 @@ Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)
 ## LOCAL-001 로컬 2인 모드 설계 확정
 
 우선순위: P0
-상태: 예정
-담당: 개발자 A
+상태: 진행 중
+담당: 개발자 A (Claude)
 의존성: DOC-010
-범위: `GameSession` 명령·이벤트 시그니처, 한 PC에서 비공개 방해요소를 다루는 화면 교대 방식, 기다리는 사람의 방해요소 입력(숫자키)과 벽·끈끈이 위치 지정, AI 대전의 로컬 처리 여부를 확정한다.
+범위: `GameSession` 명령·이벤트 시그니처, 한 PC에서 비공개 방해요소를 다루는 방식, 방해요소 사용 입력과 벽·끈끈이 위치 지정, AI 대전의 로컬 처리 여부를 확정한다. 화면 교대·숫자키 안은 DEC-020의 창 2개·E 키 방식으로 대체했다.
 관련 문서: [LOCAL](design/LOCAL.md) / [방해요소 규칙](PRD.md#방해요소-규칙)·[AI 대전](PRD.md#ai-대전)
 Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)
 
 수용 기준:
-- [ ] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다.
-- [ ] 로컬 모드에서 상대 방해요소를 가리는 방식과 방해요소 입력 방식이 정해졌다.
+- [x] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다. ([LOCAL](design/LOCAL.md#gamesession-시그니처)의 이벤트 키 11개가 [API](design/API.md#socketio-이벤트-초안) 이벤트 이름과 같고, `CommandResult`는 API의 ack·오류 형식을 따른다)
+- [x] 로컬 모드에서 상대 방해요소를 가리는 방식과 방해요소 입력 방식이 정해졌다. ([DEC-020](DECISIONS.md#결정-색인)·[LOCAL](design/LOCAL.md#상세-계약-초안-local-001))
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#local-001-로컬-2인-모드-설계-초안)
+
+남은 조건: 리뷰·병합. 명령 필드(ShotSubmit·HazardUse)는 개발자 B의 확인이 필요하고, 방해요소 사용 거부 오류 코드는 API-001에서 정한다. `ai:start` 삭제(DEC-021), commandId 제거·ack 반환(DEC-026), AI 대전 진입 변경(DEC-024), API-001 확정안의 오류 코드(PR #16)는 반영했다.
 
 ## GAME-002 물리·방해요소 수치 기본값 제안
 
@@ -346,7 +348,7 @@ Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
 상태: 예정
 담당: 개발자 A
 의존성: 없음
-범위: UI-001 디자인 캔버스를 PRD v0.17 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 방해요소 영역·피로도 게이지, 프로필바의 환경설정·로그아웃 버튼(레이팅·랭킹 제거), 로비의 새로고침 버튼·비공개 방 자물쇠·"게임 중" 표시·입장 버튼/더블클릭, 방 생성 창의 PvP/AI 선택·알 5·7·9개·비공개 코드 생성과 복사, 코드 입력·환경설정 플로팅 창, 대기실, 재도전 대기 표시, 로그인 화면의 인증 요청 제한 안내가 대상이다. PRD 화면 미정 사항(비공개 방 목록 입장 시 코드 입력, AI 선택 시 입력 항목)은 시안으로 제안한다.
+범위: UI-001 디자인 캔버스를 PRD v0.18 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 프로필 옆 방해요소 칸(E 키 표시)·피로도 게이지, 프로필바의 환경설정·로그아웃 버튼(레이팅·랭킹 제거), 로비의 새로고침 버튼·비공개 방 자물쇠·"게임 중" 표시·입장 버튼/더블클릭, 방 생성 창의 PvP/AI 선택·알 5·7·9개·비공개 코드 생성과 복사, 코드 입력·환경설정 플로팅 창, 대기실, 재도전 대기 표시, 로그인 화면의 인증 요청 제한 안내가 대상이다. PRD 화면 미정 사항(비공개 방 목록 입장 시 코드 입력, AI 선택 시 입력 항목)은 시안으로 제안한다.
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-001](#ui-001-로비인게임-화면-프로토타입)
 Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 
