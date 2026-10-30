@@ -485,19 +485,20 @@ Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 | 묶음 | 내용 | 담당 | 선행 설계 |
 | --- | --- | --- | --- |
 | 1. 프로젝트 골격 | npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`), 패키지 의존 경계 린트, 테스트·빌드 스크립트, `.env.example` | B | DOC-010 |
-| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A (제안) | GAME-001 |
-| 3. `game-runtime` | 명령 큐·고정 틱 스케줄러·뷰 배포, 시계·전송·로거·종료 콜백 주입 | B | GAME-001, LOCAL-001 |
-| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A (제안) | LOCAL-001 |
+| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A (제안) | GAME-001, GAME-002(수치 기본값) |
+| 3. `game-runtime` | 명령 큐·고정 틱 스케줄러·뷰 배포, 시계·전송·로거·종료 콜백 주입 | B | GAME-001, LOCAL-001, 묶음 2의 입력·출력 시그니처 선공개 |
+| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A (제안) | LOCAL-001, UI-002, ASSET-001 |
 | 5. AI 대전 | `AiGameSession`, AI 컨트롤러 | A (제안) | LOCAL-001 |
 | 6. DB·마이그레이션 | Drizzle 스키마(users·rooms·세션), 마이그레이션, 연결 풀 | B | DB-001 |
 | 7. 인증 | 가입·로그인·세션·요청 빈도 제한·비밀번호·캐릭터 변경 | B | AUTH-001, API-001 |
-| 8. 로비·방 | 방 목록·방 이벤트·`rooms` 갱신(서버 B), 방 관련 화면(A (제안)) | B·A | API-001, DB-001 |
-| 9. 온라인 대전 | 서버 전송 연결·이탈·중복 접속(B), `RemoteGameSession`·`RoomClient`(A (제안)) | B·A | API-001, 묶음 3 |
-| 10. 경기 종료 전적 | `finishOnce`, 전적 갱신 트랜잭션 | B | DB-001, 묶음 3 |
-| 11. 계정·로비·대기실·결과 화면 | PRD 화면 요구사항 구현 | A (제안) | UI-002, API-001 |
-| 12. 배포 | Render·Neon 설정, 헬스체크, 로그, 수동 배포·롤백 | B | OPS-001 |
+| 8. 로비·방 (서버) | 방 목록 조회, 방 이벤트, `rooms` 상태 갱신 | B | API-001, DB-001 |
+| 9. 온라인 대전 (서버) | 서버 전송 연결, 이탈·중복 접속 처리 | B | API-001, 묶음 3 |
+| 10. 온라인 대전 (클라이언트) | `RemoteGameSession`·`RoomClient` | A (제안) | API-001, 묶음 3 |
+| 11. 경기 종료 전적 | `finishOnce`, 전적 갱신 트랜잭션 | B | DB-001, 묶음 3 |
+| 12. 계정·로비·대기실·결과 화면 | 로그인·가입·로비·방 목록·방 생성·대기실·결과 화면 (PRD 화면 요구사항 구현. 방 관련 화면은 여기에 포함) | A (제안) | UI-002, API-001 |
+| 13. 배포 | Render·Neon 설정, 헬스체크, 로그, 수동 배포·롤백 | B | OPS-001 |
 
-의존성 순서는 골격 → `game-core`·`game-runtime` → 로컬 2인 모드·AI 대전 → DB·인증·로비·방 → 온라인 대전 → 전적 → 배포이다. 각 묶음의 정상·오류·예외 수용 기준은 별도 작업으로 등록할 때 PRD 수용 기준 예시(`ROOM-JOIN`·`HAZARD-GRANT`·`HAZARD-USE`·`TURN-TIMEOUT`·`LEAVE-FORFEIT`)에 맞춰 쓴다.
+의존성 순서는 골격 → `game-core`·`game-runtime`(묶음 3은 묶음 2의 입력·출력 시그니처를 먼저 공유한 뒤 병행) → 로컬 2인 모드·AI 대전 → DB·인증·로비·방(서버) → 온라인 대전(서버·클라이언트) → 전적 → 배포이다. 각 묶음의 정상·오류·예외 수용 기준은 별도 작업으로 등록할 때 PRD 수용 기준 예시(`ROOM-JOIN`·`HAZARD-GRANT`·`HAZARD-USE`·`TURN-TIMEOUT`·`LEAVE-FORFEIT`)에 맞춰 쓴다.
 
 수용 기준:
 - [ ] 로컬 2인 모드부터 온라인 배포까지의 구현 작업이 의존성 순서로 등록됐다.
@@ -506,7 +507,7 @@ Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)
 
-남은 조건: 담당 "(제안)" 항목과 B의 분량(묶음 1·3·6·7·8·9·10·12)은 개발자 A의 확인을 받는다. API-001·DB-001·AUTH-001이 확정되기 전이라 인증·로비·방·온라인 대전·전적 묶음의 상세는 설계 확정 후 정한다. 이 PR은 중간 PR이라 위 수용 기준은 체크하지 않는다.
+남은 조건: 담당 "(제안)" 항목과 B의 분량(묶음 1·3·6·7·8·9·11·13)은 개발자 A의 확인을 받는다. API-001·DB-001·AUTH-001이 확정되기 전이라 인증·로비·방·온라인 대전·전적 묶음의 상세는 설계 확정 후 정한다. 이 PR은 중간 PR이라 위 수용 기준은 체크하지 않는다.
 
 ## DOC-011 README 설치·실행 절차
 
