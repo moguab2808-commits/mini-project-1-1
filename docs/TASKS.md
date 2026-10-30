@@ -45,19 +45,19 @@
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
-| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
+| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
 | [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 예정 | 개발자 B | 미생성 |
-| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A (제안) | 미생성 |
+| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A | 미생성 |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입출력 시그니처 | 예정 | 개발자 B | 미생성 |
-| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A (제안) | 미생성 |
-| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A (제안) | 미생성 |
+| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | 미생성 |
+| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | 미생성 |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 예정 | 개발자 B | 미생성 |
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 예정 | 개발자 B | 미생성 |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | 미생성 |
 | [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 예정 | 개발자 B | 미생성 |
-| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A (제안) | 미생성 |
+| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | 미생성 |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 예정 | 개발자 B | 미생성 |
-| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 A (제안) | 미생성 |
+| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 A | 미생성 |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -528,41 +528,41 @@ Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## PLAN-001 구현 작업 등록
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: GAME-001, LOCAL-001, API-001, DB-001, AUTH-001
 범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)). 모노레포 도구는 [ADR-0003](adr/0003-tech-stack-and-architecture.md)의 npm workspaces로 정해져 있어 별도 결정이 필요 없고, `game-runtime`을 패키지에 추가한다. 선행 설계(API-001·DB-001·AUTH-001·OPS-001)가 모두 완료돼 아래 작업 분해의 13묶음을 IMPL-001~013으로 등록했다. Issue는 착수할 때 하나씩 만든다.
 관련 문서: [PRD 수용 기준 작성 예시](PRD.md#수용-기준-작성-예시) / [DESIGN](DESIGN.md) / [LOCAL 패키지 구성](design/LOCAL.md#패키지-구성-승인)·[GAME 구현 경계](design/GAME.md#구현-경계-ab) / [DEC-030](DECISIONS.md#결정-색인)
 Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)
 
-작업 분해: 담당의 "(제안)"은 개발자 A 확인 전이다. 순서는 위에서 아래이며 선행 설계는 TASKS의 해당 작업을 가리킨다. 묶음 N은 [IMPL-00N](#impl-001-프로젝트-골격)(N은 세 자리로 0을 채움)로 등록했다.
+작업 분해: 담당은 개발자 A가 PR #32에서 수락했다. 순서는 위에서 아래이며 선행 설계는 TASKS의 해당 작업을 가리킨다. 묶음 N은 [IMPL-00N](#impl-001-프로젝트-골격)(N은 세 자리로 0을 채움)로 등록했다.
 
 | 묶음 | 내용 | 담당 | 선행 설계 |
 | --- | --- | --- | --- |
 | 1. 프로젝트 골격 | npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`), 패키지 의존 경계 린트, 테스트·빌드 스크립트, `.env.example` | B | DOC-010 |
-| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A (제안) | GAME-001, GAME-002(수치 기본값) |
+| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A | GAME-001, GAME-002(수치 기본값) |
 | 3. `game-runtime` | 명령 큐·고정 틱 스케줄러·뷰 배포, 시계·전송·로거·종료 콜백 주입 | B | GAME-001, LOCAL-001, 묶음 2의 입력·출력 시그니처 선공개 |
-| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A (제안) | LOCAL-001, UI-002, ASSET-001 |
-| 5. AI 대전 | `AiGameSession`, AI 컨트롤러 | A (제안) | LOCAL-001 |
+| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A | LOCAL-001, UI-002, ASSET-001 |
+| 5. AI 대전 | `AiGameSession`, AI 컨트롤러 | A | LOCAL-001 |
 | 6. DB·마이그레이션 | Drizzle 스키마(users·rooms·세션), 마이그레이션, 연결 풀 | B | DB-001 |
 | 7. 인증 | 가입·로그인·세션·요청 빈도 제한·비밀번호·캐릭터 변경 | B | AUTH-001, API-001 |
 | 8. 로비·방 (서버) | 방 목록 조회, 방 이벤트, `rooms` 상태 갱신 | B | API-001, DB-001 |
 | 9. 온라인 대전 (서버) | 서버 전송 연결, 이탈·중복 접속 처리 | B | API-001, 묶음 3 |
-| 10. 온라인 대전 (클라이언트) | `RemoteGameSession`·`RoomClient` | A (제안) | API-001, 묶음 3 |
+| 10. 온라인 대전 (클라이언트) | `RemoteGameSession`·`RoomClient` | A | API-001, 묶음 3 |
 | 11. 경기 종료 전적 | `finishOnce`, 전적 갱신 트랜잭션 | B | DB-001, 묶음 3 |
-| 12. 계정·로비·대기실·결과 화면 | 로그인·가입·로비·방 목록·방 생성·대기실·결과 화면 (PRD 화면 요구사항 구현. 방 관련 화면은 여기에 포함) | A (제안) | UI-002, API-001 |
+| 12. 계정·로비·대기실·결과 화면 | 로그인·가입·로비·방 목록·방 생성·대기실·결과 화면 (PRD 화면 요구사항 구현. 방 관련 화면은 여기에 포함) | A | UI-002, API-001 |
 | 13. 배포 | Render·Neon 설정, 헬스체크, 로그, 수동 배포·롤백 | B | OPS-001 |
 
 의존성 순서는 골격 → `game-core`·`game-runtime`(묶음 3은 묶음 2의 입력·출력 시그니처를 먼저 공유한 뒤 병행) → 로컬 2인 모드·AI 대전 → DB·인증·로비·방(서버) → 온라인 대전(서버·클라이언트) → 전적 → 배포이다. 각 묶음의 정상·오류·예외 수용 기준은 별도 작업으로 등록할 때 PRD 수용 기준 예시(`ROOM-JOIN`·`HAZARD-GRANT`·`HAZARD-USE`·`TURN-TIMEOUT`·`LEAVE-FORFEIT`)에 맞춰 쓴다.
 
 수용 기준:
 - [x] 로컬 2인 모드부터 온라인 배포까지의 구현 작업이 의존성 순서로 등록됐다. (IMPL-001~013. [작업 목록](#작업-목록)의 순서가 의존성 순서이며 로컬 2인 모드(IMPL-004)가 온라인(IMPL-008~)보다 앞이다)
-- [x] 각 작업에 검증 가능한 수용 기준과 담당이 있다. (IMPL-001~013 각 절에 정상·오류·예외 기준과 담당. A 몫의 "(제안)" 담당은 A 확인 전이라 아래 남은 조건으로 남긴다)
+- [x] 각 작업에 검증 가능한 수용 기준과 담당이 있다. (IMPL-001~013 각 절에 정상·오류·예외 기준과 담당. A 몫 5건은 개발자 A가 PR #32에서 수락했다)
 - [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #32. 개발자 A 검토를 반영하며, 병합 전에 체크했다. PR #20은 앞서 병합된 분해 초안 PR이다)
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)·[구현 작업 등록](worklogs/2026-10-30.md#plan-001-구현-작업-13건-등록)
 
-남은 조건: 담당 "(제안)" 항목(IMPL-002·004·005·010·012)과 B의 분량(IMPL-001·003·006~009·011·013)은 개발자 A의 확인을 받는다. 확인 결과 담당이 바뀌면 해당 IMPL 절과 작업 목록을 고친다. 이 확인은 PLAN-001 수용 기준에 포함하지 않는다. 각 IMPL의 수용 기준은 착수 전에 해당 PRD 절과 대조해 보완할 수 있다. 병합 후 PLAN-001의 상태를 완료로 바꾼다.
+결정: 개발자 A가 PR #32 재검토에서 A 몫 5건(IMPL-002·004·005·010·012)을 수락하고 B 몫 8건의 분량·우선순위·의존 순서에 동의했다. VAL-002의 "게임 화면 구현"은 IMPL-004로 보며, 연결은 이 PR 병합 후 별도 문서 변경으로 한다. 각 IMPL의 수용 기준은 착수 전에 해당 PRD 절과 대조해 보완할 수 있다.
 
 ## IMPL-001 프로젝트 골격
 
@@ -586,7 +586,7 @@ Issue·PR: 미생성
 
 우선순위: P0
 상태: 예정
-담당: 개발자 A (제안)
+담당: 개발자 A
 의존성: GAME-001, GAME-002, IMPL-001
 범위: 규칙·물리·상태 머신·방해요소 훅·시드 PRNG·`getViewFor`를 순수 TypeScript로 구현한다. 시간·명령·난수는 외부에서 주입받는다. 입력·출력 시그니처는 IMPL-003 착수 전에 먼저 공개한다. `shared`의 Zod 스키마·`Seat` 값의 `…Id` 이름도 여기서 정한다.
 관련 문서: [GAME](design/GAME.md#상세-계약-초안-game-001)·[기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [API 공통 타입](design/API.md#공통-타입)
@@ -625,7 +625,7 @@ Issue·PR: 미생성
 
 우선순위: P0
 상태: 예정
-담당: 개발자 A (제안)
+담당: 개발자 A
 의존성: LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001
 범위: `LocalGameSession`, SharedWorker 로컬 권한 측(`game-runtime` + `game-core`), 개발용 `/local` 경로(창 2개, `seat` 0·1), 3D 인게임 화면, 방해요소 입력(E 키·벽·끈끈이 배치)을 구현한다. 서버·DB·로그인은 쓰지 않는다.
 관련 문서: [LOCAL](design/LOCAL.md#상세-계약-초안-local-001) / [게임 화면](PRD.md#게임-화면)·[방해요소 규칙](PRD.md#방해요소-규칙) / [DEC-020](DECISIONS.md#결정-색인)
@@ -644,7 +644,7 @@ Issue·PR: 미생성
 
 우선순위: P1
 상태: 예정
-담당: 개발자 A (제안)
+담당: 개발자 A
 의존성: LOCAL-001, IMPL-004
 범위: `AiGameSession`(mode `ai`)과 전용 Web Worker, AI 컨트롤러를 구현한다. 서버 연결·저장은 없다.
 관련 문서: [LOCAL AI 대전](design/LOCAL.md#ai-대전) / [AI 대전](PRD.md#ai-대전) / [GAME AI](design/GAME.md#ai-대전) / [DEC-021](DECISIONS.md#결정-색인)
@@ -737,7 +737,7 @@ Issue·PR: 미생성
 
 우선순위: P0
 상태: 예정
-담당: 개발자 A (제안)
+담당: 개발자 A
 의존성: API-001, IMPL-003, IMPL-004
 범위: `RemoteGameSession`(이벤트 변환 없이 전달)과 `RoomClient`(`room:*`·`session:replaced`)를 구현해 `LocalGameSession`을 바꿔 끼울 수 있게 한다.
 관련 문서: [LOCAL GameSession](design/LOCAL.md#gamesession-시그니처) / [API](design/API.md#socketio-이벤트) / [DEC-030](DECISIONS.md#결정-색인)
@@ -773,7 +773,7 @@ Issue·PR: 미생성
 
 우선순위: P0
 상태: 예정
-담당: 개발자 A (제안)
+담당: 개발자 A
 의존성: UI-002, API-001, IMPL-007, IMPL-008
 범위: 로그인·가입·로비(방 목록·새로고침·방 생성·즉시 참가·코드 입력)·캐릭터 변경·환경설정·대기실·결과(재도전하기·나가기) 화면을 PRD 화면 요구사항대로 구현한다.
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) / [API](design/API.md)
