@@ -22,6 +22,8 @@
 
 GAME-001에 대한 개발자 B의 검토를 반영했다. 명령·종료·전송 계약은 [DEC-026](DECISIONS.md#결정-색인)으로 정했다. 사용자가 B의 의견대로 랭킹·레이팅 제외, 방 정보 DB 보관, 방 생성 창의 PvP/AI·알 5·7·9개·로비 새로고침, IP당 인증 요청 제한을 결정했다([DEC-022~025](DECISIONS.md#결정-색인), PRD v0.17). B의 답변 동의 확인과 커밋·PR 반영은 남았다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-개발자-b-검토-반영)를 따른다.
 
+개발자 B는 [API-001](TASKS.md#api-001-api실시간-이벤트-계약-확정)·[DB-001](TASKS.md#db-001-db-스키마-확정)·[AUTH-001](TASKS.md#auth-001-인증-상세-설계-확정)·[OPS-001](TASKS.md#ops-001-운영-설계-확정)의 확정안을 [API](design/API.md)·[DATABASE](design/DATABASE.md)·[AUTH](design/AUTH.md)·[OPERATIONS](design/OPERATIONS.md)에 작성했다([DEC-027~029](DECISIONS.md#결정-색인)). 네 작업 모두 진행 중이며 확정안은 개발자 A의 검토와 제안 항목의 B 확인을 기다린다. 실제 구현·무료 조건 재확인·측정은 하지 않았다. 상세는 [2026-10-30 worklog](worklogs/2026-10-30.md#api-001db-001auth-001ops-001-개발자-b-설계-확정안)를 따른다.
+
 ## 남은 일과 한계
 
 - 상세 계약 확정: 게임 상태 전이·물리([GAME](design/GAME.md)), API 이벤트·필드([API](design/API.md)), DB 스키마([DATABASE](design/DATABASE.md)), 인증 세부([AUTH](design/AUTH.md)), 운영 세부([OPERATIONS](design/OPERATIONS.md))
