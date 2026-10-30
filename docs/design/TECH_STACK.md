@@ -14,7 +14,7 @@
 
 | 영역 | 채택 | 관련 설계 |
 | --- | --- | --- |
-| 언어·저장소 | TypeScript, npm workspaces 모노레포 (`client`, `server`, `game-core`, `shared`) | [LOCAL](LOCAL.md) |
+| 언어·저장소 | TypeScript, npm workspaces 모노레포 (`client`, `server`, `game-core`, `game-runtime`, `shared`) | [LOCAL](LOCAL.md) |
 | 클라이언트 | Vite, React, React Router, Zustand, 일반 CSS(CSS Modules) | [LOCAL](LOCAL.md) |
 | 렌더링 | Three.js, React Three Fiber, drei | [GAME](GAME.md) |
 | 오디오 | Howler.js | [OPERATIONS](OPERATIONS.md) |
@@ -24,6 +24,8 @@
 | 저장 | PostgreSQL (Neon 무료 플랜), Drizzle ORM, node-postgres(pg) | [DATABASE](DATABASE.md) |
 | 배포 | Render 무료 웹 서비스 1개 + 외부 헬스체크 요청, 싱가포르 리전 | [OPERATIONS](OPERATIONS.md) |
 | 품질 | Vitest, ESLint, Prettier, tsx, tsup | [LOCAL](LOCAL.md)·[검증 계획](../ENGINEERING-VALIDATION.md) |
+
+`game-runtime`은 서버·로컬 2인·AI 대전이 함께 쓰는 경기 실행 패키지로 [DEC-030](../DECISIONS.md#결정-색인)에서 추가했다. ADR-0003의 패키지 목록은 결정 당시 기록이라 고치지 않았다.
 
 라이브러리 버전은 구현을 시작할 때 고정하고 lock 파일로 관리한다.
 
