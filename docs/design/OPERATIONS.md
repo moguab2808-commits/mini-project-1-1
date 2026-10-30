@@ -65,14 +65,17 @@
 | 시각 | `ts`(UTC), `mono`(단조 시각 ms) | UTC·단조 시각 |
 | 식별 | `roomId`, `gameId`, `turnId`, `userId` | 경기·턴 ID, userId·roomId |
 | 순서 | `ingressSeq`, `serverTick` | ingressSeq, serverTick |
-| 이벤트 `event` | `start_commit`, `turn_start`, `shot`, `hazard_use`, `hazard_trigger`, `leave`, `forfeit`, `session_replaced`, `tick_skipped`, `game_over` | 턴 시작·발사·방해요소 사용/발동·이탈·종료 |
+| 이벤트 `event` | `start_commit`, `turn_start`, `shot`, `hazard_use`, `hazard_trigger`, `leave`, `forfeit`, `tick_skipped`, `game_over` | 턴 시작·발사·방해요소 사용/발동·이탈·종료 |
 | 결과 | `result`(명령 판정 결과, API 오류 코드와 같은 이름), `reason`(종료 사유) | 명령 종류·판정 결과, 종료 사유 |
 
-- `leave`는 연결 끊김·나가기·접속 대체로 이탈이 큐에서 관찰된 시점이며 `reason`에 `disconnect`·`leave_button`·`session_replaced`를 적는다. `forfeit`는 `leave`나 시간초과 누적으로 기권패가 확정된 시점이고, `game_over`는 `finishOnce` 실행 결과(`reason`: [API `game:over`](API.md#경기-이벤트-필드)의 `all_stones_out`·`final_round`·`forfeit`·`timeout_forfeit`)다.
+- `leave`는 연결 끊김·나가기·접속 대체로 이탈이 큐에서 관찰된 시점이며 `reason`에 `disconnect`·`leave_button`·`session_replaced`를 적는다. 접속 대체도 별도 이벤트 없이 `leave` 하나로 기록한다.
+- `forfeit`는 기권패가 확정된 시점이며 `reason`은 `leave`(위 `leave`로 확정)·`command`(`game:forfeit` 명령)·`timeout`(연속 시간초과 누적) 중 하나다. `game_over`의 `reason`에 나오는 `timeout_forfeit`는 `game_over`에만 쓰며 `forfeit` 이벤트에는 `timeout`으로 적는다. `game_over`는 `finishOnce` 실행 결과(`reason`: [API `game:over`](API.md#경기-이벤트-필드)의 `all_stones_out`·`final_round`·`forfeit`·`timeout_forfeit`)다.
 - `tick_skipped`는 [틱 따라잡기 상한](GAME.md#전송실행)을 넘어 버린 지연 시간을 `result`에 적는다.
 - 이 로그가 동시 이탈과 시작 직전 이탈의 판정 근거다([게임 규칙](../PRD.md#게임-규칙)). 경기 종료 사유는 DB에 저장하지 않고 여기에만 남는다([DATABASE](DATABASE.md#경기-종료-저장)).
 
-판정 방법(같은 방의 로그를 `ingressSeq` 순으로 본다):
+`ingressSeq`는 **방 단위 큐**([GAME 구현 경계](GAME.md#구현-경계-ab)의 방별 단일 큐)가 붙이는 순번이며 서버가 켜져 있는 동안 방 안에서 계속 늘어난다. 재도전으로 새 경기가 시작돼도 0으로 되돌리지 않는다. 대기실 이벤트(시작 전 `leave`)는 경기가 없어 `gameId`가 `null`이고 `roomId`로 묶으며, `start_commit`에서 새 `gameId`가 붙어 그 뒤 이벤트는 `gameId`를 가진다. 재도전 경기는 새 `gameId`를 받지만 같은 방의 `ingressSeq`가 이어진다. 그래서 판정은 `roomId`와 `ingressSeq`로 한다. GAME의 "경기별 단일 큐" 표현(명령 경합 절)은 개발자 A가 방 단위로 맞춘다.
+
+판정 방법(같은 `roomId`의 로그를 `ingressSeq` 순으로 본다):
 
 | 상황 | 판정 |
 | --- | --- |
