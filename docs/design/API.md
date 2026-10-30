@@ -52,8 +52,12 @@
 | `STALE_TURN` | 발사 명령의 gameId·turnId가 현재 경기·턴과 다름. 같은 턴의 두 번째 발사에는 쓰지 않는다 ([DEC-026](../DECISIONS.md#결정-색인)) |
 | `SHOT_ALREADY_SUBMITTED` | 같은 턴에 이미 발사해 `shotCommitted`로 두 번째 발사가 거부됨 ([GAME](GAME.md#명령-경합과-시간), 제안). turnId가 맞는 요청이라 낡은 요청과 구분한다 |
 | `STALE_HAZARD` | 방해요소 명령의 hazardInstanceId가 현재 보유와 다름 (제안) |
+| `HAZARD_COOLDOWN` | 쿨타임 중인 쿨타임형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
+| `HAZARD_OVERHEATED` | 과열 중에 피로도 게이지형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
+| `HAZARD_INVALID_TARGET` | 벽·끈끈이의 위치가 판 밖이거나 알·기존 벽·끈끈이와 겹침 ([GAME 방해요소별 처리](GAME.md#방해요소별-처리)) |
+| `HAZARD_NOT_USABLE` | 경기 시작 전이나 종료 후의 입력, 또는 랜덤형 방해요소를 직접 사용함 ([GAME 상태 전이](GAME.md#상태-전이와-순서), [PRD 사용](../PRD.md#사용)) |
 
-방해요소 사용 거부(쿨타임·게이지·진행 중 효과 제한 등)의 오류 코드는 이벤트 필드와 함께 정한다. 목록은 이 절 한 곳에서 관리한다.
+방해요소 사용 거부는 위 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*` 코드 이름은 개발자 B가 정했고 개발자 A 검토 전이다. 목록은 이 절 한 곳에서 관리한다.
 
 ### Socket.IO 이벤트 (초안)
 
@@ -73,10 +77,10 @@
 | S → C | `room:closed` | 방장 이탈 등으로 방이 닫힘 |
 | S → C | `game:start` | 게임 시작 (판, 알 배치, 선공) |
 | S → C | `hazard:granted` | 방해요소 지급·교체 (1·3·5·7·9라운드 시작, 받은 플레이어에게만 전송. 상대에게는 보내지 않는다) |
-| C → S | `hazard:use` | 방해요소 사용 (현재 보유 1개의 instanceId, 벽·끈끈이는 위치 좌표. 입력 방식은 [LOCAL](LOCAL.md#방해요소-입력)). 직접 사용형은 내 턴·상대 턴과 알 이동 여부에 관계없이 제한 충족 시 허용. 랜덤형은 서버 자동 발동 (DEC-015·017) |
+| C → S | `hazard:use` | 방해요소 사용 (현재 보유 1개의 instanceId, 벽·끈끈이는 위치 좌표. 입력 방식은 [LOCAL](LOCAL.md#방해요소-입력)). 직접 사용형은 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용하고, 거부는 `HAZARD_*` 코드로 응답. 랜덤형은 서버 자동 발동 (DEC-015·017·031) |
 | S → C | `hazard:triggered` | 방해요소 발동·종료 알림 (양쪽 공개, 랜덤형은 턴과 관계없이 보유 중 상대에게 자동 발동) |
 | S → C | `game:state` | 플레이어별 현재 게임 상태 (**플레이어별 뷰**: 상대 보유 방해요소 제외). 필드는 [GAME의 공개 GameView·본인 private](GAME.md#상태-위치와-플레이어별-뷰)를 따른다. 전송 주기는 물리와 분리하고 오래된 틱은 건너뛴다 ([GAME](GAME.md#전송과-표시-초안)) |
-| C → S | `shot:submit` | 발사 (gameId, turnId, 알 id, 각도, 세기 0~100). 결과는 ack로 반환 ([DEC-026](../DECISIONS.md#결정-색인)) |
+| C → S | `shot:submit` | 발사 (gameId, turnId, 알 id, 각도, 세기). 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), 각도는 판 좌표계의 라디안([LOCAL](LOCAL.md#gamesession-시그니처)). 각도 범위는 구현 때 정한다. 결과는 ack로 반환 ([DEC-026](../DECISIONS.md#결정-색인)) |
 | S → C | `turn:change` | 턴 변경 (남은 시간 포함) |
 | C → S | `game:forfeit` | 기권 |
 | S → C | `game:over` | 게임 종료 (승 / 패 / 무, 종료 사유). 레이팅 없음 ([DEC-022](../DECISIONS.md#결정-색인)) |
