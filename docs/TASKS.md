@@ -369,13 +369,15 @@ Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 담당: 개발자 A
 의존성: DOC-010
 범위: 판·알·동물 캐릭터 6종 3D 모델·방해요소 아이콘·효과음의 출처와 제작 방법, 라이선스 기록 위치(docs/CREDITS.md 여부), 용량 한도를 정한다.
-관련 문서: [TECH_STACK 에셋 후보](design/TECH_STACK.md#에셋-후보) / [환경설정 효과음 목록](PRD.md#환경설정)
+관련 문서: [TECH_STACK 에셋 후보](design/TECH_STACK.md#에셋-조달-계획) / [환경설정 효과음 목록](PRD.md#환경설정)
 Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
 
 수용 기준:
 - [x] 에셋 종류마다 출처 또는 제작 방법과 라이선스 확인일이 정해졌다.
 - [x] 출처·라이선스 기록 위치와 텍스처·오디오 용량 한도가 정해졌다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+1번 해석: 이용 조건 확인일이 "미확인"인 항목(Claude·jsfxr·ChipTone·Jua)은 사용자가 구현 단계(반입 시)로 미뤘고([DEC-033](DECISIONS.md#결정-색인)), 방식이 정해졌으면 충족으로 보았다. 미확인 항목은 TECH_STACK 미정에 남아 있다.
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#asset-001-에셋-조달-계획)
 
