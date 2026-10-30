@@ -20,6 +20,8 @@
 
 [ASSET-001](TASKS.md#asset-001-에셋-조달-계획)은 [PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28)로 main에 병합됐다([DEC-033](DECISIONS.md#결정-색인)). 판·알·동물 3D는 코드 도형, 방해요소 아이콘은 Claude가 작성하는 SVG, 효과음은 jsfxr·ChipTone 자체 생성이며 출처 기록은 [CREDITS](CREDITS.md)에 둔다. 도구·글꼴 이용 조건 확인은 구현 단계로 남았다.
 
+[VAL-001](TASKS.md#val-001-성능-측정-절차와-플레이-테스트-기록-양식)은 [PR #30](https://github.com/moguab2808-commits/mini-project-1-1/pull/30)로 main에 병합됐다([DEC-034](DECISIONS.md#결정-색인)). [fps 측정 절차와 플레이 테스트 기록 양식](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001)이 정해졌고(평균 55fps 이상·하위 5% 30fps 이상), 구현이 없어 실제 측정은 하지 못했다. 프레임 시간 기록 코드는 [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록)로 등록했다.
+
 개발자 A는 [PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15)의 `docs/game-001`에서 [GAME-001](TASKS.md#game-001-게임-처리-상세-설계-확정) 상세 계약 초안을 작성했다. DEC-014·015의 단일 보유·교체·상시 사용을 반영했다. DEC-017의 추가 효과 규칙과 승인된 실시간 방식(DEC-016·ADR-0004)을 반영했다. 효과 세부와 API-001 이벤트 계약은 검토 전이다. 구현은 없다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)를 따른다.
 
 GAME-001에 대한 개발자 B의 검토를 반영했다. 명령·종료·전송 계약은 [DEC-026](DECISIONS.md#결정-색인)으로 정했다. 사용자가 B의 의견대로 랭킹·레이팅 제외, 방 정보 DB 보관, 방 생성 창의 PvP/AI·알 5·7·9개·로비 새로고침, IP당 인증 요청 제한을 결정했다([DEC-022~025](DECISIONS.md#결정-색인), PRD v0.17). PR #15가 `main`에 병합되어 GAME-001을 완료 처리했다(남은 수용 기준 2개는 사용자 결정으로 삭제). 남은 효과 세부와 수치는 GAME-002, 이벤트 필드는 API-001에서 다룬다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-개발자-b-검토-반영)를 따른다.
