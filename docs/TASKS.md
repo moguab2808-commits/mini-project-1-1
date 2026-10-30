@@ -34,8 +34,8 @@
 | [DOC-009](#doc-009-prd-미정-항목-위임-결정) | PRD 미정 항목 위임 결정 | P0 | DOC-008 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
 | [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
-| [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3) |
-| [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 예정 | 개발자 A | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
+| [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18) |
+| [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 진행 중 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
@@ -309,38 +309,40 @@ Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)
 ## LOCAL-001 로컬 2인 모드 설계 확정
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 A (Claude)
 의존성: DOC-010
 범위: `GameSession` 명령·이벤트 시그니처, 한 PC에서 비공개 방해요소를 다루는 방식, 방해요소 사용 입력과 벽·끈끈이 위치 지정, AI 대전의 로컬 처리 여부를 확정한다. 화면 교대·숫자키 안은 DEC-020의 창 2개·E 키 방식으로 대체했다.
 관련 문서: [LOCAL](design/LOCAL.md) / [방해요소 규칙](PRD.md#방해요소-규칙)·[AI 대전](PRD.md#ai-대전)
-Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)
+Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18)
 
 수용 기준:
 - [x] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다. ([LOCAL](design/LOCAL.md#gamesession-시그니처)의 이벤트 7개와 명령 4개, 총 11개 이름이 [API](design/API.md#socketio-이벤트-초안) 이벤트 이름과 같고, `CommandResult`는 API의 ack·오류 형식을 따른다. 개발자 B가 PR #18 검토에서 동의)
 - [x] 로컬 모드에서 상대 방해요소를 가리는 방식과 방해요소 입력 방식이 정해졌다. ([DEC-020](DECISIONS.md#결정-색인)·[LOCAL](design/LOCAL.md#상세-계약-초안-local-001))
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #18, `main` 68340b3)
 
-검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#local-001-로컬-2인-모드-설계-초안)
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#local-001-로컬-2인-모드-설계-초안)·[B 검토 반영](worklogs/2026-10-30.md#local-001-개발자-b-검토-반영)
 
-남은 조건: 리뷰·병합. 명령 필드는 개발자 B가 PR #18 검토에서 API-001과 맞음을 확인했다. 공통 실행 모듈·좌석 PlayerId·세션 수명·`RoomClient` 분리는 [DEC-030](DECISIONS.md#결정-색인)으로 정했다. 방해요소 사용 거부 오류 코드는 B가 API-001에서 추가한 뒤 LOCAL에 연결한다(이 작업의 완료 조건이 아님). `ai:start` 삭제(DEC-021), commandId 제거·ack 반환(DEC-026), AI 대전 진입 변경(DEC-024), API-001 확정안의 오류 코드(PR #16)는 반영했다.
+후속: 방해요소 사용 거부 오류 코드는 개발자 B가 API-001에서 추가한 뒤 LOCAL에 연결한다. `game-runtime` 주입 인터페이스는 PLAN-001에서 정한다([DEC-030](DECISIONS.md#결정-색인)).
 
 ## GAME-002 물리·방해요소 수치 기본값 제안
 
 우선순위: P1
-상태: 예정
-담당: 개발자 A
+상태: 진행 중
+담당: 개발자 A (Claude)
 의존성: GAME-001
 범위: 마찰·반발·최대 발사 속도·떠오름 높이 등 물리 수치와 피로도 게이지·쿨타임·랜덤 발동 확률, 방해요소 효과 크기의 구현 시작용 기본값을 제안한다. 확정은 플레이 테스트 후 결정 기록으로 한다.
 관련 문서: [GAME 기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [PRD 미정 사항](PRD.md#7-미정-사항과-변경-관리)
 Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
 
 수용 기준:
-- [ ] PRD에서 "이후 정함"으로 표시한 수치마다 기본값과 근거가 GAME에 있다.
-- [ ] 기본값을 바꾸는 절차(플레이 테스트 → DECISIONS)가 명시됐다.
+- [x] PRD에서 "이후 정함"으로 표시한 수치마다 기본값과 근거가 GAME에 있다. ([GAME 기술 초기값](design/GAME.md#기술-초기값-조정-대상)의 물리·방해요소 수치·전송·AI 표. 수치 규칙 해석은 [DEC-031](DECISIONS.md#결정-색인))
+- [x] 기본값을 바꾸는 절차(플레이 테스트 → DECISIONS)가 명시됐다. ([수치 변경 절차](design/GAME.md#수치-변경-절차))
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-002-물리방해요소-수치-기본값-제안)
+
+남은 조건: 리뷰·병합. 제안값은 미승인이며 플레이 테스트 후 DEC로 확정한다. 효과와 30초 마감의 관계는 사용자가 "턴 마감과 독립, 라운드 기준"으로 정했다(DEC-031).
 
 ## UI-002 디자인 캔버스 현재 요구사항 반영
 
