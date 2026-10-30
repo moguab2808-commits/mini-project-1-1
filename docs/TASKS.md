@@ -43,7 +43,7 @@
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
-| [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
+| [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현 | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -477,7 +477,7 @@ Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## OPS-001 운영 설계 확정
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: DOC-010
 범위: 외부 헬스체크 서비스 선정과 Render 이용 조건 재확인, SPA fallback, 배포·롤백, 이탈 판정용 서버 로그 항목, 사용량(Render 시간·Neon CU-hour) 확인 방법, 백업·복구 절차를 정한다. 헬스체크는 UptimeRobot 5분 간격, 배포는 자동 배포를 끄고 Render 대시보드에서 수동으로 하며, 백업은 Neon 기본 복구만 쓴다(DEC-029). 방 상태를 DB에서 관리해 늘 수 있는 Neon 사용량과 실시간 상태 전송의 서버 부하 측정 항목도 함께 정한다.
@@ -485,12 +485,12 @@ Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)
 
 수용 기준:
-- [ ] OPERATIONS의 미정 사항이 모두 방식으로 정해지고 무료 조건 재확인 날짜가 기록됐다.
-- [ ] 동시 이탈·시작 직전 이탈 판정에 쓸 로그 항목이 GAME-001의 로그 필드와 맞춰 정해졌다.
-- [ ] Neon 기본 복구의 가능 기간과 한계(보관 무제한 정책과의 차이), 수동 배포·롤백 방법이 공식 문서로 확인되어 기록됐다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] OPERATIONS의 미정 사항이 모두 방식으로 정해지고 무료 조건 재확인 날짜가 기록됐다. ([무료 조건 재확인](design/OPERATIONS.md#무료-조건-재확인-2026-10-30) 2026-10-30. `[제안]` 표시를 확정하고 `rooms` 정리·음량 저장·민감정보 제거·부하 측정 항목을 정했다. 지속 요청 사용 여부는 DEC-029대로 구현 단계 판단이며 운영 방식은 정해 두었다)
+- [x] 동시 이탈·시작 직전 이탈 판정에 쓸 로그 항목이 GAME-001의 로그 필드와 맞춰 정해졌다. ([서버 로그](design/OPERATIONS.md#서버-로그)의 필드가 [GAME 명령 경합](design/GAME.md#명령-경합과-시간)과 같고, `start_commit`·`leave`의 `ingressSeq` 비교로 판정한다)
+- [x] Neon 기본 복구의 가능 기간과 한계(보관 무제한 정책과의 차이), 수동 배포·롤백 방법이 공식 문서로 확인되어 기록됐다. ([백업·복구](design/OPERATIONS.md#백업복구) 6시간·1 GB 상한, [배포·롤백](design/OPERATIONS.md#배포롤백) Render 공식 문서 2026-10-30)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #26. 개발자 A 검토를 반영했고, 병합 전에 체크했다)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#ops-001-미충족-수용-기준-보완)
 
 ## PLAN-001 구현 작업 등록
 
