@@ -6,7 +6,7 @@
 | --- | --- |
 | 승인된 미구현 설계 | 아래 배포 구성 ([DEC-013](../DECISIONS.md#결정-색인), [ADR-0003](../adr/0003-tech-stack-and-architecture.md)). 헬스체크 서비스·수동 배포·백업 방식([DEC-029](../DECISIONS.md#결정-색인)) |
 | 현재 구현 | 없음 |
-| 확정안 (B 결정, 리뷰 전) | 아래 [OPS-001](../TASKS.md#ops-001-운영-설계-확정) 세부 절차와 [무료 조건 확인](#무료-조건-재확인-2026-10-30). 개발자 A 검토 전 |
+| 확정 (OPS-001 완료) | 아래 [OPS-001](../TASKS.md#ops-001-운영-설계-확정) 세부 절차와 [무료 조건 확인](#무료-조건-재확인-2026-10-30) |
 | 미정 | 아래 미정 사항 |
 
 비용·보관·삭제·장애 시 제품 약속은 [PRD](../PRD.md), 실행 절차는 [README](../../README.md), 성능·실패 실험 방법은 [ENGINEERING-VALIDATION](../ENGINEERING-VALIDATION.md)을 따른다.
@@ -34,7 +34,7 @@
 | Neon 무료 플랜 | 프로젝트당 월 100 CU-hour. 비활성 5분 뒤 컴퓨트 중지(무료 플랜에서는 끌 수 없음). 복구용 변경 이력(history window) 기본·최대 6시간, 이력 1 GB 상한 | [Plans](https://neon.com/docs/introduction/plans), [History window](https://neon.com/docs/postgres/backup-restore/history-window) |
 | UptimeRobot 무료 플랜 | 모니터 50개, 확인 간격 5분. 이용약관은 "any use, including commercial and business use"라고 적어 비상업적 용도 제한이 없다. 요금 페이지도 개인·상업 프로젝트에 쓸 수 있다고 한다. 약관에서 인용하지 못한 공정 사용 정책(Fair Use Policy)에 한도가 있을 수 있어 구현 때 확인한다 | [Terms](https://uptimerobot.com/terms/), [Pricing](https://uptimerobot.com/pricing/) |
 
-다음 확인일은 2026-11-30이며 이후 월 1회 재확인한다([TASKS2](../TASKS2.md)의 위험 대응과 같다).
+다음 확인일은 2026-11-30이며 이후 월 1회 재확인한다.
 
 ## 세부 절차 (확정안)
 
@@ -73,8 +73,7 @@
 - `tick_skipped`는 [틱 따라잡기 상한](GAME.md#전송실행)을 넘어 버린 지연 시간을 `result`에 적는다.
 - 이 로그가 동시 이탈과 시작 직전 이탈의 판정 근거다([게임 규칙](../PRD.md#게임-규칙)). 경기 종료 사유는 DB에 저장하지 않고 여기에만 남는다([DATABASE](DATABASE.md#경기-종료-저장)).
 
-`ingressSeq`는 **방 단위 큐**([GAME 구현 경계](GAME.md#구현-경계-ab)의 방별 단일 큐)가 붙이는 순번이며 서버가 켜져 있는 동안 방 안에서 계속 늘어난다. 재도전으로 새 경기가 시작돼도 0으로 되돌리지 않는다. 대기실 이벤트(시작 전 `leave`)는 경기가 없어 `gameId`가 `null`이고 `roomId`로 묶으며, `start_commit`에서 새 `gameId`가 붙어 그 뒤 이벤트는 `gameId`를 가진다. 재도전 경기는 새 `gameId`를 받지만 같은 방의 `ingressSeq`가 이어진다. 그래서 판정은 `roomId`와 `ingressSeq`로 한다. GAME의 "경기별 단일 큐" 표현(명령 경합 절)은 개발자 A가 방 단위로 맞춘다.
-
+`ingressSeq`는 **방 단위 큐**([GAME 구현 경계](GAME.md#구현-경계-ab)의 방별 단일 큐)가 붙이는 순번이며 서버가 켜져 있는 동안 방 안에서 계속 늘어난다. 재도전으로 새 경기가 시작돼도 0으로 되돌리지 않는다. 대기실 이벤트(시작 전 `leave`)는 경기가 없어 `gameId`가 `null`이고 `roomId`로 묶으며, `start_commit`에서 새 `gameId`가 붙어 그 뒤 이벤트는 `gameId`를 가진다. 재도전 경기는 새 `gameId`를 받지만 같은 방의 `ingressSeq`가 이어진다. 그래서 판정은 `roomId`와 `ingressSeq`로 한다.
 판정 방법(같은 `roomId`의 로그를 `ingressSeq` 순으로 본다):
 
 | 상황 | 판정 |
