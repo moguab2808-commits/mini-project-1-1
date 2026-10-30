@@ -14,6 +14,7 @@
 | 기존 결정 확인·변경·기록 | [DECISIONS.md](docs/DECISIONS.md) | 무엇이 언제 승인됐고 어떤 결정이 유효한가. DEC ID·결정일·상태·대체 관계·ADR 링크와 기록·변경 규칙 | 해당 ID·연결 ADR·기록 규칙을 읽는다. ADR이 있으면 식별 가능한 요약과 링크만 두고 대안·영향이나 PRD·설계의 상세 계약을 다시 쓰지 않는다. 별도 ADR이 없는 작은 결정만 결론·핵심 이유를 짧게 기록한다. |
 | 중요한 선택의 이유·절충 확인 | [docs/adr/의 해당 ADR](docs/adr/TEMPLATE.md) | 왜 이 선택을 했고 어떤 절충을 승인했는가. 결정 당시 배경·선택·동의 근거·대안·영향·위험·재검토 조건 | 의미를 식별하는 핵심 조건은 남기되 전체 제품 명세·API/DB 명세·작업 완료 기준·최신 테스트 결과는 복사하지 않는다. 현행 요구사항·설계·검증 근거로 연결한다. |
 | 트러블슈팅 선별·작성·재발 확인 | [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | 어떤 문제를 어떻게 진단·해결하고 재발을 확인하는가. 기록 기준·양식·관련 사례 | 당일 작업·검증 결과는 worklog로 연결한다. 재사용할 진단·해결 지식만 사례로 남긴다. |
+| 에셋 출처·이용 조건 확인 | [docs/CREDITS.md](docs/CREDITS.md) | 반입한 에셋이 어디서 왔고 어떤 조건으로 쓰는가. 에셋·경로·출처·이용 조건·확인일 | 조달 방식·용량 한도는 [TECH_STACK](docs/design/TECH_STACK.md#에셋-조달-계획)을 따른다. 직접 제작한 에셋은 적지 않는다. |
 | 기준선·부하·실패 실험 설계 | [ENGINEERING-VALIDATION.md](docs/ENGINEERING-VALIDATION.md) | 어떻게 측정하고 검증할 것인가. 최소 지표·기준선·실험 절차·기록 양식 | 실제 실험 조건·결과는 해당 날짜의 worklog로 연결한다. 제품 목표값은 PRD, 작업 합격 기준은 TASKS를 따른다. |
 | 과거 변경 추적 | [CHANGELOG.md](docs/CHANGELOG.md) | 사용자에게 의미 있는 무엇이 바뀌었는가. 날짜별 변경 요약 | 현재 진행 상태는 PROGRESS, 상세 검증 결과는 worklog, 정책·설계·이유는 각 기준 문서로 연결한다. |
 | 프로젝트 소개·실행·설치 확인 | [README.md](README.md) | 무엇을 하는 프로젝트이며 어떻게 설치·실행하는가. 소개·설치·실행 절차 | 상세 정책·설계는 해당 문서로 연결한다. 실행 절차를 설계에 복사하지 않는다. |
@@ -33,6 +34,7 @@
    ├─ DECISIONS.md
    ├─ TROUBLESHOOTING.md        # 기록 기준·양식·사례
    ├─ ENGINEERING-VALIDATION.md
+   ├─ CREDITS.md                # 에셋 출처·이용 조건
    ├─ CHANGELOG.md
    ├─ CONTRIBUTING.md
    ├─ design/                   # API·DB·인증·게임·로컬·운영·기술 후보
