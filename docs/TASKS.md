@@ -41,7 +41,7 @@
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
-| [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9) |
+| [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
@@ -439,22 +439,22 @@ Issue·PR: 미생성
 ## DB-001 DB 스키마 확정
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: DOC-010
 범위: users·rooms·세션 테이블의 컬럼·제약·인덱스를 확정한다. 닉네임 정규화 유니크, 캐릭터, 전적(판수·승·패) 1회 갱신, 방 정보와 상태 전이, 서버 재시작 후 남은 방 정리가 대상이다. 랭킹·레이팅·matches는 DEC-022로 제외했다. users는 닉네임(로그인 식별자)·비밀번호 해시·캐릭터·전체 게임 수·승·패만 저장하고 가입 시각·로그인 실패 컬럼을 두지 않는다(DEC-027). rooms는 제목·방장·참여자·공개 여부·비공개 코드·알 개수·판·상태(대기 중/게임 중)를 담는다(DEC-023·027). AI 대전은 어떤 정보도 저장하지 않는다(DEC-021).
 관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록)·[전적](PRD.md#전적) / [DEC-022·023·027](DECISIONS.md#결정-색인)
-Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
+Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23)
 
 수용 기준:
 - [x] DATABASE의 초안 표시가 확정 스키마로 바뀌고 Drizzle 스키마로 옮길 수 있는 수준의 타입·제약이 있으며, `matches`·레이팅·랭킹·로그인 실패 컬럼이 없음이 명시됐다. ([DATABASE](design/DATABASE.md#users)의 `users`·`rooms` 타입·제약·`CHECK`·FK `ON DELETE`, [sessions](design/DATABASE.md#sessions) 스키마 방침, 31행의 제외 컬럼 명시. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거)
 - [x] `rooms`의 컬럼·FK·유니크·공개/비공개 제약, 입장 시 동시성 처리, 방 삭제 시점, 서버 시작 시 정리가 정의됐다. ([방 생명주기](design/DATABASE.md#방-생명주기)의 삭제 시점·서버 시작 정리·입장 조건부 갱신, 한 사람 한 방 제약)
 - [x] 경기 종료 트랜잭션의 순서와 잠금, 중복 저장 방지 방법이 정해졌다. ([경기 종료 저장](design/DATABASE.md#경기-종료-저장)의 `id` 오름차순 `FOR UPDATE`, `finishOnce` 메모리 플래그)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #23. 개발자 A 검토 반영 후 병합하는 PR이며, 병합 전에 체크했다)
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#db-001-스키마-보완과-api-001-완료-처리)
 
-남은 조건: 마지막 기준은 병합 직후 체크한다. 세션 테이블 컬럼·인덱스는 구현 때 connect-pg-simple 공식 문서 기본 스키마와 대조하고, 마이그레이션 SQL의 `lower(nickname)` 유니크 인덱스도 구현 때 확인한다.
+후속: 세션 테이블 컬럼·인덱스는 구현 때 connect-pg-simple 공식 문서의 기본 스키마와 대조하고, 마이그레이션 SQL의 `lower(nickname)` 유니크 인덱스와 `23505` 제약 이름 구분도 구현 때 확인한다.
 
 ## AUTH-001 인증 상세 설계 확정
 
