@@ -49,7 +49,8 @@
 | `ROOM_PLAYING` | 게임이 시작된 방 |
 | `ROOM_NOT_FOUND` | 없는 방, 즉시 참가할 수 있는 방이 없음 |
 | `CODE_TAKEN` | 방 생성 시 코드가 다른 방과 겹침. 다시 생성해 요청한다 |
-| `STALE_TURN` | 발사 명령의 gameId·turnId가 현재 경기·턴과 다름 ([DEC-026](../DECISIONS.md#결정-색인)) |
+| `STALE_TURN` | 발사 명령의 gameId·turnId가 현재 경기·턴과 다름. 같은 턴의 두 번째 발사에는 쓰지 않는다 ([DEC-026](../DECISIONS.md#결정-색인)) |
+| `SHOT_ALREADY_SUBMITTED` | 같은 턴에 이미 발사해 `shotCommitted`로 두 번째 발사가 거부됨 ([GAME](GAME.md#명령-경합과-시간), 제안). turnId가 맞는 요청이라 낡은 요청과 구분한다 |
 | `STALE_HAZARD` | 방해요소 명령의 hazardInstanceId가 현재 보유와 다름 (제안) |
 
 방해요소 사용 거부(쿨타임·게이지·진행 중 효과 제한 등)의 오류 코드는 이벤트 필드와 함께 정한다. 목록은 이 절 한 곳에서 관리한다.
