@@ -317,7 +317,7 @@ Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)
 Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18)
 
 수용 기준:
-- [x] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다. ([LOCAL](design/LOCAL.md#gamesession-시그니처)의 이벤트 7개와 명령 4개, 총 11개 이름이 [API](design/API.md#socketio-이벤트-초안) 이벤트 이름과 같고, `CommandResult`는 API의 ack·오류 형식을 따른다. 개발자 B가 PR #18 검토에서 동의)
+- [x] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다. ([LOCAL](design/LOCAL.md#gamesession-시그니처)의 이벤트 7개와 명령 4개, 총 11개 이름이 [API](design/API.md#socketio-이벤트) 이벤트 이름과 같고, `CommandResult`는 API의 ack·오류 형식을 따른다. 개발자 B가 PR #18 검토에서 동의)
 - [x] 로컬 모드에서 상대 방해요소를 가리는 방식과 방해요소 입력 방식이 정해졌다. ([DEC-020](DECISIONS.md#결정-색인)·[LOCAL](design/LOCAL.md#상세-계약-초안-local-001))
 - [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #18, `main` 68340b3)
 
@@ -406,15 +406,17 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 
 수용 기준:
-- [ ] API 초안의 모든 경로·이벤트에 요청·응답·오류 필드가 정의됐고, 삭제한 `ai:start`·`lobby:*`·`sim:result`·랭킹·최근 경기가 API에 없다.
-- [ ] 방 이벤트(`room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start`)의 필드와 방 입장 오류(`INVALID_CODE`·`ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`)가 정의되고, `GET /api/rooms` 응답에 비공개 방의 코드가 없다.
-- [ ] 인증 오류와 방·발사 오류가 REST·ack 공통의 오류 코드 목록 한 곳으로 합쳐졌고 AUTH-001과 일치한다.
-- [ ] 이벤트 순서(방 생성 → 시작 → 턴 → 종료 → 재도전)가 순서도로 있다.
-- [ ] 상대에게 전송되는 이벤트에 상대 보유 방해요소 정보가 없음을 필드 단위로 확인했다.
-- [ ] GAME-001 담당자가 이벤트 순서를 검토했다.
+- [x] API 초안의 모든 경로·이벤트에 요청·응답·오류 필드가 정의됐고, 삭제한 `ai:start`·`lobby:*`·`sim:result`·랭킹·최근 경기가 API에 없다. ([API](design/API.md#rest-api)의 REST 8개 표, [방 이벤트](design/API.md#방-이벤트-필드)·[경기 이벤트](design/API.md#경기-이벤트-필드) 필드 표. 삭제 대상은 "없다"는 설명으로만 남음)
+- [x] 방 이벤트(`room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start`)의 필드와 방 입장 오류(`INVALID_CODE`·`ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`)가 정의되고, `GET /api/rooms` 응답에 비공개 방의 코드가 없다. (방 생성 거부 `CODE_TAKEN`·`ALREADY_IN_ROOM`, `room:start` 거부 `NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY` 추가)
+- [x] 인증 오류와 방·발사 오류가 REST·ack 공통의 오류 코드 목록 한 곳으로 합쳐졌고 AUTH-001과 일치한다. ([API 오류 코드 표](design/API.md#오류-형식과-코드) 한 곳에 인증·방·발사·방해요소 코드가 있고, [AUTH](design/AUTH.md#오류-형식)가 이 표를 참조하며 인증 코드 5종이 같음을 대조)
+- [x] 이벤트 순서(방 생성 → 시작 → 턴 → 종료 → 재도전)가 순서도로 있다. ([API 이벤트 순서](design/API.md#이벤트-순서)의 sequenceDiagram과 순서 규칙 7개)
+- [x] 상대에게 전송되는 이벤트에 상대 보유 방해요소 정보가 없음을 필드 단위로 확인했다. ([API 상대 비공개 필드 점검](design/API.md#상대-비공개-필드-점검). 계약 문서의 필드 목록 대조이며 구현 후 `getViewFor` 테스트로 다시 검증)
+- [x] GAME-001 담당자가 이벤트 순서를 검토했다. (개발자 A가 [PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) 리뷰에서 순서·교체 지급 순서를 GAME과 대조해 모순 없음을 확인하고, 사용자에게도 검토 완료를 전달)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#api-001-방해요소-거부-오류-코드-반영)·[필드·순서 확정안](worklogs/2026-10-30.md#api-001-필드순서도비공개-점검-추가)
+
+남은 조건: 새 오류 코드·식별자 이름의 개발자 A 확인과 본인 private 뷰의 게이지·쿨타임 필드 이름(A가 GAME에서 정한 뒤 API에 반영)이 남아 있다. 마지막 기준은 병합 직후 체크한다.
 
 ## DB-001 DB 스키마 확정
 
