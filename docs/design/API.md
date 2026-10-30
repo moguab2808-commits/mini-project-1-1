@@ -52,6 +52,7 @@
 - REST 오류는 `{ error: { code, message } }`로 응답한다. HTTP 상태는 위 표를 따른다.
 - Socket.IO 명령은 ack 콜백으로 `{ ok: true, … }` 또는 `{ ok: false, error: { code, message } }`를 돌려준다.
 - 거부된 명령은 경기 상태와 난수를 바꾸지 않는다.
+- `RATE_LIMITED`(REST 429)에는 `Retry-After` 헤더(초)가 붙는다. `room:join` ack의 `RATE_LIMITED`에는 없다.
 
 | 코드 | 사용처 |
 | --- | --- |
