@@ -39,10 +39,10 @@
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
-| [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 예정 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8) |
-| [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 예정 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9) |
-| [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 예정 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
-| [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 예정 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
+| [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 진행 중 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8) |
+| [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9) |
+| [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
+| [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 예정 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현 | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -394,15 +394,18 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 ## API-001 API·실시간 이벤트 계약 확정
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: GAME-001
-범위: REST 경로와 Socket.IO 이벤트 이름·방향·필드·오류 형식, 이벤트 순서와 재전송·중복 처리, 플레이어별 공개 필드를 확정하고 `shared`의 Zod 스키마로 옮길 수 있게 정리한다.
-관련 문서: [API](design/API.md) / [GAME](design/GAME.md)·[AUTH](design/AUTH.md)
+범위: REST 경로와 Socket.IO 이벤트 이름·방향·필드·오류 형식, 이벤트 순서와 재전송·중복 처리, 플레이어별 공개 필드를 확정하고 `shared`의 Zod 스키마로 옮길 수 있게 정리한다. 이미 정한 것: AI 대전은 서버 이벤트가 없다(`ai:start` 삭제, DEC-021). 랭킹·최근 경기 조회 API는 없다(DEC-022). 방 목록은 로비 진입·새로고침 때 `GET /api/rooms`로 조회하고 구독 이벤트를 두지 않는다(DEC-024). 중복·재전송은 `commandId` 없이 발사는 gameId·turnId, 방해요소는 gameId·hazardInstanceId로 거르고 결과는 ack로 반환한다(DEC-026). 이 작업에서 정하는 것: 실시간 `game:state`가 대체하는 `sim:result` 삭제, 방 이벤트와 방 목록 응답의 필드, REST·ack 공통 오류 코드 목록, 이벤트 순서.
+관련 문서: [API](design/API.md) / [GAME](design/GAME.md)·[AUTH](design/AUTH.md) / [DEC-021·022·024·026](DECISIONS.md#결정-색인)
 Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 
 수용 기준:
-- [ ] API 초안의 모든 경로·이벤트에 요청·응답·오류 필드가 정의됐다.
+- [ ] API 초안의 모든 경로·이벤트에 요청·응답·오류 필드가 정의됐고, 삭제한 `ai:start`·`lobby:*`·`sim:result`·랭킹·최근 경기가 API에 없다.
+- [ ] 방 이벤트(`room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start`)의 필드와 방 입장 오류(`INVALID_CODE`·`ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`)가 정의되고, `GET /api/rooms` 응답에 비공개 방의 코드가 없다.
+- [ ] 인증 오류와 방·발사 오류가 REST·ack 공통의 오류 코드 목록 한 곳으로 합쳐졌고 AUTH-001과 일치한다.
+- [ ] 이벤트 순서(방 생성 → 시작 → 턴 → 종료 → 재도전)가 순서도로 있다.
 - [ ] 상대에게 전송되는 이벤트에 상대 보유 방해요소 정보가 없음을 필드 단위로 확인했다.
 - [ ] GAME-001 담당자가 이벤트 순서를 검토했다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
@@ -412,15 +415,16 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 ## DB-001 DB 스키마 확정
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: DOC-010
-범위: users·rooms·세션 테이블의 컬럼·제약·인덱스를 확정한다. 닉네임 정규화 유니크, 캐릭터, 전적(판수·승·패) 1회 갱신, 방 정보와 상태 전이, 서버 재시작 후 남은 방 정리가 대상이다. 랭킹·레이팅·matches는 DEC-022로 제외했다.
-관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록)·[전적](PRD.md#전적)
+범위: users·rooms·세션 테이블의 컬럼·제약·인덱스를 확정한다. 닉네임 정규화 유니크, 캐릭터, 전적(판수·승·패) 1회 갱신, 방 정보와 상태 전이, 서버 재시작 후 남은 방 정리가 대상이다. 랭킹·레이팅·matches는 DEC-022로 제외했다. users는 닉네임(로그인 식별자)·비밀번호 해시·캐릭터·전체 게임 수·승·패만 저장하고 가입 시각·로그인 실패 컬럼을 두지 않는다(DEC-027). rooms는 제목·방장·참여자·공개 여부·비공개 코드·알 개수·판·상태(대기 중/게임 중)를 담는다(DEC-023·027). AI 대전은 어떤 정보도 저장하지 않는다(DEC-021).
+관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록)·[전적](PRD.md#전적) / [DEC-022·023·027](DECISIONS.md#결정-색인)
 Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
 
 수용 기준:
-- [ ] DATABASE의 초안 표시가 확정 스키마로 바뀌고 Drizzle 스키마로 옮길 수 있는 수준의 타입·제약이 있다.
+- [ ] DATABASE의 초안 표시가 확정 스키마로 바뀌고 Drizzle 스키마로 옮길 수 있는 수준의 타입·제약이 있으며, `matches`·레이팅·랭킹·로그인 실패 컬럼이 없음이 명시됐다.
+- [ ] `rooms`의 컬럼·FK·유니크·공개/비공개 제약, 입장 시 동시성 처리, 방 삭제 시점, 서버 시작 시 정리가 정의됐다.
 - [ ] 경기 종료 트랜잭션의 순서와 잠금, 중복 저장 방지 방법이 정해졌다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
@@ -429,15 +433,16 @@ Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
 ## AUTH-001 인증 상세 설계 확정
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: DOC-010
-범위: 세션 만료, argon2id 파라미터, IP당 `/api/auth/*` 분당 20회 제한(DEC-025)의 저장·응답 형식, 그 밖의 요청 빈도 제한, Render 프록시 신뢰 설정, Socket.IO 연결 인증·중복 접속 처리, 인증 오류 형식을 확정한다.
-관련 문서: [AUTH](design/AUTH.md) / [로그인](PRD.md#로그인)·[연결 끊김](PRD.md#연결-끊김과-중복-접속)
+범위: 세션 만료, argon2id 파라미터, IP당 `/api/auth/*` 분당 20회 제한(DEC-025)의 저장·응답 형식, 그 밖의 요청 빈도 제한, Render 프록시 신뢰 설정, Socket.IO 연결 인증·중복 접속 처리, 인증 오류 형식을 확정한다. 세션은 브라우저 종료 시 만료하고 서버 기본 만료를 병행하며, 비밀번호를 바꾸면 다른 세션을 모두 끝낸다(DEC-028). 방해요소·턴·알 소유권 검증 경계는 GAME-001 확정 후 정한다.
+관련 문서: [AUTH](design/AUTH.md) / [로그인](PRD.md#로그인)·[연결 끊김](PRD.md#연결-끊김과-중복-접속) / [DEC-025·028](DECISIONS.md#결정-색인)
 Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)
 
 수용 기준:
 - [ ] AUTH의 세부 미정 항목이 모두 값이나 방식으로 정해졌다.
+- [ ] 로그인 연속 실패 제한이 없고 요청 빈도 제한의 한도·응답 형식이 API-001의 오류 코드와 일치한다.
 - [ ] 중복 접속 시 기존 연결 종료와 기권 처리 흐름이 API-001과 일치한다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
@@ -446,16 +451,17 @@ Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## OPS-001 운영 설계 확정
 
 우선순위: P1
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: DOC-010
-범위: 외부 헬스체크 서비스 선정과 Render 이용 조건 재확인, SPA fallback, 자동 배포·롤백, 이탈 판정용 서버 로그 항목, 사용량(Render 시간·Neon CU-hour) 확인 방법, 백업·복구 절차를 정한다.
-관련 문서: [OPERATIONS](design/OPERATIONS.md) / [ADR-0003](adr/0003-tech-stack-and-architecture.md)
+범위: 외부 헬스체크 서비스 선정과 Render 이용 조건 재확인, SPA fallback, 배포·롤백, 이탈 판정용 서버 로그 항목, 사용량(Render 시간·Neon CU-hour) 확인 방법, 백업·복구 절차를 정한다. 헬스체크는 UptimeRobot 5분 간격, 배포는 자동 배포를 끄고 Render 대시보드에서 수동으로 하며, 백업은 Neon 기본 복구만 쓴다(DEC-029). 방 상태를 DB에서 관리해 늘 수 있는 Neon 사용량과 실시간 상태 전송의 서버 부하 측정 항목도 함께 정한다.
+관련 문서: [OPERATIONS](design/OPERATIONS.md) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
 Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)
 
 수용 기준:
 - [ ] OPERATIONS의 미정 사항이 모두 방식으로 정해지고 무료 조건 재확인 날짜가 기록됐다.
-- [ ] 동시 이탈·시작 직전 이탈 판정에 쓸 로그 항목이 정해졌다.
+- [ ] 동시 이탈·시작 직전 이탈 판정에 쓸 로그 항목이 GAME-001의 로그 필드와 맞춰 정해졌다.
+- [ ] Neon 기본 복구의 가능 기간과 한계(보관 무제한 정책과의 차이), 수동 배포·롤백 방법이 공식 문서로 확인되어 기록됐다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
