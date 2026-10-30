@@ -42,7 +42,7 @@
 | `guest_id` | integer null, FK → `users.id` `ON DELETE RESTRICT`, unique | 참여자. 상대가 없으면 null(null은 여러 개 허용). 한 사용자가 두 방의 참여자가 되지 못한다 |
 | `is_public` | boolean not null | true = 공개, false = 비공개 |
 | `code` | varchar(6) unique null | 비공개 방 입장 코드. 공개 방은 null. 방장이 복사해 전달하므로 해시하지 않고 그대로 저장한다(사용자 비밀번호가 아닌 입장 코드) |
-| `piece_count` | integer not null default 5 | `CHECK (piece_count IN (5, 7, 9))` |
+| `piece_count` | integer not null default 5 | `CHECK (piece_count IN (5, 7, 9))`. 5·7·9는 PRD 고정값이며 개수를 늘리면 마이그레이션이 필요하다 |
 | `board` | varchar(16) not null | 방 생성 때 고른 판([API `BoardId`](API.md#공통-타입)). 판이 늘 수 있어 값은 앱(Zod)만 검사한다 |
 | `status` | varchar(16) not null default 'waiting' | `waiting`(대기 중) / `playing`(게임 중). `CHECK (status IN ('waiting', 'playing'))` |
 
@@ -61,19 +61,19 @@
 | 시작 커밋 | 방 큐의 시작 명령 처리로 `status`를 `waiting` → `playing`으로 바꾼다([GAME](GAME.md#상태-전이와-순서)) |
 | 재도전 성립 | `status`는 `playing`을 유지하고 `guest_id`도 그대로 둔다(같은 방·같은 설정으로 새 경기). 상태 전이는 [GAME의 방 상태 표](GAME.md#상태-전이와-순서)를 따른다 |
 | 재도전 만료 | 두 사람이 같은 방 대기실로 돌아가므로 `status`만 `waiting`으로 바꾸고 `guest_id`는 비우지 않는다([게임 화면](../PRD.md#게임-화면)) |
-| 상대(참여자)가 나감 | `guest_id = null`로 비운다(방 유지, 다시 대기). 대기실·경기 중·결과 화면 어디서 나가도 같고, `status`가 `playing`이었다면 같은 UPDATE 한 문장에서 `waiting`으로 바꿔 중간 상태를 남기지 않는다 |
-| 방장이 나감 | 행 삭제(방 닫힘). 방이 닫히면 이력을 남기지 않는다 |
+| 상대(참여자)가 나감 | `guest_id = null`로 비운다(방 유지, 다시 대기). 대기실·경기 중·결과 화면 어디서 나가도 같고, `status`가 `playing`이었다면 같은 UPDATE 한 문장에서 `waiting`으로 바꿔 중간 상태를 남기지 않는다. 경기 중 이탈이면 기권패 전적 저장(`finishOnce`)을 먼저 끝낸 뒤 이 UPDATE를 한다. 두 작업은 한 트랜잭션으로 묶지 않으며, 전적 저장이 실패해도 방 정리는 진행한다([경기 종료 저장](#경기-종료-저장)) |
+| 방장이 나감 | 행 삭제(방 닫힘). 경기 중이면 기권패 전적 저장(`finishOnce`) 뒤에 행을 삭제한다. 방이 닫히면 이력을 남기지 않는다 |
 | 서버 시작 | `rooms`를 전부 삭제한다. 배포·재시작으로 메모리의 연결·경기가 사라지는데 방만 남으면 유령 방이 목록에 보인다 |
 
 - **방 삭제 시점**: 방은 ①방장이 나갈 때(나가기·연결 끊김·기권 이탈 포함)와 ②서버 시작 때만 삭제한다. 경기 종료·재도전 만료·참여자 이탈로는 삭제하지 않는다.
-- **입장 동시성**: 두 사람이 같은 방에 동시에 들어와도 한 명만 성공하도록 조건부 갱신을 쓴다. `UPDATE rooms SET guest_id = $me WHERE id = $id AND guest_id IS NULL AND status = 'waiting' RETURNING *`가 0행이면 방 상태를 다시 읽어 `ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`로 구분한다. 비공개 방은 입력한 코드가 `code`와 같을 때만 갱신한다. 즉시 참가는 공개·`guest_id IS NULL`·`status = 'waiting'`인 방 중 무작위 1개를 골라 같은 조건부 갱신을 한다.
+- **입장 동시성**: 두 사람이 같은 방에 동시에 들어와도 한 명만 성공하도록 조건부 갱신을 쓴다. `UPDATE rooms SET guest_id = $me WHERE id = $id AND guest_id IS NULL AND status = 'waiting' RETURNING *`가 0행이면 방 상태를 다시 읽어 `ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`로 구분한다. 비공개 방은 입력한 코드가 `code`와 같을 때만 갱신한다. 즉시 참가는 공개·`guest_id IS NULL`·`status = 'waiting'`인 방 중 무작위 1개를 골라 같은 조건부 갱신을 한다. 이미 다른 방의 참여자인 사용자가 입장하면 조건부 UPDATE가 0행이 되는 대신 `guest_id` 유니크 위반(PostgreSQL `23505`)이 DB 오류로 난다. 서버는 위반한 제약 이름으로 구분해 `ALREADY_IN_ROOM`으로 매핑한다. 방 생성의 `host_id` 유니크 위반도 `ALREADY_IN_ROOM`, `code` 유니크 위반은 `CODE_TAKEN`으로 매핑한다.
 - **DB 접속 최소화**: 방 목록은 폴링하지 않고 로비 진입·새로고침 때만 조회한다([DEC-024](../DECISIONS.md#결정-색인)). DB 접속이 계속 있으면 Neon이 중지되지 않아 월 100 CU-hour 한도([ADR-0003](../adr/0003-tech-stack-and-architecture.md))를 더 쓴다.
 
 ## 경기 종료 저장
 
 - 종료 시 두 사용자의 `total_games`·`wins`·`losses`만 한 트랜잭션에서 갱신한다. 승자는 `total_games`와 `wins`, 패자는 `total_games`와 `losses`를 올리고, 무승부는 두 사람의 `total_games`만 올린다.
 - 두 `users` 행을 **id 오름차순으로 `SELECT … FOR UPDATE`** 한 뒤 갱신한다. 잠금 순서를 고정해 교착을 막는다.
-- 중복 처리는 서버의 `finishOnce`가 막는다([GAME](GAME.md#명령-경합과-시간)). `matches`가 없어 DB 제약으로는 막을 수 없으므로 게임 인스턴스의 메모리 플래그에 의존한다. MVP는 서버 장애를 고려하지 않으므로([비기능 요구사항](../PRD.md#4-비기능-요구사항과-제약)) 충분하다.
+- 중복 처리는 서버의 `finishOnce`가 막는다([GAME](GAME.md#명령-경합과-시간)). `matches`가 없어 DB 제약으로는 막을 수 없으므로 게임 인스턴스의 메모리 플래그에 의존한다. MVP는 서버 장애를 고려하지 않으므로([비기능 요구사항](../PRD.md#4-비기능-요구사항과-제약)) 충분하다. 플래그는 종료를 확정하는 시점에 **저장 전에** 설정한다. 트랜잭션이 실패하면 오류를 서버 로그에 남기고 전적 반영을 포기한다(MVP). 재시도로 같은 경기가 두 번 반영되는 것이 한 판 누락보다 나쁘고, 서버 장애를 고려하지 않기 때문이다.
 - 종료 사유는 저장하지 않고 서버 로그에 남긴다([운영](OPERATIONS.md)). 동시 이탈·시작 직전 이탈은 [게임 규칙](../PRD.md#게임-규칙)에 따라 먼저 확인된 쪽 기권패, 시작 처리 전이면 전적에 반영하지 않는다.
 - AI 대전은 전적에 반영하지 않는다([AI 대전](../PRD.md#ai-대전)).
 

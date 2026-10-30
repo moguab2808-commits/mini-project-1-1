@@ -40,6 +40,7 @@
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
+| [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
@@ -416,7 +417,24 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#api-001-방해요소-거부-오류-코드-반영)·[필드·순서 확정안](worklogs/2026-10-30.md#api-001-필드순서도비공개-점검-추가)
 
-후속: 새 오류 코드·식별자 이름(`HAZARD_*` 등 오류 코드, `HazardKind`·`CharacterId`·`BoardId`, `game:over.reason`)은 개발자 A가 확인하고, 본인 private 뷰의 게이지·쿨타임 필드 이름은 A가 GAME에서 정한 뒤 API에 반영한다. `Seat` 값의 `…Id` 이름은 `shared` 스키마를 만들 때 정한다. API 문서의 "A 검토 전" 표시는 그대로 둔다.
+후속: 새 오류 코드·식별자 이름 확인과 본인 private 뷰의 게이지·쿨타임 필드 이름은 [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정)에서 다룬다. `Seat` 값의 `…Id` 이름은 PLAN-001 묶음 2(`game-core`·`shared`)에서 스키마를 만들 때 정한다.
+
+## API-002 API 이름·식별자 확인과 private 뷰 필드 확정
+
+우선순위: P1
+상태: 예정
+담당: 개발자 A
+의존성: API-001
+범위: API-001 완료 때 남긴 후속이다. 개발자 B가 정하고 A가 확인하지 않은 이름을 확인하고, 본인 private 뷰의 게이지·쿨타임 필드 이름을 A가 GAME에서 정한 뒤 API에 반영한다. 새 제품 정책을 정하지 않는다.
+관련 문서: [API](design/API.md) / [GAME](design/GAME.md#상태-위치와-플레이어별-뷰)·[LOCAL](design/LOCAL.md) / [API-001](#api-001-api실시간-이벤트-계약-확정)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] 새 오류 코드 9종(`ALREADY_IN_ROOM`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY`·`GAME_NOT_ACTIVE`·`NOT_YOUR_TURN`·`INVALID_STONE`·`PLAYER_STUNNED`·`REMATCH_NOT_AVAILABLE`)과 `HAZARD_*` 4종, `HazardKind`·`CharacterId`·`BoardId` 식별자, `game:over.reason` 값을 A가 확인하고 바꿀 이름이 있으면 API·LOCAL·GAME에 반영됐다.
+- [ ] 본인 private 뷰의 게이지·쿨타임·사용 가능 여부 필드 이름이 GAME에 정해지고 API의 `GameView.private`에 반영됐다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
 
 ## DB-001 DB 스키마 확정
 
