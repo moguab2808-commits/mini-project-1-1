@@ -20,6 +20,8 @@
 
 개발자 A는 [PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15)의 `docs/game-001`에서 [GAME-001](TASKS.md#game-001-게임-처리-상세-설계-확정) 상세 계약 초안을 작성했다. DEC-014·015의 단일 보유·교체·상시 사용을 반영했다. DEC-017의 추가 효과 규칙과 승인된 실시간 방식(DEC-016·ADR-0004)을 반영했다. 효과 세부와 API-001 이벤트 계약은 검토 전이다. 구현은 없다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)를 따른다.
 
+GAME-001에 대한 개발자 B의 검토를 반영했다. 명령·종료·전송 계약은 [DEC-026](DECISIONS.md#결정-색인)으로 정했다. 사용자가 B의 의견대로 랭킹·레이팅 제외, 방 정보 DB 보관, 방 생성 창의 PvP/AI·알 5·7·9개·로비 새로고침, IP당 인증 요청 제한을 결정했다([DEC-022~025](DECISIONS.md#결정-색인), PRD v0.17). B의 답변 동의 확인과 커밋·PR 반영은 남았다. 근거는 [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-개발자-b-검토-반영)를 따른다.
+
 ## 남은 일과 한계
 
 - 상세 계약 확정: 게임 상태 전이·물리([GAME](design/GAME.md)), API 이벤트·필드([API](design/API.md)), DB 스키마([DATABASE](design/DATABASE.md)), 인증 세부([AUTH](design/AUTH.md)), 운영 세부([OPERATIONS](design/OPERATIONS.md))
