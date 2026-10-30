@@ -50,7 +50,7 @@
 
 ### `GameSession` 시그니처
 
-이벤트 키는 [API](API.md#socketio-이벤트-초안)의 Socket.IO 이벤트 이름을 그대로 쓴다. `RemoteGameSession`은 받은 이벤트를 변환 없이 전달하고, 로컬 구현은 같은 타입을 만들어 보낸다. 타입은 `shared`에 Zod 스키마로 둔다.
+이벤트 키는 [API](API.md#socketio-이벤트)의 Socket.IO 이벤트 이름을 그대로 쓴다. `RemoteGameSession`은 받은 이벤트를 변환 없이 전달하고, 로컬 구현은 같은 타입을 만들어 보낸다. 타입은 `shared`에 Zod 스키마로 둔다.
 
 ```ts
 type GameMode = 'local' | 'ai' | 'online';
