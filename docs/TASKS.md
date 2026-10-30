@@ -35,7 +35,7 @@
 | [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
 | [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18) |
-| [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 진행 중 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
+| [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 완료 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
@@ -43,7 +43,7 @@
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
-| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 예정 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
+| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현 | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -328,21 +328,21 @@ Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)
 ## GAME-002 물리·방해요소 수치 기본값 제안
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 A (Claude)
 의존성: GAME-001
 범위: 마찰·반발·최대 발사 속도·떠오름 높이 등 물리 수치와 피로도 게이지·쿨타임·랜덤 발동 확률, 방해요소 효과 크기의 구현 시작용 기본값을 제안한다. 확정은 플레이 테스트 후 결정 기록으로 한다.
 관련 문서: [GAME 기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [PRD 미정 사항](PRD.md#7-미정-사항과-변경-관리)
-Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
+Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19)
 
 수용 기준:
 - [x] PRD에서 "이후 정함"으로 표시한 수치마다 기본값과 근거가 GAME에 있다. ([GAME 기술 초기값](design/GAME.md#기술-초기값-조정-대상)의 물리·방해요소 수치·전송·AI 표. 수치 규칙 해석은 [DEC-031](DECISIONS.md#결정-색인))
 - [x] 기본값을 바꾸는 절차(플레이 테스트 → DECISIONS)가 명시됐다. ([수치 변경 절차](design/GAME.md#수치-변경-절차))
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #19, `main` 93b9c88)
 
-검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-002-물리방해요소-수치-기본값-제안)
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-002-물리방해요소-수치-기본값-제안)·[완료 처리](worklogs/2026-10-30.md#game-002-완료-처리)
 
-남은 조건: 리뷰·병합. 제안값은 미승인이며 플레이 테스트 후 DEC로 확정한다. 효과와 30초 마감의 관계는 사용자가 "턴 마감과 독립, 라운드 기준"으로 정했다(DEC-031).
+후속: 제안값은 미승인이며 플레이 테스트 후 DEC로 확정한다. 효과와 30초 마감의 관계는 사용자가 "턴 마감과 독립, 라운드 기준"으로 정했다(DEC-031).
 
 ## UI-002 디자인 캔버스 현재 요구사항 반영
 
@@ -475,19 +475,41 @@ Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## PLAN-001 구현 작업 등록
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: GAME-001, LOCAL-001, API-001, DB-001, AUTH-001
-범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)).
-관련 문서: [PRD 수용 기준 작성 예시](PRD.md#수용-기준-작성-예시) / [DESIGN](DESIGN.md)
+범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)). 모노레포 도구는 [ADR-0003](adr/0003-tech-stack-and-architecture.md)의 npm workspaces로 정해져 있어 별도 결정이 필요 없고, `game-runtime`을 패키지에 추가한다. 아래 작업 분해를 기준으로 하며, 별도 작업 항목과 Issue는 해당 설계가 확정된 뒤 이 분해에서 하나씩 등록한다.
+관련 문서: [PRD 수용 기준 작성 예시](PRD.md#수용-기준-작성-예시) / [DESIGN](DESIGN.md) / [LOCAL 패키지 구성](design/LOCAL.md#패키지-구성-승인)·[GAME 구현 경계](design/GAME.md#구현-경계-ab) / [DEC-030](DECISIONS.md#결정-색인)
 Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)
+
+작업 분해 (초안): 담당의 "(제안)"은 개발자 A 확인 전이다. 순서는 위에서 아래이며 선행 설계는 TASKS의 해당 작업을 가리킨다.
+
+| 묶음 | 내용 | 담당 | 선행 설계 |
+| --- | --- | --- | --- |
+| 1. 프로젝트 골격 | npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`), 패키지 의존 경계 린트, 테스트·빌드 스크립트, `.env.example` | B | DOC-010 |
+| 2. `game-core` | 규칙·물리·상태 머신·`getViewFor` | A (제안) | GAME-001, GAME-002(수치 기본값) |
+| 3. `game-runtime` | 명령 큐·고정 틱 스케줄러·뷰 배포, 시계·전송·로거·종료 콜백 주입 | B | GAME-001, LOCAL-001, 묶음 2의 입력·출력 시그니처 선공개 |
+| 4. 로컬 2인 모드 | `LocalGameSession`, SharedWorker 연결, 3D 화면, 방해요소 입력 | A (제안) | LOCAL-001, UI-002, ASSET-001 |
+| 5. AI 대전 | `AiGameSession`, AI 컨트롤러 | A (제안) | LOCAL-001 |
+| 6. DB·마이그레이션 | Drizzle 스키마(users·rooms·세션), 마이그레이션, 연결 풀 | B | DB-001 |
+| 7. 인증 | 가입·로그인·세션·요청 빈도 제한·비밀번호·캐릭터 변경 | B | AUTH-001, API-001 |
+| 8. 로비·방 (서버) | 방 목록 조회, 방 이벤트, `rooms` 상태 갱신 | B | API-001, DB-001 |
+| 9. 온라인 대전 (서버) | 서버 전송 연결, 이탈·중복 접속 처리 | B | API-001, 묶음 3 |
+| 10. 온라인 대전 (클라이언트) | `RemoteGameSession`·`RoomClient` | A (제안) | API-001, 묶음 3 |
+| 11. 경기 종료 전적 | `finishOnce`, 전적 갱신 트랜잭션 | B | DB-001, 묶음 3 |
+| 12. 계정·로비·대기실·결과 화면 | 로그인·가입·로비·방 목록·방 생성·대기실·결과 화면 (PRD 화면 요구사항 구현. 방 관련 화면은 여기에 포함) | A (제안) | UI-002, API-001 |
+| 13. 배포 | Render·Neon 설정, 헬스체크, 로그, 수동 배포·롤백 | B | OPS-001 |
+
+의존성 순서는 골격 → `game-core`·`game-runtime`(묶음 3은 묶음 2의 입력·출력 시그니처를 먼저 공유한 뒤 병행) → 로컬 2인 모드·AI 대전 → DB·인증·로비·방(서버) → 온라인 대전(서버·클라이언트) → 전적 → 배포이다. 각 묶음의 정상·오류·예외 수용 기준은 별도 작업으로 등록할 때 PRD 수용 기준 예시(`ROOM-JOIN`·`HAZARD-GRANT`·`HAZARD-USE`·`TURN-TIMEOUT`·`LEAVE-FORFEIT`)에 맞춰 쓴다.
 
 수용 기준:
 - [ ] 로컬 2인 모드부터 온라인 배포까지의 구현 작업이 의존성 순서로 등록됐다.
 - [ ] 각 작업에 검증 가능한 수용 기준과 담당이 있다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)
+
+남은 조건: 담당 "(제안)" 항목과 B의 분량(묶음 1·3·6·7·8·9·11·13)은 개발자 A의 확인을 받는다. API-001·DB-001·AUTH-001이 확정되기 전이라 인증·로비·방·온라인 대전·전적 묶음의 상세는 설계 확정 후 정한다. 이 PR은 중간 PR이라 위 수용 기준은 체크하지 않는다.
 
 ## DOC-011 README 설치·실행 절차
 
