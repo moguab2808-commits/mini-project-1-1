@@ -25,7 +25,7 @@
 | [DOC-001](#doc-001-문서-책임과-구조-재편) | 문서 책임과 구조 재편 | P0 | 없음 | 완료 | Codex — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-002](#doc-002-문서-위치-정리와-단일-문서-통합) | 문서 위치 정리와 단일 문서 통합 | P0 | DOC-001 현재 작업 파일 | 완료 | Codex — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-003](#doc-003-문서별-책임-중복-제거) | 문서별 책임 중복 제거 | P0 | DOC-002 현재 작업 파일 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
-| [UI-001](#ui-001-로비인게임-화면-프로토타입) | 로비·인게임 화면 프로토타입 | P1 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
+| [UI-001](#ui-001-로비인게임-화면-프로토타입) | 로비·인게임 화면 프로토타입 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-004](#doc-004-개발-전-문서-충돌-정리) | 개발 전 문서 충돌 정리 | P0 | UI-001 현재 작업 파일 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-005](#doc-005-개발-전-결정-반영) | 개발 전 결정 반영 | P0 | DOC-004 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-006](#doc-006-증강을-방해요소로-대체) | 증강을 방해요소로 대체 | P0 | DOC-005 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
@@ -36,14 +36,14 @@
 | [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 완료 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19) |
-| [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
+| [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 진행 중 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
-| [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
+| [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 진행 중 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현 | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -126,7 +126,7 @@ Issue·PR: [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1
 ## UI-001 로비·인게임 화면 프로토타입
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: 없음
 범위: 2026-10-29 사용자 요청의 계정·로비·게임 화면 변경을 PRD에 반영하고, `알까기 바 (2).html`을 기반으로 한 화면 시안을 claude.ai 디자인 캔버스에 만들어 사용자가 직접 수정할 수 있게 한다. 실제 서비스 구현·통신·저장은 포함하지 않는다.
@@ -137,7 +137,7 @@ Issue·PR: [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1
 수용 기준:
 - [x] PRD에 닉네임·비밀번호 가입, 로비(프로필바·방 목록·방 생성·즉시 참가·코드 입력), 플로팅 캐릭터 변경, 게임 화면 프로필 배치·투명 배경, 재도전하기·나가기가 반영되고 정하지 않은 세부는 미정으로 표시됐다.
 - [x] 시안에서 로그인·가입 → 로비 → 방 생성/코드 입력 창·캐릭터 변경 창 → 인게임 → 결과(재도전하기·나가기) 흐름을 눌러 볼 수 있다.
-- [ ] 사용자가 시안을 검토하고 화면 미정 항목(정보 배치·캐릭터 표현 등)의 반영 여부를 정했다.
+- [x] 사용자가 시안을 검토하고 화면 미정 항목(정보 배치·캐릭터 표현 등)의 반영 여부를 정했다. (방해요소 칸은 프로필 위쪽으로 변경, 나머지는 2D 시안으로 판단할 수 없어 UI-002에서 확정으로 넘김: [DEC-032](DECISIONS.md#결정-색인))
 - [x] 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-10-29 worklog](worklogs/2026-10-29.md#ui-001-로비인게임-화면-프로토타입)
@@ -348,19 +348,19 @@ Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
 ## UI-002 디자인 캔버스 현재 요구사항 반영
 
 우선순위: P1
-상태: 예정
+상태: 완료
 담당: 개발자 A
 의존성: 없음
-범위: UI-001 디자인 캔버스를 PRD v0.18 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 프로필 옆 방해요소 칸(E 키 표시)·피로도 게이지, 프로필바의 환경설정·로그아웃 버튼(레이팅·랭킹 제거), 로비의 새로고침 버튼·비공개 방 자물쇠·"게임 중" 표시·입장 버튼/더블클릭, 방 생성 창의 PvP/AI 선택·알 5·7·9개·비공개 코드 생성과 복사, 코드 입력·환경설정 플로팅 창, 대기실, 재도전 대기 표시, 로그인 화면의 인증 요청 제한 안내가 대상이다. PRD 화면 미정 사항(비공개 방 목록 입장 시 코드 입력, AI 선택 시 입력 항목)은 시안으로 제안한다.
+범위: UI-001 디자인 캔버스를 PRD v0.18 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 프로필 위쪽 방해요소 칸(E 키 표시)·피로도 게이지, 프로필바의 환경설정·로그아웃 버튼(레이팅·랭킹 제거), 로비의 새로고침 버튼·비공개 방 자물쇠·"게임 중" 표시·입장 버튼/더블클릭, 방 생성 창의 PvP/AI 선택·알 5·7·9개·비공개 코드 생성과 복사, 코드 입력·환경설정 플로팅 창, 대기실, 재도전 대기 표시, 로그인 화면의 인증 요청 제한 안내가 대상이다. PRD 화면 미정 사항(비공개 방 목록 입장 시 코드 입력, AI 선택 시 입력 항목)은 시안으로 제안한다.
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-001](#ui-001-로비인게임-화면-프로토타입)
 Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 
 수용 기준:
-- [ ] 캔버스에서 로그인 → 로비 → 대기실 → 인게임 → 결과 흐름을 눌러 볼 수 있다.
-- [ ] 위 화면 요소가 PRD 배치대로 표시되고, PRD와 다른 부분은 worklog에 기록됐다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 캔버스에서 로그인 → 로비 → 대기실 → 인게임 → 결과 흐름을 눌러 볼 수 있다. (2026-10-30 사용자가 캔버스를 직접 확인하고 통과로 알림)
+- [x] 위 화면 요소가 PRD 배치대로 표시되고, PRD와 다른 부분은 worklog에 기록됐다. (사용자 확인, 차이는 worklog의 "PRD와 다른 부분")
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #25, `main` 85d0ec8)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#ui-002-디자인-캔버스-현재-요구사항-반영)
 
 ## ASSET-001 에셋 조달 계획
 
@@ -373,11 +373,11 @@ Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
 
 수용 기준:
-- [ ] 에셋 종류마다 출처 또는 제작 방법과 라이선스 확인일이 정해졌다.
-- [ ] 출처·라이선스 기록 위치와 텍스처·오디오 용량 한도가 정해졌다.
+- [x] 에셋 종류마다 출처 또는 제작 방법과 라이선스 확인일이 정해졌다.
+- [x] 출처·라이선스 기록 위치와 텍스처·오디오 용량 한도가 정해졌다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#asset-001-에셋-조달-계획-초안)
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#asset-001-에셋-조달-계획)
 
 ## VAL-001 성능 측정 절차와 플레이 테스트 기록 양식
 
@@ -477,7 +477,7 @@ Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## OPS-001 운영 설계 확정
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: DOC-010
 범위: 외부 헬스체크 서비스 선정과 Render 이용 조건 재확인, SPA fallback, 배포·롤백, 이탈 판정용 서버 로그 항목, 사용량(Render 시간·Neon CU-hour) 확인 방법, 백업·복구 절차를 정한다. 헬스체크는 UptimeRobot 5분 간격, 배포는 자동 배포를 끄고 Render 대시보드에서 수동으로 하며, 백업은 Neon 기본 복구만 쓴다(DEC-029). 방 상태를 DB에서 관리해 늘 수 있는 Neon 사용량과 실시간 상태 전송의 서버 부하 측정 항목도 함께 정한다.
@@ -485,12 +485,12 @@ Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)
 
 수용 기준:
-- [ ] OPERATIONS의 미정 사항이 모두 방식으로 정해지고 무료 조건 재확인 날짜가 기록됐다.
-- [ ] 동시 이탈·시작 직전 이탈 판정에 쓸 로그 항목이 GAME-001의 로그 필드와 맞춰 정해졌다.
-- [ ] Neon 기본 복구의 가능 기간과 한계(보관 무제한 정책과의 차이), 수동 배포·롤백 방법이 공식 문서로 확인되어 기록됐다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] OPERATIONS의 미정 사항이 모두 방식으로 정해지고 무료 조건 재확인 날짜가 기록됐다. ([무료 조건 재확인](design/OPERATIONS.md#무료-조건-재확인-2026-10-30) 2026-10-30. `[제안]` 표시를 확정하고 `rooms` 정리·음량 저장·민감정보 제거·부하 측정 항목을 정했다. 지속 요청 사용 여부는 DEC-029대로 구현 단계 판단이며 운영 방식은 정해 두었다)
+- [x] 동시 이탈·시작 직전 이탈 판정에 쓸 로그 항목이 GAME-001의 로그 필드와 맞춰 정해졌다. ([서버 로그](design/OPERATIONS.md#서버-로그)의 필드가 [GAME 명령 경합](design/GAME.md#명령-경합과-시간)과 같고, `start_commit`·`leave`의 `ingressSeq` 비교로 판정한다)
+- [x] Neon 기본 복구의 가능 기간과 한계(보관 무제한 정책과의 차이), 수동 배포·롤백 방법이 공식 문서로 확인되어 기록됐다. ([백업·복구](design/OPERATIONS.md#백업복구) 6시간·1 GB 상한, [배포·롤백](design/OPERATIONS.md#배포롤백) Render 공식 문서 2026-10-30)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #26. 개발자 A 검토를 반영했고, 병합 전에 체크했다)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#ops-001-미충족-수용-기준-보완)
 
 ## PLAN-001 구현 작업 등록
 
