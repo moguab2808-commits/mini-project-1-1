@@ -104,6 +104,8 @@ stateDiagram-v2
 
 `getViewFor(playerId)`는 허용 목록으로 새 객체를 만든다. 상대 보유 종류·교체 추첨 결과·게이지·쿨타임·난수 시드는 보내지 않는다. 보유 개수도 별도 전송하지 않는다. 사용된 효과의 이름과 효과는 양쪽 공개하고 화면 가림 표현은 대상 뷰에만 담는다.
 
+`playerId`·`ownerId`·`activePlayerId`는 경기 안의 좌석 값 0·1이며 뷰에 `users.id`를 넣지 않는다. 서버만 좌석과 `users.id`를 매핑해 전적을 저장한다([DEC-030](../DECISIONS.md#결정-색인)).
+
 ### 방해요소별 처리
 
 직접 사용형은 aiming과 moving 양쪽에서 처리한다. 슬롯은 1개이며 비용·쿨타임 검증에 실패한 입력은 상태와 난수를 바꾸지 않는다. 효과별 대상과 제한의 미정 항목은 아래를 따른다.
@@ -136,10 +138,10 @@ stateDiagram-v2
 
 | 담당 | 범위 |
 | --- | --- |
-| 개발자 A | `game-core`·`shared`: 규칙, 틱 진행(step), `getViewFor`, 방해요소 훅, 시드 PRNG, 명령·이벤트 타입 이름 |
-| 개발자 B | 서버 실행: 방별 단일 큐(ingressSeq·observedAtMs 부여), 단조 시계 틱 스케줄러, 플레이어별 뷰 전송, 이탈·중복 접속의 큐 명령 변환, `finishOnce` 종료 저장, 서버 로그 |
+| 개발자 A | `game-core`·`shared`: 규칙, 틱 진행(step), `getViewFor`, 방해요소 훅, 시드 PRNG, 명령·이벤트 타입 이름. 로컬 2인 SharedWorker·AI Web Worker에 `game-runtime`을 워커 시계·MessagePort로 연결 |
+| 개발자 B | `game-runtime`: 방별 단일 큐(ingressSeq·observedAtMs 부여), 단조 시계 틱 스케줄러, 플레이어별 뷰 배포(시계·전송 주입). 서버 실행: Socket.IO 전송 연결, 이탈·중복 접속의 큐 명령 변환, `finishOnce` 종료 저장, 서버 로그 |
 
-이벤트 이름·명령 필드는 `shared` 한 곳에 정의하고 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 이름 목록은 API-001에서 먼저 맞춘다.
+큐·틱·뷰 배포는 서버·로컬·AI가 같은 `game-runtime`을 쓰고 시계와 전송만 주입한다([DEC-030](../DECISIONS.md#결정-색인)). 이벤트 이름·명령 필드는 `shared` 한 곳에 정의하고 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 이름 목록은 API-001에서 먼저 맞춘다.
 
 ### 전송과 표시 초안
 

@@ -18,15 +18,15 @@
 
 ```text
 브라우저 (client: React + R3F)
-  ├─ 로컬 2인: 창 2개의 LocalGameSession → SharedWorker의 game-core
-  ├─ AI 대전: AiGameSession → Web Worker의 game-core (서버 미사용)
+  ├─ 로컬 2인: 창 2개의 LocalGameSession → SharedWorker의 game-runtime + game-core
+  ├─ AI 대전: AiGameSession → Web Worker의 game-runtime + game-core (서버 미사용)
   └─ 온라인: RemoteGameSession ──REST·Socket.IO──┐
                                                   ▼
 서버 (server: Express + Socket.IO, Render 웹 서비스 1개)
   ├─ 인증·세션 (express-session, argon2id)
-  ├─ 방(DB rooms)·대전 진행(메모리) → game-core로 판정, 플레이어별 뷰 생성
+  ├─ 방(DB rooms)·대전 진행(메모리) → game-runtime(큐·틱·뷰 배포)이 game-core로 판정
   └─ 영구 데이터 (Drizzle) ──→ PostgreSQL (Neon)
-공용: shared (타입·Zod 스키마·방해요소/판 데이터), game-core (순수 TypeScript)
+공용: shared (타입·Zod 스키마·방해요소/판 데이터), game-core (순수 TypeScript), game-runtime (시계·전송 주입, DEC-030)
 ```
 
 | 책임 | 위치 | 상세 |

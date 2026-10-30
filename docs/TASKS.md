@@ -317,13 +317,13 @@ Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)
 Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)
 
 수용 기준:
-- [x] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다. ([LOCAL](design/LOCAL.md#gamesession-시그니처)의 이벤트 키 11개가 [API](design/API.md#socketio-이벤트-초안) 이벤트 이름과 같고, `CommandResult`는 API의 ack·오류 형식을 따른다)
+- [x] `GameSession` 명령·이벤트 목록이 API-001 초안과 같은 타입 이름으로 정리됐다. ([LOCAL](design/LOCAL.md#gamesession-시그니처)의 이벤트 7개와 명령 4개, 총 11개 이름이 [API](design/API.md#socketio-이벤트-초안) 이벤트 이름과 같고, `CommandResult`는 API의 ack·오류 형식을 따른다. 개발자 B가 PR #18 검토에서 동의)
 - [x] 로컬 모드에서 상대 방해요소를 가리는 방식과 방해요소 입력 방식이 정해졌다. ([DEC-020](DECISIONS.md#결정-색인)·[LOCAL](design/LOCAL.md#상세-계약-초안-local-001))
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#local-001-로컬-2인-모드-설계-초안)
 
-남은 조건: 리뷰·병합. 명령 필드(ShotSubmit·HazardUse)는 개발자 B의 확인이 필요하고, 방해요소 사용 거부 오류 코드는 API-001에서 정한다. `ai:start` 삭제(DEC-021), commandId 제거·ack 반환(DEC-026), AI 대전 진입 변경(DEC-024), API-001 확정안의 오류 코드(PR #16)는 반영했다.
+남은 조건: 리뷰·병합. 명령 필드는 개발자 B가 PR #18 검토에서 API-001과 맞음을 확인했다. 공통 실행 모듈·좌석 PlayerId·세션 수명·`RoomClient` 분리는 [DEC-030](DECISIONS.md#결정-색인)으로 정했다. 방해요소 사용 거부 오류 코드는 B가 API-001에서 추가한 뒤 LOCAL에 연결한다(이 작업의 완료 조건이 아님). `ai:start` 삭제(DEC-021), commandId 제거·ack 반환(DEC-026), AI 대전 진입 변경(DEC-024), API-001 확정안의 오류 코드(PR #16)는 반영했다.
 
 ## GAME-002 물리·방해요소 수치 기본값 제안
 
@@ -474,7 +474,7 @@ Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 상태: 예정
 담당: 개발자 B
 의존성: GAME-001, LOCAL-001, API-001, DB-001, AUTH-001
-범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다.
+범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)).
 관련 문서: [PRD 수용 기준 작성 예시](PRD.md#수용-기준-작성-예시) / [DESIGN](DESIGN.md)
 Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)
 
