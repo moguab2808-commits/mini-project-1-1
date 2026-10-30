@@ -35,7 +35,7 @@
 | [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
 | [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18) |
-| [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 진행 중 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
+| [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 완료 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
@@ -328,21 +328,21 @@ Issue·PR: [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)
 ## GAME-002 물리·방해요소 수치 기본값 제안
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 A (Claude)
 의존성: GAME-001
 범위: 마찰·반발·최대 발사 속도·떠오름 높이 등 물리 수치와 피로도 게이지·쿨타임·랜덤 발동 확률, 방해요소 효과 크기의 구현 시작용 기본값을 제안한다. 확정은 플레이 테스트 후 결정 기록으로 한다.
 관련 문서: [GAME 기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [PRD 미정 사항](PRD.md#7-미정-사항과-변경-관리)
-Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
+Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19)
 
 수용 기준:
 - [x] PRD에서 "이후 정함"으로 표시한 수치마다 기본값과 근거가 GAME에 있다. ([GAME 기술 초기값](design/GAME.md#기술-초기값-조정-대상)의 물리·방해요소 수치·전송·AI 표. 수치 규칙 해석은 [DEC-031](DECISIONS.md#결정-색인))
 - [x] 기본값을 바꾸는 절차(플레이 테스트 → DECISIONS)가 명시됐다. ([수치 변경 절차](design/GAME.md#수치-변경-절차))
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #19, `main` 93b9c88)
 
-검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-002-물리방해요소-수치-기본값-제안)
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-002-물리방해요소-수치-기본값-제안)·[완료 처리](worklogs/2026-10-30.md#game-002-완료-처리)
 
-남은 조건: 리뷰·병합. 제안값은 미승인이며 플레이 테스트 후 DEC로 확정한다. 효과와 30초 마감의 관계는 사용자가 "턴 마감과 독립, 라운드 기준"으로 정했다(DEC-031).
+후속: 제안값은 미승인이며 플레이 테스트 후 DEC로 확정한다. 효과와 30초 마감의 관계는 사용자가 "턴 마감과 독립, 라운드 기준"으로 정했다(DEC-031).
 
 ## UI-002 디자인 캔버스 현재 요구사항 반영
 
