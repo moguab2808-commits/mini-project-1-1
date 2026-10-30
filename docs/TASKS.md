@@ -38,7 +38,7 @@
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 완료 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 완료 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28) |
-| [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
+| [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 진행 중 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
@@ -384,7 +384,7 @@ Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
 ## VAL-001 성능 측정 절차와 플레이 테스트 기록 양식
 
 우선순위: P1
-상태: 예정
+상태: 진행 중
 담당: 개발자 A
 의존성: 없음
 범위: PRD의 fps 목표(평균 60fps 근접, 하위 5% 30fps 이상) 측정 절차와 성공 기준 판정용 플레이 테스트 기록 양식을 만든다.
@@ -392,11 +392,11 @@ Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
 Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 
 수용 기준:
-- [ ] fps 측정 도구·구간·기록 형식이 정해졌다.
-- [ ] 성공 기준 5개마다 기록할 항목과 판정식이 있는 양식이 있다.
+- [x] fps 측정 도구·구간·기록 형식이 정해졌다.
+- [x] 성공 기준 5개마다 기록할 항목과 판정식이 있는 양식이 있다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#val-001-fps-측정-절차와-플레이-테스트-기록-양식)
 
 ## API-001 API·실시간 이벤트 계약 확정
 
