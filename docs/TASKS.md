@@ -39,7 +39,7 @@
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 예정 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 예정 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7) |
-| [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 진행 중 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8) |
+| [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 진행 중 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 진행 중 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11) |
@@ -398,12 +398,12 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 ## API-001 API·실시간 이벤트 계약 확정
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: GAME-001
 범위: REST 경로와 Socket.IO 이벤트 이름·방향·필드·오류 형식, 이벤트 순서와 재전송·중복 처리, 플레이어별 공개 필드를 확정하고 `shared`의 Zod 스키마로 옮길 수 있게 정리한다. 이미 정한 것: AI 대전은 서버 이벤트가 없다(`ai:start` 삭제, DEC-021). 랭킹·최근 경기 조회 API는 없다(DEC-022). 방 목록은 로비 진입·새로고침 때 `GET /api/rooms`로 조회하고 구독 이벤트를 두지 않는다(DEC-024). 중복·재전송은 `commandId` 없이 발사는 gameId·turnId, 방해요소는 gameId·hazardInstanceId로 거르고 결과는 ack로 반환한다(DEC-026). 이 작업에서 정하는 것: 실시간 `game:state`가 대체하는 `sim:result` 삭제, 방 이벤트와 방 목록 응답의 필드, REST·ack 공통 오류 코드 목록, 이벤트 순서.
 관련 문서: [API](design/API.md) / [GAME](design/GAME.md)·[AUTH](design/AUTH.md) / [DEC-021·022·024·026](DECISIONS.md#결정-색인)
-Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
+Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22)
 
 수용 기준:
 - [x] API 초안의 모든 경로·이벤트에 요청·응답·오류 필드가 정의됐고, 삭제한 `ai:start`·`lobby:*`·`sim:result`·랭킹·최근 경기가 API에 없다. ([API](design/API.md#rest-api)의 REST 8개 표, [방 이벤트](design/API.md#방-이벤트-필드)·[경기 이벤트](design/API.md#경기-이벤트-필드) 필드 표. 삭제 대상은 "없다"는 설명으로만 남음)
@@ -412,11 +412,11 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 - [x] 이벤트 순서(방 생성 → 시작 → 턴 → 종료 → 재도전)가 순서도로 있다. ([API 이벤트 순서](design/API.md#이벤트-순서)의 sequenceDiagram과 순서 규칙 7개)
 - [x] 상대에게 전송되는 이벤트에 상대 보유 방해요소 정보가 없음을 필드 단위로 확인했다. ([API 상대 비공개 필드 점검](design/API.md#상대-비공개-필드-점검). 계약 문서의 필드 목록 대조이며 구현 후 `getViewFor` 테스트로 다시 검증)
 - [x] GAME-001 담당자가 이벤트 순서를 검토했다. (개발자 A가 [PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) 리뷰에서 순서·교체 지급 순서를 GAME과 대조해 모순 없음을 확인하고, 사용자에게도 검토 완료를 전달)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #22, `main` d39ce7d)
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#api-001-방해요소-거부-오류-코드-반영)·[필드·순서 확정안](worklogs/2026-10-30.md#api-001-필드순서도비공개-점검-추가)
 
-남은 조건: 새 오류 코드·식별자 이름의 개발자 A 확인과 본인 private 뷰의 게이지·쿨타임 필드 이름(A가 GAME에서 정한 뒤 API에 반영)이 남아 있다. 마지막 기준은 병합 직후 체크한다.
+후속: 새 오류 코드·식별자 이름(`HAZARD_*` 등 오류 코드, `HazardKind`·`CharacterId`·`BoardId`, `game:over.reason`)은 개발자 A가 확인하고, 본인 private 뷰의 게이지·쿨타임 필드 이름은 A가 GAME에서 정한 뒤 API에 반영한다. `Seat` 값의 `…Id` 이름은 `shared` 스키마를 만들 때 정한다. API 문서의 "A 검토 전" 표시는 그대로 둔다.
 
 ## DB-001 DB 스키마 확정
 
@@ -429,12 +429,14 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
 
 수용 기준:
-- [ ] DATABASE의 초안 표시가 확정 스키마로 바뀌고 Drizzle 스키마로 옮길 수 있는 수준의 타입·제약이 있으며, `matches`·레이팅·랭킹·로그인 실패 컬럼이 없음이 명시됐다.
-- [ ] `rooms`의 컬럼·FK·유니크·공개/비공개 제약, 입장 시 동시성 처리, 방 삭제 시점, 서버 시작 시 정리가 정의됐다.
-- [ ] 경기 종료 트랜잭션의 순서와 잠금, 중복 저장 방지 방법이 정해졌다.
+- [x] DATABASE의 초안 표시가 확정 스키마로 바뀌고 Drizzle 스키마로 옮길 수 있는 수준의 타입·제약이 있으며, `matches`·레이팅·랭킹·로그인 실패 컬럼이 없음이 명시됐다. ([DATABASE](design/DATABASE.md#users)의 `users`·`rooms` 타입·제약·`CHECK`·FK `ON DELETE`, [sessions](design/DATABASE.md#sessions) 스키마 방침, 31행의 제외 컬럼 명시. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거)
+- [x] `rooms`의 컬럼·FK·유니크·공개/비공개 제약, 입장 시 동시성 처리, 방 삭제 시점, 서버 시작 시 정리가 정의됐다. ([방 생명주기](design/DATABASE.md#방-생명주기)의 삭제 시점·서버 시작 정리·입장 조건부 갱신, 한 사람 한 방 제약)
+- [x] 경기 종료 트랜잭션의 순서와 잠금, 중복 저장 방지 방법이 정해졌다. ([경기 종료 저장](design/DATABASE.md#경기-종료-저장)의 `id` 오름차순 `FOR UPDATE`, `finishOnce` 메모리 플래그)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#db-001-스키마-보완과-api-001-완료-처리)
+
+남은 조건: 마지막 기준은 병합 직후 체크한다. 세션 테이블 컬럼·인덱스는 구현 때 connect-pg-simple 공식 문서 기본 스키마와 대조하고, 마이그레이션 SQL의 `lower(nickname)` 유니크 인덱스도 구현 때 확인한다.
 
 ## AUTH-001 인증 상세 설계 확정
 
