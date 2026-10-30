@@ -32,8 +32,8 @@
 | [DOC-007](#doc-007-보관장애규모-정책과-방해요소-지급-보완) | 보관·장애·규모 정책과 방해요소 지급 보완 | P0 | DOC-006 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-008](#doc-008-prd-보완-의견과-상태-문구-최신화) | PRD 보완 의견과 상태 문구 최신화 | P1 | DOC-007 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
 | [DOC-009](#doc-009-prd-미정-항목-위임-결정) | PRD 미정 항목 위임 결정 | P0 | DOC-008 | 완료 | Claude — 사용자 요청 수행 | [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1) |
-| [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
-| [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 예정 | 개발자 A | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2) |
+| [DOC-010](#doc-010-기술-스택과-아키텍처-결정) | 기술 스택과 아키텍처 결정 | P0 | DOC-009 | 완료 | Claude — 사용자 요청 수행 | [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14) |
+| [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 리뷰 중 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 예정 | 개발자 A | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 예정 | 개발자 A | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4) |
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 예정 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
@@ -265,12 +265,12 @@ Issue·PR: [PR #1](https://github.com/moguab2808-commits/mini-project-1-1/pull/1
 ## DOC-010 기술 스택과 아키텍처 결정
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: DOC-009
 범위: 사용자가 승인한 추천안대로 기술 스택과 아키텍처를 ADR로 기록하고, DESIGN과 상세 설계의 "후보" 상태를 승인·초안·미정으로 나눈다. API 이벤트·DB 스키마·상태 전이의 상세 계약은 확정하지 않는다. PR #1 병합에 따라 DOC-001~009의 상태를 갱신한다.
 관련 문서: [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DESIGN](DESIGN.md)·[TECH_STACK](design/TECH_STACK.md)·[GAME](design/GAME.md)·[LOCAL](design/LOCAL.md)·[API](design/API.md)·[AUTH](design/AUTH.md)·[DATABASE](design/DATABASE.md)·[OPERATIONS](design/OPERATIONS.md) / [DEC-013](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [PR #14](https://github.com/moguab2808-commits/mini-project-1-1/pull/14)
 
 수용 기준:
 - [x] ADR-0003에 배경·선택·대안·위험·재검토 조건과 무료 플랜 확인 근거가 있고, DEC-013이 이를 가리킨다.
@@ -278,7 +278,7 @@ Issue·PR: 미생성
 - [x] 무료 운영 조건(Render 절전 방지, Neon 유휴 연결)이 운영 설계에 반영됐다.
 - [x] DOC-001~009의 병합 항목과 상태가 PR #1 병합에 맞게 갱신됐다.
 - [x] 링크·앵커 검사와 `git diff --check`를 통과했다.
-- [ ] 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-10-29 worklog](worklogs/2026-10-29.md#doc-010-기술-스택과-아키텍처-결정)
 
@@ -289,20 +289,22 @@ Issue·PR: 미생성
 ## GAME-001 게임 처리 상세 설계 확정
 
 우선순위: P0
-상태: 예정
-담당: 개발자 A
+상태: 리뷰 중
+담당: 개발자 A (Codex)
 의존성: DOC-010
-범위: 게임 단계·턴·시뮬레이션·종료·이탈의 상태 전이와 경합 처리, 충돌·판 이탈 훅 구조, 떠오름 계산, 초 단위 방해요소 효과와 시뮬레이션 시간의 연결, 피로도·쿨타임·랜덤 발동의 상태 위치, AI 봇 실행 위치를 확정한다. 수치 기본값은 GAME-002에서 다룬다.
+범위: 게임 단계·턴·시뮬레이션·종료·이탈의 상태 전이와 경합 처리, 충돌·판 이탈 훅 구조, 떠오름 계산, 초 단위 방해요소 효과와 시뮬레이션 시간의 연결, 피로도·쿨타임·랜덤 발동의 상태 위치, AI 봇 실행 위치를 확정한다. AI 봇 실행 위치는 DEC-021(브라우저)로 정했다. 수치 기본값은 GAME-002에서 다룬다.
 관련 문서: [GAME](design/GAME.md) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [ADR-0003](adr/0003-tech-stack-and-architecture.md)
-Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)
+Issue·PR: [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15)
 
 수용 기준:
 - [ ] GAME 미정 사항의 상태 전이·경합(시간초과와 발사 입력, 동시 이탈)이 상태 표나 다이어그램으로 정의됐다.
 - [ ] 방해요소 9종의 처리 시점(조준 중·시뮬레이션 중)과 상태 위치가 정의되고, 플레이어별 뷰에 들어갈 필드가 정해졌다.
-- [ ] API-001 담당자가 상태 전이를 검토했다.
+- [x] API-001 담당자가 상태 전이를 검토했다. (개발자 B의 PR #15 검토 의견에 대한 답변을 [DEC-026](DECISIONS.md#결정-색인)으로 반영. B 제안대로 질문 1·3·4·5 답변 후 체크)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#game-001-게임-처리-상세-설계-초안)
+
+남은 조건: DEC-014·015·017의 남은 효과 세부 합의. ADR-0004 실시간 방식은 사용자와 B가 합의했고, B의 검토 질문(commandId·시작 커밋·재도전 전이·조준 권한·전송 주기)은 DEC-026으로, 문서 충돌 7건은 사용자가 B의 의견대로 정해 DEC-022~025로 반영했다. 이벤트 이름·필드는 API-001에서 확정한다. 상세 계약은 검토 초안이며 나머지 수용 기준은 확정 후 체크한다.
 
 ## LOCAL-001 로컬 2인 모드 설계 확정
 
@@ -344,7 +346,7 @@ Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
 상태: 예정
 담당: 개발자 A
 의존성: 없음
-범위: UI-001 디자인 캔버스를 PRD v0.16 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 방해요소 영역·피로도 게이지, 프로필바의 랭킹·환경설정·로그아웃 버튼, AI 대전 버튼, 코드 입력·랭킹·환경설정 플로팅 창, 대기실, 재도전 대기 표시가 대상이다.
+범위: UI-001 디자인 캔버스를 PRD v0.17 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 방해요소 영역·피로도 게이지, 프로필바의 환경설정·로그아웃 버튼(레이팅·랭킹 제거), 로비의 새로고침 버튼·비공개 방 자물쇠·"게임 중" 표시·입장 버튼/더블클릭, 방 생성 창의 PvP/AI 선택·알 5·7·9개·비공개 코드 생성과 복사, 코드 입력·환경설정 플로팅 창, 대기실, 재도전 대기 표시, 로그인 화면의 인증 요청 제한 안내가 대상이다. PRD 화면 미정 사항(비공개 방 목록 입장 시 코드 입력, AI 선택 시 입력 항목)은 시안으로 제안한다.
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-001](#ui-001-로비인게임-화면-프로토타입)
 Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 
@@ -413,8 +415,8 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 상태: 예정
 담당: 개발자 B
 의존성: DOC-010
-범위: users·matches·세션 테이블의 컬럼·제약·인덱스를 확정한다. 닉네임 정규화 유니크, 캐릭터, 레이팅 하한 0, 로그인 실패 횟수·제한 시각, 경기 결과 저장과 전적·레이팅 갱신 트랜잭션, 중복 저장 방지가 대상이다.
-관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록)·[랭킹 시스템](PRD.md#랭킹-시스템)
+범위: users·rooms·세션 테이블의 컬럼·제약·인덱스를 확정한다. 닉네임 정규화 유니크, 캐릭터, 전적(판수·승·패) 1회 갱신, 방 정보와 상태 전이, 서버 재시작 후 남은 방 정리가 대상이다. 랭킹·레이팅·matches는 DEC-022로 제외했다.
+관련 문서: [DATABASE](design/DATABASE.md) / [회원등록](PRD.md#회원등록)·[전적](PRD.md#전적)
 Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
 
 수용 기준:
@@ -430,7 +432,7 @@ Issue·PR: [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)
 상태: 예정
 담당: 개발자 B
 의존성: DOC-010
-범위: 세션 만료, argon2id 파라미터, 로그인 5회 제한의 저장·해제, 요청 빈도 제한, Render 프록시 신뢰 설정, Socket.IO 연결 인증·중복 접속 처리, 인증 오류 형식을 확정한다.
+범위: 세션 만료, argon2id 파라미터, IP당 `/api/auth/*` 분당 20회 제한(DEC-025)의 저장·응답 형식, 그 밖의 요청 빈도 제한, Render 프록시 신뢰 설정, Socket.IO 연결 인증·중복 접속 처리, 인증 오류 형식을 확정한다.
 관련 문서: [AUTH](design/AUTH.md) / [로그인](PRD.md#로그인)·[연결 끊김](PRD.md#연결-끊김과-중복-접속)
 Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)
 
