@@ -36,16 +36,16 @@
 | [GAME-001](#game-001-게임-처리-상세-설계-확정) | 게임 처리 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Codex) | [#2](https://github.com/moguab2808-commits/mini-project-1-1/issues/2)·[PR #15](https://github.com/moguab2808-commits/mini-project-1-1/pull/15) |
 | [LOCAL-001](#local-001-로컬-2인-모드-설계-확정) | 로컬 2인 모드 설계 확정 | P0 | DOC-010 | 완료 | 개발자 A (Claude) | [#3](https://github.com/moguab2808-commits/mini-project-1-1/issues/3)·[PR #18](https://github.com/moguab2808-commits/mini-project-1-1/pull/18) |
 | [GAME-002](#game-002-물리방해요소-수치-기본값-제안) | 물리·방해요소 수치 기본값 제안 | P1 | GAME-001 | 완료 | 개발자 A (Claude) | [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)·[PR #19](https://github.com/moguab2808-commits/mini-project-1-1/pull/19) |
-| [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5) |
+| [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)·[PR #25](https://github.com/moguab2808-commits/mini-project-1-1/pull/25) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 완료 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 완료 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)·[PR #30](https://github.com/moguab2808-commits/mini-project-1-1/pull/30) |
-| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | 게임 화면 구현 | 예정 | 미정 | 미생성 |
+| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 진행 중 | 개발자 A | 미생성 |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
-| [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 예정 | 개발자 A | 미생성 |
+| [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 리뷰 중 | 개발자 A | 미생성 |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
-| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12) |
+| [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32) |
 | [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 예정 | 개발자 B | 미생성 |
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A | 미생성 |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002의 입출력 시그니처 | 예정 | 개발자 B | 미생성 |
@@ -367,7 +367,7 @@ Issue·PR: [#4](https://github.com/moguab2808-commits/mini-project-1-1/issues/4)
 의존성: 없음
 범위: UI-001 디자인 캔버스를 PRD v0.18 화면 요구사항에 맞춘다. 턴 프로필 하이라이트, 내 프로필 위쪽 방해요소 칸(E 키 표시)·피로도 게이지, 프로필바의 환경설정·로그아웃 버튼(레이팅·랭킹 제거), 로비의 새로고침 버튼·비공개 방 자물쇠·"게임 중" 표시·입장 버튼/더블클릭, 방 생성 창의 PvP/AI 선택·알 5·7·9개·비공개 코드 생성과 복사, 코드 입력·환경설정 플로팅 창, 대기실, 재도전 대기 표시, 로그인 화면의 인증 요청 제한 안내가 대상이다. PRD 화면 미정 사항(비공개 방 목록 입장 시 코드 입력, AI 선택 시 입력 항목)은 시안으로 제안한다.
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-001](#ui-001-로비인게임-화면-프로토타입)
-Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
+Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)·[PR #25](https://github.com/moguab2808-commits/mini-project-1-1/pull/25)
 
 수용 기준:
 - [x] 캔버스에서 로그인 → 로비 → 대기실 → 인게임 → 결과 흐름을 눌러 볼 수 있다. (2026-10-30 사용자가 캔버스를 직접 확인하고 통과로 알림)
@@ -384,7 +384,7 @@ Issue·PR: [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)
 의존성: DOC-010
 범위: 판·알·동물 캐릭터 6종 3D 모델·방해요소 아이콘·효과음의 출처와 제작 방법, 라이선스 기록 위치(docs/CREDITS.md 여부), 용량 한도를 정한다.
 관련 문서: [TECH_STACK 에셋 후보](design/TECH_STACK.md#에셋-조달-계획) / [환경설정 효과음 목록](PRD.md#환경설정)
-Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
+Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28)
 
 수용 기준:
 - [x] 에셋 종류마다 출처 또는 제작 방법과 라이선스 확인일이 정해졌다.
@@ -403,7 +403,7 @@ Issue·PR: [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)
 의존성: 없음
 범위: PRD의 fps 목표(평균 60fps 근접, 하위 5% 30fps 이상) 측정 절차와 성공 기준 판정용 플레이 테스트 기록 양식을 만든다.
 관련 문서: [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md) / [성공 기준](PRD.md#5-성공-기준)·[비기능 요구사항](PRD.md#4-비기능-요구사항과-제약)
-Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
+Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)·[PR #30](https://github.com/moguab2808-commits/mini-project-1-1/pull/30)
 
 수용 기준:
 - [x] fps 측정 도구·구간·기록 형식이 정해졌다.
@@ -415,19 +415,19 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 ## VAL-002 개발용 프레임 시간 기록
 
 우선순위: P2
-상태: 예정
-담당: 미정
-의존성: 게임 화면 구현(작업 ID 미등록)
-범위: [fps 측정 절차](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001)가 요구하는 판 전체의 프레임 간격(ms) 원자료를 개발 중에만 기록·내보내는 코드를 만든다. VAL-001 완료 때 남긴 후속이며, 게임 화면이 있어야 착수할 수 있다.
+상태: 진행 중
+담당: 개발자 A
+의존성: IMPL-004 (게임 화면 구현. 기록 모듈은 화면 없이 먼저 만들었고, 화면 연결은 IMPL-004 이후)
+범위: [fps 측정 절차](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001)가 요구하는 판 전체의 프레임 간격(ms) 원자료를 개발 중에만 기록·내보내는 코드를 만든다. VAL-001 완료 때 남긴 후속이다. 기록 모듈(`packages/client/src/dev/frame-recorder.ts`)은 화면 없이 만들 수 있어 먼저 만들었고, 실제 화면에 붙이는 일과 운영 빌드 제외 확인은 게임 화면(IMPL-004)이 있어야 한다.
 관련 문서: [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001) / [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식)
 Issue·PR: 미생성
 
 수용 기준:
-- [ ] 개발 환경에서만 켜지고 운영 빌드에는 영향이 없다.
-- [ ] 판 시작부터 결과 화면 직전까지 프레임 간격을 기록해 평균 fps·프레임 시간 95백분위·100ms 이상 멈춤 횟수를 계산할 수 있다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [ ] 개발 환경에서만 켜지고 운영 빌드에는 영향이 없다. (미충족: 모듈은 DOM·프레임워크를 참조하지 않고 켜는 책임을 호출 쪽에 두었다. 화면에서 `import.meta.env.DEV`일 때만 동적 import하고 운영 빌드에 들어가지 않음을 확인하는 일은 IMPL-004 이후)
+- [ ] 판 시작부터 결과 화면 직전까지 프레임 간격을 기록해 평균 fps·프레임 시간 95백분위·100ms 이상 멈춤 횟수를 계산할 수 있다. (부분 충족: `start`·`frame`·`stop`과 판정식의 계산은 합성 입력으로 단위 검증했다. 실제 게임 화면의 시작·종료 시점에 연결한 기록은 IMPL-004 이후)
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (worklog는 기록했고 병합 전이다)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#val-002-개발용-프레임-시간-기록-모듈)
 
 ## API-001 API·실시간 이벤트 계약 확정
 
@@ -455,7 +455,7 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 ## API-002 API 이름·식별자 확인과 private 뷰 필드 확정
 
 우선순위: P1
-상태: 예정
+상태: 리뷰 중
 담당: 개발자 A
 의존성: API-001
 범위: API-001 완료 때 남긴 후속이다. 개발자 B가 정하고 A가 확인하지 않은 이름을 확인하고, 본인 private 뷰의 게이지·쿨타임 필드 이름을 A가 GAME에서 정한 뒤 API에 반영한다. 새 제품 정책을 정하지 않는다.
@@ -463,11 +463,11 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 Issue·PR: 미생성
 
 수용 기준:
-- [ ] 새 오류 코드 9종(`ALREADY_IN_ROOM`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY`·`GAME_NOT_ACTIVE`·`NOT_YOUR_TURN`·`INVALID_STONE`·`PLAYER_STUNNED`·`REMATCH_NOT_AVAILABLE`)과 `HAZARD_*` 4종, `HazardKind`·`CharacterId`·`BoardId` 식별자, `game:over.reason` 값을 A가 확인하고 바꿀 이름이 있으면 API·LOCAL·GAME에 반영됐다.
-- [ ] 본인 private 뷰의 게이지·쿨타임·사용 가능 여부 필드 이름이 GAME에 정해지고 API의 `GameView.private`에 반영됐다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 새 오류 코드 9종(`ALREADY_IN_ROOM`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY`·`GAME_NOT_ACTIVE`·`NOT_YOUR_TURN`·`INVALID_STONE`·`PLAYER_STUNNED`·`REMATCH_NOT_AVAILABLE`)과 `HAZARD_*` 4종, `HazardKind`·`CharacterId`·`BoardId` 식별자, `game:over.reason` 값을 A가 확인하고 바꿀 이름이 있으면 API·LOCAL·GAME에 반영됐다. (바꿀 이름 없음. 이름·값이 API·GAME·LOCAL·OPERATIONS·PRD와 일치함을 worklog에 대조)
+- [x] 본인 private 뷰의 게이지·쿨타임·사용 가능 여부 필드 이름이 GAME에 정해지고 API의 `GameView.private`에 반영됐다. ([GAME](design/GAME.md#상태-위치와-플레이어별-뷰)의 `fatigueGauge`·`overheated`·`cooldownEndsAtMs`·`usable`, [API](design/API.md#경기-이벤트-필드)의 `GameView.private`)
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (worklog는 기록했고 병합 전이다. 병합 후 체크하고 완료로 바꾼다)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#api-002-이름식별자-확인과-private-뷰-필드-확정)
 
 ## DB-001 DB 스키마 확정
 
@@ -515,7 +515,7 @@ Issue·PR: [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 의존성: DOC-010
 범위: 외부 헬스체크 서비스 선정과 Render 이용 조건 재확인, SPA fallback, 배포·롤백, 이탈 판정용 서버 로그 항목, 사용량(Render 시간·Neon CU-hour) 확인 방법, 백업·복구 절차를 정한다. 헬스체크는 UptimeRobot 5분 간격, 배포는 자동 배포를 끄고 Render 대시보드에서 수동으로 하며, 백업은 Neon 기본 복구만 쓴다(DEC-029). 방 상태를 DB에서 관리해 늘 수 있는 Neon 사용량과 실시간 상태 전송의 서버 부하 측정 항목도 함께 정한다.
 관련 문서: [OPERATIONS](design/OPERATIONS.md) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
-Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)
+Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26)
 
 수용 기준:
 - [x] OPERATIONS의 미정 사항이 모두 방식으로 정해지고 무료 조건 재확인 날짜가 기록됐다. ([무료 조건 재확인](design/OPERATIONS.md#무료-조건-재확인-2026-10-30) 2026-10-30. `[제안]` 표시를 확정하고 `rooms` 정리·음량 저장·민감정보 제거·부하 측정 항목을 정했다. 지속 요청 사용 여부는 DEC-029대로 구현 단계 판단이며 운영 방식은 정해 두었다)
@@ -533,7 +533,7 @@ Issue·PR: [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 의존성: GAME-001, LOCAL-001, API-001, DB-001, AUTH-001
 범위: 확정된 설계를 바탕으로 구현 작업을 기능 ID와 정상·오류·예외 수용 기준으로 TASKS에 등록하고 A·B에 배분한다. 로컬 2인 모드 작업을 먼저 둔다. 공통 실행 모듈 `game-runtime`(B)과 로컬·AI 워커 연결(A)을 별도 작업으로 나눈다([DEC-030](DECISIONS.md#결정-색인)). 모노레포 도구는 [ADR-0003](adr/0003-tech-stack-and-architecture.md)의 npm workspaces로 정해져 있어 별도 결정이 필요 없고, `game-runtime`을 패키지에 추가한다. 선행 설계(API-001·DB-001·AUTH-001·OPS-001)가 모두 완료돼 아래 작업 분해의 13묶음을 IMPL-001~013으로 등록했다. Issue는 착수할 때 하나씩 만든다.
 관련 문서: [PRD 수용 기준 작성 예시](PRD.md#수용-기준-작성-예시) / [DESIGN](DESIGN.md) / [LOCAL 패키지 구성](design/LOCAL.md#패키지-구성-승인)·[GAME 구현 경계](design/GAME.md#구현-경계-ab) / [DEC-030](DECISIONS.md#결정-색인)
-Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)
+Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32)
 
 작업 분해: 담당은 개발자 A가 PR #32에서 수락했다. 순서는 위에서 아래이며 선행 설계는 TASKS의 해당 작업을 가리킨다. 묶음 N은 [IMPL-00N](#impl-001-프로젝트-골격)(N은 세 자리로 0을 채움)로 등록했다.
 
@@ -562,7 +562,7 @@ Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 
 검증 근거: [2026-10-30 worklog](worklogs/2026-10-30.md#plan-001-구현-작업-등록-작업-분해-초안)·[구현 작업 등록](worklogs/2026-10-30.md#plan-001-구현-작업-13건-등록)
 
-결정: 개발자 A가 PR #32 재검토에서 A 몫 5건(IMPL-002·004·005·010·012)을 수락하고 B 몫 8건의 분량·우선순위·의존 순서에 동의했다. VAL-002의 "게임 화면 구현"은 IMPL-004로 보며, 연결은 이 PR 병합 후 별도 문서 변경으로 한다. 각 IMPL의 수용 기준은 착수 전에 해당 PRD 절과 대조해 보완할 수 있다.
+결정: 개발자 A가 PR #32 재검토에서 A 몫 5건(IMPL-002·004·005·010·012)을 수락하고 B 몫 8건의 분량·우선순위·의존 순서에 동의했다. VAL-002의 "게임 화면 구현"은 IMPL-004로 본다(2026-10-31에 VAL-002 의존성에 연결했다). 각 IMPL의 수용 기준은 착수 전에 해당 PRD 절과 대조해 보완할 수 있다.
 
 ## IMPL-001 프로젝트 골격
 

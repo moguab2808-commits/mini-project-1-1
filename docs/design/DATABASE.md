@@ -6,7 +6,7 @@
 | --- | --- |
 | 승인된 미구현 설계 | PostgreSQL(Neon), Drizzle ORM + node-postgres, 세션 테이블은 connect-pg-simple ([DEC-013](../DECISIONS.md#결정-색인)). 랭킹·레이팅·`matches` 제외([DEC-022](../DECISIONS.md#결정-색인)), 방 정보는 `rooms`([DEC-023](../DECISIONS.md#결정-색인)), 사용자·방 컬럼과 입장·종료 처리([DEC-027](../DECISIONS.md#결정-색인)) |
 | 현재 구현 | 없음 |
-| 확정안 (B 확정, PR 리뷰 전) | 아래 [DB-001](../TASKS.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
+| 확정 (DB-001 완료) | 아래 [DB-001](../TASKS.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
 | 미정 | 아래 미정 사항 |
 
 상위 구조는 [DESIGN](../DESIGN.md)이다. 보관·삭제·열람 정책은 [PRD](../PRD.md), 선택 이유는 [결정 기록](../DECISIONS.md)을 따른다. 이 문서는 스키마·관계·제약·인덱스·트랜잭션·마이그레이션을 관리한다.

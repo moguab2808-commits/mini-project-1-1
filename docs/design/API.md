@@ -6,8 +6,8 @@
 | --- | --- |
 | 승인된 미구현 설계 | 전송 방식: 계정·조회는 REST, 방·대전은 Socket.IO, 세션 쿠키 공유 ([DEC-013](../DECISIONS.md#결정-색인)) |
 | 현재 구현 | 없음 |
-| 확정안 (B 결정, A 검토 전) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검 ([API-001](../TASKS.md#api-001-api실시간-이벤트-계약-확정)) |
-| 미정 | 본인 private 뷰의 게이지·쿨타임 필드 이름(개발자 A가 GAME에서 정한 뒤 반영), 발사 각도 범위 |
+| 확정 (API-001·API-002 완료) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검, 이름·식별자 확인, 본인 private 뷰의 게이지·쿨타임 필드 ([API-001](../TASKS.md#api-001-api실시간-이벤트-계약-확정), [API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)) |
+| 미정 | 발사 각도 범위(구현 때 정함) |
 
 상위 구조는 [DESIGN](../DESIGN.md), 제품 동작은 [PRD](../PRD.md)를 따른다. 이 문서는 전송 방식·메시지·요청·응답·오류·검증 경계를 관리한다. 선택 이유는 [결정 기록](../DECISIONS.md)에 둔다. 아래 필드는 `shared`의 Zod 스키마로 옮길 수 있는 수준으로 적었고, 필드 이름은 `camelCase`다.
 
@@ -83,7 +83,7 @@
 | `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
 
-방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A 검토 전이다. 목록은 이 절 한 곳에서 관리한다.
+방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A가 GAME·LOCAL·OPERATIONS와 대조해 확인했다([API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)). 목록은 이 절 한 곳에서 관리한다.
 
 ### Socket.IO 이벤트
 
@@ -166,7 +166,7 @@
 | `result` | `null` 또는 `game:over`와 같은 결과 | 확정 후에만 |
 | `private` | 아래 | **받는 사람 본인의 것만** |
 
-`private`는 `{ held: { hazardInstanceId, kind, round } \| null, timeoutStreak, blind? }`와 게이지·쿨타임 필드를 담는다. `blind`는 내가 시야 가림 대상일 때의 가림 모양과 만료 시각이다. 게이지·쿨타임·사용 가능 여부 필드의 이름은 개발자 A가 GAME에서 정한 뒤 이 표에 반영한다.
+`private`는 `{ held: { hazardInstanceId, kind, round } \| null, fatigueGauge: number \| null, overheated: boolean, cooldownEndsAtMs: number \| null, usable: boolean, timeoutStreak, blind? }`다. `blind`는 내가 시야 가림 대상일 때의 가림 모양과 만료 시각이다. `fatigueGauge`·`overheated`·`cooldownEndsAtMs`·`usable`의 의미는 [GAME 상태 위치와 플레이어별 뷰](GAME.md#상태-위치와-플레이어별-뷰)를 따르며 `held`가 `null`이면 `null`·`false`다.
 
 ### 이벤트 순서
 
@@ -263,7 +263,6 @@ sequenceDiagram
 ## 계약 확정 전 확인할 항목
 
 - 인증 전달·실패 응답·권한 검사 위치: [인증 설계](AUTH.md)
-- 개발자 A 검토: 이벤트 순서, `HAZARD_*`·방·경기 오류 코드 이름, `game:start`·`game:state` 필드, 본인 private 뷰의 게이지·쿨타임 필드 이름
 - 발사 각도 범위 (구현 때 정함)
 - 호환성·버전 변경
 
