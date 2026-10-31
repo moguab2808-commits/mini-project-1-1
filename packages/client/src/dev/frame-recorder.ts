@@ -42,7 +42,7 @@ export interface FrameReport {
 export function percentile(sorted: readonly number[], p: number): number | null {
   if (sorted.length === 0) return null;
   const rank = Math.ceil((p / 100) * sorted.length);
-  return sorted[Math.min(sorted.length, Math.max(1, rank)) - 1];
+  return sorted[Math.min(sorted.length, Math.max(1, rank)) - 1] ?? null;
 }
 
 export class FrameRecorder {

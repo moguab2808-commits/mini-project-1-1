@@ -1,0 +1,26 @@
+{
+  "name": "@alkkagi/client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@alkkagi/game-core": "*",
+    "@alkkagi/game-runtime": "*",
+    "@alkkagi/shared": "*",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "scripts": {
+    "build": "tsc --noEmit -p . && vite build",
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@alkkagi/game-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@alkkagi/shared": "*"
+  },
+  "scripts": {
+    "build": "tsc --noEmit -p ."
+  }
+}

@@ -1,7 +1,6 @@
-// 실행: node --test packages/client/src/dev/frame-recorder.test.ts (Node 24 타입 제거 실행, 의존성 없음)
-// IMPL-001에서 Vitest가 들어오면 같은 검증을 Vitest로 옮긴다.
+// 실행: 루트에서 npm test (Vitest)
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { FrameRecorder, percentile, reportToJson, sampleFrames } from './frame-recorder.ts';
 
 function run(intervals: number[], startMs = 1000): FrameRecorder {
@@ -40,8 +39,11 @@ test('95백분위(nearest-rank): 느린 프레임이 5개면 p95는 정상 값, 
 test('멈춤: 100ms 이상 간격만 시각과 함께 센다(99ms는 제외)', () => {
   const rep = run([16, 99, 100, 16, 250]).stop();
   assert.equal(rep.stalls.length, 2);
-  assert.deepEqual(rep.stalls.map((s) => s.intervalMs), [100, 250]);
-  assert.ok(Math.abs(rep.stalls[0].atSec - 0.215) < 1e-9);
+  assert.deepEqual(
+    rep.stalls.map((s) => s.intervalMs),
+    [100, 250],
+  );
+  assert.ok(Math.abs(rep.stalls[0]!.atSec - 0.215) < 1e-9);
 });
 
 test('평균 fps 55 경계: 55fps는 충족, 54fps는 불충족', () => {
