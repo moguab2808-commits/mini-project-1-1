@@ -1,0 +1,29 @@
+{
+  "name": "alkkagi-bar",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "vitest run --config config/vitest.config.ts",
+    "lint": "eslint --config config/eslint.config.js .",
+    "format": "prettier --config config/prettier.json --ignore-path config/prettier.ignore --check .",
+    "format:write": "prettier --config config/prettier.json --ignore-path config/prettier.ignore --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "prettier": "3.9.10",
+    "tsup": "9.0.0",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}

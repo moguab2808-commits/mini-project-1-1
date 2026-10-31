@@ -46,7 +46,7 @@
 | [AUTH-001](#auth-001-인증-상세-설계-확정) | 인증 상세 설계 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#10](https://github.com/moguab2808-commits/mini-project-1-1/issues/10)·[PR #24](https://github.com/moguab2808-commits/mini-project-1-1/pull/24) |
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32) |
-| [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 예정 | 개발자 A | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35) |
+| [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 리뷰 중 | 개발자 A | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35) |
 | [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 예정 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 예정 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36) |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 예정 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
@@ -570,7 +570,7 @@ Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## IMPL-001 프로젝트 골격
 
 우선순위: P0
-상태: 예정
+상태: 리뷰 중
 담당: 개발자 A (2026-10-31 [DEC-035](DECISIONS.md#결정-색인)로 B에서 변경)
 의존성: DOC-010
 범위: npm workspaces 5개 패키지(`client`·`server`·`shared`·`game-core`·`game-runtime`)와 공통 TypeScript·빌드·테스트·기본 린트 구성을 만든다. 라이브러리 버전은 이때 고정하고 lock 파일로 관리한다. 다른 작업을 막지 않는 패키지 의존 경계 린트와 `.env.example`은 [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample)로 분리했다.
@@ -578,12 +578,12 @@ Issue·PR: [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 Issue·PR: [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35)
 
 수용 기준:
-- [ ] (정상) 클론 직후 루트에서 설치·빌드·테스트·린트 명령이 오류 없이 끝난다. 실행한 명령과 결과를 worklog에 적는다.
-- [ ] (오류) 한 패키지의 TypeScript 오류나 실패하는 테스트가 루트 빌드·테스트 명령을 실패로 만든다. 위반 예시로 실패를 확인한다.
-- [ ] (예외) 패키지 간 참조가 workspaces 이름으로 해석되고, 라이브러리 버전이 고정돼 lock 파일이 저장소에 있다.
+- [x] (정상) 클론 직후 루트에서 설치·빌드·테스트·린트 명령이 오류 없이 끝난다. 실행한 명령과 결과를 worklog에 적는다.
+- [x] (오류) 한 패키지의 TypeScript 오류나 실패하는 테스트가 루트 빌드·테스트 명령을 실패로 만든다. 위반 예시로 실패를 확인한다.
+- [x] (예외) 패키지 간 참조가 workspaces 이름으로 해석되고, 라이브러리 버전이 고정돼 lock 파일이 저장소에 있다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#impl-001-프로젝트-골격)
 
 ## IMPL-014 패키지 의존 경계 린트와 `.env.example`
 
