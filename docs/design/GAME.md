@@ -204,10 +204,10 @@ stateDiagram-v2
 
 | 담당 | 범위 |
 | --- | --- |
-| 개발자 A | `game-core`·`shared`: 규칙, 틱 진행(step), `getViewFor`, 방해요소 훅, 시드 PRNG, 명령·이벤트 타입 이름. 로컬 2인 SharedWorker·AI Web Worker에 `game-runtime`을 워커 시계·MessagePort로 연결 |
-| 개발자 B | `game-runtime`: 방별 단일 큐(ingressSeq·observedAtMs 부여), 단조 시계 틱 스케줄러, 플레이어별 뷰 배포(시계·전송 주입). 서버 실행: Socket.IO 전송 연결, 이탈·중복 접속의 큐 명령 변환, `finishOnce` 종료 저장, 서버 로그 |
+| 개발자 A | `game-core`·`shared`: 규칙, 틱 진행(step), `getViewFor`, 방해요소 훅, 시드 PRNG, 명령·이벤트 타입 이름. `game-runtime`: 방별 단일 큐(ingressSeq·observedAtMs 부여), 단조 시계 틱 스케줄러, 플레이어별 뷰 배포(시계·전송 주입). 로컬 2인 SharedWorker·AI Web Worker에 `game-runtime`을 워커 시계·MessagePort로 연결 |
+| 개발자 B | 서버 실행: `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입, 이탈·중복 접속의 큐 명령 변환, `finishOnce` 종료 저장, 서버 로그 |
 
-큐·틱·뷰 배포는 서버·로컬·AI가 같은 `game-runtime`을 쓰고 시계와 전송만 주입한다([DEC-030](../DECISIONS.md#결정-색인)). 이벤트 이름·명령 필드는 `shared` 한 곳에 정의하고 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 이름 목록은 API-001에서 먼저 맞춘다.
+큐·틱·뷰 배포는 서버·로컬·AI가 같은 `game-runtime`을 쓰고 시계와 전송만 주입한다([DEC-030](../DECISIONS.md#결정-색인)). `game-runtime` 담당은 [DEC-035](../DECISIONS.md#결정-색인)로 A가 됐다. 이벤트 이름·명령 필드는 `shared` 한 곳에 정의하고 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 이름 목록은 API-001에서 먼저 맞춘다.
 
 ### 전송과 표시 초안
 
