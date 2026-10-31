@@ -20,6 +20,7 @@
 - 구현 작업 [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록)·[IMPL-001~013](TASKS.md#impl-001-프로젝트-골격)은 Issue [#34~#47](https://github.com/moguab2808-commits/mini-project-1-1/issues)로 등록했다.
 - [API-002](TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정): 이름 확인과 본인 private 뷰의 게이지·쿨타임 필드를 정해 GAME·API에 반영했다. 수용 기준을 충족하고 PR #33으로 병합돼 완료했다.
 - [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록): 프레임 시간 기록 모듈과 단위 검증을 만들었다. 게임 화면 연결과 운영 빌드 제외 확인은 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드) 이후라 진행 중이다.
+- 구현 담당 재분배([DEC-035](DECISIONS.md#결정-색인)): A는 게임 줄(IMPL-001·002·003·004·005·010), B는 서버·계정 줄(IMPL-014·006~009·011~013). 경계 린트·`.env.example`은 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)로 분리했다.
 - 2026-10-31 문서 교차 검증(Claude·Codex)에서 찾은 불일치를 정리했다([worklog](worklogs/2026-10-31.md#문서-정합성-교차-검증과-불일치-정리)).
 
 ## 남은 일과 한계
