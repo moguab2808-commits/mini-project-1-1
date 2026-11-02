@@ -1,0 +1,400 @@
+/* 게임 화면 HUD. 색·글꼴은 시안(알까기 바 (2).html)을 따른다. 글꼴 Jua는 반입 확인 전이라 시스템 글꼴로 대체된다. */
+.gs-root {
+  --ink: #2b1d14;
+  --cream: #faf3e4;
+  --accent: #f0b553;
+  --danger: #d9694f;
+  --ok: #7fb069;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  min-width: 1280px;
+  min-height: 720px;
+  overflow: hidden;
+  background: #1b130e;
+  color: var(--cream);
+  font-family: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+  user-select: none;
+}
+.gs-scene {
+  position: absolute;
+  inset: 0;
+}
+.gs-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.gs-shadow {
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(0, 0, 0, 0.7);
+}
+
+/* 프로필: 배경 없음(투명), 글자 그림자 */
+.gs-profile {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+.gs-profile.opponent {
+  left: 24px;
+  top: 20px;
+}
+.gs-profile.me {
+  right: 24px;
+  bottom: 20px;
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.gs-profile.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(240, 181, 83, 0.55);
+}
+.gs-face {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+.gs-nick {
+  font-size: 22px;
+}
+.gs-sub {
+  font-size: 14px;
+  opacity: 0.9;
+}
+.gs-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 4px;
+}
+.gs-profile.me .gs-dots {
+  justify-content: flex-end;
+}
+.gs-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--cream);
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.gs-dot.on {
+  background: var(--accent);
+}
+
+/* 상단 중앙 */
+.gs-top {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.gs-time {
+  font-size: 44px;
+  line-height: 1;
+}
+.gs-time.low {
+  color: var(--danger);
+}
+.gs-round {
+  font-size: 16px;
+  margin-top: 2px;
+}
+.gs-turn {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 방해요소 칸 */
+.gs-slot-wrap {
+  position: absolute;
+  right: 36px;
+  bottom: 124px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.gs-slot {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
+  border: 3px solid var(--cream);
+  background: rgba(27, 19, 14, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+}
+.gs-slot.empty {
+  border-style: dashed;
+  opacity: 0.55;
+  cursor: default;
+}
+.gs-slot.dim {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.gs-slot.cooldown svg {
+  filter: grayscale(1);
+}
+.gs-slot-key {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.gs-slot-cool {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #fff;
+  background: rgba(60, 60, 60, 0.55);
+  border-radius: 11px;
+}
+.gs-slot-na {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(27, 19, 14, 0.85);
+}
+.gs-gauge {
+  width: 76px;
+  height: 9px;
+  border-radius: 5px;
+  border: 2px solid var(--cream);
+  background: rgba(27, 19, 14, 0.6);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.gs-gauge > i {
+  display: block;
+  height: 100%;
+  background: var(--ok);
+}
+.gs-gauge.hot > i {
+  background: var(--danger);
+}
+.gs-slot-name {
+  font-size: 13px;
+  max-width: 130px;
+  text-align: right;
+}
+
+/* 받음 카드·발동 안내·안내 문구 */
+.gs-grant {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 190px;
+  padding: 18px 16px;
+  margin: -110px 0 0 -95px;
+  border-radius: 18px;
+  background: var(--cream);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  animation: gs-grant-fly 1.5s ease-in forwards;
+}
+.gs-grant strong {
+  display: block;
+  font-size: 22px;
+  margin-top: 6px;
+}
+.gs-grant span {
+  font-size: 13px;
+}
+@keyframes gs-grant-fly {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(520px, 360px) scale(0.35);
+    opacity: 0.2;
+  }
+}
+.gs-announce {
+  position: absolute;
+  top: 104px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.gs-announce > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 8px;
+  border-radius: 999px;
+  background: rgba(27, 19, 14, 0.78);
+  border: 2px solid var(--accent);
+  font-size: 18px;
+}
+.gs-notice {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(27, 19, 14, 0.82);
+  border: 2px solid var(--danger);
+  font-size: 16px;
+}
+.gs-wait {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: rgba(27, 19, 14, 0.82);
+  pointer-events: auto;
+}
+.gs-wind {
+  position: absolute;
+  top: 168px;
+  left: 50%;
+  margin-left: -28px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+.gs-wind-label {
+  position: absolute;
+  top: 226px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+}
+
+/* 시야 가림 */
+.gs-blind {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* 기권 */
+.gs-forfeit {
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.gs-btn {
+  font: inherit;
+  font-size: 16px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 2px solid var(--cream);
+  background: rgba(27, 19, 14, 0.7);
+  color: var(--cream);
+  cursor: pointer;
+}
+.gs-btn:hover:not(:disabled) {
+  background: rgba(60, 42, 30, 0.9);
+}
+.gs-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.gs-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.gs-btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+/* 결과 */
+.gs-result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27, 19, 14, 0.6);
+  pointer-events: auto;
+}
+.gs-result-box {
+  min-width: 380px;
+  padding: 28px 40px;
+  border-radius: 20px;
+  background: rgba(38, 27, 20, 0.95);
+  border: 3px solid var(--accent);
+  text-align: center;
+}
+.gs-result-title {
+  font-size: 56px;
+  line-height: 1.1;
+}
+.gs-result-title.win {
+  color: var(--accent);
+}
+.gs-result-title.lose {
+  color: var(--danger);
+}
+.gs-result-reason {
+  font-size: 16px;
+  margin: 6px 0 14px;
+  opacity: 0.9;
+}
+.gs-result-msg {
+  min-height: 24px;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+.gs-result-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}

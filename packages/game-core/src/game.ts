@@ -24,14 +24,12 @@ import {
   boardOf,
   clampInside,
   circleVsObb,
-  insideBoard,
   makeWall,
-  obbCorners,
-  obbOverlap,
   rotate,
   spawnPositions,
   type Obb,
 } from './geometry.ts';
+import { isStickyPlaceable, isWallPlaceable, type PlacementWorld } from './placement.ts';
 import { Prng, deriveSeed } from './prng.ts';
 import {
   DT,
@@ -648,29 +646,21 @@ export class Game {
     return this.world.stones.filter((s) => s.alive && !s.airborne);
   }
 
+  private placementWorld(): PlacementWorld {
+    return {
+      board: this.board,
+      stones: this.groundStones(),
+      walls: this.world.walls,
+      stickies: this.world.stickies,
+    };
+  }
+
   private wallPlaceable(w: Obb): boolean {
-    if (!obbCorners(w).every(([x, y]) => insideBoard(this.board, x, y))) return false;
-    if (this.groundStones().some((s) => circleVsObb(s.x, s.y, PHYSICS.stoneRadius, w)))
-      return false;
-    if (this.world.walls.some((o) => obbOverlap(w, o))) return false;
-    const pseudo = (a: { cx: number; cy: number; radius: number }) =>
-      circleVsObb(a.cx, a.cy, a.radius, w) !== null;
-    return !this.world.stickies.some(pseudo);
+    return isWallPlaceable(w, this.placementWorld());
   }
 
   private stickyPlaceable(a: { cx: number; cy: number; radius: number }): boolean {
-    if (!insideBoard(this.board, a.cx, a.cy, a.radius)) return false;
-    if (
-      this.groundStones().some(
-        (s) => Math.hypot(s.x - a.cx, s.y - a.cy) < a.radius + PHYSICS.stoneRadius,
-      )
-    ) {
-      return false;
-    }
-    if (this.world.walls.some((w) => circleVsObb(a.cx, a.cy, a.radius, w))) return false;
-    return !this.world.stickies.some(
-      (o) => Math.hypot(o.cx - a.cx, o.cy - a.cy) < o.radius + a.radius,
-    );
+    return isStickyPlaceable(a, this.placementWorld());
   }
 
   /** 판 중심 기준 시계 방향 회전. 알·속도·벽·끈끈이를 함께 돌리고 알을 판 안에 유지한다. */
