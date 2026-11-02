@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 전송 방식: 계정·조회는 REST, 방·대전은 Socket.IO, 세션 쿠키 공유 ([DEC-013](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | `shared`의 Zod 스키마와 이벤트 필드 타입([IMPL-002](../TASKS.md#impl-002-game-core), PR 병합 전). 서버·클라이언트 연동은 없음 |
+| 현재 구현 | `shared`의 Zod 스키마와 이벤트 필드 타입([IMPL-002](../TASKS.md#impl-002-game-core), PR 병합 전). 서버·클라이언트 연동은 없음. 방 이벤트·`GET /api/rooms`는 서버가 구현했다(`packages/server/src/rooms`, [IMPL-008](../TASKS.md#impl-008-로비방-서버)). 경기 이벤트의 서버 연동은 IMPL-009 |
 | 확정 (API-001·API-002 완료) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검, 이름·식별자 확인, 본인 private 뷰의 게이지·쿨타임 필드 ([API-001](../TASKS.md#api-001-api실시간-이벤트-계약-확정), [API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)) |
 | 미정 | 발사 각도 범위. 제안 (−π, π]·범위 밖·NaN은 `INVALID_INPUT`을 IMPL-002가 임시로 따랐으나 승인 전이다(승인되면 DEC를 연결해 이 표시를 지운다) |
 
@@ -61,16 +61,12 @@
 | `UNAUTHENTICATED` | 로그인하지 않았거나 세션이 만료됨 |
 | `INVALID_CREDENTIALS` | 로그인·비밀번호 변경 실패. 닉네임 없음과 비밀번호 틀림을 구분하지 않는다 |
 | `NICKNAME_TAKEN` | 가입 시 닉네임 중복 |
-| `RATE_LIMITED` | 인증 요청 빈도 제한 초과 ([AUTH](AUTH.md#인증-요청-빈도-제한)), `room:join` 연결당 빈도 제한 초과 |
+| `RATE_LIMITED` | 인증 요청 빈도 제한 초과 ([AUTH](AUTH.md#인증-요청-빈도-제한)), `room:join` 사용자당 빈도 제한 초과 |
 | `INVALID_CODE` | 비공개 방 코드가 맞지 않음. 비공개 방에 방 id만 보내 입장할 때도 쓴다 |
-| `ROOM_FULL` | 이미 상대가 입장한 방 |
-| `ROOM_PLAYING` | 게임이 시작된 방. `room:start`를 이미 시작된 방에 보낼 때도 쓴다 |
+| `ROOM_PLAYING` | 이미 상대가 입장해 게임이 시작된 방. 상대가 입장하면 바로 시작하므로(DEC-040) 상대가 있는 방은 항상 게임 중이다 |
 | `ROOM_NOT_FOUND` | 없는 방, 즉시 참가할 수 있는 방이 없음 |
 | `CODE_TAKEN` | 방 생성 시 코드가 다른 방과 겹침. 다시 생성해 요청한다 |
 | `ALREADY_IN_ROOM` | 이미 방장이거나 참여자인 사용자의 `room:create`·`room:join`·`room:quickJoin` (한 사람 한 방, [DATABASE](DATABASE.md#rooms)) |
-| `NOT_IN_ROOM` | 방에 없는 사용자의 `room:start` |
-| `NOT_HOST` | 방장이 아닌 사용자의 `room:start` |
-| `ROOM_NOT_READY` | 상대가 입장하지 않은 방의 `room:start` |
 | `GAME_NOT_ACTIVE` | 진행 중인 경기가 없음(경기 시작 전·종료 후)에 `shot:submit`·`hazard:use`·`game:forfeit`을 보냄. `game:forfeit`은 gameId가 현재 경기와 달라도 이 코드를 쓴다. 진행 중인 경기가 있는데 gameId·turnId·hazardInstanceId만 낡은 `shot:submit`·`hazard:use`는 `STALE_TURN`·`STALE_HAZARD`를 쓴다 |
 | `STALE_TURN` | 발사 명령의 gameId·turnId가 현재 경기·턴과 다름. 같은 턴의 두 번째 발사에는 쓰지 않는다 ([DEC-026](../DECISIONS.md#결정-색인)) |
 | `SHOT_ALREADY_SUBMITTED` | 같은 턴에 이미 발사해 `shotCommitted`로 두 번째 발사가 거부됨 ([GAME](GAME.md#명령-경합과-시간)). turnId가 맞는 요청이라 낡은 요청과 구분한다 |
@@ -103,9 +99,8 @@
 | C → S | `room:join` | 방 입장 (공개 방은 방 id, 비공개 방은 방 코드) |
 | C → S | `room:quickJoin` | 즉시 참가 (대기 중인 공개 방 중 무작위, 없으면 `ROOM_NOT_FOUND`. [로비](../PRD.md#로비)) |
 | C → S | `room:leave` | 방 나가기 |
-| C → S | `room:start` | 게임 시작 (방장만, 상대 입장 시) |
-| S → C | `room:state` | 대기실 상태 |
-| S → C | `room:closed` | 방장 이탈 등으로 방이 닫힘 |
+| S → C | `room:state` | 방 상태(대기 중·상대 입장으로 시작됨) |
+| S → C | `room:closed` | 방장 이탈·재도전 시간 초과로 방에서 나가짐 |
 | S → C | `game:start` | 게임 시작 (판, 알 배치, 선공) |
 | S → C | `hazard:granted` | 방해요소 지급·교체 (게임 시작과 3·5·7·9라운드 시작. 받은 플레이어에게만 전송) |
 | C → S | `hazard:use` | 방해요소 사용 |
@@ -129,18 +124,24 @@
 
 | 이벤트 | 요청 | 응답(ack) 또는 오류 |
 | --- | --- | --- |
-| `room:create` | `{ title, isPublic, pieceCount, board, code? }`. 제목 1~20자, 알 개수 5·7·9, `board`는 `BoardId`. 비공개면 `code` 필수(6자리, 영문 대문자·숫자에서 0/O·1/I 제외), 공개면 `code`를 보내지 않는다 | `{ ok: true, roomId }` 뒤에 방장에게 `room:state`. `INVALID_INPUT`, `CODE_TAKEN`(코드 중복), `ALREADY_IN_ROOM` |
-| `room:join` | `{ roomId?, code? }`. 공개 방은 `roomId`, 비공개 방은 `code`(`roomId`는 선택, 함께 보내면 같은 방이어야 한다). 둘 다 없으면 `INVALID_INPUT` | `{ ok: true, roomId }` 뒤에 양쪽에 `room:state`. `INVALID_INPUT`, `ROOM_NOT_FOUND`, `ROOM_FULL`, `ROOM_PLAYING`, `INVALID_CODE`, `ALREADY_IN_ROOM`, `RATE_LIMITED` |
-| `room:quickJoin` | 없음 | `{ ok: true, roomId }` 뒤에 양쪽에 `room:state`. `ROOM_NOT_FOUND`, `ALREADY_IN_ROOM` |
+| `room:create` | `{ title, isPublic, pieceCount, board, code? }`. 제목 1~20자, 알 개수 5·7·9, `board`는 `BoardId`. 비공개면 `code` 필수(6자리, 영문 대문자·숫자에서 0/O·1/I 제외), 공개면 `code`를 보내지 않는다 | 방장에게 `room:state`가 먼저 가고 ack `{ ok: true, roomId }`가 뒤따른다. `INVALID_INPUT`, `CODE_TAKEN`(코드 중복), `ALREADY_IN_ROOM` |
+| `room:join` | `{ roomId?, code? }`. 공개 방은 `roomId`, 비공개 방은 `code`(`roomId`는 선택, 함께 보내면 같은 방이어야 한다). 둘 다 없으면 `INVALID_INPUT` | 양쪽에 `room:state`(`status: "playing"`)가 먼저 가고 곧바로 경기가 시작되며, ack `{ ok: true, roomId }`는 그 뒤에 간다. `INVALID_INPUT`, `ROOM_NOT_FOUND`, `ROOM_PLAYING`, `INVALID_CODE`, `ALREADY_IN_ROOM`, `RATE_LIMITED` |
+| `room:quickJoin` | 없음 | 양쪽에 `room:state`가 먼저 가고 곧바로 경기가 시작되며, ack `{ ok: true, roomId }`는 그 뒤에 간다. `ROOM_NOT_FOUND`, `ALREADY_IN_ROOM` |
 | `room:leave` | 없음 | `{ ok: true }` (방에 없어도 성공). 경기 중이면 서버가 기권패로 처리한다 |
-| `room:start` | 없음 | `{ ok: true }`. `NOT_IN_ROOM`, `NOT_HOST`, `ROOM_NOT_READY`, `ROOM_PLAYING`. 시작 커밋 순서는 [GAME의 시작 커밋](GAME.md#상태-전이와-순서) |
-| `room:state` (S → C) | — | `{ roomId, title, isPublic, pieceCount, board, status, host: Member, guest: Member \| null, isHost, code? }`. `code`는 **방장에게만** 담고 상대·목록에는 넣지 않는다. 입장·퇴장·재도전 만료 때 방 안 사용자 각각에게 보낸다 |
-| `room:closed` (S → C) | — | `{ reason: "host_left" }`. 방장이 나가 방이 닫힘. 받은 클라이언트는 로비로 이동한다 |
+| `room:state` (S → C) | — | `{ roomId, title, isPublic, pieceCount, board, status, host: Member, guest: Member \| null, isHost, code? }`. `code`는 **방장에게만** 담고 상대·목록에는 넣지 않는다. 상대 입장(곧바로 시작해 `status`가 `playing`)·퇴장(`guest`가 비고 `waiting`)·재도전 만료 때 방 안 사용자 각각에게 보낸다. 방장 혼자 있으면 `guest`가 `null`이다 |
+| `room:closed` (S → C) | — | `{ roomId, reason: "host_left" \| "rematch_timeout" }`. `roomId`는 닫힌(또는 본인이 나간) 방이다. `host_left`는 방장이 나가 방이 닫힘, `rematch_timeout`은 재도전 15초 동안 누르지 않아 서버가 나가기로 처리한 사람 본인에게 보낸다. 방장이 누르지 않아 방이 닫힐 때 참여자가 누르지 않았어도(두 사람 모두 안 누름) 참여자에게도 `rematch_timeout`을 보낸다([DEC-041](../DECISIONS.md#결정-색인)). 받은 클라이언트는 로비로 이동한다 |
 
-- 입장은 서버가 `rooms`의 조건부 갱신(참여자가 비어 있고 상태가 `waiting`)으로 처리해 동시 입장 중 한 명만 성공시킨다 ([DB-001](../TASKS.md#db-001-db-스키마-확정)). 목록이 오래된 채 입장해도 이 시점에 최신 상태로 다시 검사한다.
-- 코드 틀림 횟수 제한은 두지 않는다. 대신 `room:join`에 연결당 분당 30회 빈도 제한을 둔다 ([AUTH](AUTH.md#인증-요청-빈도-제한)).
+- 입장은 서버가 `rooms`의 조건부 갱신(참여자가 비어 있고 상태가 `waiting`이면 `guest_id`를 채우고 같은 문장에서 `playing`으로 바꿈)으로 처리해 동시 입장 중 한 명만 성공시킨다. 시작 버튼·`room:start`·카운트다운은 없다([DEC-040](../DECISIONS.md#결정-색인)) ([DB-001](../TASKS.md#db-001-db-스키마-확정)). 목록이 오래된 채 입장해도 이 시점에 최신 상태로 다시 검사한다.
+- 코드 틀림 횟수 제한은 두지 않는다. 대신 `room:join`에 사용자당 분당 30회 빈도 제한을 둔다 ([AUTH](AUTH.md#인증-요청-빈도-제한)).
 - 비공개 방 코드는 방장에게만 보이며 `room:state`를 포함한 상대·목록 응답에는 넣지 않는다.
 - AI 대전은 방 이벤트를 쓰지 않는다. `room:create`는 PvP만 받는다.
+- 구현에서 정한 세부([IMPL-008](../TASKS.md#impl-008-로비방-서버), 개발자 A의 확인 필요):
+  - `room:join`의 `code`는 형식을 검사하지 않는다. 형식이 틀린 코드도 맞지 않는 코드와 같이 `INVALID_CODE`다. 비공개 방은 코드가 틀리면 방이 게임 중이어도 `INVALID_CODE`를 먼저 돌려줘 방 상태를 알려 주지 않는다.
+  - 소켓 ack의 `INTERNAL_ERROR`: 처리하지 못한 서버 오류는 `{ ok: false, error: { code: "INTERNAL_ERROR" } }`로 응답한다(REST의 `500`과 같은 코드).
+  - 연결이 끊기면 `room:leave`와 같게 처리한다(방장이면 방 삭제, 참여자면 자리 비움). 이 소켓이 방을 만들거나 입장한 적이 있을 때만 처리한다.
+  - 입장이 곧 시작이므로 입장 성공 시 서버는 양쪽에 `room:state`(`playing`)를 보낸 뒤 경기 서버(IMPL-009)에 알린다(`RoomHooks.onStarted`). `game:start`는 IMPL-009가 보낸다.
+  - 이전 `ROOM_FULL`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY`는 `room:start`와 함께 없앴다. 상대가 있는 방은 항상 게임 중이라 이미 찬 방은 `ROOM_PLAYING`이다.
+  - `GET /api/rooms`는 방 번호 오름차순이다. `room:join` 빈도 제한은 `room:quickJoin`을 세지 않는다.
 
 ### 경기 이벤트 필드
 
@@ -158,7 +159,7 @@
 | `game:forfeit` (C → S) | `{ gameId }` | `{ ok: true }`. `GAME_NOT_ACTIVE`, `INVALID_INPUT` |
 | `game:over` (S → C) | — | `{ gameId, winnerId: Seat \| null, reason, remainingStones: [n0, n1], rematchDeadlineMs: number \| null }`. `winnerId`가 `null`이면 무승부다. `reason`은 `all_stones_out`(알 모두 제거)·`final_round`(최종 라운드 알 수 비교)·`forfeit`(기권·이탈)·`timeout_forfeit`(연속 시간초과 강제 기권). 상대가 나가 재도전할 수 없으면 `rematchDeadlineMs`는 `null`이다. 레이팅은 없다 ([DEC-022](../DECISIONS.md#결정-색인)) |
 | `rematch:request` (C → S) | `{ gameId }`. 끝난 경기의 id | `{ ok: true }`. `REMATCH_NOT_AVAILABLE`, `INVALID_INPUT` |
-| `rematch:state` (S → C) | — | `{ gameId, myRequested, opponentRequested, deadlineMs, outcome }`. `outcome`은 `pending`·`accepted`·`expired`. `accepted`면 새 `gameId`의 `game:start`가 이어지고, `expired`면 `room:state`(대기 중)가 이어진다. 15초 기준은 [게임 화면](../PRD.md#게임-화면) |
+| `rematch:state` (S → C) | — | `{ gameId, myRequested, opponentRequested, deadlineMs, outcome }`. `outcome`은 `pending`·`accepted`·`expired`. `accepted`면 새 `gameId`의 `game:start`가 이어지고, `expired`면 서버가 재도전을 누르지 않은 쪽을 나가기로 처리한다(상대가 누르지 않았으면 방장에게 `room:state`(대기 중), 방장이 누르지 않았으면 상대에게 `room:closed`. 누르지 않은 본인에게는 `room:closed`의 `rematch_timeout`이 간다, [DEC-041](../DECISIONS.md#결정-색인)). 15초 기준은 [게임 화면](../PRD.md#게임-화면) |
 | `session:replaced` (S → C) | — | `{ reason }`. `reason`은 `new_connection`·`password_changed`. 서버가 연결을 끊고, 게임 중이면 기권패 처리한다 ([AUTH](AUTH.md#socketio-인증중복-접속)) |
 
 `GameView`는 [GAME의 공개 GameView·본인 private](GAME.md#상태-위치와-플레이어별-뷰)를 따르며 필드는 아래와 같다.
@@ -185,16 +186,14 @@ sequenceDiagram
     participant G as 상대
     H->>S: GET /api/rooms (로비 진입·새로고침)
     H->>S: room:create
-    S-->>H: ack {roomId} · room:state
+    S-->>H: room:state · ack {roomId}
     G->>S: room:join / room:quickJoin
-    S-->>G: ack {roomId}
-    S-->>H: room:state (guest 채움)
+    S-->>G: ack {roomId} (room:state·game:start 뒤)
+    Note over S: 입장과 같은 문장이 시작 커밋: guest_id 채움 · rooms.status = playing
+    S-->>H: room:state (guest 채움, playing)
     S-->>G: room:state
-    H->>S: room:start
-    Note over S: 시작 커밋: rooms.status = playing
     S-->>H: game:start (seat 0, view)
     S-->>G: game:start (seat 1, view)
-    S-->>H: ack {ok}
     S-->>H: hazard:granted (받은 사람에게만)
     S-->>G: hazard:granted (받은 사람에게만)
     S-->>H: turn:change (reason start)
@@ -229,21 +228,22 @@ sequenceDiagram
     alt 15초 안에 양쪽 동의
         S-->>H: rematch:state (accepted) · game:start (새 gameId)
         S-->>G: rematch:state (accepted) · game:start (새 gameId)
-    else 만료 또는 한쪽 나가기
-        S-->>H: rematch:state (expired) · room:state (waiting)
-        S-->>G: rematch:state (expired) · room:state (waiting)
+    else 15초 만료 또는 한쪽 나가기
+        S-->>H: rematch:state (expired)
+        S-->>G: rematch:state (expired)
+        Note over S: 재도전을 누르지 않은 쪽은 서버가 나가기로 처리 (DEC-041)<br/>누르지 않은 본인에게 room:closed (rematch_timeout)<br/>상대만 → 방장에게 room:state (guest null, waiting)<br/>방장 → 상대에게 room:closed (host_left, 상대도 안 눌렀으면 rematch_timeout)
     end
 ```
 
 순서 규칙 (제안):
 
 1. 한 연결 안에서 신뢰 전송 이벤트는 보낸 순서대로 도착한다(Socket.IO). 클라이언트는 `gameId`가 현재 경기와 다른 이벤트를 버린다.
-2. `room:start`는 시작 커밋 → `game:start` 전송 → 방장 ack 순서다. 시작 커밋보다 먼저 관찰된 이탈은 대기실 처리, 뒤의 이탈은 기권패다([GAME](GAME.md#상태-전이와-순서)).
+2. 상대 입장은 시작 커밋 → `room:state` → `game:start` 전송 → 입장자의 ack 순서다. `room:create`도 `room:state` 뒤에 ack가 간다. `room:state`에 `roomId`가 있으므로 클라이언트는 ack를 기다리지 말고 `room:state`로 방을 정한다. 입장 UPDATE와 방장 이탈이 겹치면 `room:closed`(`host_left`) 뒤에 `room:state`(`playing`)·`game:start`·성공 ack가 올 수 있고, 나간 방장도 자기가 나간 방의 `room:state`를 늦게 받을 수 있다. 그래서 클라이언트는 `room:closed`를 받았거나 직접 나간 `roomId`의 이후 `room:state`·`game:start`·ack를 버린다(규칙 1의 `gameId` 처리와 같은 방식). `onStarted`(경기 생성)가 오래 걸리면 ack도 늦어지므로 ack 시간 초과를 실패로 판단하지 않는다. 시작 커밋보다 먼저 관찰된 이탈은 대기실 처리, 뒤의 이탈은 기권패다([GAME](GAME.md#상태-전이와-순서)).
 3. 경기 시작 때의 `hazard:granted`는 `game:start` 뒤, 첫 `turn:change` 앞에 온다. 라운드 교체 지급은 [GAME](GAME.md#상태-전이와-순서)의 종료 판정 → 교체 → 다음 턴 주인 변경 → 뷰·`turn:change` 순에 따라 그 턴의 최종 `game:state`보다 먼저 보낸다. 최종 스냅샷의 `private.held`가 교체 뒤의 값이 되며, 교체가 없는 턴은 최종 `game:state` → `turn:change` 순이다.
 4. 발사 ack는 명령 수락·거부만 뜻한다. 결과는 이후 `game:state`·`hazard:triggered`로 받는다.
 5. `game:state`는 `revision`이 커지는 순서로만 적용한다. volatile 스냅샷이 유실돼도 마지막 신뢰 전송 스냅샷이 서버 상태로 수렴시킨다. 연결이 끊기면 재접속 복구는 없다.
 6. `game:over` 뒤에는 `game:state`·`hazard:triggered`·`turn:change`를 보내지 않으며 이후 `shot:submit`·`hazard:use`·`game:forfeit`은 `GAME_NOT_ACTIVE`로 거부한다. 재도전으로 새 경기가 시작된 뒤 이전 경기의 명령은 `STALE_TURN`·`STALE_HAZARD`(`game:forfeit`은 `GAME_NOT_ACTIVE`)다.
-7. 재도전이 성립해도 `rooms.status`는 `playing`으로 유지하며, 만료·한쪽 나가기면 `room:state`로 대기실 상태를 보낸다([DATABASE](DATABASE.md#방-생명주기)).
+7. 재도전이 성립해도 `rooms.status`는 `playing`으로 유지한다. 15초 만료로 재도전하기를 누르지 않은 쪽은 서버가 `room:leave`와 같게 처리하고 그 사람 본인에게 `room:closed`(`rematch_timeout`)를 보낸다: 상대가 누르지 않았으면 방장에게 `guest`가 빈 `room:state`(`waiting`)를, 방장이 누르지 않았으면 방이 닫히며 상대에게 `room:closed`를 보낸다(상대도 누르지 않았으면 `rematch_timeout`, 눌렀으면 `host_left`)([DEC-041](../DECISIONS.md#결정-색인), [DATABASE](DATABASE.md#방-생명주기)).
 
 ### 상대 비공개 필드 점검
 
