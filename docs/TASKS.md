@@ -55,9 +55,9 @@
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 완료 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)·[PR #59](https://github.com/moguab2808-commits/mini-project-1-1/pull/59) |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 완료 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42)·[PR #61](https://github.com/moguab2808-commits/mini-project-1-1/pull/61) |
-| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 진행 중 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43) |
+| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 진행 중 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44) |
-| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 진행 중 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45) |
+| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 진행 중 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
@@ -755,7 +755,7 @@ Issue·PR: [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 의존성: API-001, IMPL-003, IMPL-008
 범위: 서버가 `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 경기를 진행한다. 이탈·중복 접속의 기권 명령 변환, 재도전 15초 처리, 서버 로그를 구현한다. IMPL-008이 남긴 두 자리를 이어받는다: 상대 입장 직후 경기를 여는 `RoomHooks.onStarted`와, 경기 중 이탈의 기권패 저장을 끼워 넣을 `RoomService.leave` 앞. 재도전 15초 만료는 재도전하기를 누르지 않은 쪽을 나가기와 같게 처리한다([DEC-041](DECISIONS.md#결정-색인)): 방장이 누르지 않았으면 방을 닫고(`room:closed`) 방장만 눌렀으면 상대만 내보내 방장에게 `room:state`(`waiting`)를 보낸다. 서버가 처리하며 누르지 않은 본인에게는 `room:closed`(`rematch_timeout`)를 보낸다. 방장이 누르지 않아 방이 닫힐 때 상대도 누르지 않았으면 상대에게도 `rematch_timeout`, 눌렀으면 `host_left`를 보낸다. `RoomService.leave`가 처리하되 본인에게 알리는 사유를 넘기도록 확장한다. 그 밖에 PR #61 리뷰에서 넘어온 것은 [DEC-043](DECISIONS.md#결정-색인)으로 정했다: ① 시작 커밋과 이탈의 순서는 방별 `RoomRuntime`이 `ingressSeq`를 대기실부터 이어 매겨 보장하고, 입장 직후 이탈은 경기 생성을 기다려 시작 뒤 이탈(기권패)로 처리한다. ② `onStarted` 실패는 입장을 되돌린다. ③ 소켓 ack의 `INTERNAL_ERROR`를 경기 명령 `CommandResult`(`ERROR_CODES`)에도 넣는다. 전적 저장(`finishOnce`·전적 갱신 트랜잭션)은 원래 [IMPL-011](#impl-011-경기-종료-전적) 범위였으나 이 PR에 포함하도록 조정했다([DEC-044](DECISIONS.md#결정-색인)). 이탈로 끝난 경기는 전적 저장을 끝낸 뒤 방을 정리한다. 경기 종료 뒤 `rooms`는 재도전이 `playing`을 유지하므로 따로 갱신하지 않는다.
 관련 문서: [API 경기 이벤트](design/API.md#경기-이벤트-필드)·[이벤트 순서](design/API.md#이벤트-순서) / [AUTH 검증 경계](design/AUTH.md#검증-경계) / [OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그) / [연결 끊김과 중복 접속](PRD.md#연결-끊김과-중복-접속)
-Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)
+Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63)
 
 수용 기준:
 - [x] (정상, `HAZARD-GRANT`·`HAZARD-USE`) 게임 시작과 교체 라운드에 `hazard:granted`가 받은 플레이어에게만 가고, `hazard:use`는 조건을 충족하면 양쪽에 `hazard:triggered`가 간다. 이벤트 순서가 [순서 규칙](design/API.md#이벤트-순서)과 같다.
@@ -795,7 +795,7 @@ Issue·PR: [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 의존성: DB-001, IMPL-009
 범위: `finishOnce`와 전적 갱신 트랜잭션, 경기 종료 뒤 `rooms` 상태 갱신을 구현한다. 구현과 검증은 [IMPL-009](#impl-009-온라인-대전-서버) PR에서 했다([DEC-044](DECISIONS.md#결정-색인)). 경기 종료 뒤 `rooms`는 재도전이 `playing`을 유지하므로 갱신할 것이 없다. 병합 기준은 IMPL-009 병합으로 충족한다.
 관련 문서: [DATABASE 경기 종료 저장](design/DATABASE.md#경기-종료-저장) / [전적](PRD.md#전적) / [GAME 명령 경합](design/GAME.md#명령-경합과-시간)
-Issue·PR: [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)
+Issue·PR: [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63)
 
 수용 기준:
 - [x] (정상, `LEAVE-FORFEIT`) 정상 종료·기권 종료 뒤 양쪽 전적이 갱신된다. 승자는 `total_games`·`wins`, 패자는 `total_games`·`losses`가 오르고 무승부는 `total_games`만 오른다.
