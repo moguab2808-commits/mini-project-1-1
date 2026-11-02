@@ -62,6 +62,9 @@ interface GameSession {
   useHazard(cmd: HazardUse): Promise<CommandResult>;    // hazard:use
   forfeit(): Promise<CommandResult>;      // game:forfeit
   requestRematch(): Promise<CommandResult>; // rematch:request
+  rotateBoard(cmd: BoardRotate): Promise<CommandResult>; // board:rotate (DEC-036)
+  aimHazard(cmd: HazardAim): void;        // hazard:aim, 응답 없음
+  sendAim(update: AimUpdate): void;       // aim:update, 응답 없음
   on<K extends keyof GameEventMap>(type: K, handler: (e: GameEventMap[K]) => void): () => void;
   dispose(): void;                        // 창 닫기·이동. 진행 중이면 이탈로 처리
 }
@@ -76,6 +79,7 @@ interface GameEventMap {
   'turn:change': TurnChange;
   'game:over': GameOver;
   'rematch:state': RematchState;
+  'aim:state': AimState;                  // 상대 조준·몸짓 (표시용)
 }
 ```
 
@@ -107,6 +111,8 @@ interface GameEventMap {
 - 권한 측은 같은 출처의 `SharedWorker` 1개다. 서버와 같은 `game-runtime`을 워커 시계·MessagePort 전송으로 실행해 고정 틱 진행, 단일 명령 큐, 플레이어별 뷰 생성, 턴 타이머를 맡는다. 두 창은 서로 직접 통신하지 않는다. 창이 백그라운드여도 진행이 창 렌더링에 묶이지 않도록 권한 측을 창 밖에 둔다.
 - 좌석은 URL의 `seat`(0·1)로 정하며 그 값이 PlayerId다. 두 좌석이 모두 연결되면 경기를 시작하고, 같은 좌석의 두 번째 연결은 거부한다. 선공 추첨·시드는 권한 측이 정한다.
 - 창을 닫거나 새로고침하면 그 좌석의 이탈로 보고 PRD대로 기권패 처리한다. 모든 창이 닫혀 워커가 종료되면 경기 상태도 사라진다. 저장·복구는 없다.
+- 이탈로 끝난 경기의 재도전은 열자마자 무산(`rematch:state` `expired`)으로 알리고, 남은 창은 "상대가 나가서 재도전할 수 없어요"를 표시한다(이탈 기권이 다음 틱에 처리돼 이탈 시점의 무산 처리보다 늦기 때문).
+- 한계: 하트비트 ping(2초 주기, 6초 무응답이면 이탈)은 창의 `setInterval`로 보낸다. 브라우저는 숨겨진 탭의 타이머를 늦추고 Chrome은 5분 넘게 숨겨진 탭을 분당 1회까지 제한하므로, 한 창을 5분 넘게 가리면 기권패될 수 있다. 필요해지면 ping을 전용 워커에서 보내는 방법을 검토한다.
 - `SharedWorker`를 지원하지 않는 브라우저에서는 `/local`이 미지원 안내를 표시한다. 개발용이므로 다른 대체 구성을 두지 않는다. 대상 브라우저는 데스크톱 Chrome·Edge·Firefox다.
 - 개발 편의 기능(같은 시드 재시작, 상대 뷰 미리보기 등)은 개발 화면에만 두고 `GameSession` 계약에 넣지 않는다.
 
@@ -121,6 +127,10 @@ interface GameEventMap {
 | 배치 모드에서 왼쪽 클릭 | 그 위치로 `hazard:use` 전송. 빨간 후보에서는 보내지 않음 |
 | 배치 모드에서 마우스 휠 또는 `R` 키 | 벽 방향을 가로·세로로 전환. 기본은 내 화면 기준 가로 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | 배치 모드에서 ESC·오른쪽 클릭 | 배치 취소. 사용 횟수·게이지·쿨타임 변화 없음 |
+| 후레쉬·물총: `E` 키 또는 칸 클릭 | 손에 들기. 마우스로 방향을 잡고 왼쪽 클릭으로 발동(`hazard:use`, target에 조준점 x·y·h). 발동 뒤 지속 시간 동안 마우스로 계속 조준(`hazard:aim`). 발동 전 ESC·오른쪽 클릭은 취소 ([DEC-036](../DECISIONS.md#결정-색인)) |
+| `A`·`D` 또는 ←·→ (누르고 있는 동안), 화면의 판 돌리기 버튼 | 기본 판 돌리기. 내 턴·조준 단계에서 세기 충전 중이 아닐 때만 ([DEC-036](../DECISIONS.md#결정-색인)) |
+| 오른쪽 드래그 | 고개 돌려 둘러보기. 놓으면 기본 시점으로 돌아온다. 시점 버튼·숫자 키·휠 확대는 없고, 알을 조준·발사하는 동안만 자동 1인칭 ([DEC-038](../DECISIONS.md#결정-색인)) |
+| 왼쪽 버튼으로 조준하는 중 오른쪽 버튼 | 조준 취소. 브라우저는 이미 버튼을 누른 상태의 추가 버튼을 `pointerdown`이 아닌 `pointermove`(버튼 조합 변경)로 알리므로 장면이 그 이벤트를 오른쪽 down으로 바꿔 전달한다 |
 
 - `Alt`는 브라우저 메뉴·포커스 이동과 겹쳐 쓰지 않는다. `E`는 키 입력 기본 동작이 없어 `preventDefault` 없이 처리할 수 있다.
 - 배치 모드에서는 왼쪽 클릭이 알 선택·세기 충전으로 전달되지 않는다. 세기 막대를 누르고 있는 중에는 벽·끈끈이 배치 모드로 들어가지 않고, 즉시형은 충전을 끊지 않고 사용한다.
@@ -144,3 +154,7 @@ interface GameEventMap {
 - 개발용 설정·환경변수 이름과 안전한 예제 관리: [운영 설계](OPERATIONS.md)
 
 실제 설치 명령과 접속 주소는 구성 후 README에 추가하고 검증 결과는 worklog에 기록한다.
+
+### 로컬 입력 계약 변경 (2026-11-02 사용자 승인)
+
+기존 클릭 선택 후 별도 충전·클릭 발동 설명을 대체한다. 내 알을 누른 채 뒤로 당겨 반대 방향으로 조준하고 왕복하는 파워 게이지의 현재 세기로 놓아 발사한다. 오른쪽 클릭으로 취소하며 알 범위로 돌아와도 선택은 유지한다. 조준은 1인칭이며 해제 시 거리 흔들림도 끝난다. 좌석 0은 검정, 좌석 1은 흰색으로 양쪽에서 동일하다. 후레쉬·물총은 E를 누르는 동안만 효과와 피로도가 발생하며 마우스는 위치만 조절한다. 판 돌리기 방해요소는 A/왼쪽 또는 D/오른쪽 방향 입력과 E를 조합해 방향을 정한다.

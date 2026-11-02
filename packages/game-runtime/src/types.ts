@@ -1,5 +1,6 @@
 import type { Game, GameConfig } from '@alkkagi/game-core';
 import type {
+  AimState,
   CommandResult,
   GameOver,
   GameStart,
@@ -36,6 +37,8 @@ export interface RuntimeEventMap {
   'hazard:triggered': HazardTriggered;
   'turn:change': TurnChange;
   'game:over': GameOver;
+  /** 상대의 조준·몸짓 상태 중계(표시용, 권한 상태 아님. DEC-036). 항상 volatile로 보낸다 */
+  'aim:state': AimState;
 }
 
 export interface SendOptions {
@@ -105,6 +108,8 @@ export type GameLike = Pick<
   | 'submitShot'
   | 'useHazard'
   | 'forfeit'
+  | 'rotateBoard'
+  | 'aimHazard'
 >;
 
 export interface RuntimeOptions {

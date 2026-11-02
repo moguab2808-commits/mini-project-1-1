@@ -20,6 +20,9 @@ export const ERROR_CODES = [
   'HAZARD_OVERHEATED',
   'HAZARD_INVALID_TARGET',
   'HAZARD_NOT_USABLE',
+  'REMATCH_NOT_AVAILABLE',
+  'OUT_OF_REACH',
+  'BOARD_ROTATE_NOT_ALLOWED',
 ] as const;
 export type GameErrorCode = (typeof ERROR_CODES)[number];
 
@@ -39,9 +42,14 @@ export const ShotSubmitSchema = z.object({
 });
 export type ShotSubmit = z.infer<typeof ShotSubmitSchema>;
 
+/** 판 좌표계 점. `h`는 판 윗면 기준 높이로 후레쉬·물총 조준점에만 쓴다 */
+const Point3Schema = z.object({ x: finite, y: finite, h: finite });
+
 export const HazardTargetSchema = z.object({
   x: finite,
   y: finite,
+  /** 후레쉬·물총: 조준점 높이. 손 위치→조준점 방향으로 발동 영역을 쏜다 */
+  h: finite.optional(),
   orientation: z.enum(['horizontal', 'vertical']).optional(),
 });
 export type HazardTarget = z.infer<typeof HazardTargetSchema>;
@@ -50,8 +58,50 @@ export const HazardUseSchema = z.object({
   gameId: z.string().min(1),
   hazardInstanceId: z.string().min(1),
   target: HazardTargetSchema.optional(),
+  direction: z.union([z.literal(-1), z.literal(1)]).optional(),
 });
 export type HazardUse = z.infer<typeof HazardUseSchema>;
+
+/** `board:rotate`: 기본 판 돌리기. 내 턴·조준 단계에서만. 양수는 반시계(판 좌표계) */
+export const BoardRotateSchema = z.object({
+  gameId: z.string().min(1),
+  turnId: z.number().int().nonnegative(),
+  deltaDeg: finite.refine((d) => Math.abs(d) <= 90, '|deltaDeg| <= 90'),
+});
+export type BoardRotate = z.infer<typeof BoardRotateSchema>;
+
+/** `hazard:aim`: 발동 중인 내 후레쉬·물총의 조준점을 옮긴다. ack 없이 최신 값만 의미가 있다 */
+export const HazardAimSchema = z.object({
+  gameId: z.string().min(1),
+  hazardInstanceId: z.string().min(1),
+  target: Point3Schema,
+  active: z.boolean().optional(),
+});
+export type HazardAim = z.infer<typeof HazardAimSchema>;
+
+/**
+ * `aim:update`(C→S) / `aim:state`(S→C, 상대에게만 중계): 캐릭터 몸짓을 상대 화면에 보이기 위한
+ * 조준 상태. 권한 상태가 아니며 서버는 검증 후 중계만 한다(DEC-036). 초당 20회 이하로 보낸다.
+ */
+export const AIM_MODES = ['idle', 'aim', 'charge', 'rotate', 'hold_hazard'] as const;
+export const AimUpdateSchema = z.object({
+  gameId: z.string().min(1),
+  mode: z.enum(AIM_MODES),
+  pull: finite.min(0).max(1).optional(),
+  lookYaw: finite.min(-1.1).max(1.1).optional(),
+  lookPitch: finite.min(-0.6).max(0.6).optional(),
+  stoneId: z.number().int().nonnegative().optional(),
+  /** 판 좌표계 라디안 */
+  angle: finite.optional(),
+  /** 0~100 */
+  power: finite.refine((p) => p >= 0 && p <= 100, '[0, 100]').optional(),
+  /** `hold_hazard`일 때 손에 든 방해요소 */
+  kind: HazardKindSchema.optional(),
+  /** `hold_hazard`일 때 조준점 */
+  target: Point3Schema.optional(),
+});
+export type AimUpdate = z.infer<typeof AimUpdateSchema>;
+export type AimState = AimUpdate & { seat: 0 | 1 };
 
 export const GameForfeitSchema = z.object({ gameId: z.string().min(1) });
 export type GameForfeit = z.infer<typeof GameForfeitSchema>;
@@ -72,6 +122,21 @@ export const GameResultSchema = z.object({
 });
 export type GameOver = z.infer<typeof GameResultSchema>;
 
+export const REMATCH_OUTCOMES = ['pending', 'accepted', 'expired'] as const;
+
+/** `rematch:state` (docs/design/API.md). `gameId`는 끝난 경기의 id다. */
+export const RematchStateSchema = z.object({
+  gameId: z.string(),
+  myRequested: z.boolean(),
+  opponentRequested: z.boolean(),
+  deadlineMs: z.number(),
+  outcome: z.enum(REMATCH_OUTCOMES),
+});
+export type RematchState = z.infer<typeof RematchStateSchema>;
+
+export const RematchRequestSchema = z.object({ gameId: z.string().min(1) });
+export type RematchRequest = z.infer<typeof RematchRequestSchema>;
+
 export const HazardGrantedSchema = z.object({
   gameId: z.string(),
   hazardInstanceId: z.string(),
@@ -88,6 +153,11 @@ export const HazardParamsSchema = z.object({
   directionRad: z.number().optional(),
   multiplier: z.number().optional(),
   angleDeg: z.number().optional(),
+  /** 후레쉬·물총: 현재 조준점(판 좌표계)과 상대 얼굴 가림 정도(0~1, 최대 면적 대비) */
+  aimX: z.number().optional(),
+  aimY: z.number().optional(),
+  aimH: z.number().optional(),
+  coverage: z.number().optional(),
 });
 export type HazardParams = z.infer<typeof HazardParamsSchema>;
 
@@ -147,6 +217,8 @@ const PrivateViewSchema = z.object({
       startsAtMs: z.number(),
       expiresAtMs: z.number(),
       maxCoverage: z.number(),
+      /** 현재 가림 정도(0~1, maxCoverage 대비). 상대 조준이 얼굴에 머무를수록 오른다 */
+      coverage: z.number(),
       pattern: z.number().int(),
     })
     .optional(),

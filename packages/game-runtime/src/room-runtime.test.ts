@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { monitorEventLoopDelay, performance } from 'node:perf_hooks';
 import { describe, test } from 'vitest';
 import type { CommandResult, GameView, Seat } from '@alkkagi/shared';
+import { Game } from '@alkkagi/game-core';
 import { MAX_CATCH_UP_MS, RoomRuntime, type StartGameConfig } from './index.ts';
 import type {
   GameLike,
@@ -492,5 +493,94 @@ describe('RoomRuntime', () => {
           `이벤트 루프 지연 p99 ${(loop.percentile(99) / 1e6).toFixed(1)}ms, max ${(loop.max / 1e6).toFixed(1)}ms`,
       );
     }, 10_000);
+  });
+});
+
+describe('RoomRuntime: 판 돌리기·조준 중계 (DEC-036)', () => {
+  const turnIdOf = (t: FakeTransport) =>
+    (t.of('turn:change', 0).at(-1)!.payload as RuntimeEventMap['turn:change']).turnId;
+
+  test('relayAim은 큐·틱을 거치지 않고 상대 좌석에만 seat를 붙여 volatile로 보낸다', () => {
+    const { transport, rt } = setup();
+    const before = transport.sent.length;
+    const ok = rt.relayAim(0, { gameId: 'g1', mode: 'aim', stoneId: 0, angle: 0.5, extra: 'x' });
+    assert.equal(ok, true);
+    const sent = transport.sent.slice(before);
+    assert.equal(sent.length, 1, '틱을 기다리지 않고 바로 보낸다');
+    assert.equal(sent[0]!.type, 'aim:state');
+    assert.equal(sent[0]!.seat, 1);
+    assert.equal(sent[0]!.opts.volatile, true);
+    assert.deepEqual(sent[0]!.payload, {
+      gameId: 'g1',
+      mode: 'aim',
+      stoneId: 0,
+      angle: 0.5,
+      seat: 0,
+    });
+  });
+
+  test('relayAim은 형식 오류·다른 gameId·끝난 경기에서 버린다', () => {
+    const { clock, transport, rt } = setup();
+    const before = transport.sent.length;
+    assert.equal(rt.relayAim(1, { gameId: 'g1', mode: 'fly' }), false);
+    assert.equal(rt.relayAim(1, { gameId: 'g1', mode: 'charge', power: 101 }), false);
+    assert.equal(rt.relayAim(1, { gameId: 'old', mode: 'idle' }), false);
+    assert.equal(transport.sent.length, before);
+    void rt.forfeit(0, { gameId: 'g1' });
+    clock.advance(20);
+    const after = transport.sent.length;
+    assert.equal(rt.relayAim(1, { gameId: 'g1', mode: 'idle' }), false);
+    assert.equal(transport.sent.length, after);
+  });
+
+  test('rotateBoard는 큐에서 처리되고 ack하며 양쪽 뷰의 판 각이 바뀐다', async () => {
+    const { clock, transport, rt } = setup();
+    const ok = rt.rotateBoard(0, { gameId: 'g1', turnId: turnIdOf(transport), deltaDeg: 10 });
+    const wrongSeat = rt.rotateBoard(1, {
+      gameId: 'g1',
+      turnId: turnIdOf(transport),
+      deltaDeg: 10,
+    });
+    const invalid = rt.rotateBoard(0, { gameId: 'g1', turnId: 1, deltaDeg: 120 });
+    clock.advance(20);
+    assert.equal((await ok).ok, true);
+    const ws = await wrongSeat;
+    assert.equal(!ws.ok && ws.error.code, 'NOT_YOUR_TURN');
+    const inv = await invalid;
+    assert.equal(!inv.ok && inv.error.code, 'INVALID_INPUT');
+    assert.equal(lastView(transport, 0)!.boardRotationDeg, 10);
+    assert.equal(lastView(transport, 1)!.boardRotationDeg, 10);
+  });
+
+  test('aimHazard는 발동 중인 후레쉬의 조준점을 옮기고 상대 가림 정도가 오른다', async () => {
+    // 좌석 0이 시작부터 후레쉬를 받는 시드를 찾는다(지급은 시드 난수로 정해진다)
+    const heldOf = (seed: number) => {
+      const g = new Game({ gameId: 'g1', board: 'standard', pieceCount: 5, seed, startMs: 0 });
+      g.start();
+      return g.getViewFor(0).private.held?.kind;
+    };
+    let seed = 1;
+    while (heldOf(seed) !== 'flashlight') seed++;
+    const clock = new FakeClock();
+    const transport = new FakeTransport();
+    const rt = new RoomRuntime({ clock, transport });
+    rt.startGame({ ...CONFIG, seed });
+    const start = transport.of('game:start', 0)[0]!.payload as RuntimeEventMap['game:start'];
+    const id = start.view.private.held!.hazardInstanceId;
+    const used = rt.useHazard(0, { gameId: 'g1', hazardInstanceId: id });
+    clock.advance(20);
+    assert.equal((await used).ok, true);
+    const aimed = rt.aimHazard(0, {
+      gameId: 'g1',
+      hazardInstanceId: id,
+      target: { x: 0, y: 30, h: 24 },
+    });
+    clock.advance(20);
+    assert.equal((await aimed).ok, true);
+    clock.advance(1000);
+    const blind = lastView(transport, 1)!.private.blind;
+    assert.equal(blind?.kind, 'flashlight');
+    assert.ok(blind.coverage > 0.7, `가림 ${blind.coverage}`);
+    assert.equal(lastView(transport, 0)!.private.blind, undefined);
   });
 });
