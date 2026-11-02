@@ -21,6 +21,7 @@
 - 구현 작업 [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록)·[IMPL-001~013](TASKS.md#impl-001-프로젝트-골격)은 Issue [#34~#47](https://github.com/moguab2808-commits/mini-project-1-1/issues)로 등록했다.
 - [API-002](TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정): 이름 확인과 본인 private 뷰의 게이지·쿨타임 필드를 정해 GAME·API에 반영했다. 수용 기준을 충족하고 PR #33으로 병합돼 완료했다.
 - [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록): 프레임 시간 기록 모듈과 단위 검증을 만들었다. 게임 화면 연결과 운영 빌드 제외 확인은 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드) 이후라 진행 중이다.
+- [IMPL-002](TASKS.md#impl-002-game-core): `game-core`·`shared` 스키마를 구현해 수용 기준 5개를 단위 테스트로 확인했다. 브랜치 `feat/impl-002-game-core`에서 PR·병합 전이라 진행 중이다([worklog](worklogs/2026-11-01.md#impl-002-game-core)).
 - 구현 담당 재분배([DEC-035](DECISIONS.md#결정-색인)): A는 게임 줄(IMPL-001·002·003·004·005·010), B는 서버·계정 줄(IMPL-014·006~009·011~013). 경계 린트·`.env.example`은 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)로 분리했다.
 - 2026-10-31 문서 교차 검증(Claude·Codex)에서 찾은 불일치를 정리했다([worklog](worklogs/2026-10-31.md#문서-정합성-교차-검증과-불일치-정리)).
 
@@ -29,5 +30,5 @@
 - 구현 전체: [IMPL-002~014](TASKS.md#impl-002-game-core). A는 `game-core`부터, B는 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)·[IMPL-006](TASKS.md#impl-006-db마이그레이션)부터 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
-- 발사 각도 범위는 구현 때 정한다([API](design/API.md)).
+- 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).
 - README 설치·실행 절차는 구현 뒤 작성한다([DOC-011](TASKS.md#doc-011-readme-설치실행-절차)).
