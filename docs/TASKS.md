@@ -50,7 +50,7 @@
 | [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 예정 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 완료 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)·[PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57) |
-| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
+| [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 진행 중 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
 | [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 예정 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41) |
@@ -651,7 +651,7 @@ Issue·PR: [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 ## IMPL-004 로컬 2인 모드
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 A
 의존성: LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001
 범위: `LocalGameSession`, SharedWorker 로컬 권한 측(`game-runtime` + `game-core`), 개발용 `/local` 경로(창 2개, `seat` 0·1), 3D 인게임 화면, 방해요소 입력(E 키·벽·끈끈이 배치)을 구현한다. 서버·DB·로그인은 쓰지 않는다.
@@ -661,9 +661,11 @@ Issue·PR: [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 수용 기준:
 - [ ] (정상, `HAZARD-USE`) 두 창이 모두 연결되면 경기가 시작되고, 사용 제한을 충족한 방해요소를 쓰면 양쪽 화면에 발동 안내가 표시되고 효과가 적용된다. 알이 움직이는 중에도 쓸 수 있다.
 - [ ] (정상, `HAZARD-GRANT` 비공개) 받은 방해요소는 본인 창의 방해요소 칸에만 표시되고 상대 창·상대 창이 받는 메시지에는 없다.
-- [ ] (오류) 쿨타임·과열·잘못된 위치(빨간 후보)의 사용은 거부되고 사용 횟수·게이지·쿨타임이 바뀌지 않는다. 같은 좌석의 두 번째 연결은 거부된다.
-- [ ] (예외) 창을 닫거나 새로고침하면 그 좌석이 기권패이고, `SharedWorker` 미지원 브라우저에서는 `/local`이 미지원 안내를 표시한다.
+- [ ] (오류, 부분 충족: 같은 좌석의 두 번째 연결 거부는 [2026-11-02 worklog](worklogs/2026-11-02.md#impl-004-로컬-권한-측과-localgamesession)에서 확인. 쿨타임·과열·잘못된 위치 거부의 화면 입력 경로는 미충족) 쿨타임·과열·잘못된 위치(빨간 후보)의 사용은 거부되고 사용 횟수·게이지·쿨타임이 바뀌지 않는다. 같은 좌석의 두 번째 연결은 거부된다.
+- [ ] (예외, 부분 충족: 권한 측의 창 닫기·하트비트 끊김 기권패와 재접속 거부는 확인. 새로고침·`pagehide` 연결과 `SharedWorker` 미지원 안내는 화면 단계) 창을 닫거나 새로고침하면 그 좌석이 기권패이고, `SharedWorker` 미지원 브라우저에서는 `/local`이 미지원 안내를 표시한다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+진행(2026-11-02): 1단계로 로컬 권한 측(`packages/client/src/local/local-authority.ts`)과 `LocalGameSession`·`GameSession` 인터페이스, `shared`의 `rematch:state` 스키마를 구현했다. 남은 단계는 SharedWorker 연결·`/local` 경로, 3D 인게임 화면, 방해요소 입력이다.
 
 검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
 

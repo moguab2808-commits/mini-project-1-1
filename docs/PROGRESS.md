@@ -25,6 +25,7 @@
 - [API-002](TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정): 이름 확인과 본인 private 뷰의 게이지·쿨타임 필드를 정해 GAME·API에 반영했다. 수용 기준을 충족하고 PR #33으로 병합돼 완료했다.
 - [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록): 프레임 시간 기록 모듈과 단위 검증을 만들었다. 게임 화면 연결과 운영 빌드 제외 확인은 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드) 이후라 진행 중이다.
 - 구현 담당 재분배([DEC-035](DECISIONS.md#결정-색인)): A는 게임 줄(IMPL-001·002·003·004·005·010), B는 서버·계정 줄(IMPL-014·006~009·011~013). 경계 린트·`.env.example`은 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)로 분리했다.
+- [IMPL-004](TASKS.md#impl-004-로컬-2인-모드) 진행 중(브랜치 `feat/impl-004-local-session`, 미병합): 로컬 권한 측·`LocalGameSession`·재도전. 가짜 시계 테스트로만 확인했고 SharedWorker 연결·3D 화면·방해요소 입력은 남았다
 - 2026-10-31 문서 교차 검증(Claude·Codex)에서 찾은 불일치를 정리했다([worklog](worklogs/2026-10-31.md#문서-정합성-교차-검증과-불일치-정리)).
 
 ## 남은 일과 한계

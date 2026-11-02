@@ -20,6 +20,7 @@ export const ERROR_CODES = [
   'HAZARD_OVERHEATED',
   'HAZARD_INVALID_TARGET',
   'HAZARD_NOT_USABLE',
+  'REMATCH_NOT_AVAILABLE',
 ] as const;
 export type GameErrorCode = (typeof ERROR_CODES)[number];
 
@@ -71,6 +72,21 @@ export const GameResultSchema = z.object({
   rematchDeadlineMs: z.number().nullable(),
 });
 export type GameOver = z.infer<typeof GameResultSchema>;
+
+export const REMATCH_OUTCOMES = ['pending', 'accepted', 'expired'] as const;
+
+/** `rematch:state` (docs/design/API.md). `gameId`는 끝난 경기의 id다. */
+export const RematchStateSchema = z.object({
+  gameId: z.string(),
+  myRequested: z.boolean(),
+  opponentRequested: z.boolean(),
+  deadlineMs: z.number(),
+  outcome: z.enum(REMATCH_OUTCOMES),
+});
+export type RematchState = z.infer<typeof RematchStateSchema>;
+
+export const RematchRequestSchema = z.object({ gameId: z.string().min(1) });
+export type RematchRequest = z.infer<typeof RematchRequestSchema>;
 
 export const HazardGrantedSchema = z.object({
   gameId: z.string(),

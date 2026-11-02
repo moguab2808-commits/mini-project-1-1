@@ -1,0 +1,28 @@
+// 로컬 창 ↔ SharedWorker 권한 측 메시지. LocalGameSession 내부 구현이며 GameSession 계약에 넣지 않는다.
+import type { BoardId, CommandResult, Seat } from '@alkkagi/shared';
+import type { GameEventMap } from '../session/game-session.ts';
+
+export type LocalCommand =
+  | { kind: 'shot'; payload: unknown }
+  | { kind: 'hazard'; payload: unknown }
+  | { kind: 'forfeit'; payload: unknown }
+  | { kind: 'rematch'; payload: unknown };
+
+export type ClientMessage =
+  | { t: 'hello'; seat: Seat; board?: BoardId; pieceCount?: number }
+  | ({ t: 'cmd'; id: number } & LocalCommand)
+  | { t: 'ping' }
+  | { t: 'bye' };
+
+export const REJECT_REASONS = ['SEAT_TAKEN', 'SEAT_DEPARTED', 'INVALID_HELLO'] as const;
+export type RejectReason = (typeof REJECT_REASONS)[number];
+
+export type WorkerMessage =
+  | { t: 'welcome'; seat: Seat }
+  | { t: 'rejected'; reason: RejectReason }
+  | { t: 'result'; id: number; result: CommandResult }
+  | {
+      t: 'event';
+      type: keyof GameEventMap;
+      payload: GameEventMap[keyof GameEventMap];
+    };
