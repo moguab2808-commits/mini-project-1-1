@@ -3,6 +3,7 @@ import { test } from 'vitest';
 import {
   ROOM_CODE_ALPHABET,
   ROOM_CODE_LENGTH,
+  RoomClosedSchema,
   RoomCodeSchema,
   RoomCreateSchema,
   RoomJoinSchema,
@@ -50,4 +51,10 @@ test('방 입장: roomId·code 중 하나는 있어야 하고 code 형식은 검
   assert.equal(RoomJoinSchema.safeParse({ code: 'abc' }).success, true);
   assert.equal(RoomJoinSchema.safeParse({ roomId: 0 }).success, false);
   assert.equal(RoomJoinSchema.safeParse({ roomId: 1.5 }).success, false);
+});
+
+test('room:closed 사유는 방장 이탈과 재도전 시간 초과만 받는다', () => {
+  assert.equal(RoomClosedSchema.safeParse({ reason: 'host_left' }).success, true);
+  assert.equal(RoomClosedSchema.safeParse({ reason: 'rematch_timeout' }).success, true);
+  assert.equal(RoomClosedSchema.safeParse({ reason: 'other' }).success, false);
 });

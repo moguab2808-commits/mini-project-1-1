@@ -442,7 +442,7 @@ Issue·PR: [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)
 
 수용 기준:
 - [x] API 초안의 모든 경로·이벤트에 요청·응답·오류 필드가 정의됐고, 삭제한 `ai:start`·`lobby:*`·`sim:result`·랭킹·최근 경기가 API에 없다. ([API](design/API.md#rest-api)의 REST 8개 표, [방 이벤트](design/API.md#방-이벤트-필드)·[경기 이벤트](design/API.md#경기-이벤트-필드) 필드 표. 삭제 대상은 "없다"는 설명으로만 남음)
-- [x] 방 이벤트(`room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start`)의 필드와 방 입장 오류(`INVALID_CODE`·`ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`)가 정의되고, `GET /api/rooms` 응답에 비공개 방의 코드가 없다. (방 생성 거부 `CODE_TAKEN`·`ALREADY_IN_ROOM`, `room:start` 거부 `NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY` 추가)
+- [x] 방 이벤트(`room:create`·`room:join`·`room:quickJoin`·`room:leave`·`room:start`)의 필드와 방 입장 오류(`INVALID_CODE`·`ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`)가 정의되고, `GET /api/rooms` 응답에 비공개 방의 코드가 없다. (방 생성 거부 `CODE_TAKEN`·`ALREADY_IN_ROOM`, `room:start` 거부 `NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY` 추가. 이후 DEC-040으로 `room:start`·`ROOM_FULL`·`NOT_IN_ROOM`·`NOT_HOST`·`ROOM_NOT_READY` 삭제)
 - [x] 인증 오류와 방·발사 오류가 REST·ack 공통의 오류 코드 목록 한 곳으로 합쳐졌고 AUTH-001과 일치한다. ([API 오류 코드 표](design/API.md#오류-형식과-코드) 한 곳에 인증·방·발사·방해요소 코드가 있고, [AUTH](design/AUTH.md#오류-형식)가 이 표를 참조하며 인증 코드 5종이 같음을 대조)
 - [x] 이벤트 순서(방 생성 → 시작 → 턴 → 종료 → 재도전)가 순서도로 있다. ([API 이벤트 순서](design/API.md#이벤트-순서)의 sequenceDiagram과 순서 규칙 7개)
 - [x] 상대에게 전송되는 이벤트에 상대 보유 방해요소 정보가 없음을 필드 단위로 확인했다. ([API 상대 비공개 필드 점검](design/API.md#상대-비공개-필드-점검). 계약 문서의 필드 목록 대조이며 구현 후 `getViewFor` 테스트로 다시 검증)
@@ -741,7 +741,7 @@ Issue·PR: [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 수용 기준:
 - [x] (정상, `ROOM-JOIN`) 대기 중인 공개 방에 참여하면 양쪽에 `room:state`로 두 사용자가 담기고 별도 조작 없이 곧바로 시작(`status`가 `playing`)한다. 방장은 상대가 입장하기 전까지 `guest`가 `null`인 상태로 기다린다. 즉시 참가는 대기 중인 공개 방 중 하나를 고른다.
 - [x] (정상) `GET /api/rooms`는 공개·비공개 방을 모두 `status`와 함께 돌려주고 비공개 방의 `code`·사용자 번호가 응답에 없다. `code`는 방장의 `room:state`에만 있다.
-- [x] (오류) `INVALID_CODE`·`ROOM_PLAYING`(상대가 있는 방)·`ROOM_NOT_FOUND`·`CODE_TAKEN`·`ALREADY_IN_ROOM`이 [API](design/API.md#오류-형식과-코드)의 조건대로 ack로 응답된다. `room:join`이 연결당 분당 30회를 넘으면 `RATE_LIMITED`다.
+- [x] (오류) `INVALID_CODE`·`ROOM_PLAYING`(상대가 있는 방)·`ROOM_NOT_FOUND`·`CODE_TAKEN`·`ALREADY_IN_ROOM`이 [API](design/API.md#오류-형식과-코드)의 조건대로 ack로 응답된다. `room:join`이 사용자당 분당 30회를 넘으면 `RATE_LIMITED`다.
 - [x] (예외) 두 사용자가 동시에 같은 방에 입장하면 한 명만 성공한다. 방장이 나가면 방이 삭제되고 `room:closed`가 가며(경기 중 포함), 참여자가 나가면 방은 유지돼 `guest_id`가 비워지고 `waiting`으로 돌아가며 다음 입장자가 오면 다시 바로 시작한다. 서버 시작 때 `rooms`가 전부 삭제된다.
 - [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (병합과 함께 충족. PR #61)
 
@@ -753,7 +753,7 @@ Issue·PR: [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 상태: 예정
 담당: 개발자 B
 의존성: API-001, IMPL-003, IMPL-008
-범위: 서버가 `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 경기를 진행한다. 이탈·중복 접속의 기권 명령 변환, 재도전 15초 처리, 서버 로그를 구현한다. IMPL-008이 남긴 두 자리를 이어받는다: 상대 입장 직후 경기를 여는 `RoomHooks.onStarted`와, 경기 중 이탈의 기권패 저장을 끼워 넣을 `RoomService.leave` 앞. 재도전 15초 만료는 재도전하기를 누르지 않은 쪽을 나가기와 같게 처리한다([DEC-041](DECISIONS.md#결정-색인)): 방장이 누르지 않았으면 방을 닫고(`room:closed`) 방장만 눌렀으면 상대만 내보내 방장에게 `room:state`(`waiting`)를 보낸다. `RoomService.leave`를 그대로 쓰면 된다.
+범위: 서버가 `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 경기를 진행한다. 이탈·중복 접속의 기권 명령 변환, 재도전 15초 처리, 서버 로그를 구현한다. IMPL-008이 남긴 두 자리를 이어받는다: 상대 입장 직후 경기를 여는 `RoomHooks.onStarted`와, 경기 중 이탈의 기권패 저장을 끼워 넣을 `RoomService.leave` 앞. 재도전 15초 만료는 재도전하기를 누르지 않은 쪽을 나가기와 같게 처리한다([DEC-041](DECISIONS.md#결정-색인)): 방장이 누르지 않았으면 방을 닫고(`room:closed`) 방장만 눌렀으면 상대만 내보내 방장에게 `room:state`(`waiting`)를 보낸다. 서버가 처리하며 누르지 않은 본인에게는 `room:closed`(`rematch_timeout`)를 보낸다. `RoomService.leave`가 처리하되 본인에게 알리는 사유를 넘기도록 확장한다. 그 밖에 PR #61 리뷰에서 넘어온 것: ① 입장 UPDATE가 시작 커밋이므로 그 뒤의 이탈(입장 직후 방장 이탈 포함)은 기권패이며, `start_commit` 로그를 누가 언제 남기는지와 `ingressSeq` 순번에 입장을 올리는 방법을 정한다(`onStarted`는 입장 UPDATE가 돌려준 스냅샷으로 불리므로 방이 곧바로 지워져도 건너뛰지 않는다). ② `onStarted`가 실패하면 입장을 되돌릴지 경기를 연 것으로 볼지 정한다(지금은 참여자가 `playing`에 남고 재입장은 `ALREADY_IN_ROOM`). ③ 소켓 ack의 `INTERNAL_ERROR`를 경기 명령 `CommandResult`(`ERROR_CODES`)에도 넣을지 정한다.
 관련 문서: [API 경기 이벤트](design/API.md#경기-이벤트-필드)·[이벤트 순서](design/API.md#이벤트-순서) / [AUTH 검증 경계](design/AUTH.md#검증-경계) / [OPERATIONS 서버 로그](design/OPERATIONS.md#서버-로그) / [연결 끊김과 중복 접속](PRD.md#연결-끊김과-중복-접속)
 Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)
 
@@ -762,7 +762,8 @@ Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 - [ ] (정상, `TURN-TIMEOUT`) 30초 동안 발사하지 않으면 `turn:change`(`timeout`)가 가고 연속 3회에 `game:over`(`timeout_forfeit`)가 간다.
 - [ ] (오류) 사용자 번호를 입력으로 받지 않고 세션 사용자만 좌석으로 바꾼다. 경기 중이 아닌 사용자의 명령은 `GAME_NOT_ACTIVE`, 낡은 명령은 `STALE_TURN`·`STALE_HAZARD`다.
 - [ ] (예외, `LEAVE-FORFEIT`) 경기 중 연결이 끊기거나 `room:leave`·`session:replaced`가 일어나면 그 플레이어가 기권패다. 동시 이탈은 먼저 관찰된 쪽, 시작 커밋 전 이탈은 대기실 처리이며 `leave`·`start_commit` 로그의 `ingressSeq`로 판정할 수 있다. 로그에 세션·쿠키·상대 보유 방해요소가 없다.
-- [ ] (예외, 재도전 15초) 재도전하기를 누르지 않은 쪽은 나가기와 같게 처리된다. 방장만 눌렀으면 상대만 나가고 방장은 대기 상태가 되며, 방장이 누르지 않았으면(상대가 눌렀든 아니든) 방이 닫혀 상대에게 `room:closed`가 간다. 두 사람이 남은 채 `waiting`이 되는 일이 없다.
+- [ ] (예외, 재도전 15초) 재도전하기를 누르지 않은 쪽은 나가기와 같게 처리된다. 방장만 눌렀으면 상대만 나가고 방장은 대기 상태가 되며, 방장이 누르지 않았으면(상대가 눌렀든 아니든) 방이 닫혀 상대에게 `room:closed`가 간다. 두 사람이 남은 채 `waiting`이 되는 일이 없다. 누르지 않은 본인은 `room:closed`(`rematch_timeout`)를 받는다.
+- [ ] (예외, 시작 직후 이탈) 입장 UPDATE 직후 방장이 나가도 시작 처리가 건너뛰어지지 않고 그 이탈이 기권패로 기록되며, `start_commit`·`leave` 로그의 `ingressSeq`로 순서를 판정할 수 있다. `onStarted` 실패 때의 입장 처리 정책이 정해져 있다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: 작업 시 날짜별 worklog의 해당 작업 절

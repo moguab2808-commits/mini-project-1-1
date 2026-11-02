@@ -74,7 +74,7 @@ export type RoomStatus = z.infer<typeof RoomStatusSchema>;
 export const MemberSchema = MeSchema;
 export type Member = z.infer<typeof MemberSchema>;
 
-/** `GET /api/rooms`의 항목. 비공개 방의 코드·알 개수·판·참여 인원은 넣지 않는다. */
+/** `GET /api/rooms`의 항목. 코드·알 개수·판·참여 인원은 공개·비공개 방 모두 넣지 않는다(PRD 로비). */
 export const RoomSummarySchema = z.object({
   roomId: z.number().int(),
   title: z.string(),
@@ -99,7 +99,12 @@ export const RoomStateSchema = z.object({
 });
 export type RoomState = z.infer<typeof RoomStateSchema>;
 
-export const RoomClosedSchema = z.object({ reason: z.literal('host_left') });
+/**
+ * `room:closed`의 사유. `host_left`는 방장이 나가 방이 닫힘, `rematch_timeout`은 재도전 15초 동안 누르지 않아
+ * 서버가 나가기로 처리한 사람 본인에게 보내는 알림이다(DEC-041).
+ */
+export const ROOM_CLOSED_REASONS = ['host_left', 'rematch_timeout'] as const;
+export const RoomClosedSchema = z.object({ reason: z.enum(ROOM_CLOSED_REASONS) });
 export type RoomClosed = z.infer<typeof RoomClosedSchema>;
 
 /** 방 명령의 ack. 성공에는 명령별 값(`roomId` 등)이 붙는다. */

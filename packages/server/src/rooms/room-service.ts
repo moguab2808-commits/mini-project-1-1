@@ -1,6 +1,6 @@
 // 방 생성·입장(입장하면 바로 시작)·퇴장과 `room:state`·`room:closed` 전송. 소켓 이벤트 연결은 room-handlers.ts가 맡는다.
 import type { RoomClosed, RoomCreate, RoomJoin, RoomState, RoomSummary } from '@alkkagi/shared';
-import { toMe } from '../auth/users.ts';
+import { findUserById, toMe } from '../auth/users.ts';
 import type { Db } from '../db/pool.ts';
 import type { ConnectionRegistry } from '../realtime/connections.ts';
 import { roomErrors } from './errors.ts';
@@ -60,7 +60,7 @@ export class RoomService {
       target.isPublic ? undefined : input.code,
     );
     if (!joined) throw await this.#whyNotJoinable(target.id);
-    await this.#startOnJoin(joined.id);
+    await this.#startOnJoin(joined);
     return joined.id;
   }
 
@@ -68,7 +68,7 @@ export class RoomService {
     await this.#assertFree(userId);
     const joined = await claimRandomPublicRoom(this.db, userId);
     if (!joined) throw roomErrors.roomNotFound();
-    await this.#startOnJoin(joined.id);
+    await this.#startOnJoin(joined);
     return joined.id;
   }
 
@@ -124,18 +124,28 @@ export class RoomService {
 
   /**
    * 입장이 곧 시작이다. 입장 문장이 `playing`까지 바꿨으므로(시작 커밋) 양쪽에 `room:state`를 보내고
-   * 경기 서버(IMPL-009)가 연결하는 `onStarted`를 부른다.
+   * 경기 서버(IMPL-009)가 연결하는 `onStarted`를 부른다. 입장 문장이 돌려준 행으로 스냅샷을 만들어
+   * 쓰므로, 그 사이에 방장이 나가 방이 지워져도 시작 처리는 건너뛰지 않는다(그 이탈은 시작 뒤 이탈이다).
+   * 알림 순서는 `room:state` → `onStarted` → 호출자의 ack다(API 문서의 이벤트 순서).
    */
-  async #startOnJoin(roomId: number): Promise<void> {
-    await this.#publishState(roomId);
+  async #startOnJoin(joined: RoomRow): Promise<void> {
+    const [host, guest] = await Promise.all([
+      findUserById(this.db, joined.hostId),
+      findUserById(this.db, joined.guestId!),
+    ]);
+    if (!host || !guest) return; // 사용자 행은 지워지지 않는다(FK restrict)
+    const view: RoomView = { room: joined, host, guest };
+    this.#emitState(view);
+    await this.hooks.onStarted?.(view);
+  }
+
+  async #publishState(roomId: number): Promise<void> {
     const view = await loadRoomView(this.db, roomId);
-    if (view) await this.hooks.onStarted?.(view);
+    if (view) this.#emitState(view);
   }
 
   /** 방 안 사용자 각각에게 `room:state`를 보낸다. `code`는 비공개 방의 방장에게만 담는다. */
-  async #publishState(roomId: number): Promise<void> {
-    const view = await loadRoomView(this.db, roomId);
-    if (!view) return;
+  #emitState(view: RoomView): void {
     const { room, host, guest } = view;
     const base = {
       roomId: room.id,
