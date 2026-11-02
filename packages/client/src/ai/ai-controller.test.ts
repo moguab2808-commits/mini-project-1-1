@@ -8,7 +8,7 @@ import {
   type GameView,
   type Seat,
 } from '@alkkagi/shared';
-import { AiController, placementTarget, planShot } from './ai-controller.ts';
+import { AiController, placementTarget, planShot, planShotSteps } from './ai-controller.ts';
 
 function makeView(stones: GameView['stones'], extra: Partial<GameView> = {}): GameView {
   return {
@@ -316,4 +316,111 @@ describe('AiController 방해요소', () => {
     await clock.advance(30000);
     expect(calls.filter((c) => c.type === 'hazard')).toHaveLength(0);
   });
+});
+
+describe('AiController 계획 시간 나누기', () => {
+  /** 최악 케이스: 손 닿는 내 알 9개 vs 판 중앙에 몰린 상대 알 9개(0°에 마땅한 발사가 없어 판 돌리기 후보까지 본다) */
+  function worstCaseStones(): GameView['stones'] {
+    const stones: GameView['stones'] = [];
+    for (let i = 0; i < 9; i++) {
+      stones.push({
+        id: i + 1,
+        ownerId: 1,
+        x: -12 + 3 * i,
+        y: 12 + (i % 2) * 3,
+        h: 0,
+      });
+    }
+    for (let i = 0; i < 9; i++) {
+      stones.push({
+        id: 20 + i,
+        ownerId: 0,
+        x: -4 + (i % 3) * 4,
+        y: -4 + Math.floor(i / 3) * 4,
+        h: 0,
+      });
+    }
+    return stones;
+  }
+
+  it('planShotSteps는 미리보기마다 멈추고 끝까지 돌리면 planShot과 같은 계획이다', () => {
+    const view = makeView(worstCaseStones());
+    const steps = planShotSteps(view, board, 1, true);
+    let yields = 0;
+    let r = steps.next();
+    while (!r.done) {
+      yields += 1;
+      r = steps.next();
+    }
+    expect(r.value).toEqual(planShot(view, board, 1, true));
+    // 이론상 최대는 0° + 판 돌리기 5가지 × (9 × 9 × 5 후보 + 상위 12개 × 오차 표본 6) = 2,862회다.
+    // 이 배치는 판을 돌리면 일부 알이 손에 닿지 않아 2,205회다(판 돌리기 후보까지 본다는 확인)
+    expect(yields).toBeGreaterThan(2000);
+  });
+
+  it('최악 케이스 계획 중에도 같은 스레드의 120Hz 타이머가 수십 ms 넘게 밀리지 않는다', async () => {
+    // 실제 시각과 실제 타이머를 쓰는 시계(Worker의 시계와 같은 방식)
+    const clock: RuntimeClock = {
+      now: () => performance.now(),
+      setTimer: (cb, delayMs) => {
+        const t = setTimeout(cb, delayMs);
+        return () => clearTimeout(t);
+      },
+    };
+    let fired: () => void = () => undefined;
+    const shotOrRotate = new Promise<void>((resolve) => {
+      fired = resolve;
+    });
+    const act = () => {
+      fired();
+      return Promise.resolve<CommandResult>({
+        ok: false,
+        error: { code: 'GAME_NOT_ACTIVE', message: '' },
+      });
+    };
+    const controller = new AiController({
+      seat: 1,
+      clock,
+      seed: 1,
+      tuning: { aimDelayMinMs: 0, aimDelayMaxMs: 0 },
+      actions: {
+        submitShot: act,
+        useHazard: act,
+        rotateBoard: act,
+        aimHazard: () => undefined,
+        sendAim: () => undefined,
+      },
+    });
+    const now = performance.now();
+    const view = makeView(worstCaseStones(), {
+      serverNowMs: now,
+      deadlineMs: now + 30000,
+    });
+    const gaps: number[] = [];
+    let last = performance.now();
+    const tick = setInterval(() => {
+      const t = performance.now();
+      gaps.push(t - last);
+      last = t;
+    }, 1000 / 120);
+    controller.receive('game:start', {
+      gameId: 'g',
+      seat: 1,
+      players: [
+        { seat: 0, nickname: 'me', characterId: 'bear' },
+        { seat: 1, nickname: 'AI', characterId: 'cat' },
+      ],
+      board: 'standard',
+      pieceCount: 9,
+      finalRound: 10,
+      turnSeconds: 30,
+      view,
+    } as GameStart);
+    await shotOrRotate;
+    clearInterval(tick);
+    controller.dispose();
+    expect(gaps.length).toBeGreaterThan(10); // 계획 중에 타이머가 여러 번 돌았다
+    // 나누지 않으면 1초 가까이 밀린다. 조각은 4ms이므로 여유를 크게 둔 상한
+    expect(Math.max(...gaps)).toBeLessThan(60);
+  }, 30000);
 });

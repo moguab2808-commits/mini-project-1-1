@@ -83,6 +83,8 @@ const MAX_ROTATIONS_PER_TURN = 2;
 const MIN_TIME_TO_ROTATE_MS = 6000;
 const BLIND_AIM_EVERY_MS = 100;
 const RETRY_MS = 300;
+/** 발사 계획을 한 번에 돌리는 최대 시간(ms). 틱 간격(120Hz, 약 8.3ms)보다 짧게 둔다 */
+const PLAN_SLICE_MS = 4;
 
 export interface AiShotPlan {
   /** 먼저 돌릴 판 각도(°). 0이면 바로 친다 */
@@ -198,7 +200,39 @@ export class AiController {
     const remaining = view.deadlineMs - view.serverNowMs;
     const allowRotate =
       this.rotations < MAX_ROTATIONS_PER_TURN && remaining > MIN_TIME_TO_ROTATE_MS;
-    const plan = planShot(view, this.boardDef(), this.seat, allowRotate, this.tuning);
+    const steps = planShotSteps(view, this.boardDef(), this.seat, allowRotate, this.tuning);
+    this.planInSlices(turn, steps, (plan) => {
+      this.act(turn, plan);
+    });
+  }
+
+  /**
+   * 계획 단계를 `PLAN_SLICE_MS`씩 끊어 돌리고 사이마다 타이머로 양보한다. 같은 Worker의 권한 측 틱과
+   * 사람의 aim 중계가 계획 중에도 밀리지 않게 한다. 턴이 바뀌면 남은 계획을 버린다.
+   */
+  private planInSlices(
+    turn: { gameId: string; turnId: number },
+    steps: Generator<void, AiShotPlan | null>,
+    done: (plan: AiShotPlan | null) => void,
+  ): void {
+    const slice = (): void => {
+      if (!this.isCurrent(turn, 'aiming')) return;
+      const until = this.clock.now() + PLAN_SLICE_MS;
+      for (;;) {
+        const r = steps.next();
+        if (r.done) {
+          done(r.value);
+          return;
+        }
+        if (this.clock.now() >= until) break;
+      }
+      this.later(0, slice);
+    };
+    slice();
+  }
+
+  private act(turn: { gameId: string; turnId: number }, plan: AiShotPlan | null): void {
+    if (!this.isCurrent(turn, 'aiming')) return;
     if (!plan) return; // 칠 알이 없다: 시간초과로 넘어간다
     if (plan.rotateDeg !== 0) {
       this.rotations += 1;
@@ -232,7 +266,10 @@ export class AiController {
       .then((result) => {
         this.actions.sendAim({ gameId: turn.gameId, mode: 'idle' });
         if (result.ok) return;
-        // 기절이 막 걸렸거나 판이 움직였다: 잠시 뒤 다시 판단한다
+        // 기절이 막 걸렸거나 판이 움직였다: 잠시 뒤 다시 판단한다.
+        // 그 밖의 거부(GAME_NOT_ACTIVE·STALE_TURN·NOT_YOUR_TURN·SHOT_ALREADY_SUBMITTED)는 이 턴이 이미
+        // 끝났거나 내 턴이 아니라는 뜻이라 다시 시도하지 않는다. 새 턴은 다음 뷰의 `think`가 맡는다.
+        // INVALID_STONE·INVALID_INPUT은 계획 오류라 재시도해도 같으므로 시간초과로 넘긴다.
         if (result.error.code === 'PLAYER_STUNNED' || result.error.code === 'OUT_OF_REACH') {
           this.later(RETRY_MS, () => {
             this.think(turn);
@@ -420,10 +457,11 @@ function fieldOf(view: GameView): Field {
       stickies.push({ x: e.params.x, y: e.params.y });
     }
   }
+  // 조준 단계의 알은 모두 지면(h = 0)이다. 떠 있는 알은 이동 중에만 생기고, 정지 판정은 떠 있는 알이
+  // 없을 때만 성립하며 시간 상한(forceStop)도 착지시킨다. 높이를 바꾸는 방해요소는 없다.
+  // 그래서 높이로 거르지 않고 뷰의 알을 모두 넣는다(걸러 내면 그 알을 없는 것으로 계산하게 된다).
   return {
-    stones: view.stones
-      .filter((s) => s.h <= 0)
-      .map((s) => ({ id: s.id, ownerId: s.ownerId, x: s.x, y: s.y })),
+    stones: view.stones.map((s) => ({ id: s.id, ownerId: s.ownerId, x: s.x, y: s.y })),
     walls,
     stickies,
   };
@@ -483,25 +521,44 @@ export function planShot(
   allowRotate: boolean,
   noise: PlanNoise = DEFAULT_AI_TUNING,
 ): AiShotPlan | null {
+  const steps = planShotSteps(view, board, seat, allowRotate, noise);
+  for (;;) {
+    const r = steps.next();
+    if (r.done) return r.value;
+  }
+}
+
+/**
+ * `planShot`을 발사 미리보기 1회마다 멈추는 단계로 나눈 것. 최악(알 9 vs 9, 판 돌리기 후보까지)에는
+ * 미리보기가 최대 2,862회라 한 번에 돌리면 같은 Worker의 틱·aim 중계가 1초 가까이 멈춘다.
+ * 컨트롤러는 이 단계를 짧은 시간 조각으로 나눠 틱 사이에 돌린다(`AiController.planInSlices`).
+ */
+export function* planShotSteps(
+  view: GameView,
+  board: BoardDefinition,
+  seat: Seat,
+  allowRotate: boolean,
+  noise: PlanNoise = DEFAULT_AI_TUNING,
+): Generator<void, AiShotPlan | null> {
   const base = fieldOf(view);
-  const best = bestAt(base, board, seat, 0, noise);
+  const best = yield* bestAt(base, board, seat, 0, noise);
   if (best && best.score >= GOOD_ENOUGH_SCORE) return best;
   if (!allowRotate) return best;
   let chosen = best;
   for (const rot of ROTATION_CANDIDATES) {
-    const plan = bestAt(rotateField(base, rot), board, seat, rot, noise);
+    const plan = yield* bestAt(rotateField(base, rot), board, seat, rot, noise);
     if (plan && (!chosen || plan.score > chosen.score)) chosen = plan;
   }
   return chosen;
 }
 
-function bestAt(
+function* bestAt(
   field: Field,
   board: BoardDefinition,
   seat: Seat,
   rot: number,
   noise: PlanNoise,
-): AiShotPlan | null {
+): Generator<void, AiShotPlan | null> {
   const mine = field.stones.filter((s) => s.ownerId === seat && reachOf(seat, s.x, s.y).reachable);
   const theirs = field.stones.filter((s) => s.ownerId !== seat);
   if (mine.length === 0) return null;
@@ -530,6 +587,7 @@ function bestAt(
           );
     for (const shot of shots) {
       candidates.push({ stoneId: s.id, ...shot, score: evaluate(s.id, shot.angle, shot.power) });
+      yield;
     }
   }
   candidates.sort((a, b) => b.score - a.score);
@@ -549,6 +607,7 @@ function bestAt(
     let sum = c.score;
     for (const [a, p] of samples.slice(1)) {
       sum += evaluate(c.stoneId, wrapAngle(c.angle + a), clamp(c.power + p, 1, 100));
+      yield;
     }
     const score = sum / samples.length - penalty;
     if (!best || score > best.score) {

@@ -1,9 +1,9 @@
 // 발사 결과 미리보기. 권한 측과 같은 물리(`stepPhysics`)·정지 판정으로 한 번의 발사를 끝까지 돌려 본다.
 // AI 컨트롤러가 자기 GameView로 후보 발사를 평가할 때 쓴다(docs/design/LOCAL.md "AI 대전").
 // 순수 함수이며 입력을 바꾸지 않는다. 방해요소 발동·턴 진행은 다루지 않는다.
-import { HAZARD_TUNING, PHYSICS, type BoardDefinition, type Seat } from '@alkkagi/shared';
+import { HAZARD_TUNING, type BoardDefinition, type Seat } from '@alkkagi/shared';
 import type { Obb } from './geometry.ts';
-import { allSlow, DT, forceStop, launch, stepPhysics, type Stone, type World } from './physics.ts';
+import { advanceMotion, launch, type Stone, type World } from './physics.ts';
 
 export interface PreviewStone {
   id: number;
@@ -57,17 +57,12 @@ export function previewShot(input: ShotPreviewInput): ShotPreview {
   const removed: number[] = [];
   if (shooter) {
     launch(shooter, input.angle, input.power);
-    let elapsed = 0;
-    let settle = 0;
+    // 권한 측 `Game`의 틱과 같은 함수로 정지까지 돌린다(정지 판정이 한쪽만 바뀌지 않게).
+    const clock = { elapsed: 0, settle: 0 };
     for (;;) {
-      removed.push(...stepPhysics(world));
-      elapsed += DT;
-      settle = allSlow(world) ? settle + DT : 0;
-      if (settle >= PHYSICS.settleSeconds) break;
-      if (elapsed >= PHYSICS.maxSimSeconds) {
-        removed.push(...forceStop(world));
-        break;
-      }
+      const step = advanceMotion(world, clock);
+      removed.push(...step.removed);
+      if (step.outcome !== 'moving') break;
     }
   }
   return {
