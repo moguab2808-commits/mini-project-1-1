@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 세션 쿠키 인증(express-session + connect-pg-simple), argon2id(@node-rs/argon2), Zod 입력 검증 ([DEC-013](../DECISIONS.md#결정-색인)). IP당 인증 요청 제한([DEC-025](../DECISIONS.md#결정-색인)). 세션 만료·비밀번호 변경 시 다른 세션 종료([DEC-028](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 없음 |
+| 현재 구현 | 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 빈도 제한, argon2id, Socket.IO 연결 인증·중복 접속 대체(`packages/server/src/auth`·`realtime`, [IMPL-007](../TASKS.md#impl-007-인증)). 기권 명령 변환은 IMPL-009 |
 | 확정 (AUTH-001 완료) | 아래 [AUTH-001](../TASKS.md#auth-001-인증-상세-설계-확정) 세부 설정, 인증 요청 빈도 제한의 한도·응답 형식, 검증 경계 |
 | 미정 | 없음. 해시 시간은 구현 때 측정해 파라미터를 조정한다 |
 
@@ -23,14 +23,15 @@
 ### 세션
 
 - **만료**: 쿠키에 `maxAge`를 두지 않아 브라우저를 닫으면 만료된다([DEC-028](../DECISIONS.md#결정-색인)).
-- **서버 쪽 안전 만료**: 브라우저가 탭을 복원하면 세션 쿠키가 남을 수 있어서 connect-pg-simple의 기본 만료(마지막 사용 후 24시간)를 그대로 쓴다. 별도 구현은 없다. 기본값이 실제로 24시간이고 만료된 행 정리 기능이 켜져 있는지는 구현 때 공식 문서로 확인한다.
+- **서버 쪽 안전 만료**: 브라우저가 탭을 복원하면 세션 쿠키가 남을 수 있어서 connect-pg-simple의 기본 만료(마지막 사용 후 24시간)를 그대로 쓴다. 별도 구현은 없다. 기본값(쿠키 `maxAge`가 없으면 `ttl` 1일, 만료 행은 기본 15분 주기로 정리)은 connect-pg-simple 10.0.0 README로 확인했고, 실제 DB로 만료 시각이 24시간 뒤이고 정리 호출이 만료 행을 지우는 것을 검증했다([worklog](../worklogs/2026-11-02.md#impl-007-인증)).
 - **가입은 세션을 만들지 않는다**: 가입 API는 성공만 응답하고 사용자가 로그인한다([회원등록](../PRD.md#회원등록)).
 - **비밀번호 변경**: 현재 세션만 남기고 같은 사용자의 다른 세션 행을 모두 삭제한다. 이미 열려 있는 다른 접속의 Socket.IO 연결도 끊어 `session:replaced`와 같은 흐름으로 로그인 화면으로 보낸다([DEC-028](../DECISIONS.md#결정-색인)).
 
 ### 해시·프록시
 
-- **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 측정 결과는 worklog에 남긴다.
-- **프록시 신뢰**: `app.set('trust proxy', 1)`(Render 프록시 1단). `secure` 쿠키와 IP 제한이 이에 의존한다.
+- **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 측정 결과는 worklog에 남긴다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스의 측정과 파라미터 조정은 배포 뒤로 옮겼다([IMPL-013](../TASKS.md#impl-013-배포)).
+- **프록시 신뢰**: `app.set('trust proxy', 1)`(Render 프록시 1단). `secure` 쿠키와 IP 제한이 이에 의존한다. 운영 설정에서 `X-Forwarded-Proto: https`가 있을 때 세션 쿠키에 `Secure`가 붙는 것을 테스트로 확인했다.
+- **환경 변수**: `SESSION_SECRET`은 32자 이상이어야 서버가 시작한다. 값은 문서·로그에 남기지 않는다([OPERATIONS](OPERATIONS.md)).
 
 ### Socket.IO 인증·중복 접속
 

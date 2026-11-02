@@ -21,7 +21,7 @@
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
 | `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소 9종](../PRD.md#방해요소-규칙). 이름은 제안 |
-| `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. 승률은 클라이언트가 계산한다 |
+| `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
 | `Member` | `{ nickname, characterId, record: Record }` | 사용자 번호는 넣지 않는다 |
 | `Me` | `{ nickname, characterId, record: Record }` | `GET /api/me`·로그인 응답 |
 
@@ -50,6 +50,7 @@
 ### 오류 형식과 코드
 
 - REST 오류는 `{ error: { code, message } }`로 응답한다. HTTP 상태는 위 표를 따른다.
+- 처리하지 못한 서버 오류는 `500 { error: { code: "INTERNAL_ERROR", message } }`로 응답한다. 원인은 응답에 싣지 않고 서버 로그에만 남긴다. 아래 코드 표의 클라이언트 분기 대상이 아니라 일반 오류 안내로 처리한다.
 - Socket.IO 명령은 ack 콜백으로 `{ ok: true, … }` 또는 `{ ok: false, error: { code, message } }`를 돌려준다.
 - 거부된 명령은 경기 상태와 난수를 바꾸지 않는다.
 - `RATE_LIMITED`(REST 429)에는 `Retry-After` 헤더(초)가 붙는다. `room:join` ack의 `RATE_LIMITED`에는 없다.
