@@ -6,7 +6,7 @@
 
 ## 기준 브랜치에 반영된 범위
 
-`main`(PR #54 병합)까지 반영된 내용은 문서, 기준 화면 프로토타입 `알까기 바 (2).html`, 프로젝트 골격(npm workspaces 5개 패키지·빌드·테스트·린트), VAL-002 기록 모듈, DB 스키마·마이그레이션·연결 풀(`packages/server/src/db`)이다. 패키지 안은 비어 있고 완료된 제품 기능은 없다. 실제 동작·성능·배포 검증 범위도 없다.
+`main`(PR #53·#54 병합)까지 반영된 내용은 문서, 기준 화면 프로토타입 `알까기 바 (2).html`, 프로젝트 골격(npm workspaces 5개 패키지·빌드·테스트·린트), VAL-002 기록 모듈, `game-core`·`shared` 스키마, DB 스키마·마이그레이션·연결 풀(`packages/server/src/db`)이다. 화면·서버 API·`game-runtime`은 비어 있고 사용자가 쓸 수 있는 제품 기능은 없다. 실제 동작·성능·배포 검증 범위도 없다.
 
 - 문서 책임·위치 재편 ([DOC-001~003](TASKS.md#작업-목록))
 - 제품 요구사항: 계정·로비·게임 화면, 방해요소 시스템, 보관·장애·규모 정책, 위임 결정 ([DOC-004~009](TASKS.md#작업-목록), [DEC-006~012](DECISIONS.md#결정-색인))
@@ -14,6 +14,7 @@
 - 상세 설계: 게임·수치 기본값([GAME-001·002](TASKS.md#game-001-게임-처리-상세-설계-확정)), 로컬 2인([LOCAL-001](TASKS.md#local-001-로컬-2인-모드-설계-확정)), API([API-001](TASKS.md#api-001-api실시간-이벤트-계약-확정)), DB([DB-001](TASKS.md#db-001-db-스키마-확정)), 인증([AUTH-001](TASKS.md#auth-001-인증-상세-설계-확정)), 운영([OPS-001](TASKS.md#ops-001-운영-설계-확정))
 - 디자인 캔버스([UI-001·002](TASKS.md#ui-002-디자인-캔버스-현재-요구사항-반영)), 에셋 조달 방식([ASSET-001](TASKS.md#asset-001-에셋-조달-계획)), fps 측정 절차·플레이 테스트 양식([VAL-001](TASKS.md#val-001-성능-측정-절차와-플레이-테스트-기록-양식))
 - 프로젝트 골격([IMPL-001](TASKS.md#impl-001-프로젝트-골격), PR #51)
+- `game-core`·`shared` 스키마: 규칙·물리·상태 머신·방해요소·`getViewFor`([IMPL-002](TASKS.md#impl-002-game-core), PR #53). 단위 테스트로 확인했고 플레이 테스트·성능 측정은 없다
 - DB 스키마·마이그레이션·연결 풀([IMPL-006](TASKS.md#impl-006-db마이그레이션), PR #54). 마이그레이션은 임시 DB에서 검증했고 개발 DB에는 아직 적용하지 않았다
 - 구현 작업 13건 등록([PLAN-001](TASKS.md#plan-001-구현-작업-등록), [IMPL-001~013](TASKS.md#impl-001-프로젝트-골격))
 
@@ -22,13 +23,12 @@
 - 구현 작업 [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록)·[IMPL-001~013](TASKS.md#impl-001-프로젝트-골격)은 Issue [#34~#47](https://github.com/moguab2808-commits/mini-project-1-1/issues)로 등록했다.
 - [API-002](TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정): 이름 확인과 본인 private 뷰의 게이지·쿨타임 필드를 정해 GAME·API에 반영했다. 수용 기준을 충족하고 PR #33으로 병합돼 완료했다.
 - [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록): 프레임 시간 기록 모듈과 단위 검증을 만들었다. 게임 화면 연결과 운영 빌드 제외 확인은 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드) 이후라 진행 중이다.
-- [IMPL-002](TASKS.md#impl-002-game-core): `game-core`·`shared` 스키마를 구현해 수용 기준 5개를 단위 테스트로 확인했다. 브랜치 `feat/impl-002-game-core`에서 PR·병합 전이라 진행 중이다([worklog](worklogs/2026-11-01.md#impl-002-game-core)).
 - 구현 담당 재분배([DEC-035](DECISIONS.md#결정-색인)): A는 게임 줄(IMPL-001·002·003·004·005·010), B는 서버·계정 줄(IMPL-014·006~009·011~013). 경계 린트·`.env.example`은 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)로 분리했다.
 - 2026-10-31 문서 교차 검증(Claude·Codex)에서 찾은 불일치를 정리했다([worklog](worklogs/2026-10-31.md#문서-정합성-교차-검증과-불일치-정리)).
 
 ## 남은 일과 한계
 
-- 구현 전체: [IMPL-002~014](TASKS.md#impl-002-game-core). A는 `game-core`부터, B는 IMPL-006이 끝나 [IMPL-007](TASKS.md#impl-007-인증)과 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)를 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
+- 구현 전체: [IMPL-003~014](TASKS.md#impl-003-game-runtime). A는 [IMPL-003](TASKS.md#impl-003-game-runtime)부터, B는 IMPL-006이 끝나 [IMPL-007](TASKS.md#impl-007-인증)과 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)를 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
 - 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).
