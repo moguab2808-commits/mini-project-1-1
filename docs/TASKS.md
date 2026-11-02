@@ -51,7 +51,7 @@
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 완료 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)·[PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 완료 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
-| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
+| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 진행 중 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 완료 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)·[PR #59](https://github.com/moguab2808-commits/mini-project-1-1/pull/59) |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42) |
@@ -676,20 +676,20 @@ Issue·PR: [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 ## IMPL-005 AI 대전
 
 우선순위: P1
-상태: 예정
+상태: 진행 중
 담당: 개발자 A
 의존성: LOCAL-001, IMPL-004
-범위: `AiGameSession`(mode `ai`)과 전용 Web Worker, AI 컨트롤러를 구현한다. 서버 연결·저장은 없다.
-관련 문서: [LOCAL AI 대전](design/LOCAL.md#ai-대전) / [AI 대전](PRD.md#ai-대전) / [GAME AI](design/GAME.md#ai-대전) / [DEC-021](DECISIONS.md#결정-색인)
+범위: `AiGameSession`(mode `ai`)과 전용 Web Worker, AI 컨트롤러를 구현한다. 서버 연결·저장은 없다. 로비 방 생성 창은 IMPL-012 범위이므로 이 작업은 개발용 `/ai` 설정 폼과 방 생성 창이 그대로 쓸 `AiSetupForm`·`startAiGame`까지 만든다([DEC-042](DECISIONS.md#결정-색인)).
+관련 문서: [LOCAL AI 대전](design/LOCAL.md#ai-대전) / [AI 대전](PRD.md#ai-대전) / [GAME AI](design/GAME.md#ai-대전) / [DEC-021·040](DECISIONS.md#결정-색인)
 Issue·PR: [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39)
 
 수용 기준:
-- [ ] (정상) 방 생성 창에서 AI·판·알 개수(5·7·9)를 고르면 서버 요청 없이 경기가 시작되고 끝까지 진행된다.
-- [ ] (오류) AI 컨트롤러가 자기 `GameView`만 읽고 사람과 같은 명령 검증을 거친다. 검증에 걸린 명령은 상태를 바꾸지 않는다.
-- [ ] (예외) AI 대전 결과가 서버로 전송되지 않고 전적이 바뀌지 않으며 방 목록에 나타나지 않는다. 네트워크 요청이 없음을 확인한다.
+- [x] (정상) 방 생성 창에서 AI·판·알 개수(5·7·9)를 고르면 서버 요청 없이 경기가 시작되고 끝까지 진행된다. (개발용 `/ai` 설정 폼으로 확인. 로비 방 생성 창 연결은 IMPL-012에서 같은 `AiSetupForm`·`startAiGame`을 쓴다)
+- [x] (오류) AI 컨트롤러가 자기 `GameView`만 읽고 사람과 같은 명령 검증을 거친다. 검증에 걸린 명령은 상태를 바꾸지 않는다.
+- [x] (예외) AI 대전 결과가 서버로 전송되지 않고 전적이 바뀌지 않으며 방 목록에 나타나지 않는다. 네트워크 요청이 없음을 확인한다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-005-ai-대전)
 
 ## IMPL-006 DB·마이그레이션
 

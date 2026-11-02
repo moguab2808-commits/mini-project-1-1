@@ -94,8 +94,8 @@ interface GameEventMap {
 - commandId는 두지 않는다 ([DEC-026](../DECISIONS.md#결정-색인), [GAME](GAME.md#명령-경합과-시간)). 명령 메서드는 수락·거부만 `CommandResult`로 돌려준다. 원격은 Socket.IO ack, 로컬은 워커 응답으로 짝짓는다. 로컬의 MessagePort 메시지 짝짓기용 번호는 `LocalGameSession` 내부 구현이며 계약에 넣지 않는다. 적용 결과는 `game:state`·`hazard:triggered`로 받는다.
 - 조준 중인 각도·세기 막대 값은 클라이언트 입력 상태이며 명령으로 보내지 않는다. 바람·세기 막대 속도 조절의 발동 시작·만료 시각은 뷰로 받아 클라이언트 조준 입력에 반영하고, 반영한 최종값을 `shot:submit`으로 보낸다. 권한 측은 값 범위·기절·마감·알 소유·turnId를 검증하고, 바람 편향을 따랐는지는 검증하지 않는다 (DEC-026).
 - **PlayerId**: 경기 안의 좌석 값 0·1이다. 알의 `ownerId`·`activePlayerId`도 같은 값을 쓴다. 로컬에는 `users.id`가 없고, 온라인에서 상대에게 사용자 번호를 보내지 않기 위해서다. 서버만 좌석과 `users.id`를 매핑해 전적을 저장한다 ([DEC-030](../DECISIONS.md#결정-색인)).
-- **세션 수명**: `GameSession` 하나가 같은 방의 재도전 경기까지 이어 간다. `game:over` 뒤 같은 세션으로 `requestRematch()`를 보내고, 성립하면 새 gameId의 `game:start`를 받는다. 이벤트의 gameId로 경기를 구분하고, 새 `game:start`에서 화면 상태를 초기화한다. 재도전이 만료되면 두 사람이 같은 방 대기실로 돌아가며 방과 참여자는 유지되므로([PRD 게임 화면](../PRD.md#게임-화면), [DATABASE](DATABASE.md#방-생명주기)) 세션을 `dispose()`하지 않고 대기 상태로 두어 다음 `game:start`를 같은 세션이 받는다. 방을 나가거나 창을 닫을 때만 `dispose()`한다 ([DEC-030](../DECISIONS.md#결정-색인)).
-- **방·접속 이벤트**: `room:*` 명령·이벤트와 `session:replaced`는 `GameSession`에 넣지 않고 온라인 전용 `RoomClient`가 처리한다(로비·대기실). `GameSession`은 경기만 맡는다. 온라인 `dispose()`는 `RoomClient`를 통해 `room:leave`를 보내고, 경기 중이면 서버가 이탈 기권패로 처리한다. 로컬·AI는 방이 없으므로 `RoomClient`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)).
+- **세션 수명**: `GameSession` 하나가 같은 방의 재도전 경기까지 이어 간다. `game:over` 뒤 같은 세션으로 `requestRematch()`를 보내고, 성립하면 새 gameId의 `game:start`를 받는다. 이벤트의 gameId로 경기를 구분하고, 새 `game:start`에서 화면 상태를 초기화한다. 재도전이 만료되면 누르지 않은 사람은 나가기와 같게 처리된다([DEC-041](../DECISIONS.md#결정-색인)). `room:closed`(`rematch_timeout`·`host_left`)를 받은 클라이언트는 세션을 `dispose()`하고 로비로 간다. 방장만 눌렀으면 방장은 `room:state`(`waiting`)를 받고 세션을 유지한 채 다음 입장자의 `game:start`를 같은 세션으로 받는다([API 순서 규칙](API.md#이벤트-순서)). 방을 나가거나 창을 닫을 때만 `dispose()`한다 ([DEC-030](../DECISIONS.md#결정-색인)).
+- **방·접속 이벤트**: `room:*` 명령·이벤트와 `session:replaced`는 `GameSession`에 넣지 않고 온라인 전용 `RoomClient`가 처리한다(로비·대기실). `GameSession`은 경기만 맡는다. 온라인 `dispose()`는 `RoomClient`를 통해 `room:leave`를 보내고, 경기 중이면 서버가 이탈 기권패로 처리한다. 로컬·AI는 방이 없으므로 `RoomClient`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)). 상대 입장은 `room:state` → `game:start` → 입장 ack 순서로 오므로(API 순서 규칙 2), 온라인 클라이언트는 ack가 아니라 `room:state`(`playing`)로 경기 화면 전환을 시작하고 `RemoteGameSession`의 경기 이벤트 구독은 소켓 연결 시점(늦어도 `room:state` 처리 중 동기적으로)에 걸어 `game:start`를 놓치지 않는다.
 
 ### 로컬 2인 구성 (창 2개)
 
@@ -141,6 +141,10 @@ interface GameEventMap {
 - AI 대전은 브라우저에서 실행한다 ([DEC-021](../DECISIONS.md#결정-색인)). `AiGameSession`(mode `ai`)이 전용 Web Worker에서 `game-runtime`·`game-core`와 AI 컨트롤러를 진행한다. 서버 연결·`ai:start`는 쓰지 않는다. 전적에 반영하지 않으므로 서버 권한이 필요하지 않다.
 - AI 컨트롤러는 자기 플레이어의 `GameView`만 읽고 사람과 같은 명령 타입·검증을 거친다. 조준 무작위 오차와 방해요소 사용 시점은 컨트롤러의 시드 난수로 정한다.
 - 방 생성 창에서 대전 상대를 AI로 고르고 판·알 개수(5·7·9)를 정해 시작한다 ([DEC-024](../DECISIONS.md#결정-색인)). 방 목록·`rooms`에 올리지 않는다. 로그인한 사용자 정보는 화면 표시에만 쓰고 결과는 서버로 보내지 않는다.
+- 구성(현재 구현): 창 1개 = 전용 `Worker` 1개. 사람은 좌석 0(흑), AI는 좌석 1(백)이다. 창과 워커는 로컬 2인과 같은 메시지 형식(`hello`·`cmd`·`event`·`result`, `client/src/local/messages.ts`)을 쓰고 `hello`에 표시용 `profile`(닉네임·캐릭터)을 더한다. 워커가 창과 수명을 같이하므로 하트비트는 쓰지 않고, 나가기·창 닫기는 워커를 끝내 경기를 버린다.
+- AI 컨트롤러는 런타임 전송이 좌석 1로 보낸 이벤트만 받고(틱 처리 재진입을 피해 다음 마이크로태스크에 전달), 명령은 `RoomRuntime`의 좌석 1 명령으로 사람과 같은 큐·검증을 거친다. 발사 선택·방해요소 시점 수치는 [GAME AI 대전](GAME.md#ai-대전)을 따른다.
+- 재도전: AI는 항상 받는다. 사람이 재도전하기를 누르면 바로 같은 설정의 새 경기를 시작하고, 15초가 지나면 무산(`expired`)을 알린다.
+- 진입: 로비 방 생성 창(IMPL-012) 전까지는 개발용 `/ai`의 설정 폼(`AiSetupForm`)으로 시작한다. 방 생성 창은 같은 폼·`startAiGame`을 쓴다 ([DEC-042](../DECISIONS.md#결정-색인)).
 
 ## 개발 순서
 

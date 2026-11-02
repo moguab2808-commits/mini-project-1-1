@@ -27,6 +27,8 @@ export interface LocalGameSessionOptions {
   pieceCount?: number;
   /** 하트비트 ping 주기(ms). 0이면 보내지 않는다. 기본 2000. */
   heartbeatMs?: number;
+  /** AI 대전: 화면 표시용 내 정보 */
+  profile?: { nickname?: string; characterId?: string };
 }
 
 export class LocalSessionRejectedError extends Error {
@@ -71,6 +73,7 @@ export class LocalGameSession implements GameSession {
       seat: options.seat,
       board: options.board,
       pieceCount: options.pieceCount,
+      profile: options.profile,
     });
     const every = options.heartbeatMs ?? 2000;
     if (every > 0) {

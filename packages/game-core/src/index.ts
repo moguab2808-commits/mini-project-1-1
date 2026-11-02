@@ -12,3 +12,7 @@ export {
 export type { PlacementCircle, PlacementWorld } from './placement.ts';
 export { beamHitsFace, facePoint, handPoint, reachOf, seatAnchor } from './reach.ts';
 export type { Point3, Reach } from './reach.ts';
+export { previewShot } from './preview.ts';
+export type { PreviewStone, ShotPreview, ShotPreviewInput } from './preview.ts';
+export { rotate } from './geometry.ts';
+export type { Obb } from './geometry.ts';
