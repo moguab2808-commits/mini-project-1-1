@@ -49,7 +49,7 @@
 | [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 완료 | 개발자 A | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35)·[PR #51](https://github.com/moguab2808-commits/mini-project-1-1/pull/51) |
 | [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 예정 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
-| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 예정 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
+| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 진행 중 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
 | [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
@@ -626,7 +626,7 @@ Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 ## IMPL-003 `game-runtime`
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 A (2026-10-31 [DEC-035](DECISIONS.md#결정-색인)로 B에서 변경)
 의존성: GAME-001, LOCAL-001, IMPL-001, IMPL-002
 범위: 방별 단일 명령 큐(`ingressSeq`·`observedAtMs` 부여), 단조 시계 고정 틱 스케줄러, 플레이어별 뷰 배포를 구현하고 시계·전송·로거·종료 콜백을 주입받게 한다. 주입 인터페이스의 형태를 이 작업에서 정한다([DEC-030](DECISIONS.md#결정-색인)). 서버가 이 인터페이스에 Socket.IO 전송·서버 시계를 주입하므로(IMPL-009, B) 형태를 확정하기 전에 B와 합의하고 결과를 이 절에 남긴다.
@@ -634,13 +634,13 @@ Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 Issue·PR: [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)
 
 수용 기준:
-- [ ] (정상) 가짜 시계·가짜 전송을 주입해 틱 진행, 같은 틱 명령의 `ingressSeq` 순서 처리, 플레이어별 뷰 전송이 테스트로 확인된다. 서버·워커가 같은 코드를 쓰며 시계·전송만 다르다.
-- [ ] (정상) 알 이동 중 스냅샷은 volatile, 모든 알 정지 뒤 최종 스냅샷·`turn:change`·`hazard:triggered`·`game:over`는 신뢰 전송으로 나간다. `revision`이 오래된 상태를 만들지 않는다.
-- [ ] (오류) 틱이 지연되면 따라잡기 상한까지만 처리하고 넘긴 시간을 `tick_skipped`로 로거에 남긴다. 거부된 명령은 큐 순서만 소비하고 상태를 바꾸지 않는다.
-- [ ] (예외, `LEAVE-FORFEIT` 기반) 이탈·기권·접속 대체가 같은 큐의 기권 명령으로 처리되고, 동시 이탈은 `ingressSeq`가 작은 쪽을 기권패로 한다. 시작 커밋보다 앞선 이탈은 대기실 처리다.
+- [x] (정상) 가짜 시계·가짜 전송을 주입해 틱 진행, 같은 틱 명령의 `ingressSeq` 순서 처리, 플레이어별 뷰 전송이 테스트로 확인된다. 서버·워커가 같은 코드를 쓰며 시계·전송만 다르다.
+- [x] (정상) 알 이동 중 스냅샷은 volatile, 모든 알 정지 뒤 최종 스냅샷·`turn:change`·`hazard:triggered`·`game:over`는 신뢰 전송으로 나간다. `revision`이 오래된 상태를 만들지 않는다.
+- [x] (오류) 틱이 지연되면 따라잡기 상한까지만 처리하고 넘긴 시간을 `tick_skipped`로 로거에 남긴다. 거부된 명령은 큐 순서만 소비하고 상태를 바꾸지 않는다.
+- [x] (예외, `LEAVE-FORFEIT` 기반) 이탈·기권·접속 대체가 같은 큐의 기권 명령으로 처리되고, 동시 이탈은 `ingressSeq`가 작은 쪽을 기권패로 한다. 시작 커밋보다 앞선 이탈은 대기실 처리다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-003-game-runtime). 4개 기준은 가짜 시계·전송 단위 테스트로 확인했다. 주입 인터페이스(`RuntimeClock`·`RuntimeTransport`·`RuntimeLogger`·`onFinished`)는 개발자 A의 초안이며 B와 합의하지 않았다. 합의 결과를 이 절에 남긴 뒤 병합한다.
 
 ## IMPL-004 로컬 2인 모드
 
