@@ -56,7 +56,7 @@
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 완료 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)·[PR #59](https://github.com/moguab2808-commits/mini-project-1-1/pull/59) |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 완료 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42)·[PR #61](https://github.com/moguab2808-commits/mini-project-1-1/pull/61) |
 | [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 진행 중 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
-| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 진행 중 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44) |
+| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 리뷰 중 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 진행 중 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
@@ -772,12 +772,12 @@ Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-010 온라인 대전 (클라이언트)
 
 우선순위: P0
-상태: 진행 중
+상태: 리뷰 중
 담당: 개발자 A
 의존성: API-001, IMPL-003, IMPL-004
 범위: `RemoteGameSession`(이벤트 변환 없이 전달)과 `RoomClient`(`room:*`·`session:replaced`)를 구현해 `LocalGameSession`을 바꿔 끼울 수 있게 한다.
 관련 문서: [LOCAL GameSession](design/LOCAL.md#gamesession-시그니처) / [API](design/API.md#socketio-이벤트) / [DEC-030](DECISIONS.md#결정-색인)
-Issue·PR: [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)
+Issue·PR: [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64)
 
 수용 기준:
 - [x] (정상) 화면 코드를 바꾸지 않고 `LocalGameSession` 대신 `RemoteGameSession`으로 경기가 진행된다. 재도전 경기를 같은 세션이 이어 간다.
