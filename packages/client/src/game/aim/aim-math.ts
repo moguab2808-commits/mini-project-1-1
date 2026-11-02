@@ -1,4 +1,4 @@
-// 조준 각도·세기 막대 계산. React·DOM에 의존하지 않는 순수 함수다.
+// 조준 각도·세기 막대·떨림 계산. React·DOM에 의존하지 않는 순수 함수다.
 
 /** 각도를 (−π, π] 범위로 정규화한다. 서버 `ShotSubmit.angle`이 이 범위만 받는다. */
 export function normalizeAngle(angle: number): number {
@@ -24,5 +24,30 @@ export function powerFromPhase(phase: number): number {
   return (p <= 1 ? p : 2 - p) * 100;
 }
 
-/** 바람이 초당 조준 방향을 돌리는 각도(도). GAME 방해요소 수치 */
-export const WIND_DEG_PER_SEC = 60;
+/**
+ * 시간 기반 의사잡음 [−1, 1]. 서로 나누어떨어지지 않는 주파수의 사인 합이라 반복이 눈에 띄지 않고,
+ * 같은 시각이면 같은 값이라 테스트가 결정적이다.
+ */
+export function tremor(timeMs: number): number {
+  const t = timeMs / 1000;
+  const v =
+    0.5 * Math.sin(t * 2 * Math.PI * 3.1) +
+    0.3 * Math.sin(t * 2 * Math.PI * 5.3 + 1.7) +
+    0.2 * Math.sin(t * 2 * Math.PI * 8.9 + 4.1);
+  return Math.max(-1, Math.min(1, v));
+}
+
+/** 먼 거리 조준(strain 1)의 최대 조준 떨림(도) */
+export const STRAIN_JITTER_DEG = 4;
+/** 책상 흔들기 효과 중 최대 조준 떨림(도) */
+export const DESK_SHAKE_JITTER_DEG = 6;
+
+/** 화면 흔들림 세기(0~1) 원인별 값. 장면이 카메라를 흔든다 */
+export const SHAKE = {
+  /** 먼 거리 조준: strain에 곱한다 */
+  strain: 0.35,
+  /** 내게 걸린 바람 */
+  wind: 0.6,
+  /** 책상 흔들기(양쪽 화면) */
+  deskShake: 1,
+} as const;

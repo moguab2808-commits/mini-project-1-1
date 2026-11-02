@@ -1,6 +1,7 @@
 // 방·테이블·판·알 에셋. 모두 코드 도형과 canvas 절차 텍스처이며 외부 파일은 쓰지 않는다.
-// 단위 cm. 판 윗면이 월드 Y=0, 책상 윗면은 판 아래 TABLE_Y다.
-import { BOARDS, type BoardId } from '@alkkagi/shared';
+// 단위 cm. 판 윗면이 월드 Y=0이다. 판은 두께 BOARD_THICKNESS의 몸체와 다리(BOARD_LEG)를 가진 실제 바둑판 형태이고,
+// 그 아래 책상 윗면이 TABLE_Y다. 좌석(SEAT_GEOMETRY.anchorDistance) 바깥에 의자를 둔다.
+import { BOARDS, SEAT_GEOMETRY, type BoardId } from '@alkkagi/shared';
 import {
   BoxGeometry,
   CanvasTexture,
@@ -23,10 +24,17 @@ import {
   type Texture,
 } from 'three';
 
-export const BOARD_THICKNESS = 3;
-export const TABLE_Y = -4;
-export const FLOOR_Y = -80;
-export const TABLE_HALF = 56;
+export const BOARD_THICKNESS = 6;
+export const BOARD_LEG = 3.5;
+/** 책상 윗면 높이(판 윗면 기준) */
+export const TABLE_Y = -(BOARD_THICKNESS + BOARD_LEG);
+export const FLOOR_Y = -84;
+/** 책상 반폭(좌우 X)·반깊이(좌석 쪽 Z). 캐릭터 배가 닿지 않게 깊이는 좌석 기준점보다 안쪽이다 */
+export const TABLE_HALF_X = 44;
+export const TABLE_HALF_Z = 25;
+const TABLE_TOP_T = 3;
+/** 의자 방석 윗면 높이 */
+export const CHAIR_SEAT_Y = -36.5;
 
 function canvasTexture(size: number, draw: (g: CanvasRenderingContext2D, s: number) => void) {
   const canvas = document.createElement('canvas');
@@ -188,6 +196,8 @@ export interface Stage {
   table: Group;
   /** 판 돌리기 연출로 Y축 회전하는 판 */
   boardPivot: Group;
+  /** 천장 램프. 카메라가 높이 올라가면 시야를 가리지 않게 숨긴다 */
+  lamp: Group;
   dispose: () => void;
 }
 
@@ -221,15 +231,17 @@ export function buildStage(board: BoardId): Stage {
   k.mats.push(lampMat);
   const shade = k.mesh(new ConeGeometry(24, 16, 32, 1, true), lampMat, false, false);
   shade.position.y = 86;
-  room.add(shade);
+  const lamp = new Group();
+  room.add(lamp);
+  lamp.add(shade);
   const cord = k.mesh(new CylinderGeometry(0.5, 0.5, 120, 6), k.std(0x111111), false, false);
   cord.position.y = 154;
-  room.add(cord);
+  lamp.add(cord);
   const bulbMat = new MeshBasicMaterial({ color: 0xfff1c9 });
   k.mats.push(bulbMat);
   const bulb = k.mesh(new SphereGeometry(4.5, 12, 10), bulbMat, false, false);
   bulb.position.y = 80;
-  room.add(bulb);
+  lamp.add(bulb);
   const glow = new PointLight(0xffb36b, 0.0, 0);
   glow.position.set(0, 70, 0);
   room.add(glow);
@@ -253,39 +265,105 @@ export function buildStage(board: BoardId): Stage {
     }
   }
 
-  // 책상(흔들림 대상)
+  // 의자: 좌석마다 기준점 바깥(엉덩이 아래)에 둔다. 흔들림·회전과 무관하다
+  const chairMat = k.std(0x6b3f22, 0.55);
+  const chairLeg = k.std(0x3b2416, 0.6);
+  for (const side of [1, -1]) {
+    const cz = side * (SEAT_GEOMETRY.anchorDistance + 6);
+    const seat = k.mesh(new CylinderGeometry(11, 11, 2.6, 24), chairMat);
+    seat.position.set(0, CHAIR_SEAT_Y - 1.3, cz);
+    room.add(seat);
+    const post = k.mesh(new CylinderGeometry(1.6, 2, CHAIR_SEAT_Y - 2.6 - FLOOR_Y, 10), chairLeg);
+    post.position.set(0, (CHAIR_SEAT_Y - 2.6 + FLOOR_Y) / 2, cz);
+    room.add(post);
+    const base = k.mesh(new CylinderGeometry(9, 10, 1.4, 20), chairLeg);
+    base.position.set(0, FLOOR_Y + 0.7, cz);
+    room.add(base);
+    const back = k.mesh(new BoxGeometry(20, 16, 2), chairMat);
+    back.position.set(0, CHAIR_SEAT_Y + 12, cz + side * 11);
+    room.add(back);
+    for (const bx of [-8, 8]) {
+      const rod = k.mesh(new CylinderGeometry(0.8, 0.8, 12, 6), chairLeg);
+      rod.position.set(bx, CHAIR_SEAT_Y + 4, cz + side * 11);
+      room.add(rod);
+    }
+  }
+
+  // 책상(흔들림 대상): 상판·다리·가로대
   const table = new Group();
   const woodTop = k.std(0x5a3520, 0.55);
-  const top = k.mesh(new BoxGeometry(TABLE_HALF * 2, 4, TABLE_HALF * 2), woodTop);
-  top.position.y = TABLE_Y - 2;
+  const top = k.mesh(new BoxGeometry(TABLE_HALF_X * 2, TABLE_TOP_T, TABLE_HALF_Z * 2), woodTop);
+  top.position.y = TABLE_Y - TABLE_TOP_T / 2;
   table.add(top);
+  const edgeMat = k.std(0x3f2414, 0.5);
+  for (const sz of [1, -1]) {
+    const lip = k.mesh(new BoxGeometry(TABLE_HALF_X * 2 + 0.6, 1.2, 1.2), edgeMat);
+    lip.position.set(0, TABLE_Y - 0.6, sz * (TABLE_HALF_Z + 0.3));
+    table.add(lip);
+  }
   const legMat = k.std(0x3d2415, 0.6);
+  const legH = TABLE_Y - TABLE_TOP_T - FLOOR_Y;
   for (const [a, b] of [
     [1, 1],
     [1, -1],
     [-1, 1],
     [-1, -1],
   ] as const) {
-    const h = TABLE_Y - 4 - FLOOR_Y;
-    const leg = k.mesh(new CylinderGeometry(3, 3.6, h, 12), legMat);
-    leg.position.set(a * (TABLE_HALF - 6), FLOOR_Y + h / 2, b * (TABLE_HALF - 6));
+    const leg = k.mesh(new BoxGeometry(4.5, legH, 4.5), legMat);
+    leg.position.set(a * (TABLE_HALF_X - 5), FLOOR_Y + legH / 2, b * (TABLE_HALF_Z - 5));
     table.add(leg);
   }
-  // 회전판 받침: 판이 도는 동안에도 책상 위에 고정되어 있다
-  const lazy = k.mesh(new CylinderGeometry(35, 36, 1, 48), k.std(0x2c2c30, 0.6, 0.1));
-  lazy.position.y = TABLE_Y + 0.5;
-  table.add(lazy);
+  for (const b of [1, -1]) {
+    const apron = k.mesh(new BoxGeometry(TABLE_HALF_X * 2 - 10, 6, 2), legMat);
+    apron.position.set(0, TABLE_Y - TABLE_TOP_T - 3, b * (TABLE_HALF_Z - 5));
+    table.add(apron);
+  }
 
-  // 판
+  // 판: 몸체(두께) + 다리. 판 돌리기 연출 때 몸체째 회전한다
   const boardPivot = new Group();
-  const sideWood = k.std(0xb07a3f, 0.6);
-  const bodyGeo =
+  const sideWood = k.std(0xc08a4c, 0.5);
+  const body =
     def.shape === 'square'
-      ? new BoxGeometry(def.size, BOARD_THICKNESS, def.size)
-      : new CylinderGeometry(def.diameter / 2, def.diameter / 2, BOARD_THICKNESS, 64);
-  const body = k.mesh(bodyGeo, sideWood);
+      ? k.mesh(new BoxGeometry(def.size, BOARD_THICKNESS, def.size), sideWood)
+      : k.mesh(
+          new CylinderGeometry(def.diameter / 2, def.diameter / 2 - 0.6, BOARD_THICKNESS, 72),
+          sideWood,
+        );
   body.position.y = -BOARD_THICKNESS / 2 - 0.02;
   boardPivot.add(body);
+  // 몸체 아래 가장자리를 어둡게 둘러 두께가 보이게 한다
+  const seamMat = k.std(0x6e4522, 0.7);
+  const seam =
+    def.shape === 'square'
+      ? k.mesh(new BoxGeometry(def.size - 1, 0.8, def.size - 1), seamMat)
+      : k.mesh(
+          new CylinderGeometry(def.diameter / 2 - 0.8, def.diameter / 2 - 0.8, 0.8, 64),
+          seamMat,
+        );
+  seam.position.y = -BOARD_THICKNESS - 0.4;
+  boardPivot.add(seam);
+  const legWood = k.std(0x8a5a2c, 0.55);
+  const legGeo = new CylinderGeometry(3, 2, BOARD_LEG, 12);
+  k.geos.push(legGeo);
+  const legSpots: [number, number][] =
+    def.shape === 'square'
+      ? [
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ].map(([a, b]) => [(a ?? 1) * (def.size / 2 - 7), (b ?? 1) * (def.size / 2 - 7)])
+      : [0, 1, 2, 3].map((i) => {
+          const a = Math.PI / 4 + (i * Math.PI) / 2;
+          return [Math.cos(a) * def.diameter * 0.3, Math.sin(a) * def.diameter * 0.3];
+        });
+  for (const [lx, lz] of legSpots) {
+    const leg = new Mesh(legGeo, legWood);
+    leg.castShadow = true;
+    leg.receiveShadow = true;
+    leg.position.set(lx, -BOARD_THICKNESS - BOARD_LEG / 2 - 0.02, lz);
+    boardPivot.add(leg);
+  }
   const topTex = createBoardTexture(board);
   k.texs.push(topTex);
   const topMat = new MeshStandardMaterial({ map: topTex, roughness: 0.55 });
@@ -300,7 +378,7 @@ export function buildStage(board: BoardId): Stage {
   boardPivot.add(topMesh);
   table.add(boardPivot);
 
-  return { room, table, boardPivot, dispose: k.dispose };
+  return { room, table, boardPivot, lamp, dispose: k.dispose };
 }
 
 /** 알 무늬: 내 알은 어두운 바탕에 금색 별, 상대 알은 아이보리 바탕에 붉은 가위표 */

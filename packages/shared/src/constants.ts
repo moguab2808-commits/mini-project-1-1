@@ -70,12 +70,12 @@ export interface HazardMeta {
 
 export const HAZARDS: Record<HazardKind, HazardMeta> = {
   board_spin: { kind: 'board_spin', category: 'fatigue', durationMs: 1000, fatigueCost: 50 },
-  flashlight: { kind: 'flashlight', category: 'fatigue', durationMs: 2000, fatigueCost: 40 },
-  water_gun: { kind: 'water_gun', category: 'fatigue', durationMs: 3000, fatigueCost: 45 },
+  flashlight: { kind: 'flashlight', category: 'fatigue', durationMs: 4000, fatigueCost: 40 },
+  water_gun: { kind: 'water_gun', category: 'fatigue', durationMs: 5000, fatigueCost: 45 },
   desk_shake: { kind: 'desk_shake', category: 'fatigue', durationMs: 500, fatigueCost: 40 },
-  wall: { kind: 'wall', category: 'cooldown', durationMs: 5000, cooldownMs: 20000 },
-  sticky: { kind: 'sticky', category: 'cooldown', durationMs: 5000, cooldownMs: 20000 },
-  stun: { kind: 'stun', category: 'cooldown', durationMs: 3000, cooldownMs: 30000 },
+  wall: { kind: 'wall', category: 'cooldown', durationMs: 8000, cooldownMs: 20000 },
+  sticky: { kind: 'sticky', category: 'cooldown', durationMs: 8000, cooldownMs: 20000 },
+  stun: { kind: 'stun', category: 'cooldown', durationMs: 4000, cooldownMs: 30000 },
   bar_speed: { kind: 'bar_speed', category: 'random', durationMs: 1000 },
   wind: { kind: 'wind', category: 'random', durationMs: 1000 },
 };
@@ -85,19 +85,53 @@ export const HAZARD_TUNING = {
   /** 초당 감소량. 과열 중에도 감소한다 */
   fatigueDecayPerSec: 5,
   boardSpinDeg: 45,
-  deskShakeMaxDistance: 1.1,
-  wallLength: 8.8,
+  deskShakeMaxDistance: 2.2,
+  wallLength: 13.2,
   wallThickness: 0.6,
   /** 벽 중심이 놓이는 격자 간격 (알 지름) */
   gridStep: 2.2,
-  stickyDiameter: 8.8,
+  stickyDiameter: 13.2,
   /** 끈끈이 안의 지면 알에 더해지는 감속 cm/s² */
-  stickyExtraFriction: 500,
+  stickyExtraFriction: 900,
+  /** 바람이 상대 조준 방향을 돌리는 속도(°/s) */
+  windDegPerSec: 120,
   barSpeedMultiplier: 2,
   /** 랜덤형은 지급 시각부터 이 길이 구간마다 1회 발동 */
   randomIntervalMs: 15000,
   /** 흐림 최대 면적 비율 */
   blindMaxCoverage: 0.7,
+  /** 후레쉬·물총 발동 영역(원뿔) 반각. 상대 얼굴 방향과 이 각 안이면 맞은 것이다 */
+  blindBeamHalfAngleDeg: 10,
+  /** 맞는 동안 가림이 초당 오르는 양(최대 면적 대비 비율) */
+  blindGainPerSec: 0.8,
+  /** 빗나가는 동안 가림이 초당 줄어드는 양 */
+  blindDecayPerSec: 0.5,
+} as const;
+
+/**
+ * 좌석·캐릭터 기하(판 좌표계 cm). 좌석 0은 −y 쪽, 좌석 1은 +y 쪽에 앉는다.
+ * 손이 닿는 거리 판정과 후레쉬·물총 조준에 쓴다. 제안값이며 플레이 테스트로 조정한다.
+ */
+export const SEAT_GEOMETRY = {
+  /** 캐릭터 어깨(손 닿는 거리의 기준점)의 판 중심으로부터 거리 */
+  anchorDistance: 30,
+  /** 이 거리까지는 편하게 친다(조준 흔들림 없음) */
+  comfortReach: 26,
+  /** 이 거리를 넘는 알은 칠 수 없다(OUT_OF_REACH). 판을 돌려 가까이 가져와야 한다 */
+  maxReach: 40,
+  /** 얼굴 중심 높이(판 윗면 기준) */
+  headHeight: 24,
+  /** 후레쉬·물총을 든 손의 위치: 어깨 기준점에서 판 중심 쪽으로 이만큼, 이 높이 */
+  handForward: 8,
+  handHeight: 12,
+} as const;
+
+/** 기본 판 돌리기(내 턴, 조준 전) */
+export const BOARD_TURN = {
+  /** 최대 회전 속도(°/s) */
+  maxDegPerSec: 90,
+  /** 속도 한도에 더해 한 번에 허용하는 여유(°). 전송 지연을 흡수한다 */
+  burstDeg: 15,
 } as const;
 
 export type BoardDefinition =

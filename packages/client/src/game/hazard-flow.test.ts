@@ -95,6 +95,10 @@ async function startGame() {
           sent.push(cmd);
           return session.useHazard(cmd);
         },
+        // 판 돌리기·조준 중계는 이 흐름 검증 범위 밖이다
+        rotateBoard: () => Promise.resolve({ ok: true }),
+        aimHazard: () => undefined,
+        sendAim: () => undefined,
       },
       mySeat: seat,
       now: () => store.serverNow(),
@@ -126,12 +130,22 @@ const gameId = (s: Seat) => s.store.getState().start!.gameId;
 const held = (s: Seat) => s.store.getState().view!.private.held!;
 
 describe('방해요소 사용 흐름', () => {
-  it('정상: E 키로 후레쉬를 쓰면 양쪽이 hazard:triggered를 받고 효과는 상대 뷰에만 가림으로 들어간다', async () => {
+  it('정상: E 키로 후레쉬를 들고 클릭해 쓰면 양쪽이 hazard:triggered를 받고 효과는 상대 뷰에만 가림으로 들어간다', async () => {
     const { clock, s0, s1 } = await startGame();
     expect(held(s0).kind).toBe('flashlight');
     expect(held(s1).kind).toBe('wall');
 
-    s0.controller.onKey('e');
+    s0.controller.onKey('e'); // 손에 들기(아직 보내지 않음)
+    await clock.advance(20);
+    expect(s0.sent).toHaveLength(0);
+    // 상대 얼굴을 겨누고 왼쪽 클릭으로 발동
+    s0.controller.onPointer({
+      type: 'down',
+      point: null,
+      aimPoint: { x: 0, y: 30, h: 24 },
+      stoneId: null,
+      button: 0,
+    });
     await clock.advance(100);
 
     for (const s of [s0, s1]) {
@@ -170,6 +184,13 @@ describe('방해요소 사용 흐름', () => {
     expect(s1.store.getState().view!.private.held?.kind).toBe('wall');
     // 상대가 쓴 뒤에도 효과의 이름만 공개되고 보유 인스턴스는 드러나지 않는다
     s0.controller.onKey('e');
+    s0.controller.onPointer({
+      type: 'down',
+      point: null,
+      aimPoint: { x: 0, y: 30, h: 24 },
+      stoneId: null,
+      button: 0,
+    });
     await clock.advance(100);
     expect(JSON.stringify(s1.received)).not.toContain(mine.hazardInstanceId);
   });
@@ -233,7 +254,13 @@ describe('방해요소 사용 흐름', () => {
     // 미리보기는 같은 기하 조건으로 빨강/초록을 판정한다
     s1.controller.onKey('e');
     const preview = (x: number, y: number) => {
-      s1.controller.onPointer({ type: 'move', point: { x, y }, stoneId: null, button: 0 });
+      s1.controller.onPointer({
+        type: 'move',
+        point: { x, y },
+        aimPoint: null,
+        stoneId: null,
+        button: 0,
+      });
       return s1.controller.getSnapshot().placement!;
     };
     expect(preview(0, -11.5).valid).toBe(false);
@@ -241,7 +268,13 @@ describe('방해요소 사용 흐름', () => {
     expect(preview(0, 0).valid).toBe(true);
 
     // 유효한 위치를 클릭해 확정
-    s1.controller.onPointer({ type: 'down', point: { x: 0, y: 0 }, stoneId: null, button: 0 });
+    s1.controller.onPointer({
+      type: 'down',
+      point: { x: 0, y: 0 },
+      aimPoint: null,
+      stoneId: null,
+      button: 0,
+    });
     await clock.advance(100);
     expect(s1.controller.getSnapshot().placement).toBeNull();
     for (const s of [s0, s1]) {

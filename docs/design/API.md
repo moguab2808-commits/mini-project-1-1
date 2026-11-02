@@ -82,13 +82,15 @@
 | `HAZARD_INVALID_TARGET` | 벽·끈끈이의 위치·방향이 없거나 판 밖이거나 알·기존 벽·끈끈이와 겹침 ([GAME 방해요소별 처리](GAME.md#방해요소별-처리)) |
 | `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
+| `OUT_OF_REACH` | 손이 닿는 거리 밖의 알로 발사함 ([GAME 방해요소 수치](GAME.md#방해요소-수치)의 손이 닿는 거리, [DEC-036](../DECISIONS.md#결정-색인)). 제안: B 합의 전 |
+| `BOARD_ROTATE_NOT_ALLOWED` | 조준 단계가 아니거나(알 이동 중 등) 기절 중의 `board:rotate` ([DEC-036](../DECISIONS.md#결정-색인)). 상대 턴은 `NOT_YOUR_TURN`. 제안: B 합의 전 |
 
 방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A가 GAME·LOCAL·OPERATIONS와 대조해 확인했다([API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)). 목록은 이 절 한 곳에서 관리한다.
 
 ### Socket.IO 이벤트
 
 - 연결 시 세션으로 사용자를 인증하며, 로그인하지 않은 사용자는 연결을 거부한다.
-- 모든 C → S 명령은 ack 콜백으로 결과를 받는다. commandId를 두지 않는다. 발사는 gameId·turnId, 방해요소는 gameId·hazardInstanceId로 오래된 명령을 거부한다 ([GAME](GAME.md#명령-경합과-시간), [DEC-026](../DECISIONS.md#결정-색인)). 조준 값 전송 이벤트는 두지 않는다.
+- 모든 C → S 명령은 ack 콜백으로 결과를 받는다. commandId를 두지 않는다. 발사는 gameId·turnId, 방해요소는 gameId·hazardInstanceId로 오래된 명령을 거부한다 ([GAME](GAME.md#명령-경합과-시간), [DEC-026](../DECISIONS.md#결정-색인)). 발사 검증은 최종 발사값만 본다. 조준 상태는 상대 화면의 캐릭터 몸짓 표시용으로만 `aim:update`→`aim:state`로 중계하며 ack 없이 volatile로 보낸다([DEC-036](../DECISIONS.md#결정-색인)).
 - AI 대전은 브라우저에서 실행하므로 서버 이벤트가 없다 (`ai:start` 삭제, [DEC-021](../DECISIONS.md#결정-색인)). 방 목록 구독 이벤트(`lobby:*`)도 없다([DEC-024](../DECISIONS.md#결정-색인)).
 - 같은 계정의 새 연결이 생기면 기존 연결에 `session:replaced`를 보내고 끊는다.
 - 시간은 서버 기준 epoch 밀리초(`…Ms`), 각도는 판 좌표계의 라디안이다. 좌표는 판 중심 원점, 선공 기준 오른쪽 x·상대 방향 y, 단위 cm다([GAME](GAME.md#물리와-입력-경계)).
@@ -113,6 +115,10 @@
 | S → C | `game:over` | 게임 종료 |
 | C → S | `rematch:request` | 재도전하기 |
 | S → C | `rematch:state` | 재도전 진행 상태 |
+| C → S | `board:rotate` | 기본 판 돌리기 `{ gameId, turnId, deltaDeg }`(양수 반시계, \|Δ\| ≤ 90). ack: `{ ok: true }` 또는 `INVALID_INPUT`·`GAME_NOT_ACTIVE`·`STALE_TURN`·`NOT_YOUR_TURN`·`BOARD_ROTATE_NOT_ALLOWED`. 속도 한도를 넘는 Δ는 잘라 적용 (제안, DEC-036) |
+| C → S | `hazard:aim` | 발동 중인 후레쉬·물총 조준점 `{ gameId, hazardInstanceId, target: { x, y, h } }`. ack 없음, volatile (제안, DEC-036) |
+| C → S | `aim:update` | 내 조준·몸짓 상태 `{ gameId, mode, stoneId?, angle?, power?, kind?, target? }`. ack 없음, volatile, 초당 20회 이하 (제안, DEC-036) |
+| S → C | `aim:state` | 상대의 `aim:update`에 `seat`를 붙여 상대에게만 중계 (제안, DEC-036) |
 | S → C | `session:replaced` | 다른 접속으로 대체되어 로그아웃됨 |
 
 `sim:result`(일괄 기록 이벤트)는 두지 않는다. 실시간 진행은 `game:state`로, 방해요소 발동은 `hazard:triggered`로 전달한다 ([ADR-0004](../adr/0004-realtime-hazards.md), [DEC-016](../DECISIONS.md#결정-색인)).
@@ -160,7 +166,7 @@
 | `gameId`, `serverTick`, `serverNowMs`, `revision` | 숫자·문자열 | `revision`·`serverTick`이 오래된 상태는 클라이언트가 버린다 |
 | `phase` | `waiting`·`aiming`·`moving`·`resolving`·`finished` | |
 | `turnId`, `round`, `activePlayerId`, `deadlineMs` | 숫자·`Seat`·ms | |
-| `boardRotationDeg` | 숫자 | 판 돌리기 누적 회전 |
+| `boardRotationDeg` | 숫자 | 판 누적 회전(°). 위에서 볼 때 반시계가 양수. 기본 판 돌리기는 `deltaDeg`만큼 더하고, 판 돌리기 방해요소(시계 방향 45°)는 45를 뺀다 (DEC-036) |
 | `stones` | `[{ id, ownerId: Seat, x, y, h }]` | 제거된 알은 포함하지 않는다 |
 | `effects` | `[{ kind, targetSeat, startsAtMs, expiresAtMs, params? }]` | 양쪽에 같게 보내는 공개 활성 효과. 벽·끈끈이의 위치 포함 |
 | `result` | `null` 또는 `game:over`와 같은 결과 | 확정 후에만 |
@@ -264,6 +270,7 @@ sequenceDiagram
 
 - 인증 전달·실패 응답·권한 검사 위치: [인증 설계](AUTH.md)
 - 발사 각도 범위 (제안 (−π, π], 승인 전)
+- DEC-036의 `board:rotate`·`hazard:aim`·`aim:update`/`aim:state`, `OUT_OF_REACH`·`BOARD_ROTATE_NOT_ALLOWED`, `hazard:use` target의 `h`, 효과 params의 `aimX`·`aimY`·`aimH`·`coverage`, private `blind.coverage`: 개발자 A 제안이며 서버 구현(IMPL-009) 전에 개발자 B와 합의한다. 스키마는 `packages/shared/src/protocol.ts`
 - 호환성·버전 변경
 
 이벤트명은 `shared`에 한 곳으로 정의하며 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 표에 있는 30초 등의 제품 값은 [게임 규칙](../PRD.md#게임-규칙)을 참조하며 여기서 새로 결정하지 않는다.

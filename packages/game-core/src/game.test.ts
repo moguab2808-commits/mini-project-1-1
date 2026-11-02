@@ -251,7 +251,7 @@ describe('판정과 물리', () => {
       g.debugSetStone(0, -10, 0);
       if (sticky) {
         g.debugGrant(1, 'sticky');
-        assert.equal(use(g, 1, T0, { x: -4, y: 0 }).ok, true);
+        assert.equal(use(g, 1, T0, { x: 0, y: 0 }).ok, true);
       }
       shoot(g, 0, T0 + 10, 30, 0, 0);
       settle(g, T0 + 10);
@@ -277,7 +277,11 @@ describe('판정과 물리', () => {
     const r = use(g, 0, T0);
     assert.equal(r.ok, true);
     const v = g.getViewFor(0);
-    assert.equal(v.boardRotationDeg, 45);
+    assert.equal(
+      v.boardRotationDeg,
+      -45,
+      '누적 회전은 반시계가 양수다(BoardRotateSchema와 같은 부호)',
+    );
     const s0 = v.stones.find((s) => s.id === 0)!;
     assert.ok(Math.abs(s0.x) <= 23 && Math.abs(s0.y) <= 23, '모서리의 알도 판 안으로 보정');
     const s1 = v.stones.find((s) => s.id === 1)!; // 초기 (−23+46*2/6, −11.5)
@@ -287,7 +291,7 @@ describe('판정과 물리', () => {
     assert.ok(Math.abs(s1.x - (ox * Math.cos(rad) - oy * Math.sin(rad))) < 0.05);
   });
 
-  test('책상 흔들기: 알이 1.1cm 이내로만 움직이고 제거되지 않는다', () => {
+  test('책상 흔들기: 알이 2.2cm 이내로만 움직이고 제거되지 않는다', () => {
     const g = mk();
     g.debugGrant(0, 'desk_shake');
     const before = g.getViewFor(0).stones;
@@ -297,7 +301,7 @@ describe('판정과 물리', () => {
     for (const a of after) {
       const b = before.find((s) => s.id === a.id)!;
       assert.ok(
-        Math.hypot(a.x - b.x, a.y - b.y) <= 1.1 + 2.3,
+        Math.hypot(a.x - b.x, a.y - b.y) <= 2.2 + 2.3,
         '겹침 보정으로 조금 더 움직일 수 있다',
       );
     }
@@ -333,8 +337,8 @@ describe('명령 거부', () => {
     assert.equal(code(g.submitShot(env(0, T0 + 1000), base)), 'PLAYER_STUNNED');
     assert.equal(snap(g), before);
     // 기절이 풀리면 발사된다
-    assert.equal(code(g.submitShot(env(0, T0 + 3000), base)), 'OK');
-    assert.equal(code(g.submitShot(env(0, T0 + 3001), base)), 'SHOT_ALREADY_SUBMITTED');
+    assert.equal(code(g.submitShot(env(0, T0 + 4000), base)), 'OK');
+    assert.equal(code(g.submitShot(env(0, T0 + 4001), base)), 'SHOT_ALREADY_SUBMITTED');
   });
 
   test('경기 시작 전과 종료 후에는 GAME_NOT_ACTIVE다', () => {
@@ -563,5 +567,222 @@ describe('getViewFor: 상대 비공개', () => {
       assert.equal(!r.ok && r.error.code, 'INVALID_INPUT');
     }
     assert.equal(shoot(g, 0, T0 + 20, 50, Math.PI).ok, true);
+  });
+});
+
+describe('손이 닿는 거리 (DEC-036)', () => {
+  const code = (r: { ok: boolean; error?: { code: string } }) => (r.ok ? 'OK' : r.error!.code);
+  const snap = (g: Game) =>
+    JSON.stringify([g.getViewFor(0), g.getViewFor(1), g.debugPrngStates(), g.debugState()]);
+
+  test('먼 알의 발사는 OUT_OF_REACH로 거부되고 상태·난수가 바뀌지 않는다', () => {
+    const g = mk();
+    g.debugSetStone(0, 0, 15); // 좌석 0 기준점 (0, −30)에서 45cm
+    const before = snap(g);
+    assert.equal(code(shoot(g, 0, T0, 50, 0, 0)), 'OUT_OF_REACH');
+    assert.equal(snap(g), before);
+  });
+
+  test('판을 돌려 가까이 가져오면 칠 수 있다', () => {
+    const g = mk();
+    g.debugSetStone(0, 0, 15);
+    const v = g.getViewFor(0);
+    assert.equal(
+      g.rotateBoard(env(0, T0), { gameId: 'g1', turnId: v.turnId, deltaDeg: 90 }).ok,
+      true,
+    );
+    const s0 = g.getViewFor(0).stones.find((s) => s.id === 0)!;
+    assert.ok(Math.abs(s0.x + 15) < 1e-6 && Math.abs(s0.y) < 1e-6, `반시계 90°: ${s0.x},${s0.y}`);
+    assert.equal(code(shoot(g, 0, T0 + 10, 10, 0, 0)), 'OK');
+  });
+
+  test('경계 바로 안은 칠 수 있다(maxReach 40cm)', () => {
+    const g = mk();
+    g.debugSetStone(0, 0, 9.99);
+    assert.equal(code(shoot(g, 0, T0, 10, 0, 0)), 'OK');
+  });
+});
+
+describe('기본 판 돌리기 (DEC-036)', () => {
+  const code = (r: { ok: boolean; error?: { code: string } }) => (r.ok ? 'OK' : r.error!.code);
+  const snap = (g: Game) =>
+    JSON.stringify([g.getViewFor(0), g.getViewFor(1), g.debugPrngStates(), g.debugState()]);
+  const rot = (g: Game, seat: Seat, t: number, deltaDeg: number, over: object = {}) =>
+    g.rotateBoard(env(seat, t), {
+      gameId: 'g1',
+      turnId: g.getViewFor(0).turnId,
+      deltaDeg,
+      ...over,
+    });
+
+  test('거부: 상대 턴·낡은 턴·범위 밖·이동 중·기절 중, 거부는 상태·난수를 바꾸지 않는다', () => {
+    const g = mk();
+    g.debugGrant(1, 'stun');
+    const rej = (expected: string, f: () => ReturnType<Game['rotateBoard']>) => {
+      const before = snap(g);
+      assert.equal(code(f()), expected);
+      assert.equal(snap(g), before);
+    };
+    rej('NOT_YOUR_TURN', () => rot(g, 1, T0, 10));
+    rej('STALE_TURN', () => rot(g, 0, T0, 10, { turnId: 99 }));
+    rej('STALE_TURN', () => rot(g, 0, T0, 10, { gameId: 'other' }));
+    rej('INVALID_INPUT', () => rot(g, 0, T0, 91));
+    rej('INVALID_INPUT', () => rot(g, 0, T0, Number.NaN));
+    // 기절 중
+    assert.equal(use(g, 1, T0).ok, true);
+    g.advanceTo(T0 + 100);
+    rej('BOARD_ROTATE_NOT_ALLOWED', () => rot(g, 0, T0 + 100, 10));
+    // 기절이 풀린 뒤 발사하면 이동 중에는 돌릴 수 없다
+    g.advanceTo(T0 + 4000);
+    assert.equal(code(rot(g, 0, T0 + 4000, 10)), 'OK');
+    assert.equal(code(shoot(g, 0, T0 + 4010, 30, 0)), 'OK');
+    g.advanceTo(T0 + 4050);
+    rej('BOARD_ROTATE_NOT_ALLOWED', () => rot(g, 0, T0 + 4050, 10));
+  });
+
+  test('경기 시작 전에는 GAME_NOT_ACTIVE다', () => {
+    const waiting = new Game({
+      gameId: 'g1',
+      board: 'standard',
+      pieceCount: 5,
+      seed: 1,
+      startMs: T0,
+    });
+    const r = waiting.rotateBoard(env(0, T0), { gameId: 'g1', turnId: 1, deltaDeg: 10 });
+    assert.equal(code(r), 'GAME_NOT_ACTIVE');
+  });
+
+  test('속도 한도: 마지막 회전 이후 경과 시간×90°/s + 15°까지 잘라 적용한다', () => {
+    const g = mk();
+    assert.equal(code(rot(g, 0, T0, 10)), 'OK');
+    assert.equal(g.getViewFor(0).boardRotationDeg, 10);
+    assert.equal(code(rot(g, 0, T0 + 100, 80)), 'OK', '잘라도 성공');
+    assert.ok(Math.abs(g.getViewFor(0).boardRotationDeg - (10 + 9 + 15)) < 1e-9);
+    assert.equal(code(rot(g, 0, T0 + 100, -50)), 'OK');
+    assert.ok(Math.abs(g.getViewFor(0).boardRotationDeg - (34 - 15)) < 1e-9);
+    const rev = g.getViewFor(0).revision;
+    assert.equal(code(rot(g, 0, T0 + 100, 0)), 'OK');
+    assert.equal(g.getViewFor(0).revision, rev, '0° 회전은 상태를 바꾸지 않는다');
+  });
+
+  test('알·벽·끈끈이가 판과 함께 반시계로 돌고 양쪽 뷰의 누적 각이 같다', () => {
+    const g = mk();
+    g.debugGrant(1, 'wall');
+    assert.equal(use(g, 1, T0, { x: 4.4, y: 4.4, orientation: 'horizontal' }).ok, true);
+    g.debugGrant(1, 'sticky'); // 교체 지급이 아니므로 벽 효과는 남는다
+    g.debugSetStone(0, -10, 0);
+    assert.equal(code(rot(g, 0, T0 + 10, 90)), 'OK');
+    const v0 = g.getViewFor(0);
+    const v1 = g.getViewFor(1);
+    assert.equal(v0.boardRotationDeg, 90);
+    assert.equal(v1.boardRotationDeg, 90);
+    const s0 = v0.stones.find((s) => s.id === 0)!;
+    assert.ok(Math.abs(s0.x) < 1e-6 && Math.abs(s0.y + 10) < 1e-6, `${s0.x},${s0.y}`);
+    const wall = v0.effects.find((e) => e.kind === 'wall')!;
+    assert.ok(Math.abs(wall.params!.x! + 4.4) < 1e-9 && Math.abs(wall.params!.y! - 4.4) < 1e-9);
+    assert.ok(Math.abs(wall.params!.angleDeg! - 90) < 1e-9);
+    const w = g.debugState().walls[0]!;
+    assert.ok(Math.abs(w.cx + 4.4) < 1e-9 && Math.abs(w.angle - Math.PI / 2) < 1e-9);
+  });
+
+  test('판 돌리기 방해요소는 그대로 시계 방향 45°이고 기본 판 돌리기와 누적 각을 함께 쓴다', () => {
+    const g = mk();
+    assert.equal(code(rot(g, 0, T0, 30)), 'OK');
+    g.debugGrant(1, 'board_spin');
+    assert.equal(use(g, 1, T0 + 10).ok, true);
+    assert.equal(g.getViewFor(0).boardRotationDeg, 30 - 45);
+  });
+});
+
+describe('후레쉬·물총 조준과 가림 (DEC-036)', () => {
+  const FACE_OF_1 = { x: 0, y: 30, h: 24 };
+  const MISS = { x: 25, y: 30, h: 0 };
+  const close = (a: number, b: number) => Math.abs(a - b) < 1e-6;
+
+  function fire(g: Game, kind: 'flashlight' | 'water_gun', t: number, target?: object) {
+    g.debugGrant(0, kind);
+    const id = g.getViewFor(0).private.held!.hazardInstanceId;
+    const r = g.useHazard(env(0, t), { gameId: 'g1', hazardInstanceId: id, target } as never);
+    assert.equal(r.ok, true);
+    return id;
+  }
+  const coverage = (g: Game) => g.getViewFor(1).private.blind?.coverage;
+
+  test('조준이 상대 얼굴에 머물면 가림이 초당 0.8씩 올라 1에서 멈춘다', () => {
+    const g = mk();
+    fire(g, 'flashlight', T0, FACE_OF_1);
+    const start = g.drainEvents().find((e) => e.type === 'hazard:triggered');
+    assert.ok(start && start.type === 'hazard:triggered');
+    assert.deepEqual(start.payload.params, { aimX: 0, aimY: 30, aimH: 24, coverage: 0 });
+    assert.equal(coverage(g), 0);
+    const rev = g.getViewFor(0).revision;
+    g.advanceTo(T0 + 500);
+    assert.ok(close(coverage(g)!, 0.4), `${coverage(g)}`);
+    assert.ok(g.getViewFor(0).revision > rev, '가림이 바뀌면 뷰를 다시 보낸다');
+    const eff = g.getViewFor(0).effects.find((e) => e.kind === 'flashlight')!;
+    assert.ok(close(eff.params!.coverage!, 0.4));
+    assert.equal(g.getViewFor(0).private.blind, undefined, '시전자 뷰에는 가림이 없다');
+    g.advanceTo(T0 + 2000);
+    assert.equal(coverage(g), 1);
+  });
+
+  test('조준을 옮겨 빗나가면 초당 0.5씩 줄고, 남의 효과·낡은 id의 조준은 무시된다', () => {
+    const g = mk();
+    const id = fire(g, 'flashlight', T0, FACE_OF_1);
+    g.advanceTo(T0 + 1500);
+    assert.equal(coverage(g), 1);
+    const snapBefore = JSON.stringify([g.getViewFor(0), g.getViewFor(1), g.debugState()]);
+    const stale = g.aimHazard(env(0, T0 + 1500), {
+      gameId: 'g1',
+      hazardInstanceId: 'old',
+      target: MISS,
+    });
+    const other = g.aimHazard(env(1, T0 + 1500), {
+      gameId: 'g1',
+      hazardInstanceId: id,
+      target: MISS,
+    });
+    const game = g.aimHazard(env(0, T0 + 1500), {
+      gameId: 'x',
+      hazardInstanceId: id,
+      target: MISS,
+    });
+    for (const r of [stale, other, game]) assert.equal(!r.ok && r.error.code, 'STALE_HAZARD');
+    assert.equal(JSON.stringify([g.getViewFor(0), g.getViewFor(1), g.debugState()]), snapBefore);
+    assert.equal(
+      g.aimHazard(env(0, T0 + 1500), { gameId: 'g1', hazardInstanceId: id, target: MISS }).ok,
+      true,
+    );
+    const eff = g.getViewFor(0).effects.find((e) => e.kind === 'flashlight')!;
+    assert.deepEqual([eff.params!.aimX, eff.params!.aimY, eff.params!.aimH], [25, 30, 0]);
+    g.advanceTo(T0 + 2500);
+    assert.ok(close(coverage(g)!, 0.5), `${coverage(g)}`);
+    g.advanceTo(T0 + 3999);
+    assert.equal(coverage(g), 0, '0 아래로 내려가지 않는다');
+    g.advanceTo(T0 + 4000);
+    assert.equal(g.getViewFor(1).private.blind, undefined, '후레쉬 4초 뒤 끝난다');
+  });
+
+  test('조준점 없이 발동하면 빗나감으로 시작해 가림이 오르지 않는다', () => {
+    const g = mk();
+    fire(g, 'water_gun', T0);
+    g.advanceTo(T0 + 1000);
+    assert.equal(coverage(g), 0);
+    assert.equal(g.getViewFor(1).private.blind?.kind, 'water_gun');
+    assert.equal(g.getViewFor(1).private.blind!.expiresAtMs - T0, 5000);
+  });
+
+  test('판을 돌려도 조준점은 그대로다(좌석 공간 기준)', () => {
+    const g = mk();
+    fire(g, 'flashlight', T0, FACE_OF_1);
+    const v = g.getViewFor(0);
+    assert.equal(
+      g.rotateBoard(env(0, T0 + 100), { gameId: 'g1', turnId: v.turnId, deltaDeg: 45 }).ok,
+      true,
+    );
+    const eff = g.getViewFor(0).effects.find((e) => e.kind === 'flashlight')!;
+    assert.deepEqual([eff.params!.aimX, eff.params!.aimY, eff.params!.aimH], [0, 30, 24]);
+    g.advanceTo(T0 + 600);
+    assert.ok(close(coverage(g)!, 0.48), `${coverage(g)}`);
   });
 });

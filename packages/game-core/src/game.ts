@@ -1,4 +1,5 @@
 import {
+  BOARD_TURN,
   HAZARDS,
   HAZARD_KINDS,
   HAZARD_TUNING,
@@ -6,11 +7,13 @@ import {
   RULES,
   type BoardDefinition,
   type BoardId,
+  type BoardRotate,
   type CommandResult,
   type GameErrorCode,
   type GameForfeit,
   type GameOver,
   type GameView,
+  type HazardAim,
   type HazardGranted,
   type HazardKind,
   type HazardParams,
@@ -20,6 +23,7 @@ import {
   type ShotSubmit,
   type TurnChange,
 } from '@alkkagi/shared';
+import { beamHitsFace, reachOf, type Point3 } from './reach.ts';
 import {
   boardOf,
   clampInside,
@@ -79,7 +83,20 @@ export interface Effect {
   wall?: Obb;
   sticky?: { cx: number; cy: number; radius: number };
   blindPattern?: number;
+  /** 직접 사용한 방해요소의 인스턴스 id(`hazard:aim` 대조용) */
+  instanceId?: string;
+  /** 후레쉬·물총: 사용자가 조준 중인 점(좌석 공간 기준이라 판 회전과 무관). 없으면 빗나감 */
+  aim?: Point3;
+  /** 후레쉬·물총: 현재 가림 정도 0~1(blindMaxCoverage 대비) */
+  coverage?: number;
+  /** 후레쉬·물총: 마지막으로 revision을 올린 때의 가림 정도 */
+  publishedCoverage?: number;
 }
+
+const isBlind = (k: HazardKind): k is 'flashlight' | 'water_gun' =>
+  k === 'flashlight' || k === 'water_gun';
+/** 가림 정도가 이만큼 바뀌면 revision을 올려 뷰를 다시 보낸다(매 틱 전송을 피한다) */
+const COVERAGE_PUBLISH_STEP = 0.05;
 
 export interface PlayerState {
   held: { instanceId: string; kind: HazardKind; round: number } | null;
@@ -98,6 +115,11 @@ function fail(code: GameErrorCode, message: string): CommandResult {
 }
 
 const OK: CommandResult = { ok: true };
+
+/** `hazard:use` target을 후레쉬·물총 조준점으로. h가 없으면 판 위 점(h = 0)이다 */
+function aimPointOf(t: { x: number; y: number; h?: number }): Point3 {
+  return { x: t.x, y: t.y, h: t.h ?? 0 };
+}
 
 export class Game {
   readonly gameId: string;
@@ -120,7 +142,10 @@ export class Game {
   private turnCounter = 0;
   private grantCounter = 0;
   private effectCounter = 0;
+  /** 판의 누적 회전(도). 판 좌표계에서 반시계가 양수다(BoardRotateSchema와 같은 부호) */
   private boardRotationDeg = 0;
+  /** 좌석별 마지막 기본 판 돌리기 시각. 속도 한도 계산에 쓴다 */
+  protected readonly lastBoardTurnMs: [number | null, number | null] = [null, null];
   private result: GameOver | null = null;
 
   private active: Seat = 0;
@@ -234,6 +259,9 @@ export class Game {
       return fail('INVALID_STONE', '쓸 수 없는 알이다');
     }
     if (this.isStunned(env.seat, env.observedAtMs)) return fail('PLAYER_STUNNED', '기절 중이다');
+    if (!reachOf(env.seat, stone.x, stone.y).reachable) {
+      return fail('OUT_OF_REACH', '손이 닿지 않는 알이다');
+    }
 
     launch(stone, cmd.angle, cmd.power);
     this.shotCommitted = true;
@@ -289,6 +317,9 @@ export class Game {
     } else {
       p.cooldownEndsAtMs = now + (meta.cooldownMs ?? 0);
     }
+    // 후레쉬·물총: target이 있으면 첫 조준점(h가 없으면 판 위 점), 없으면 빗나감으로 시작한다.
+    const aim: Point3 | undefined =
+      isBlind(meta.kind) && cmd.target ? aimPointOf(cmd.target) : undefined;
     const params: HazardParams | undefined =
       wall && cmd.target
         ? {
@@ -301,18 +332,92 @@ export class Game {
           ? { x: sticky.cx, y: sticky.cy }
           : meta.kind === 'board_spin'
             ? { angleDeg: HAZARD_TUNING.boardSpinDeg }
-            : undefined;
+            : isBlind(meta.kind)
+              ? { ...(aim ? { aimX: aim.x, aimY: aim.y, aimH: aim.h } : {}), coverage: 0 }
+              : undefined;
     const eff = this.addEffect(meta.kind, env.seat, other(env.seat), now, meta.durationMs, params);
+    eff.instanceId = p.held.instanceId;
     if (wall) eff.wall = wall;
     if (sticky) eff.sticky = sticky;
-    if (meta.kind === 'flashlight' || meta.kind === 'water_gun') {
+    if (isBlind(meta.kind)) {
       eff.blindPattern = this.visualRng.int(0x7fffffff);
+      eff.coverage = 0;
+      eff.publishedCoverage = 0;
+      if (aim) eff.aim = aim;
     }
     this.syncWorld();
-    if (meta.kind === 'board_spin') this.applyBoardSpin();
+    if (meta.kind === 'board_spin') this.applyBoardRotation(-HAZARD_TUNING.boardSpinDeg);
     else if (meta.kind === 'desk_shake') this.applyDeskShake();
     this.emitTriggered(eff, 'start');
     this.revision++;
+    return OK;
+  }
+
+  /**
+   * 기본 판 돌리기(`board:rotate`, DEC-036). 내 턴의 조준 단계에서 기절이 아닐 때만 받는다.
+   * 검사 순서: INVALID_INPUT → GAME_NOT_ACTIVE → STALE_TURN(gameId·turnId) → NOT_YOUR_TURN
+   * → BOARD_ROTATE_NOT_ALLOWED(조준 단계 아님·발사함·기절). 속도 한도를 넘는 각은 한도까지
+   * 잘라 적용하고 성공으로 응답한다. 양수 deltaDeg는 반시계(판 좌표계)다.
+   */
+  rotateBoard(env: Envelope, cmd: BoardRotate): CommandResult {
+    this.advanceTo(env.observedAtMs);
+    if (!Number.isFinite(cmd.deltaDeg) || Math.abs(cmd.deltaDeg) > 90) {
+      return fail('INVALID_INPUT', '회전 각이 범위 밖이다');
+    }
+    if (this.phase !== 'aiming' && this.phase !== 'moving') {
+      return fail('GAME_NOT_ACTIVE', '진행 중인 경기가 없다');
+    }
+    if (cmd.gameId !== this.gameId || cmd.turnId !== this.turnId) {
+      return fail('STALE_TURN', '낡은 턴의 명령이다');
+    }
+    if (env.seat !== this.active) return fail('NOT_YOUR_TURN', '내 턴이 아니다');
+    if (this.phase !== 'aiming' || this.shotCommitted) {
+      return fail('BOARD_ROTATE_NOT_ALLOWED', '조준 단계가 아니다');
+    }
+    if (this.isStunned(env.seat, env.observedAtMs)) {
+      return fail('BOARD_ROTATE_NOT_ALLOWED', '기절 중이다');
+    }
+
+    const last = this.lastBoardTurnMs[env.seat];
+    const elapsedSec = last === null ? Infinity : Math.max(0, env.observedAtMs - last) / 1000;
+    const limit = BOARD_TURN.maxDegPerSec * elapsedSec + BOARD_TURN.burstDeg;
+    const delta = Math.max(-limit, Math.min(limit, cmd.deltaDeg));
+    this.lastBoardTurnMs[env.seat] = env.observedAtMs;
+    if (delta !== 0) {
+      this.applyBoardRotation(delta);
+      this.revision++;
+    }
+    return OK;
+  }
+
+  /**
+   * 발동 중인 내 후레쉬·물총의 조준점을 옮긴다(`hazard:aim`, DEC-036). 응답을 쓰지 않는 명령이라
+   * 맞는 효과가 없으면 상태를 바꾸지 않고 거부 결과만 돌려준다. 조준점만 바꾸므로 revision은
+   * 올리지 않는다(가림 정도가 바뀌면 틱에서 올린다).
+   */
+  aimHazard(env: Envelope, cmd: HazardAim): CommandResult {
+    this.advanceTo(env.observedAtMs);
+    if (this.phase !== 'aiming' && this.phase !== 'moving') {
+      return fail('GAME_NOT_ACTIVE', '진행 중인 경기가 없다');
+    }
+    const t = cmd.target;
+    if (!Number.isFinite(t.x) || !Number.isFinite(t.y) || !Number.isFinite(t.h)) {
+      return fail('INVALID_INPUT', '조준점이 올바르지 않다');
+    }
+    const eff =
+      cmd.gameId === this.gameId
+        ? this.effects.find(
+            (e) =>
+              isBlind(e.kind) &&
+              e.source === env.seat &&
+              e.instanceId === cmd.hazardInstanceId &&
+              e.startsAtMs <= env.observedAtMs &&
+              env.observedAtMs < e.expiresAtMs,
+          )
+        : undefined;
+    if (!eff) return fail('STALE_HAZARD', '발동 중인 후레쉬·물총이 아니다');
+    eff.aim = { x: t.x, y: t.y, h: t.h };
+    eff.params = { ...eff.params, aimX: t.x, aimY: t.y, aimH: t.h };
     return OK;
   }
 
@@ -394,6 +499,7 @@ export class Game {
                 startsAtMs: blindEff.startsAtMs,
                 expiresAtMs: blindEff.expiresAtMs,
                 maxCoverage: HAZARD_TUNING.blindMaxCoverage,
+                coverage: blindEff.coverage ?? 0,
                 pattern: blindEff.blindPattern,
               },
             }
@@ -503,6 +609,7 @@ export class Game {
         if (p.gauge === 0) p.overheated = false;
       }
     }
+    this.updateBlindCoverage();
     if (this.phase !== 'moving') return;
     stepPhysics(this.world);
     this.simElapsed += DT;
@@ -518,6 +625,28 @@ export class Game {
   }
 
   // ───────── 내부: 방해요소 ─────────
+
+  /**
+   * 후레쉬·물총 가림 정도를 한 틱만큼 갱신한다. 손→조준점 원뿔이 상대 얼굴에 맞으면 오르고
+   * 빗나가면(조준점 없음 포함) 내려가며 [0, 1]로 자른다. 크게 바뀌면 revision을 올린다.
+   */
+  private updateBlindCoverage(): void {
+    for (const e of this.effects) {
+      if (!isBlind(e.kind) || e.startsAtMs > this.now) continue;
+      const hit = e.aim !== undefined && beamHitsFace(e.source, e.aim);
+      const prev = e.coverage ?? 0;
+      const rate = hit ? HAZARD_TUNING.blindGainPerSec : -HAZARD_TUNING.blindDecayPerSec;
+      const next = Math.min(1, Math.max(0, prev + rate * DT));
+      if (next === prev) continue;
+      e.coverage = next;
+      e.params = { ...e.params, coverage: next };
+      const published = e.publishedCoverage ?? 0;
+      if (Math.abs(next - published) >= COVERAGE_PUBLISH_STEP || next === 0 || next === 1) {
+        e.publishedCoverage = next;
+        this.revision++;
+      }
+    }
+  }
 
   private grantAll(replaced: boolean): void {
     for (const seat of [0, 1] as const) this.grantOne(seat, replaced);
@@ -663,9 +792,13 @@ export class Game {
     return isStickyPlaceable(a, this.placementWorld());
   }
 
-  /** 판 중심 기준 시계 방향 회전. 알·속도·벽·끈끈이를 함께 돌리고 알을 판 안에 유지한다. */
-  private applyBoardSpin(): void {
-    const rad = -(HAZARD_TUNING.boardSpinDeg * Math.PI) / 180;
+  /**
+   * 판 중심 기준 회전(양수 반시계, 판 좌표계). 알·속도·벽·끈끈이를 함께 돌리고 알을 판 안에 유지한다.
+   * 판 돌리기 방해요소는 −45°(시계 방향), 기본 판 돌리기는 명령의 각을 쓴다. 후레쉬·물총 조준점은
+   * 좌석 공간 기준이라 돌리지 않는다.
+   */
+  private applyBoardRotation(deg: number): void {
+    const rad = (deg * Math.PI) / 180;
     for (const s of this.world.stones) {
       if (!s.alive) continue;
       [s.x, s.y] = rotate(s.x, s.y, rad);
@@ -689,7 +822,7 @@ export class Game {
         }
       }
     }
-    this.boardRotationDeg += HAZARD_TUNING.boardSpinDeg;
+    this.boardRotationDeg += deg;
     this.keepInsideAndSeparate();
   }
 

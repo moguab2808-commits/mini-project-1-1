@@ -1,7 +1,8 @@
 import { MessageChannel } from 'node:worker_threads';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { GameOver, GameStart, GameView, RematchState } from '@alkkagi/shared';
+import type { AimState, GameOver, GameStart, GameView, RematchState } from '@alkkagi/shared';
 import type { RuntimeClock } from '@alkkagi/game-runtime';
+import { GameStore } from '../game/game-store.ts';
 import { LocalAuthority, type PortLike } from './local-authority.ts';
 import {
   LocalGameSession,
@@ -69,6 +70,7 @@ function setup(options: ConstructorParameters<typeof LocalAuthority>[0]) {
       'turn:change',
       'game:over',
       'rematch:state',
+      'aim:state',
     ] as const) {
       session.on(type, (payload) => log.push({ type, payload }));
     }
@@ -266,5 +268,69 @@ describe('LocalAuthority + LocalGameSession', () => {
     await Promise.all([a2.session.connect(), b2.session.connect()]);
     await flush();
     expect(of<GameStart>(a2.log, 'game:start')).toHaveLength(1);
+  });
+
+  describe('시안 연출: 판 돌리기·조준 중계 (DEC-036)', () => {
+    async function started(random: number) {
+      const clock = new FakeClock();
+      const { connect } = setup({ clock, random: () => random, heartbeatTimeoutMs: 0 });
+      const a = connect(0);
+      const b = connect(1);
+      await Promise.all([a.session.connect(), b.session.connect()]);
+      await flush();
+      const start = of<GameStart>(a.log, 'game:start')[0]!;
+      const first = start.view.activePlayerId;
+      return {
+        clock,
+        a,
+        b,
+        start,
+        active: first === 0 ? a : b,
+        waiting: first === 0 ? b : a,
+      };
+    }
+
+    it('aim:update는 상대 창에만 seat를 붙여 aim:state로 중계되고 상대 store에 들어간다', async () => {
+      const { a, b, start } = await started(0.5);
+      const storeB = new GameStore(b.session);
+      storeB.subscribe(() => undefined);
+      // store는 game:start 뒤에 만들어 start가 없다. 이때는 gameId 대조 없이 받는다
+      a.session.sendAim({ gameId: start.gameId, mode: 'charge', stoneId: 0, angle: 1, power: 40 });
+      a.session.sendAim({ gameId: 'wrong', mode: 'idle' });
+      await flush();
+      expect(of<AimState>(a.log, 'aim:state')).toHaveLength(0);
+      const got = of<AimState>(b.log, 'aim:state');
+      expect(got).toEqual([
+        { gameId: start.gameId, mode: 'charge', stoneId: 0, angle: 1, power: 40, seat: 0 },
+      ]);
+      expect(storeB.getState().opponentAim).toEqual(got[0]);
+      storeB.dispose();
+    });
+
+    it('내 턴의 판 돌리기는 양쪽 boardRotationDeg를 바꾸고 상대 턴의 돌리기는 거부된다', async () => {
+      const { clock, a, b, start, active, waiting } = await started(0.25);
+      const cmd = { gameId: start.gameId, turnId: start.view.turnId, deltaDeg: 10 };
+      const wrong = waiting.session.rotateBoard(cmd);
+      await clock.advance(20);
+      expect(await wrong).toMatchObject({ ok: false, error: { code: 'NOT_YOUR_TURN' } });
+      const ok = active.session.rotateBoard(cmd);
+      await clock.advance(20);
+      expect(await ok).toEqual({ ok: true });
+      expect(of<GameView>(a.log, 'game:state').at(-1)?.boardRotationDeg).toBe(10);
+      expect(of<GameView>(b.log, 'game:state').at(-1)?.boardRotationDeg).toBe(10);
+    });
+
+    it('hazard:aim은 응답 없이 보내도 연결을 깨지 않는다', async () => {
+      const { clock, active, start } = await started(0.25);
+      active.session.aimHazard({
+        gameId: start.gameId,
+        hazardInstanceId: 'none',
+        target: { x: 0, y: 30, h: 24 },
+      });
+      const cmd = { gameId: start.gameId, turnId: start.view.turnId, deltaDeg: -5 };
+      const ok = active.session.rotateBoard(cmd);
+      await clock.advance(20);
+      expect(await ok).toEqual({ ok: true });
+    });
   });
 });

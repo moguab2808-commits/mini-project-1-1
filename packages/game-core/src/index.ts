@@ -10,3 +10,5 @@ export {
   wallFromParams,
 } from './placement.ts';
 export type { PlacementCircle, PlacementWorld } from './placement.ts';
+export { beamHitsFace, facePoint, handPoint, reachOf, seatAnchor } from './reach.ts';
+export type { Point3, Reach } from './reach.ts';

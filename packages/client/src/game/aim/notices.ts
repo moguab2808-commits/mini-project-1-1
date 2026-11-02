@@ -17,7 +17,16 @@ const TEXT: Partial<Record<GameErrorCode, string>> = {
   HAZARD_INVALID_TARGET: '여기에는 놓을 수 없어요',
   HAZARD_NOT_USABLE: '직접 쓸 수 없는 방해요소예요',
   INVALID_INPUT: '입력이 올바르지 않아요',
+  OUT_OF_REACH: '손이 안 닿아요 — 판을 돌려 보세요',
+  BOARD_ROTATE_NOT_ALLOWED: '지금은 판을 돌릴 수 없어요',
 };
+
+/** 지속 안내(조건이 이어지는 동안 표시) */
+export const HINTS = {
+  outOfReach: '손이 안 닿아요 — 판을 돌려 보세요',
+  holdHazard: '클릭해서 발동, ESC 취소',
+  aimHazard: '마우스로 상대 얼굴을 겨누세요',
+} as const;
 
 export function noticeFor(code: GameErrorCode): string {
   return TEXT[code] ?? '요청을 처리하지 못했어요';

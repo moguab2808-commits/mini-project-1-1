@@ -4,7 +4,8 @@ import { useState } from 'react';
 import type { GameOver, GameStart, GameView, RematchState, Seat } from '@alkkagi/shared';
 import type { Announcement, GameClientState } from '../game-store.ts';
 import { heldHazardState } from '../aim/hazard-state.ts';
-import type { AimNotice } from '../aim/aim-controller.ts';
+import type { AimNotice, RotateDir } from '../aim/aim-controller.ts';
+import { CAMERA_PRESETS, type CameraPreset } from '../scene/scene-contract.ts';
 import { CharacterFace } from './CharacterFace.tsx';
 import { HazardIcon } from './HazardIcon.tsx';
 import {
@@ -12,8 +13,11 @@ import {
   HAZARD_NAMES,
   OUTCOME_TEXT,
   REASON_TEXT,
+  CAMERA_LABELS,
+  CONTROLS_HELP,
   blindCoverage,
   dropletsFor,
+  flashRadiusPct,
   isRandomKind,
   nicknameOf,
   outcomeFor,
@@ -21,6 +25,7 @@ import {
   roundLabel,
   stoneDots,
   turnSecondsLeft,
+  visibleDroplets,
   windArrowRotationDeg,
 } from './hud-model.ts';
 import './hud.css';
@@ -34,6 +39,14 @@ export interface HudProps {
   result: GameOver | null;
   rematch: RematchState | null;
   notice: AimNotice | null;
+  /** 조건이 이어지는 동안의 안내(손이 안 닿음, 들기 모드 등) */
+  hint: string | null;
+  /** 기본 판 돌리기 버튼 활성(내 턴·조준 단계 등) */
+  canRotate: boolean;
+  onRotatePress: (dir: RotateDir) => void;
+  onRotateRelease: (dir: RotateDir) => void;
+  cameraPreset: CameraPreset;
+  onCameraPreset: (preset: CameraPreset) => void;
   /** 권한 측 현재 시각 추정(ms) */
   nowServerMs: number;
   /** 클라이언트 시계 현재 시각(ms). 받음 카드·발동 안내의 만료 비교용 */
@@ -129,8 +142,24 @@ export function Hud(props: HudProps) {
           {props.notice.text}
         </div>
       )}
+      {!finished && props.hint && (
+        <div className="gs-hint" role="status">
+          {props.hint}
+        </div>
+      )}
       <BlindOverlay view={view} nowServerMs={nowServerMs} />
-      {!finished && <ForfeitButton onForfeit={props.onForfeit} />}
+      {!finished && (
+        <>
+          <CameraButtons current={props.cameraPreset} onSelect={props.onCameraPreset} />
+          <RotateButtons
+            enabled={props.canRotate}
+            onPress={props.onRotatePress}
+            onRelease={props.onRotateRelease}
+          />
+          <div className="gs-help">{CONTROLS_HELP}</div>
+          <ForfeitButton onForfeit={props.onForfeit} />
+        </>
+      )}
       {props.result && (
         <ResultOverlay
           result={props.result}
@@ -272,25 +301,34 @@ function Announcements(props: {
   );
 }
 
-/** 후레쉬·물총 시야 가림. 본인 뷰(`private.blind`)에만 있어 상대 화면에는 나타나지 않는다 */
+/** 시야 가림 물방울 개수(최대 면적 기준 배치) */
+const DROPLET_COUNT = 28;
+
+/**
+ * 후레쉬·물총 시야 가림. 본인 뷰(`private.blind`)에만 있어 상대 화면에는 나타나지 않는다.
+ * 가림 정도는 서버 `coverage`(상대 조준이 얼굴에 머무른 정도)를 따르고, 스냅샷 사이 변화는
+ * CSS 전환(크기·투명도)으로 부드럽게 잇는다.
+ */
 function BlindOverlay(props: { view: GameView; nowServerMs: number }) {
   const blind = props.view.private.blind;
   if (!blind) return null;
   const coverage = blindCoverage(blind, props.nowServerMs);
-  if (coverage <= 0) return null;
   if (blind.kind === 'flashlight') {
-    // 타원 하나의 면적이 화면의 coverage가 되도록 반지름을 정한다
-    const r = Math.sqrt(coverage / Math.PI) * 100;
+    // 중앙부터 하얗게 바랜다: 고정 그라데이션 타원을 가림 비율만큼 키운다
+    const r = flashRadiusPct(coverage);
     return (
       <div
-        className="gs-blind"
+        className="gs-blind gs-blind-flash"
         style={{
-          background: `radial-gradient(ellipse ${r}% ${r}% at 50% 50%, rgba(255,255,240,0.97) 0%, rgba(255,255,240,0.9) 55%, rgba(255,255,240,0) 100%)`,
+          opacity: coverage > 0 ? 1 : 0,
+          transform: `scale(${(r / 50).toFixed(4)})`,
         }}
+        aria-hidden="true"
       />
     );
   }
-  const drops = dropletsFor(blind.pattern, coverage);
+  const drops = dropletsFor(blind.pattern, blind.maxCoverage, DROPLET_COUNT);
+  const shown = visibleDroplets(DROPLET_COUNT, coverage, blind.maxCoverage);
   return (
     <svg className="gs-blind" viewBox="0 0 100 56.25" preserveAspectRatio="none" aria-hidden="true">
       <defs>
@@ -305,10 +343,85 @@ function BlindOverlay(props: { view: GameView; nowServerMs: number }) {
         strokeWidth="0.25"
       >
         {drops.map((d, i) => (
-          <circle key={i} cx={d.cx} cy={d.cy} r={d.r} />
+          <circle
+            key={i}
+            className="gs-drop"
+            cx={d.cx}
+            cy={d.cy}
+            r={d.r}
+            style={{ opacity: i < shown ? 1 : 0 }}
+          />
         ))}
       </g>
     </svg>
+  );
+}
+
+function CameraButtons(props: { current: CameraPreset; onSelect: (preset: CameraPreset) => void }) {
+  return (
+    <div className="gs-cams" role="group" aria-label="시점">
+      {CAMERA_PRESETS.map((preset, i) => (
+        <button
+          key={preset}
+          type="button"
+          className={`gs-chip${props.current === preset ? ' on' : ''}`}
+          aria-pressed={props.current === preset}
+          title={`${CAMERA_LABELS[preset]} 시점 (${i + 1})`}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={() => props.onSelect(preset)}
+        >
+          {CAMERA_LABELS[preset]}
+          <span className="gs-chip-key">{i + 1}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** 판 돌리기 버튼: 누르고 있는 동안만 돈다(시안 `spinL`·`spinR`) */
+function RotateButtons(props: {
+  enabled: boolean;
+  onPress: (dir: RotateDir) => void;
+  onRelease: (dir: RotateDir) => void;
+}) {
+  const button = (dir: RotateDir, label: string, aria: string) => (
+    <button
+      type="button"
+      className="gs-chip gs-spin-btn"
+      disabled={!props.enabled}
+      aria-label={aria}
+      onPointerDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // 포인터 캡처를 지원하지 않아도 떼기 이벤트로 멈춘다
+        }
+        props.onPress(dir);
+      }}
+      onPointerUp={() => props.onRelease(dir)}
+      onPointerCancel={() => props.onRelease(dir)}
+      onLostPointerCapture={() => props.onRelease(dir)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (!e.repeat) props.onPress(dir);
+        }
+      }}
+      onKeyUp={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') props.onRelease(dir);
+      }}
+      onBlur={() => props.onRelease(dir)}
+    >
+      {label}
+    </button>
+  );
+  return (
+    <div className="gs-spin">
+      {button(1, '↺ 판 돌리기', '판을 왼쪽(반시계)으로 돌리기, A 또는 ←')}
+      {button(-1, '판 돌리기 ↻', '판을 오른쪽(시계)으로 돌리기, D 또는 →')}
+    </div>
   );
 }
 

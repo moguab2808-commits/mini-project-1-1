@@ -1,16 +1,21 @@
 import { Game, type CoreEvent, type Envelope } from '@alkkagi/game-core';
 import {
+  AimUpdateSchema,
+  BoardRotateSchema,
   GameForfeitSchema,
+  HazardAimSchema,
   HazardUseSchema,
   PHYSICS,
   RULES,
   ShotSubmitSchema,
   type BoardId,
+  type BoardRotate,
   type CommandResult,
   type GameForfeit,
   type GameOver,
   type GameStart,
   type GameView,
+  type HazardAim,
   type HazardUse,
   type Seat,
   type ShotSubmit,
@@ -20,6 +25,7 @@ import type {
   LeaveReason,
   RuntimeEventMap,
   RuntimeLogEntry,
+  RuntimeLogEvent,
   RuntimeOptions,
   GameLike,
   SendOptions,
@@ -56,11 +62,20 @@ export interface StartGameConfig {
   firstSeat?: Seat;
 }
 
+/**
+ * 큐 명령 종류. `board_rotate`·`hazard_aim`은 조작 중 초당 여러 번 오는 명령이라
+ * OPERATIONS 서버 로그 이벤트에 없고 로그를 남기지 않는다.
+ */
+type QueuedKind = 'shot' | 'hazard_use' | 'forfeit' | 'board_rotate' | 'hazard_aim';
+
+const logEventOf = (kind: QueuedKind): RuntimeLogEvent | null =>
+  kind === 'board_rotate' || kind === 'hazard_aim' ? null : kind;
+
 interface Queued {
   ingressSeq: number;
   observedAtMs: number;
   seat: Seat;
-  kind: 'shot' | 'hazard_use' | 'forfeit';
+  kind: QueuedKind;
   /** `forfeit` 종류일 때 로그의 기권 사유 */
   forfeitReason?: ForfeitReason;
   /** 큐에 넣을 때 이미 거부된 입력이면 결과가 들어 있다 */
@@ -184,6 +199,41 @@ export class RoomRuntime {
     );
   }
 
+  /** 기본 판 돌리기(`board:rotate`, DEC-036). 다른 명령과 같은 큐에서 순서대로 처리하고 ack한다. */
+  rotateBoard(seat: Seat, cmd: BoardRotate): Promise<CommandResult> {
+    const parsed = BoardRotateSchema.safeParse(cmd);
+    return this.enqueue(seat, 'board_rotate', parsed.success, (game, env) =>
+      game.rotateBoard(env, parsed.data as BoardRotate),
+    );
+  }
+
+  /**
+   * 발동 중인 후레쉬·물총 조준점(`hazard:aim`, DEC-036). 큐 순서를 지키도록 큐에 넣는다.
+   * 응답이 없는 이벤트라 호출자는 결과를 무시해도 된다.
+   */
+  aimHazard(seat: Seat, cmd: HazardAim): Promise<CommandResult> {
+    const parsed = HazardAimSchema.safeParse(cmd);
+    return this.enqueue(seat, 'hazard_aim', parsed.success, (game, env) =>
+      game.aimHazard(env, parsed.data as HazardAim),
+    );
+  }
+
+  /**
+   * 조준·몸짓 상태 중계(`aim:update` → 상대에게 `aim:state`, DEC-036). 권한 상태가 아니므로 큐·틱을
+   * 거치지 않고 바로 보낸다. 형식이 틀리거나 진행 중인 경기가 아니거나 gameId가 다르면 버린다.
+   * @returns 중계했으면 true
+   */
+  relayAim(seat: Seat, update: unknown): boolean {
+    const parsed = AimUpdateSchema.safeParse(update);
+    const game = this.game;
+    if (!parsed.success || !game || !this.isRunning || parsed.data.gameId !== game.gameId) {
+      return false;
+    }
+    const to: Seat = seat === 0 ? 1 : 0;
+    this.send(to, 'aim:state', { ...parsed.data, seat }, { volatile: true });
+    return true;
+  }
+
   forfeit(seat: Seat, cmd: GameForfeit): Promise<CommandResult> {
     const parsed = GameForfeitSchema.safeParse(cmd);
     return this.enqueue(
@@ -248,9 +298,10 @@ export class RoomRuntime {
     const ingressSeq = extra.ingressSeq ?? this.ingressSeq++;
     const game = this.game;
     if (!game || this.finished || this.closed) {
-      if (extra.ingressSeq === undefined) {
+      const event = logEventOf(kind);
+      if (extra.ingressSeq === undefined && event) {
         this.log({
-          event: kind,
+          event,
           gameId: null,
           ingressSeq,
           seat,
@@ -322,15 +373,18 @@ export class RoomRuntime {
       const observed = Math.min(Math.max(q.observedAtMs, this.lastGameMs), now);
       const result = q.rejected ?? q.run({ seat: q.seat, observedAtMs: observed });
       this.lastGameMs = observed;
-      this.log({
-        event: q.kind,
-        gameId: game.gameId,
-        ingressSeq: q.ingressSeq,
-        seat: q.seat,
-        result: result.ok ? 'ok' : result.error.code,
-        // 기권패가 확정된 때만 사유를 남긴다.
-        reason: q.kind === 'forfeit' && result.ok ? q.forfeitReason : undefined,
-      });
+      const event = logEventOf(q.kind);
+      if (event) {
+        this.log({
+          event,
+          gameId: game.gameId,
+          ingressSeq: q.ingressSeq,
+          seat: q.seat,
+          result: result.ok ? 'ok' : result.error.code,
+          // 기권패가 확정된 때만 사유를 남긴다.
+          reason: q.kind === 'forfeit' && result.ok ? q.forfeitReason : undefined,
+        });
+      }
       this.settle(q, result);
       this.checkFinished(game);
     }

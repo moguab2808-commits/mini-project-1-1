@@ -1,5 +1,6 @@
 // GameSession 이벤트를 화면이 읽을 상태로 모은다. React에는 `useSyncExternalStore`로 연결한다.
 import type {
+  AimState,
   GameOver,
   GameStart,
   GameView,
@@ -34,6 +35,8 @@ export interface GameClientState {
   rematch: RematchState | null;
   /** 권한 측 시각 − 클라이언트 시각(ms) 추정. 마감·쿨타임 남은 시간 계산에 쓴다 */
   clockOffsetMs: number;
+  /** 상대의 조준·몸짓 상태(`aim:state`, 표시용). 경기 시작·종료 때 null로 되돌린다 */
+  opponentAim: AimState | null;
 }
 
 export class GameStore {
@@ -55,6 +58,7 @@ export class GameStore {
       result: null,
       rematch: null,
       clockOffsetMs: 0,
+      opponentAim: null,
     };
     const on = session.on.bind(session);
     this.unsubscribe.push(
@@ -69,6 +73,7 @@ export class GameStore {
           result: null,
           rematch: null,
           clockOffsetMs: start.view.serverNowMs - this.nowMs(),
+          opponentAim: null,
         });
       }),
       on('game:state', (view) => {
@@ -94,7 +99,13 @@ export class GameStore {
         });
       }),
       on('game:over', (result) => {
-        this.set({ result });
+        this.set({ result, opponentAim: null });
+      }),
+      on('aim:state', (aim) => {
+        // 다른 경기·내 좌석의 중계는 무시한다
+        if (aim.seat === this.state.mySeat) return;
+        if (this.state.start && aim.gameId !== this.state.start.gameId) return;
+        this.set({ opponentAim: aim });
       }),
       on('rematch:state', (rematch) => {
         this.set({ rematch });

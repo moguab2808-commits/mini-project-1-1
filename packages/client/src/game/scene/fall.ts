@@ -3,7 +3,7 @@ import { PHYSICS } from '@alkkagi/shared';
 import type { RemovedStone } from './snapshot-buffer.ts';
 
 /** 판 윗면 아래로 내려가는 책상 윗면까지의 거리(cm). 알 중심 높이 기준 */
-export const FALL_GROUND_Z = -3;
+export const FALL_GROUND_Z = -9.5;
 /** 낙하 연출 길이(초). 마지막 구간에서 작아지며 사라진다 */
 export const FALL_LIFE = 1.5;
 const SHRINK_START = 1.1;

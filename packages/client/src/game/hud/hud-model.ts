@@ -9,6 +9,7 @@ import {
   type RematchState,
   type Seat,
 } from '@alkkagi/shared';
+import { CAMERA_PRESETS, type CameraPreset } from '../scene/scene-contract.ts';
 
 export const HAZARD_NAMES: Record<HazardKind, string> = {
   board_spin: '판 돌리기',
@@ -25,8 +26,8 @@ export const HAZARD_NAMES: Record<HazardKind, string> = {
 /** 방해요소 효과 설명(칸 툴팁용) */
 export const HAZARD_HINTS: Record<HazardKind, string> = {
   board_spin: '판과 알이 45도 돌아가요',
-  flashlight: '상대 화면이 밝게 바래요',
-  water_gun: '상대 화면에 물방울이 맺혀요',
+  flashlight: '손에 들고 상대 얼굴을 비추면 상대 화면이 밝게 바래요',
+  water_gun: '손에 들고 상대 얼굴을 맞히면 상대 화면에 물방울이 맺혀요',
   desk_shake: '모든 알이 조금씩 밀려요',
   wall: '판 위에 벽을 세워요',
   sticky: '지나가는 알이 느려져요',
@@ -119,26 +120,32 @@ export function rematchUi(
   };
 }
 
-/** 화면 가림의 현재 농도(0~1)와 최대 면적에 곱한 값. 후레쉬: 0.2초 상승·마지막 0.5초 감소, 물총: 마지막 1초 감소 */
-export function blindStrength(
-  blind: NonNullable<GameView['private']['blind']>,
-  nowServerMs: number,
-): number {
+type Blind = NonNullable<GameView['private']['blind']>;
+
+/** 가림 면적 상한(PRD "최대 70%"). 서버 maxCoverage가 더 커도 넘지 않는다 */
+export const BLIND_CAP = 0.7;
+
+/**
+ * 가림 면적 비율(0~0.7) = 서버가 주는 현재 가림 정도(`coverage`, 0~1) × 최대 면적.
+ * 상대 조준이 얼굴에 머무를수록 오르고 빗나가면 줄어든다(DEC-036). 효과 시간 밖이면 0이다.
+ * 스냅샷 사이의 변화는 화면이 CSS 전환으로 부드럽게 잇는다.
+ */
+export function blindCoverage(blind: Blind, nowServerMs: number): number {
   if (nowServerMs < blind.startsAtMs || nowServerMs >= blind.expiresAtMs) return 0;
-  const sinceStart = nowServerMs - blind.startsAtMs;
-  const untilEnd = blind.expiresAtMs - nowServerMs;
-  const ramp = blind.kind === 'flashlight' ? Math.min(1, sinceStart / 200) : 1;
-  const fadeMs = blind.kind === 'flashlight' ? 500 : 1000;
-  const fade = Math.min(1, untilEnd / fadeMs);
-  return Math.min(1, Math.max(0, ramp * fade));
+  const c = Number.isFinite(blind.coverage) ? Math.min(1, Math.max(0, blind.coverage)) : 0;
+  return Math.min(BLIND_CAP, blind.maxCoverage) * c;
 }
 
-/** 가림 면적 비율(0~maxCoverage). 최대 70%를 넘지 않는다 */
-export function blindCoverage(
-  blind: NonNullable<GameView['private']['blind']>,
-  nowServerMs: number,
-): number {
-  return Math.min(0.7, blind.maxCoverage) * blindStrength(blind, nowServerMs);
+/** 후레쉬: 중앙부터 하얗게 바래는 타원의 반지름(%). 타원 면적이 화면의 coverage가 되게 한다 */
+export function flashRadiusPct(coverage: number): number {
+  return Math.sqrt(Math.max(0, coverage) / Math.PI) * 100;
+}
+
+/** 물총: 최대 면적 기준으로 배치한 물방울 중 지금 보일 개수(가림 비율에 비례) */
+export function visibleDroplets(count: number, coverage: number, maxCoverage: number): number {
+  const cap = Math.min(BLIND_CAP, maxCoverage);
+  if (cap <= 0 || coverage <= 0) return 0;
+  return Math.min(count, Math.ceil((count * coverage) / cap));
 }
 
 /** 물방울 위치용 시드 난수(같은 pattern이면 같은 배치) */
@@ -186,3 +193,22 @@ export function stoneDots(view: GameView, seat: Seat, pieceCount: number): boole
 export function nicknameOf(start: GameStart, seat: Seat): string {
   return start.players[seat].nickname;
 }
+
+/** 시점 버튼(숫자 키 1~5와 같은 순서). 장면 계약 `CAMERA_PRESETS` 순서를 따른다 */
+export const CAMERA_LABELS: Record<CameraPreset, string> = {
+  default: '기본',
+  first: '1인칭',
+  top: '위에서',
+  side: '옆에서',
+  opponent: '상대 쪽',
+};
+
+/** 숫자 키(`Digit1`~`Digit5`, 숫자 패드 포함)의 시점. 해당 없으면 null */
+export function cameraPresetForCode(code: string): CameraPreset | null {
+  const m = /^(?:Digit|Numpad)([1-5])$/.exec(code);
+  return m ? CAMERA_PRESETS[Number(m[1]) - 1]! : null;
+}
+
+/** 조작 도움말 한 줄 */
+export const CONTROLS_HELP =
+  '알 클릭 후 누르고 떼서 발사 · A·D/←→ 판 돌리기 · E 방해요소 · 1~5 시점 · 오른쪽 드래그 시점 회전 · 휠 확대';

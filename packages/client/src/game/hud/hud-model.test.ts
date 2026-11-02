@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { GameOver, GameView, RematchState } from '@alkkagi/shared';
 import {
   blindCoverage,
-  blindStrength,
+  cameraPresetForCode,
   dropletsFor,
+  flashRadiusPct,
+  visibleDroplets,
   outcomeFor,
   rematchUi,
   remainingSeconds,
@@ -128,33 +130,60 @@ describe('시야 가림', () => {
   const flash = {
     kind: 'flashlight' as const,
     startsAtMs: 1000,
-    expiresAtMs: 3000,
+    expiresAtMs: 5000,
     maxCoverage: 0.7,
+    coverage: 0,
     pattern: 7,
   };
-  const water = { ...flash, kind: 'water_gun' as const, expiresAtMs: 4000 };
 
-  it('후레쉬는 0.2초 동안 밝아지고 마지막 0.5초 동안 옅어진다', () => {
-    expect(blindStrength(flash, 900)).toBe(0);
-    expect(blindStrength(flash, 1100)).toBeCloseTo(0.5);
-    expect(blindStrength(flash, 2000)).toBe(1);
-    expect(blindStrength(flash, 2750)).toBeCloseTo(0.5);
-    expect(blindStrength(flash, 3000)).toBe(0);
+  it('가림은 시간 곡선이 아니라 서버 coverage × 최대 면적이다', () => {
+    expect(blindCoverage({ ...flash, coverage: 0 }, 2000)).toBe(0);
+    expect(blindCoverage({ ...flash, coverage: 0.5 }, 2000)).toBeCloseTo(0.35);
+    expect(blindCoverage({ ...flash, coverage: 1 }, 1000)).toBeCloseTo(0.7);
+    // 같은 coverage면 시각과 관계없이 같다
+    expect(blindCoverage({ ...flash, coverage: 0.5 }, 4900)).toBeCloseTo(0.35);
   });
 
-  it('물총은 마지막 1초 동안 옅어진다', () => {
-    expect(blindStrength(water, 2000)).toBe(1);
-    expect(blindStrength(water, 3500)).toBeCloseTo(0.5);
+  it('효과 시간 밖이면 0이다', () => {
+    expect(blindCoverage({ ...flash, coverage: 1 }, 900)).toBe(0);
+    expect(blindCoverage({ ...flash, coverage: 1 }, 5000)).toBe(0);
   });
 
-  it('가림 면적은 70%를 넘지 않는다', () => {
-    expect(blindCoverage({ ...flash, maxCoverage: 0.95 }, 2000)).toBeCloseTo(0.7);
-    expect(blindCoverage(flash, 2000)).toBeCloseTo(0.7);
+  it('가림 면적은 70%를 넘지 않고 coverage는 0~1로 자른다', () => {
+    expect(blindCoverage({ ...flash, maxCoverage: 0.95, coverage: 1 }, 2000)).toBeCloseTo(0.7);
+    expect(blindCoverage({ ...flash, coverage: 3 }, 2000)).toBeCloseTo(0.7);
+    expect(blindCoverage({ ...flash, coverage: -1 }, 2000)).toBe(0);
+    expect(blindCoverage({ ...flash, coverage: Number.NaN }, 2000)).toBe(0);
+  });
+
+  it('후레쉬 타원 면적이 가림 비율과 같다', () => {
+    const r = flashRadiusPct(0.35) / 100;
+    expect(Math.PI * r * r).toBeCloseTo(0.35);
+    expect(flashRadiusPct(0)).toBe(0);
+  });
+
+  it('물총은 가림 비율만큼 물방울을 보인다', () => {
+    expect(visibleDroplets(28, 0, 0.7)).toBe(0);
+    expect(visibleDroplets(28, 0.35, 0.7)).toBe(14);
+    expect(visibleDroplets(28, 0.7, 0.7)).toBe(28);
+    expect(visibleDroplets(28, 0.7, 0.9)).toBe(28);
   });
 
   it('물방울 배치는 같은 pattern이면 같다', () => {
     expect(dropletsFor(5, 0.7)).toEqual(dropletsFor(5, 0.7));
     expect(dropletsFor(5, 0.7)).not.toEqual(dropletsFor(6, 0.7));
+  });
+});
+
+describe('시점 키', () => {
+  it('숫자 1~5(숫자 패드 포함)를 기본·1인칭·위·옆·상대 시점으로 바꾼다', () => {
+    expect(cameraPresetForCode('Digit1')).toBe('default');
+    expect(cameraPresetForCode('Digit2')).toBe('first');
+    expect(cameraPresetForCode('Numpad3')).toBe('top');
+    expect(cameraPresetForCode('Digit4')).toBe('side');
+    expect(cameraPresetForCode('Digit5')).toBe('opponent');
+    expect(cameraPresetForCode('Digit6')).toBeNull();
+    expect(cameraPresetForCode('KeyA')).toBeNull();
   });
 });
 

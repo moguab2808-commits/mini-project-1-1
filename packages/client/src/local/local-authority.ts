@@ -136,6 +136,13 @@ export class LocalAuthority {
       case 'cmd':
         this.command(conn, msg);
         return;
+      case 'hazardAim':
+        // 응답이 없는 이벤트: 결과는 버린다
+        void this.runtime?.aimHazard(conn.seat, msg.payload as never);
+        return;
+      case 'aim':
+        this.runtime?.relayAim(conn.seat, msg.payload);
+        return;
       default:
         return;
     }
@@ -157,6 +164,8 @@ export class LocalAuthority {
       result = runtime.useHazard(conn.seat, msg.payload as never);
     } else if (msg.kind === 'forfeit') {
       result = runtime.forfeit(conn.seat, msg.payload as never);
+    } else if (msg.kind === 'rotate') {
+      result = runtime.rotateBoard(conn.seat, msg.payload as never);
     } else {
       result = Promise.resolve(INVALID);
     }

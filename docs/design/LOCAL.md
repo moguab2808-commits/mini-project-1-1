@@ -62,6 +62,9 @@ interface GameSession {
   useHazard(cmd: HazardUse): Promise<CommandResult>;    // hazard:use
   forfeit(): Promise<CommandResult>;      // game:forfeit
   requestRematch(): Promise<CommandResult>; // rematch:request
+  rotateBoard(cmd: BoardRotate): Promise<CommandResult>; // board:rotate (DEC-036)
+  aimHazard(cmd: HazardAim): void;        // hazard:aim, 응답 없음
+  sendAim(update: AimUpdate): void;       // aim:update, 응답 없음
   on<K extends keyof GameEventMap>(type: K, handler: (e: GameEventMap[K]) => void): () => void;
   dispose(): void;                        // 창 닫기·이동. 진행 중이면 이탈로 처리
 }
@@ -76,6 +79,7 @@ interface GameEventMap {
   'turn:change': TurnChange;
   'game:over': GameOver;
   'rematch:state': RematchState;
+  'aim:state': AimState;                  // 상대 조준·몸짓 (표시용)
 }
 ```
 
@@ -121,6 +125,9 @@ interface GameEventMap {
 | 배치 모드에서 왼쪽 클릭 | 그 위치로 `hazard:use` 전송. 빨간 후보에서는 보내지 않음 |
 | 배치 모드에서 마우스 휠 또는 `R` 키 | 벽 방향을 가로·세로로 전환. 기본은 내 화면 기준 가로 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | 배치 모드에서 ESC·오른쪽 클릭 | 배치 취소. 사용 횟수·게이지·쿨타임 변화 없음 |
+| 후레쉬·물총: `E` 키 또는 칸 클릭 | 손에 들기. 마우스로 방향을 잡고 왼쪽 클릭으로 발동(`hazard:use`, target에 조준점 x·y·h). 발동 뒤 지속 시간 동안 마우스로 계속 조준(`hazard:aim`). 발동 전 ESC·오른쪽 클릭은 취소 ([DEC-036](../DECISIONS.md#결정-색인)) |
+| `A`·`D` 또는 ←·→ (누르고 있는 동안), 화면의 판 돌리기 버튼 | 기본 판 돌리기. 내 턴·조준 단계에서 세기 충전 중이 아닐 때만 ([DEC-036](../DECISIONS.md#결정-색인)) |
+| 오른쪽 드래그 / 휠 / 숫자 `1`~`5`·시점 버튼 | 시점 자유 회전 / 확대·축소(배치 모드가 아닐 때) / 기본·1인칭·위·옆·상대 쪽 시점 ([DEC-036](../DECISIONS.md#결정-색인)) |
 
 - `Alt`는 브라우저 메뉴·포커스 이동과 겹쳐 쓰지 않는다. `E`는 키 입력 기본 동작이 없어 `preventDefault` 없이 처리할 수 있다.
 - 배치 모드에서는 왼쪽 클릭이 알 선택·세기 충전으로 전달되지 않는다. 세기 막대를 누르고 있는 중에는 벽·끈끈이 배치 모드로 들어가지 않고, 즉시형은 충전을 끊지 않고 사용한다.

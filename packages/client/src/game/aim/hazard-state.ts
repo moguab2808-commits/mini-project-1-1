@@ -2,11 +2,12 @@
 // 상대 방해요소는 뷰에 없으므로 여기서도 다루지 않는다(비공개). 권한 측이 사용 때 다시 검증한다.
 import { HAZARDS, HAZARD_TUNING, type GameView, type HazardKind } from '@alkkagi/shared';
 
-export type HazardInputKind = 'immediate' | 'placement' | 'random';
+export type HazardInputKind = 'immediate' | 'placement' | 'hold' | 'random';
 
-/** 사용 입력 방식: 즉시형·배치형(벽·끈끈이)·랜덤형(직접 사용 불가) */
+/** 사용 입력 방식: 즉시형·배치형(벽·끈끈이)·손에 들고 조준(후레쉬·물총)·랜덤형(직접 사용 불가) */
 export function inputKindOf(kind: HazardKind): HazardInputKind {
   if (kind === 'wall' || kind === 'sticky') return 'placement';
+  if (kind === 'flashlight' || kind === 'water_gun') return 'hold';
   return HAZARDS[kind].category === 'random' ? 'random' : 'immediate';
 }
 

@@ -3,16 +3,20 @@
 import { HAZARD_TUNING, PHYSICS, type Seat } from '@alkkagi/shared';
 import {
   BoxGeometry,
+  CanvasTexture,
   CircleGeometry,
   ConeGeometry,
+  CylinderGeometry,
   Group,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
   PlaneGeometry,
+  RepeatWrapping,
   RingGeometry,
+  SphereGeometry,
+  SRGBColorSpace,
   type BufferGeometry,
-  type Material,
 } from 'three';
 import type { AimRenderState, PlacementRenderState } from './scene-contract.ts';
 import { fallScale, type FallState } from './fall.ts';
@@ -147,84 +151,197 @@ export interface HazardDraw {
   y: number;
   /** 서버 좌표계 라디안(반시계). 끈끈이는 무시 */
   angle: number;
+  /** 설치 후 경과(초). 등장 애니메이션에 쓴다 */
+  age: number;
+  /** 같은 설치물을 프레임 사이에 구분하는 키(출렁임 위상) */
+  seed: number;
 }
 
-const WALL_H = 1.8;
+const WALL_H = 2.6;
+const STICKY_R = HAZARD_TUNING.stickyDiameter / 2;
+const BLOBS = 10;
+
+/** 0→1 진행에서 살짝 넘쳤다 돌아오는 등장 곡선 */
+export function easeOutBack(p: number): number {
+  if (p <= 0) return 0;
+  if (p >= 1) return 1;
+  const c = 1.9;
+  const q = p - 1;
+  return 1 + (c + 1) * q * q * q + c * q * q;
+}
+
+/** 벽돌 무늬 텍스처: 단단한 블록으로 보이게 한다 */
+function brickTexture(): CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 64;
+  const g = c.getContext('2d');
+  if (g) {
+    g.fillStyle = '#5b5f6a';
+    g.fillRect(0, 0, 256, 64);
+    for (let row = 0; row < 2; row++) {
+      for (let i = -1; i < 5; i++) {
+        const x = i * 64 + (row % 2) * 32;
+        const shade = 120 + ((i * 37 + row * 53) % 40);
+        g.fillStyle = `rgb(${shade},${shade - 6},${shade - 14})`;
+        g.fillRect(x + 3, row * 32 + 3, 58, 26);
+        g.fillStyle = 'rgba(255,255,255,0.18)';
+        g.fillRect(x + 3, row * 32 + 3, 58, 4);
+      }
+    }
+  }
+  const t = new CanvasTexture(c);
+  t.colorSpace = SRGBColorSpace;
+  t.wrapS = RepeatWrapping;
+  t.repeat.set(2, 1);
+  return t;
+}
+
+interface WallSlot {
+  group: Group;
+  block: Mesh;
+  cap: Mesh;
+}
+
+interface StickySlot {
+  group: Group;
+  disc: Mesh;
+  blobs: Mesh[];
+  shine: Mesh;
+}
 
 export class HazardLayer {
   readonly group = new Group();
-  private readonly walls: Mesh[] = [];
-  private readonly stickies: Mesh[] = [];
+  private readonly walls: WallSlot[] = [];
+  private readonly stickies: StickySlot[] = [];
   private readonly wallGeo = new BoxGeometry(
     HAZARD_TUNING.wallLength,
     WALL_H,
     HAZARD_TUNING.wallThickness,
   );
-  private readonly stickyGeo = new CircleGeometry(HAZARD_TUNING.stickyDiameter / 2, 40);
+  private readonly capGeo = new BoxGeometry(
+    HAZARD_TUNING.wallLength + 0.3,
+    0.4,
+    HAZARD_TUNING.wallThickness + 0.3,
+  );
+  private readonly discGeo = new CylinderGeometry(STICKY_R, STICKY_R * 1.02, 0.5, 48);
+  private readonly blobGeo = new SphereGeometry(1, 12, 8);
+  private readonly shineGeo = new CircleGeometry(1, 16);
+  private readonly brick = brickTexture();
   private readonly wallMat = new MeshStandardMaterial({
-    color: 0x8a8f99,
-    roughness: 0.45,
-    metalness: 0.3,
+    map: this.brick,
+    roughness: 0.6,
+    metalness: 0.15,
   });
+  private readonly capMat = new MeshStandardMaterial({ color: 0xd8d4c8, roughness: 0.4 });
   private readonly stickyMat = new MeshStandardMaterial({
-    color: 0xe8a21c,
-    roughness: 0.15,
+    color: 0x86d43a,
+    roughness: 0.05,
+    metalness: 0.1,
     transparent: true,
-    opacity: 0.78,
-    emissive: 0x3a2200,
+    opacity: 0.82,
+    emissive: 0x1d4a06,
+  });
+  private readonly shineMat = new MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false,
   });
 
-  constructor() {
-    this.stickyGeo.rotateX(-Math.PI / 2);
+  private addWall(): WallSlot {
+    const group = new Group();
+    const block = new Mesh(this.wallGeo, this.wallMat);
+    block.castShadow = true;
+    block.receiveShadow = true;
+    block.position.y = WALL_H / 2;
+    const cap = new Mesh(this.capGeo, this.capMat);
+    cap.position.y = WALL_H + 0.2;
+    cap.castShadow = true;
+    group.add(block, cap);
+    group.visible = false;
+    this.group.add(group);
+    const w = { group, block, cap };
+    this.walls.push(w);
+    return w;
   }
 
-  private pool(list: Mesh[], geo: BufferGeometry, mat: Material, n: number) {
-    while (list.length < n) {
-      const m = new Mesh(geo, mat);
-      m.castShadow = geo === this.wallGeo;
-      m.receiveShadow = true;
-      m.visible = false;
-      this.group.add(m);
-      list.push(m);
+  private addSticky(): StickySlot {
+    const group = new Group();
+    const disc = new Mesh(this.discGeo, this.stickyMat);
+    disc.position.y = 0.25;
+    disc.receiveShadow = true;
+    group.add(disc);
+    const blobs: Mesh[] = [];
+    for (let i = 0; i < BLOBS; i++) {
+      const b = new Mesh(this.blobGeo, this.stickyMat);
+      const a = (i / BLOBS) * Math.PI * 2;
+      b.position.set(Math.cos(a) * STICKY_R * 0.97, 0.3, Math.sin(a) * STICKY_R * 0.97);
+      group.add(b);
+      blobs.push(b);
     }
+    const shine = new Mesh(this.shineGeo, this.shineMat);
+    shine.rotation.x = -Math.PI / 2;
+    shine.position.set(-STICKY_R * 0.35, 0.53, -STICKY_R * 0.3);
+    shine.scale.set(STICKY_R * 0.32, STICKY_R * 0.16, 1);
+    group.add(shine);
+    group.visible = false;
+    this.group.add(group);
+    const s = { group, disc, blobs, shine };
+    this.stickies.push(s);
+    return s;
   }
 
-  update(items: readonly HazardDraw[], count: number) {
+  update(items: readonly HazardDraw[], count: number, timeSec: number) {
     let w = 0;
     let s = 0;
     for (let i = 0; i < count; i++) {
       const it = items[i];
       if (!it) continue;
       if (it.kind === 'wall') {
-        this.pool(this.walls, this.wallGeo, this.wallMat, w + 1);
-        const m = this.walls[w++];
-        if (!m) continue;
-        m.visible = true;
-        m.position.set(it.x, WALL_H / 2, -it.y);
-        m.rotation.y = it.angle;
+        const slot = this.walls[w] ?? this.addWall();
+        w++;
+        const g = slot.group;
+        g.visible = true;
+        // 등장: 판에서 솟아오르며 살짝 넘쳤다 자리 잡는다
+        const p = easeOutBack(it.age / 0.4);
+        g.position.set(it.x, 0, -it.y);
+        g.rotation.y = it.angle;
+        g.scale.set(1, Math.max(0.01, p), 1);
       } else {
-        this.pool(this.stickies, this.stickyGeo, this.stickyMat, s + 1);
-        const m = this.stickies[s++];
-        if (!m) continue;
-        m.visible = true;
-        m.position.set(it.x, 0.04, -it.y);
+        const slot = this.stickies[s] ?? this.addSticky();
+        s++;
+        const g = slot.group;
+        g.visible = true;
+        g.position.set(it.x, 0, -it.y);
+        const p = easeOutBack(it.age / 0.45);
+        const ph = timeSec * 3 + it.seed;
+        // 가장자리 출렁임: 원판은 살짝 숨쉬고 가장자리 덩어리가 엇갈려 부풀었다 줄어든다
+        g.scale.set(p * (1 + Math.sin(ph) * 0.025), 1, p * (1 + Math.cos(ph * 1.13) * 0.025));
+        for (let k = 0; k < slot.blobs.length; k++) {
+          const b = slot.blobs[k];
+          if (!b) continue;
+          const q = 1 + Math.sin(ph * 1.7 + k * 1.9) * 0.35;
+          b.scale.set(1.5 * q, 0.55 * q, 1.5 * q);
+        }
+        slot.shine.position.x = -STICKY_R * 0.35 + Math.sin(ph * 0.7) * 0.4;
       }
     }
     for (let i = w; i < this.walls.length; i++) {
       const m = this.walls[i];
-      if (m) m.visible = false;
+      if (m) m.group.visible = false;
     }
     for (let i = s; i < this.stickies.length; i++) {
       const m = this.stickies[i];
-      if (m) m.visible = false;
+      if (m) m.group.visible = false;
     }
   }
 
   dispose() {
-    this.wallGeo.dispose();
-    this.stickyGeo.dispose();
-    this.wallMat.dispose();
-    this.stickyMat.dispose();
+    for (const g of [this.wallGeo, this.capGeo, this.discGeo, this.blobGeo, this.shineGeo])
+      g.dispose();
+    for (const m of [this.wallMat, this.capMat, this.stickyMat, this.shineMat]) m.dispose();
+    this.brick.dispose();
   }
 }
 
@@ -346,7 +463,12 @@ export class AimLayer {
       const p = Math.min(100, Math.max(0, aim.power)) / 100;
       this.barFill.scale.y = Math.max(0.0001, p);
       this.barFill.visible = p > 0;
-      this.barFillMat.color.setHex(aim.charging ? powerColor(aim.power) : 0x8fa3c4);
+      this.barFillMat.color.setHex(
+        !aim.reachable ? 0x777777 : aim.charging ? powerColor(aim.power) : 0x8fa3c4,
+      );
+      // 손이 닿지 않으면 칠 수 없다는 뜻으로 조준선을 회색으로 바꾼다
+      this.lineMat.color.setHex(aim.reachable ? 0xffffff : 0x8a8a8a);
+      this.lineMat.opacity = aim.reachable ? 0.8 : 0.55;
     }
     if (placement) {
       this.previewMat.color.setHex(placement.valid ? 0x35d06a : 0xe0463c);

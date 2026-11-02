@@ -6,11 +6,16 @@ export type LocalCommand =
   | { kind: 'shot'; payload: unknown }
   | { kind: 'hazard'; payload: unknown }
   | { kind: 'forfeit'; payload: unknown }
-  | { kind: 'rematch'; payload: unknown };
+  | { kind: 'rematch'; payload: unknown }
+  | { kind: 'rotate'; payload: unknown };
 
 export type ClientMessage =
   | { t: 'hello'; seat: Seat; board?: BoardId; pieceCount?: number }
   | ({ t: 'cmd'; id: number } & LocalCommand)
+  /** 발동 중인 후레쉬·물총 조준점(`hazard:aim`). 응답 없음 */
+  | { t: 'hazardAim'; payload: unknown }
+  /** 조준·몸짓 상태(`aim:update`). 응답 없이 상대에게 `aim:state`로 중계된다 */
+  | { t: 'aim'; payload: unknown }
   | { t: 'ping' }
   | { t: 'bye' };
 

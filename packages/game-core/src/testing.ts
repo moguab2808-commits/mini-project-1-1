@@ -30,6 +30,7 @@ export class TestGame extends Game {
         timeoutStreak: p.timeoutStreak,
       })),
       effects: this.effects.map((e) => ({ ...e })),
+      lastBoardTurnMs: [...this.lastBoardTurnMs],
     };
   }
 
