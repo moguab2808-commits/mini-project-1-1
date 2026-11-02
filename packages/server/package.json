@@ -7,12 +7,20 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@alkkagi/shared": "*",
     "@alkkagi/game-core": "*",
-    "@alkkagi/game-runtime": "*"
+    "@alkkagi/game-runtime": "*",
+    "@alkkagi/shared": "*",
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1"
   },
   "scripts": {
     "build": "tsc --noEmit -p . && tsup",
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --env-file-if-exists=../../.env src/db/migrate.ts"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.11"
   }
 }

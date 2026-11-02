@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | PostgreSQL(Neon), Drizzle ORM + node-postgres, 세션 테이블은 connect-pg-simple ([DEC-013](../DECISIONS.md#결정-색인)). 랭킹·레이팅·`matches` 제외([DEC-022](../DECISIONS.md#결정-색인)), 방 정보는 `rooms`([DEC-023](../DECISIONS.md#결정-색인)), 사용자·방 컬럼과 입장·종료 처리([DEC-027](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 없음 |
+| 현재 구현 | 스키마·마이그레이션·연결 풀(`packages/server/src/db`, [IMPL-006](../TASKS.md#impl-006-db마이그레이션), 리뷰·병합 전). 방 입장·종료 저장 같은 쿼리는 IMPL-008·011 |
 | 확정 (DB-001 완료) | 아래 [DB-001](../TASKS.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
 | 미정 | 아래 미정 사항 |
 
@@ -49,6 +49,15 @@
 - 공개/비공개 제약: `CHECK ((is_public AND code IS NULL) OR (NOT is_public AND code IS NOT NULL))`. 비공개 방은 코드가 반드시 있고 공개 방은 없다. `code` 유니크로 같은 코드의 방이 둘 생기지 않는다(null은 여러 개 허용). 코드 중복 시 `CODE_TAKEN`을 돌려주어 다시 만들게 한다([API](API.md#오류-형식과-코드)).
 - **코드 생성**: 방 생성 창의 코드 생성 버튼이 6자리 코드를 만든다. 영문 대문자·숫자에서 0/O·1/I를 뺀다([방 생성](../PRD.md#방-생성)). 생성은 `shared`의 함수가 `crypto` 난수로 한다.
 - **한 사람 한 방**: 방장은 `host_id` 유니크로, 참여자는 `guest_id` 유니크로 한 방만 갖는다. 방장이면서 다른 방의 참여자가 되는 것은 서버가 방 생성·입장 전에 검사해 `ALREADY_IN_ROOM`으로 막는다. 한 계정은 연결이 하나뿐이라([AUTH](AUTH.md#socketio-인증중복-접속)) 이 검사 사이의 경합이 거의 없어 DB 제약은 두지 않는다.
+- **제약 이름(서버 오류 매핑 계약)**: 서버는 위반한 제약 이름으로 오류를 구분한다. 이름을 바꾸면 마이그레이션과 서버 매핑을 함께 고친다.
+
+  | 제약 이름 | 위반 시 서버 오류 |
+  | --- | --- |
+  | `rooms_host_id_unique` | `ALREADY_IN_ROOM`(방 생성) |
+  | `rooms_guest_id_unique` | `ALREADY_IN_ROOM`(입장) |
+  | `rooms_code_unique` | `CODE_TAKEN` |
+
+  CHECK 제약(`rooms_public_code`·`rooms_piece_count`·`rooms_status`·`rooms_not_own_guest`)과 `users`의 제약(`users_nickname_lower_idx`·`users_*_nonneg`·`users_record_within_total`)은 입력 검증이 먼저 막으므로 서버가 오류 코드로 매핑하지 않는 방어선이다.
 - **자기 방 입장 금지**: `CHECK (guest_id IS NULL OR guest_id <> host_id)`.
 - **타입 매핑**: Drizzle의 `serial`·`varchar({길이})`·`integer`·`boolean`·`check()`·`uniqueIndex()`로 그대로 옮긴다.
 
@@ -89,7 +98,7 @@ Drizzle 마이그레이션 파일을 저장소에 커밋하고 배포 시작 단
 
 ## 미정 사항
 
-- 생성된 마이그레이션 SQL이 `lower(nickname)` 유니크 인덱스를 의도대로 만드는지 구현 때 확인
+- (해소: IMPL-006에서 생성된 SQL과 Neon의 `pg_indexes`로 `lower(nickname)` 유니크 인덱스를 확인했다. [worklog](../worklogs/2026-11-02.md#impl-006-db마이그레이션))
 - 백업·복구 절차는 [운영](OPERATIONS.md)
 
 제품 정책이 바뀌면 스키마 편의로 정하지 말고 PRD와 결정 기록을 먼저 갱신한다.
