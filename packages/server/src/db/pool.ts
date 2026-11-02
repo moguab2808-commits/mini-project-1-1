@@ -21,3 +21,6 @@ export function createDb(pool: pg.Pool) {
 }
 
 export type Db = ReturnType<typeof createDb>;
+/** `db.transaction` 콜백이 받는 트랜잭션 핸들 */
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+export type DbOrTx = Db | Tx;

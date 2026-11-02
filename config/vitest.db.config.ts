@@ -8,5 +8,8 @@ export default defineConfig({
   test: {
     include: ['packages/*/src/**/*.db.test.ts'],
     environment: 'node',
+    // 원격 DB(Neon) 왕복 지연이 흔들려 기본 5초로는 간헐적으로 시간 초과가 난다.
+    testTimeout: 30_000,
+    hookTimeout: 60_000,
   },
 });
