@@ -6,7 +6,7 @@
 
 ## 기준 브랜치에 반영된 범위
 
-`main`(PR #53·#54·#57 병합)까지 반영된 내용은 문서, 기준 화면 프로토타입 `알까기 바 (2).html`, 프로젝트 골격(npm workspaces 5개 패키지·빌드·테스트·린트), VAL-002 기록 모듈, `game-core`·`shared` 스키마, DB 스키마·마이그레이션·연결 풀(`packages/server/src/db`), `game-runtime`(명령 큐·틱 스케줄러·뷰 배포)이다. 화면·서버 API는 비어 있고 사용자가 쓸 수 있는 제품 기능은 없다. 실제 동작·성능·배포 검증 범위도 없다.
+`main`(PR #53·#54·#57 병합)까지 반영된 내용은 문서, 기준 화면 프로토타입 `알까기 바 (2).html`, 프로젝트 골격(npm workspaces 5개 패키지·빌드·테스트·린트), VAL-002 기록 모듈, `game-core`·`shared` 스키마, DB 스키마·마이그레이션·연결 풀(`packages/server/src/db`), `game-runtime`(명령 큐·틱 스케줄러·뷰 배포), 인증 API·세션·Socket.IO 연결 인증(`packages/server/src/auth`·`realtime`)이다. 화면과 방·경기 서버 API는 비어 있고 사용자가 쓸 수 있는 제품 기능은 없다. 실제 동작·성능·배포 검증 범위도 없다.
 
 - 문서 책임·위치 재편 ([DOC-001~003](TASKS.md#작업-목록))
 - 제품 요구사항: 계정·로비·게임 화면, 방해요소 시스템, 보관·장애·규모 정책, 위임 결정 ([DOC-004~009](TASKS.md#작업-목록), [DEC-006~012](DECISIONS.md#결정-색인))
@@ -17,6 +17,7 @@
 - `game-core`·`shared` 스키마: 규칙·물리·상태 머신·방해요소·`getViewFor`([IMPL-002](TASKS.md#impl-002-game-core), PR #53). 단위 테스트로 확인했고 플레이 테스트·성능 측정은 없다
 - DB 스키마·마이그레이션·연결 풀([IMPL-006](TASKS.md#impl-006-db마이그레이션), PR #54). 마이그레이션은 임시 DB에서 검증했고 개발 DB에는 아직 적용하지 않았다
 - `game-runtime`: 방별 명령 큐·120Hz 틱 스케줄러·플레이어별 뷰 배포와 시계·전송·로거·종료 콜백 주입 인터페이스([IMPL-003](TASKS.md#impl-003-game-runtime), PR #57, B와 합의). 가짜 시계 테스트와 실제 시계 한 건으로 확인했고 Socket.IO·워커 연결과 부하 측정은 없다
+- 인증 API·세션·IP당 빈도 제한·Socket.IO 연결 인증과 중복 접속 대체([IMPL-007](TASKS.md#impl-007-인증), PR #59). argon2id 해시 시간은 이 PC에서만 측정했고 Render 측정은 [IMPL-013](TASKS.md#impl-013-배포)으로 옮겼다
 - 구현 작업 13건 등록([PLAN-001](TASKS.md#plan-001-구현-작업-등록), [IMPL-001~013](TASKS.md#impl-001-프로젝트-골격))
 
 ## 현재 작업 범위
@@ -30,7 +31,7 @@
 
 ## 남은 일과 한계
 
-- 구현 전체: [IMPL-004~014](TASKS.md#impl-004-로컬-2인-모드). A는 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드)부터, B는 IMPL-006이 끝나 [IMPL-007](TASKS.md#impl-007-인증)과 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)를 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
+- 구현 전체: [IMPL-004~014](TASKS.md#impl-004-로컬-2인-모드). A는 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드)부터, B는 IMPL-006·007이 끝나 [IMPL-008](TASKS.md#impl-008-로비방-서버)과 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)를 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
 - 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).

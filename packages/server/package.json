@@ -10,8 +10,14 @@
     "@alkkagi/game-core": "*",
     "@alkkagi/game-runtime": "*",
     "@alkkagi/shared": "*",
+    "@node-rs/argon2": "2.2.2",
+    "connect-pg-simple": "10.0.0",
     "drizzle-orm": "0.45.4",
-    "pg": "8.23.1"
+    "express": "5.3.0",
+    "express-rate-limit": "8.7.2",
+    "express-session": "1.19.0",
+    "pg": "8.23.1",
+    "socket.io": "4.8.4"
   },
   "scripts": {
     "build": "tsc --noEmit -p . && tsup",
@@ -20,7 +26,13 @@
     "db:migrate": "tsx --env-file-if-exists=../../.env src/db/migrate.ts"
   },
   "devDependencies": {
+    "@types/connect-pg-simple": "7.0.3",
+    "@types/express": "5.0.6",
+    "@types/express-session": "1.19.0",
     "@types/pg": "8.23.1",
-    "drizzle-kit": "0.31.11"
+    "@types/supertest": "7.2.1",
+    "drizzle-kit": "0.31.11",
+    "socket.io-client": "4.8.4",
+    "supertest": "7.3.1"
   }
 }

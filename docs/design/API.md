@@ -21,7 +21,7 @@
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
 | `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소 9종](../PRD.md#방해요소-규칙). 이름은 제안 |
-| `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. 승률은 클라이언트가 계산한다 |
+| `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
 | `Member` | `{ nickname, characterId, record: Record }` | 사용자 번호는 넣지 않는다 |
 | `Me` | `{ nickname, characterId, record: Record }` | `GET /api/me`·로그인 응답 |
 
@@ -50,6 +50,7 @@
 ### 오류 형식과 코드
 
 - REST 오류는 `{ error: { code, message } }`로 응답한다. HTTP 상태는 위 표를 따른다.
+- 처리하지 못한 서버 오류는 `500 { error: { code: "INTERNAL_ERROR", message } }`로 응답한다. 원인은 응답에 싣지 않고 서버 로그에만 남긴다. 아래 코드 표의 클라이언트 분기 대상이 아니라 일반 오류 안내로 처리한다. 코드 표의 기준은 이 문서다. `shared`는 게임(`protocol.ts`의 `ERROR_CODES`)과 REST(`auth.ts`의 `AUTH_ERROR_CODES`, `INTERNAL_ERROR` 포함)로 나눠 구현하며 `INVALID_INPUT`은 양쪽에 있다.
 - Socket.IO 명령은 ack 콜백으로 `{ ok: true, … }` 또는 `{ ok: false, error: { code, message } }`를 돌려준다.
 - 거부된 명령은 경기 상태와 난수를 바꾸지 않는다.
 - `RATE_LIMITED`(REST 429)에는 `Retry-After` 헤더(초)가 붙는다. `room:join` ack의 `RATE_LIMITED`에는 없다.
@@ -93,6 +94,7 @@
 - 모든 C → S 명령은 ack 콜백으로 결과를 받는다. commandId를 두지 않는다. 발사는 gameId·turnId, 방해요소는 gameId·hazardInstanceId로 오래된 명령을 거부한다 ([GAME](GAME.md#명령-경합과-시간), [DEC-026](../DECISIONS.md#결정-색인)). 발사 검증은 최종 발사값만 본다. 조준 상태는 상대 화면의 캐릭터 몸짓 표시용으로만 `aim:update`→`aim:state`로 중계하며 ack 없이 volatile로 보낸다([DEC-036](../DECISIONS.md#결정-색인)).
 - AI 대전은 브라우저에서 실행하므로 서버 이벤트가 없다 (`ai:start` 삭제, [DEC-021](../DECISIONS.md#결정-색인)). 방 목록 구독 이벤트(`lobby:*`)도 없다([DEC-024](../DECISIONS.md#결정-색인)).
 - 같은 계정의 새 연결이 생기면 기존 연결에 `session:replaced`를 보내고 끊는다.
+- 로그아웃(`POST /api/auth/logout`)으로 끊긴 연결은 `session:replaced` 없이 `disconnect`만 받는다. 클라이언트는 직전에 로그아웃을 요청했는지로 "로그아웃 직후 끊김"과 네트워크 단절을 구분한다.
 - 시간은 서버 기준 epoch 밀리초(`…Ms`), 각도는 판 좌표계의 라디안이다. 좌표는 판 중심 원점, 선공 기준 오른쪽 x·상대 방향 y, 단위 cm다([GAME](GAME.md#물리와-입력-경계)).
 
 | 방향 | 이벤트 | 설명 |
