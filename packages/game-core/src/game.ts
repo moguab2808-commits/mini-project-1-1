@@ -329,6 +329,11 @@ export class Game {
 
   // ───────── 뷰 ─────────
 
+  /** 뷰를 만들지 않고 전송 여부만 가리려는 호출자를 위한 값(틱·revision·phase). */
+  meta(): { tick: number; revision: number; phase: Phase } {
+    return { tick: this.tick, revision: this.revision, phase: this.phase };
+  }
+
   /** 허용 목록 방식으로 새로 만든 플레이어별 뷰. 상대 비공개 정보를 넣지 않는다. */
   getViewFor(seat: Seat): GameView {
     const now = this.now;
