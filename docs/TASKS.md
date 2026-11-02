@@ -692,8 +692,8 @@ Issue·PR: [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 수용 기준:
 - [x] (정상) 빈 DB에 마이그레이션을 적용하면 `users`·`rooms`·세션 테이블이 [DATABASE](design/DATABASE.md)의 컬럼·제약대로 생긴다. 생성된 SQL의 `lower(nickname)` 유니크 인덱스를 확인했다.
 - [x] (오류) 제약 위반(닉네임 대소문자 중복, 공개 방의 코드, 비공개 방의 코드 없음, 음수 전적, `wins + losses > total_games`, 자기 방 입장)이 DB에서 거부된다.
-- [ ] (예외) 마이그레이션을 두 번 적용해도 오류가 없고, 연결 풀의 유휴 시간이 [OPERATIONS](design/OPERATIONS.md#사용량부하-확인)대로 짧게 설정된다. 세션 테이블 스키마를 connect-pg-simple 공식 문서와 대조했다. (부분 충족: 재적용·유휴 10초 설정·`table.sql` 대조는 확인했다. 대조 대상은 npm 패키지의 `table.sql`이고 웹 문서 페이지는 보지 않았으며 풀이 유휴 연결을 실제로 닫는 동작은 관찰하지 않았다)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] (예외) 마이그레이션을 두 번 적용해도 오류가 없고, 연결 풀의 유휴 시간이 [OPERATIONS](design/OPERATIONS.md#사용량부하-확인)대로 짧게 설정된다. 세션 테이블 스키마를 connect-pg-simple 공식 문서와 대조했다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-006-db마이그레이션)
 
