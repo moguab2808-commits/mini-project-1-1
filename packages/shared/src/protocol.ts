@@ -23,6 +23,8 @@ export const ERROR_CODES = [
   'REMATCH_NOT_AVAILABLE',
   'OUT_OF_REACH',
   'BOARD_ROTATE_NOT_ALLOWED',
+  /** 서버 어댑터가 명령을 처리하다 예외가 났다. 클라이언트는 일반 오류 안내로 처리한다 */
+  'INTERNAL_ERROR',
 ] as const;
 export type GameErrorCode = (typeof ERROR_CODES)[number];
 

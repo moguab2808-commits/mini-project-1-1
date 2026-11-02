@@ -76,6 +76,8 @@
 
 - **방 삭제 시점**: 방은 ①방장이 나갈 때(나가기·연결 끊김·기권 이탈·재도전 15초 동안 누르지 않음 포함)와 ②서버 시작 때만 삭제한다. 경기 종료·참여자 이탈로는 삭제하지 않는다.
 - **입장 동시성**: 두 사람이 같은 방에 동시에 들어와도 한 명만 성공하도록 조건부 갱신을 쓴다. `UPDATE rooms SET guest_id = $me, status = 'playing' WHERE id = $id AND guest_id IS NULL AND status = 'waiting' RETURNING *`가 0행이면 방 상태를 다시 읽어 `ROOM_PLAYING`(상대가 있는 방은 항상 게임 중)·`ROOM_NOT_FOUND`로 구분한다. 비공개 방은 입력한 코드가 `code`와 같을 때만 갱신한다. 즉시 참가는 공개·`guest_id IS NULL`·`status = 'waiting'`인 방 중 무작위 1개를 골라 같은 조건부 갱신을 한 문장으로 한다(`FOR UPDATE SKIP LOCKED`로 동시 즉시 참가가 같은 방을 잡지 않게 한다). 이미 다른 방의 참여자인 사용자가 입장하면 조건부 UPDATE가 0행이 되는 대신 `guest_id` 유니크 위반(PostgreSQL `23505`)이 DB 오류로 난다. 서버는 위반한 제약 이름으로 구분해 `ALREADY_IN_ROOM`으로 매핑한다. 방 생성의 `host_id` 유니크 위반도 `ALREADY_IN_ROOM`, `code` 유니크 위반은 `CODE_TAKEN`으로 매핑한다.
+- **경기 생성 실패**: 입장 UPDATE 뒤 경기를 열지 못하면(`onStarted` 실패) 입장을 되돌린다. `guest_id`를 비우고 `status`를 `waiting`으로 돌리는 한 문장이며, 되돌리기도 실패하면 행을 삭제한다([DEC-043](../DECISIONS.md#결정-색인)).
+- **대기 중 방장 이탈과 입장의 경합**: 방장이 대기 중인 방을 지울 때는 `status = waiting`일 때만 지운다. 그 사이 입장 UPDATE가 끼어들어 0행이면 시작 커밋 뒤 이탈로 다시 처리한다(기권패 처리 뒤 삭제).
 - **DB 접속 최소화**: 방 목록은 폴링하지 않고 로비 진입·새로고침 때만 조회한다([DEC-024](../DECISIONS.md#결정-색인)). DB 접속이 계속 있으면 Neon이 중지되지 않아 월 100 CU-hour 한도([ADR-0003](../adr/0003-tech-stack-and-architecture.md))를 더 쓴다.
 
 ## 경기 종료 저장

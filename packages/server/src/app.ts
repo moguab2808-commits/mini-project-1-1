@@ -3,6 +3,7 @@ import connectPgSimple from 'connect-pg-simple';
 import express, { type Express, type RequestHandler } from 'express';
 import session from 'express-session';
 import type pg from 'pg';
+import type { RuntimeClock } from '@alkkagi/game-runtime';
 import type { Server as SocketServer } from 'socket.io';
 import { createAuthRouter } from './auth/router.ts';
 import { createAuthRateLimiter } from './auth/rate-limit.ts';
@@ -12,6 +13,10 @@ import { createDb } from './db/pool.ts';
 import { ConnectionRegistry } from './realtime/connections.ts';
 import { createRealtime } from './realtime/socket.ts';
 import { createRequireAuth } from './auth/require-auth.ts';
+import { registerGameHandlers } from './game/game-handlers.ts';
+import { GameService, type GameServiceOptions } from './game/game-service.ts';
+import { recordResult } from './game/stats.ts';
+import type { GameLogSink } from './game/game-log.ts';
 import { JoinRateLimiter } from './rooms/join-limiter.ts';
 import { KeyedMutex } from './rooms/keyed-mutex.ts';
 import { registerRoomHandlers } from './rooms/room-handlers.ts';
@@ -27,8 +32,16 @@ export type AppOptions = {
   sessionSecret: string;
   /** 운영이면 세션 쿠키에 secure를 붙인다. */
   isProduction: boolean;
-  /** 방 이벤트가 경기 서버(IMPL-009)에 알리는 자리. 상대가 입장해 시작 커밋이 끝난 직후 불린다. */
+  /** 경기 서버 훅(IMPL-009)보다 먼저 불린다. 테스트가 시작·이탈을 관찰하거나 지연·실패시키는 자리다. */
   roomHooks?: RoomHooks;
+  /** 서버 로그 출력처. 기본은 stdout이다. */
+  gameLogSink?: GameLogSink;
+  /** 재도전 대기 시간(ms). 기본 15초다. */
+  rematchWindowMs?: number;
+  /** 경기 시계. 기본은 서버 단조 시계이며 테스트가 수동 시계를 넣는다. */
+  clock?: RuntimeClock;
+  /** 경기가 끝나 전적을 저장한 뒤 불린다. 테스트가 종료를 관찰하는 자리다. */
+  onGameFinished?: GameServiceOptions['onFinished'];
 };
 
 export type AppServer = {
@@ -76,10 +89,38 @@ export function createAppServer(options: AppOptions): AppServer {
 
   const httpServer = createServer(app);
   const registry = new ConnectionRegistry();
-  const roomService = new RoomService(db, registry, options.roomHooks);
+  const mutex = new KeyedMutex<number>();
+  const onGameError = (error: unknown) => {
+    console.error('경기 처리 오류:', error instanceof Error ? error.message : error);
+  };
+  const gameService = new GameService({
+    registry,
+    // 재도전 만료 처리도 사용자의 다른 방 명령과 같은 줄에 세운다.
+    leaveRoom: (userId, leaveOptions) =>
+      mutex.run(userId, () => roomService.leave(userId, leaveOptions)),
+    clock: options.clock,
+    // 전적 저장 실패는 오류 로그만 남기고 반영을 포기한다. 이탈로 끝난 경기는 방 정리 앞에서 기다린다.
+    onFinished: async (info) => {
+      await recordResult(db, info.userIds, info.result.winnerId);
+      await options.onGameFinished?.(info);
+    },
+    logSink: options.gameLogSink,
+    rematchWindowMs: options.rematchWindowMs,
+    onError: onGameError,
+  });
+  const roomService = new RoomService(db, registry, {
+    onStarted: async (view) => {
+      await options.roomHooks?.onStarted?.(view);
+      await gameService.hooks.onStarted?.(view);
+    },
+    onLeave: async (info) => {
+      await options.roomHooks?.onLeave?.(info);
+      await gameService.hooks.onLeave?.(info);
+    },
+  });
   const roomDeps = {
     service: roomService,
-    mutex: new KeyedMutex<number>(),
+    mutex,
     joinLimiter: new JoinRateLimiter(),
     onError: (error: unknown) => {
       console.error('방 명령 처리 오류:', error instanceof Error ? error.message : error);
@@ -87,6 +128,7 @@ export function createAppServer(options: AppOptions): AppServer {
   };
   const { io } = createRealtime(httpServer, sessionMiddleware, registry, (socket, userId) => {
     registerRoomHandlers(socket, userId, roomDeps);
+    registerGameHandlers(socket, userId, { game: gameService, onError: onGameError });
   });
 
   // 빈도 제한은 본문 파싱보다 앞에 둬서 형식이 잘못된 요청도 센다.
@@ -112,6 +154,7 @@ export function createAppServer(options: AppOptions): AppServer {
     registry,
     sessionStore: store,
     async close() {
+      gameService.dispose();
       await io.close();
       if (httpServer.listening) {
         await new Promise<void>((resolve) => httpServer.close(() => resolve()));

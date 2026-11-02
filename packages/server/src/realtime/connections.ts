@@ -48,6 +48,8 @@ export class ConnectionRegistry {
   }
 
   #replace(socket: Socket, reason: SessionReplaced['reason']): void {
+    // 끊긴 소켓의 이탈 처리가 서버 로그에 접속 대체로 남도록 표시한다(OPERATIONS 서버 로그 `leave`).
+    socket.data.leaveReason = 'session_replaced';
     const payload: SessionReplaced = { reason };
     socket.emit(SESSION_REPLACED, payload);
     socket.disconnect(true);

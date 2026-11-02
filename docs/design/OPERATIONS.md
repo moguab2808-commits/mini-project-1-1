@@ -81,6 +81,7 @@
 | 동시 이탈 | 두 사람의 `leave` 중 `ingressSeq`가 작은 쪽(먼저 관찰된 쪽)을 기권패로 본다. 같은 시각이어도 `ingressSeq`가 서로 다르다 |
 | 시작 직전 이탈 | `leave`의 `ingressSeq`가 `start_commit`보다 작으면 대기실 이탈로 전적에 남기지 않고, 크면 기권패다. `start_commit`이 로그에 없으면 시작 처리 전이다 |
 
+- 구현([IMPL-009](../TASKS.md#impl-009-온라인-대전-서버), [DEC-043](../DECISIONS.md#결정-색인)): 방마다 `RoomRuntime` 하나가 `start_commit`·`leave`를 모두 남기고 `ingressSeq`를 대기실부터 이어 매긴다. 대기실의 이탈도 같은 런타임이 `gameId: null`인 `leave`로 남긴다. 입장 UPDATE(시작 커밋) 뒤에 들어온 이탈은 경기 생성이 끝난 뒤 관찰되므로 `ingressSeq`가 `start_commit`보다 크다. 줄은 `ts`·`mono`·`roomId`·`gameId`·`turnId`·`userId`·`ingressSeq`·`serverTick`·`event`·`result`·`reason`만 직렬화한다(`game-log.ts`).
 - 틱마다 로그를 남기지 않는다. 비밀번호·세션·쿠키·상대의 비공개 보유 상태는 기록하지 않는다. 재접속 복구가 없어 재접속 이벤트는 두지 않는다.
 - **민감정보 제거 방식**: 위 표의 필드만 직렬화하는 허용 목록 방식이다. 로거 함수는 정해진 키만 받고 요청·소켓·세션 객체 전체를 넘기지 않는다. 오류 로그에는 메시지와 코드만 남기고 요청 본문·헤더·쿠키·`DATABASE_URL`을 넣지 않는다. 방해요소 보유 상태는 `hazard_use`·`hazard_trigger`가 일어난 뒤 공개된 사실만 적는다.
 - Render 로그의 보관 기간은 이 설계가 보장하지 않는다. 판정이 필요한 문제는 발생 후 바로 대시보드에서 확인하며, 보관 기간이 필요하면 구현 때 Render 문서로 확인한다.
