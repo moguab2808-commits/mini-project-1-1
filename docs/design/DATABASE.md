@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | PostgreSQL(Neon), Drizzle ORM + node-postgres, 세션 테이블은 connect-pg-simple ([DEC-013](../DECISIONS.md#결정-색인)). 랭킹·레이팅·`matches` 제외([DEC-022](../DECISIONS.md#결정-색인)), 방 정보는 `rooms`([DEC-023](../DECISIONS.md#결정-색인)), 사용자·방 컬럼과 입장·종료 처리([DEC-027](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 없음 |
+| 현재 구현 | 스키마·마이그레이션·연결 풀(`packages/server/src/db`, [IMPL-006](../TASKS.md#impl-006-db마이그레이션), 리뷰·병합 전). 방 입장·종료 저장 같은 쿼리는 IMPL-008·011 |
 | 확정 (DB-001 완료) | 아래 [DB-001](../TASKS.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
 | 미정 | 아래 미정 사항 |
 
@@ -89,7 +89,7 @@ Drizzle 마이그레이션 파일을 저장소에 커밋하고 배포 시작 단
 
 ## 미정 사항
 
-- 생성된 마이그레이션 SQL이 `lower(nickname)` 유니크 인덱스를 의도대로 만드는지 구현 때 확인
+- (해소: IMPL-006에서 생성된 SQL과 Neon의 `pg_indexes`로 `lower(nickname)` 유니크 인덱스를 확인했다. [worklog](../worklogs/2026-11-02.md#impl-006-db마이그레이션))
 - 백업·복구 절차는 [운영](OPERATIONS.md)
 
 제품 정책이 바뀌면 스키마 편의로 정하지 말고 PRD와 결정 기록을 먼저 갱신한다.

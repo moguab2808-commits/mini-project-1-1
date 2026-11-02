@@ -52,7 +52,7 @@
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 예정 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
 | [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
-| [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 예정 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40) |
+| [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 진행 중 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40) |
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 예정 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41) |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42) |
 | [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 예정 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43) |
@@ -682,7 +682,7 @@ Issue·PR: [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 ## IMPL-006 DB·마이그레이션
 
 우선순위: P0
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: DB-001, IMPL-001
 범위: Drizzle 스키마(`users`·`rooms`), 세션 테이블, 마이그레이션 파일, 연결 풀을 구현한다.
@@ -690,12 +690,12 @@ Issue·PR: [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 Issue·PR: [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)
 
 수용 기준:
-- [ ] (정상) 빈 DB에 마이그레이션을 적용하면 `users`·`rooms`·세션 테이블이 [DATABASE](design/DATABASE.md)의 컬럼·제약대로 생긴다. 생성된 SQL의 `lower(nickname)` 유니크 인덱스를 확인했다.
-- [ ] (오류) 제약 위반(닉네임 대소문자 중복, 공개 방의 코드, 비공개 방의 코드 없음, 음수 전적, `wins + losses > total_games`, 자기 방 입장)이 DB에서 거부된다.
-- [ ] (예외) 마이그레이션을 두 번 적용해도 오류가 없고, 연결 풀의 유휴 시간이 [OPERATIONS](design/OPERATIONS.md#사용량부하-확인)대로 짧게 설정된다. 세션 테이블 스키마를 connect-pg-simple 공식 문서와 대조했다.
+- [x] (정상) 빈 DB에 마이그레이션을 적용하면 `users`·`rooms`·세션 테이블이 [DATABASE](design/DATABASE.md)의 컬럼·제약대로 생긴다. 생성된 SQL의 `lower(nickname)` 유니크 인덱스를 확인했다.
+- [x] (오류) 제약 위반(닉네임 대소문자 중복, 공개 방의 코드, 비공개 방의 코드 없음, 음수 전적, `wins + losses > total_games`, 자기 방 입장)이 DB에서 거부된다.
+- [ ] (예외) 마이그레이션을 두 번 적용해도 오류가 없고, 연결 풀의 유휴 시간이 [OPERATIONS](design/OPERATIONS.md#사용량부하-확인)대로 짧게 설정된다. 세션 테이블 스키마를 connect-pg-simple 공식 문서와 대조했다. (부분 충족: 재적용·유휴 10초 설정·`table.sql` 대조는 확인했다. 대조 대상은 npm 패키지의 `table.sql`이고 웹 문서 페이지는 보지 않았으며 풀이 유휴 연결을 실제로 닫는 동작은 관찰하지 않았다)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-006-db마이그레이션)
 
 ## IMPL-007 인증
 
