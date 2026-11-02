@@ -5,10 +5,9 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 전송 방식: 계정·조회는 REST, 방·대전은 Socket.IO, 세션 쿠키 공유 ([DEC-013](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 없음 |
+| 현재 구현 | `shared`의 Zod 스키마와 이벤트 필드 타입([IMPL-002](../TASKS.md#impl-002-game-core), PR 병합 전). 서버·클라이언트 연동은 없음 |
 | 확정 (API-001·API-002 완료) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검, 이름·식별자 확인, 본인 private 뷰의 게이지·쿨타임 필드 ([API-001](../TASKS.md#api-001-api실시간-이벤트-계약-확정), [API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)) |
-| 구현 (IMPL-002) | `shared`의 Zod 스키마로 발사 각도 (−π, π]·세기 (0, 100]를 옮겼다. 위 `INVALID_INPUT` 규칙 그대로이며 제안이 구현으로 확정됐다 |
-| 미정 | 없음 |
+| 미정 | 발사 각도 범위. 제안 (−π, π]·범위 밖·NaN은 `INVALID_INPUT`을 IMPL-002가 임시로 따랐으나 승인 전이다(승인되면 DEC를 연결해 이 표시를 지운다) |
 
 상위 구조는 [DESIGN](../DESIGN.md), 제품 동작은 [PRD](../PRD.md)를 따른다. 이 문서는 전송 방식·메시지·요청·응답·오류·검증 경계를 관리한다. 선택 이유는 [결정 기록](../DECISIONS.md)에 둔다. 아래 필드는 `shared`의 Zod 스키마로 옮길 수 있는 수준으로 적었고, 필드 이름은 `camelCase`다.
 
@@ -144,9 +143,9 @@
 | `game:start` (S → C) | — | `{ gameId, seat: Seat, players: [{ seat, nickname, characterId }, { seat, nickname, characterId }], board: BoardId, pieceCount, finalRound, turnSeconds, view: GameView }`. `seat`는 받는 사람의 좌석이다. `view`는 받는 사람의 초기 `GameView`다. `finalRound`(10)와 `turnSeconds`(30)는 [PRD](../PRD.md#게임-규칙) 값이다 |
 | `hazard:granted` (S → C) | — | `{ gameId, hazardInstanceId, kind: HazardKind, round, replaced }`. 받은 플레이어에게만 보낸다. `replaced`는 이전 보유를 교체했는지 여부다. 게이지·쿨타임 상태는 `game:state`의 `private`로 받는다 |
 | `hazard:use` (C → S) | `{ gameId, hazardInstanceId, target? }`. `target`은 `wall`·`sticky`에만 필수이며 `{ x, y, orientation? }`다. `orientation`(`horizontal`·`vertical`)은 `wall`에만 필수다. 좌표는 판 좌표계다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_HAZARD`, `HAZARD_COOLDOWN`, `HAZARD_OVERHEATED`, `HAZARD_INVALID_TARGET`, `HAZARD_NOT_USABLE`, `GAME_NOT_ACTIVE`. 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용한다. 랜덤형은 서버가 자동 발동한다 (DEC-015·017·031) |
-| `hazard:triggered` (S → C) | — | `{ gameId, kind, phase, sourceSeat, targetSeat, startsAtMs, expiresAtMs, params? }`. `phase`는 `start`·`end`. `params`는 `wall`·`sticky`의 `{ x, y, orientation? }`(`wall`은 판 돌리기로 회전한 뒤의 각도를 `angleDeg`(도)로 함께 보낸다), `wind`의 `{ directionRad }`, `bar_speed`의 `{ multiplier }`, `board_spin`의 `{ angleDeg }`이며 양쪽에 같게 보낸다. 시야 가림(`flashlight`·`water_gun`)의 가림 모양은 넣지 않고 대상의 `game:state`로만 보낸다 |
+| `hazard:triggered` (S → C) | — | `{ gameId, kind, phase, sourceSeat, targetSeat, startsAtMs, expiresAtMs, params? }`. `phase`는 `start`·`end`. `params`는 `wall`·`sticky`의 `{ x, y, orientation? }`(`wall`은 판 좌표계 기준 절대각을 `angleDeg`(도, 가로 0·세로 90에서 판 돌리기로 회전한 값)로 함께 보낸다. `orientation`은 설치 때의 방향이라 클라이언트는 `angleDeg`만으로 그린다), `wind`의 `{ directionRad }`, `bar_speed`의 `{ multiplier }`, `board_spin`의 `{ angleDeg }`이며 양쪽에 같게 보낸다. 시야 가림(`flashlight`·`water_gun`)의 가림 모양은 넣지 않고 대상의 `game:state`로만 보낸다 |
 | `game:state` (S → C) | — | `GameView`(아래). 알이 움직이는 동안은 volatile, 조준 중에는 바뀔 때만, 알이 모두 멈춘 최종 스냅샷은 신뢰 전송이다 ([GAME](GAME.md#전송과-표시-초안)) |
-| `shot:submit` (C → S) | `{ gameId, turnId, stoneId, angle, power }`. 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), `angle`은 판 좌표계 라디안이며 (−π, π]만 받는다(범위 밖·NaN은 `INVALID_INPUT`) | `{ ok: true }`. `INVALID_INPUT`, `GAME_NOT_ACTIVE`, `STALE_TURN`, `SHOT_ALREADY_SUBMITTED`, `NOT_YOUR_TURN`, `INVALID_STONE`, `PLAYER_STUNNED` ([DEC-026](../DECISIONS.md#결정-색인)). 적용 결과는 `game:state`로 받는다 |
+| `shot:submit` (C → S) | `{ gameId, turnId, stoneId, angle, power }`. 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), `angle`은 판 좌표계 라디안이다. 범위는 미정이다(제안 (−π, π], 범위 밖·NaN은 `INVALID_INPUT`) | `{ ok: true }`. `INVALID_INPUT`, `GAME_NOT_ACTIVE`, `STALE_TURN`, `SHOT_ALREADY_SUBMITTED`, `NOT_YOUR_TURN`, `INVALID_STONE`, `PLAYER_STUNNED` ([DEC-026](../DECISIONS.md#결정-색인)). 적용 결과는 `game:state`로 받는다 |
 | `turn:change` (S → C) | — | `{ gameId, turnId, round, activePlayerId: Seat, deadlineMs, serverNowMs, reason }`. `reason`은 `start`(경기 첫 턴)·`resolved`(발사 처리 뒤)·`timeout`(시간초과) |
 | `game:forfeit` (C → S) | `{ gameId }` | `{ ok: true }`. `GAME_NOT_ACTIVE`, `INVALID_INPUT` |
 | `game:over` (S → C) | — | `{ gameId, winnerId: Seat \| null, reason, remainingStones: [n0, n1], rematchDeadlineMs: number \| null }`. `winnerId`가 `null`이면 무승부다. `reason`은 `all_stones_out`(알 모두 제거)·`final_round`(최종 라운드 알 수 비교)·`forfeit`(기권·이탈)·`timeout_forfeit`(연속 시간초과 강제 기권). 상대가 나가 재도전할 수 없으면 `rematchDeadlineMs`는 `null`이다. 레이팅은 없다 ([DEC-022](../DECISIONS.md#결정-색인)) |
@@ -264,6 +263,7 @@ sequenceDiagram
 ## 계약 확정 전 확인할 항목
 
 - 인증 전달·실패 응답·권한 검사 위치: [인증 설계](AUTH.md)
+- 발사 각도 범위 (제안 (−π, π], 승인 전)
 - 호환성·버전 변경
 
 이벤트명은 `shared`에 한 곳으로 정의하며 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 표에 있는 30초 등의 제품 값은 [게임 규칙](../PRD.md#게임-규칙)을 참조하며 여기서 새로 결정하지 않는다.

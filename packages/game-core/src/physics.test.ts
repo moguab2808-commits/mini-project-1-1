@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'vitest';
 import { BOARDS, PHYSICS } from '@alkkagi/shared';
-import { Game } from './index.ts';
+import { TestGame as Game } from './testing.ts';
 import { forceStop, launch, stepPhysics, type Stone, type World } from './physics.ts';
 
 function stone(id: number, x: number, y: number, vx = 0, vy = 0): Stone {
@@ -183,5 +183,39 @@ describe('회전한 벽', () => {
     const rad = -Math.PI / 4;
     assert.ok(Math.abs(p.x! - 4.4 * Math.cos(rad)) < 1e-9);
     assert.ok(Math.abs(p.y! - 4.4 * Math.sin(rad)) < 1e-9);
+  });
+
+  test('세로 벽도 판 돌리기 뒤 angleDeg는 절대각이다(설치 90° → 45°)', () => {
+    const g = new Game({
+      gameId: 'g',
+      board: 'standard',
+      pieceCount: 5,
+      seed: 1,
+      startMs: 0,
+      firstSeat: 0,
+    });
+    g.start();
+    g.debugGrant(0, 'wall');
+    const wall = g.getViewFor(0).private.held!;
+    g.useHazard(
+      { seat: 0, observedAtMs: 0 },
+      {
+        gameId: 'g',
+        hazardInstanceId: wall.hazardInstanceId,
+        target: { x: 4.4, y: 0, orientation: 'vertical' },
+      },
+    );
+    assert.ok(
+      Math.abs(g.getViewFor(0).effects.find((e) => e.kind === 'wall')!.params!.angleDeg! - 90) <
+        1e-9,
+    );
+    g.debugGrant(1, 'board_spin');
+    const spin = g.getViewFor(1).private.held!;
+    g.useHazard(
+      { seat: 1, observedAtMs: 10 },
+      { gameId: 'g', hazardInstanceId: spin.hazardInstanceId },
+    );
+    const p = g.getViewFor(0).effects.find((e) => e.kind === 'wall')!.params!;
+    assert.ok(Math.abs(p.angleDeg! - 45) < 1e-9, `angleDeg ${p.angleDeg}`);
   });
 });

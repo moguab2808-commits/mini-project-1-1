@@ -68,9 +68,9 @@ export type CoreEvent =
   | { type: 'turn:change'; payload: TurnChange }
   | { type: 'game:over'; payload: GameOver };
 
-type Phase = 'waiting' | 'aiming' | 'moving' | 'resolving' | 'finished';
+export type Phase = 'waiting' | 'aiming' | 'moving' | 'resolving' | 'finished';
 
-interface Effect {
+export interface Effect {
   id: number;
   kind: HazardKind;
   source: Seat;
@@ -83,7 +83,7 @@ interface Effect {
   blindPattern?: number;
 }
 
-interface PlayerState {
+export interface PlayerState {
   held: { instanceId: string; kind: HazardKind; round: number } | null;
   gauge: number;
   overheated: boolean;
@@ -110,15 +110,15 @@ export class Game {
   private readonly seed: number;
   private readonly startMs: number;
   private readonly firstSeat: Seat;
-  private readonly grantRng: Prng;
-  private readonly shakeRng: Prng;
-  private readonly visualRng: Prng;
+  protected readonly grantRng: Prng;
+  protected readonly shakeRng: Prng;
+  protected readonly visualRng: Prng;
 
-  private phase: Phase = 'waiting';
+  protected phase: Phase = 'waiting';
   private tick = 0;
   private now: number;
   private revision = 0;
-  private completedTurns = 0;
+  protected completedTurns = 0;
   private turnCounter = 0;
   private grantCounter = 0;
   private effectCounter = 0;
@@ -132,9 +132,9 @@ export class Game {
   private simElapsed = 0;
   private settleTimer = 0;
 
-  private readonly world: World;
-  private effects: Effect[] = [];
-  private readonly players: [PlayerState, PlayerState];
+  protected readonly world: World;
+  protected effects: Effect[] = [];
+  protected readonly players: [PlayerState, PlayerState];
   private events: CoreEvent[] = [];
 
   constructor(config: GameConfig) {
@@ -220,7 +220,7 @@ export class Game {
 
   submitShot(env: Envelope, cmd: ShotSubmit): CommandResult {
     this.advanceTo(env.observedAtMs);
-    if (!(cmd.power > 0 && cmd.power <= 100) || !Number.isFinite(cmd.angle)) {
+    if (!(cmd.power > 0 && cmd.power <= 100) || !(cmd.angle > -Math.PI && cmd.angle <= Math.PI)) {
       return fail('INVALID_INPUT', '발사 값이 범위 밖이다');
     }
     if (this.phase !== 'aiming' && this.phase !== 'moving') {
@@ -293,7 +293,12 @@ export class Game {
     }
     const params: HazardParams | undefined =
       wall && cmd.target
-        ? { x: wall.cx, y: wall.cy, orientation: cmd.target.orientation, angleDeg: 0 }
+        ? {
+            x: wall.cx,
+            y: wall.cy,
+            orientation: cmd.target.orientation,
+            angleDeg: (wall.angle * 180) / Math.PI,
+          }
         : sticky
           ? { x: sticky.cx, y: sticky.cy }
           : meta.kind === 'board_spin'
@@ -394,49 +399,10 @@ export class Game {
     };
   }
 
-  /** 테스트용: 난수 스트림 상태(거부된 명령이 난수를 바꾸지 않는지 확인) */
-  debugPrngStates(): number[] {
-    return [
-      this.grantRng.state,
-      this.shakeRng.state,
-      this.visualRng.state,
-      ...this.players.map((p) => p.random?.rng.state ?? -1),
-    ];
-  }
-
-  /** 테스트용: 서버만 쓰는 내부 상태 */
-  debugState() {
-    return {
-      phase: this.phase,
-      completedTurns: this.completedTurns,
-      stones: this.world.stones.map((s) => ({ ...s })),
-      walls: this.world.walls.map((w) => ({ ...w })),
-      players: this.players.map((p) => ({
-        held: p.held ? { ...p.held } : null,
-        gauge: p.gauge,
-        overheated: p.overheated,
-        cooldownEndsAtMs: p.cooldownEndsAtMs,
-        timeoutStreak: p.timeoutStreak,
-      })),
-      effects: this.effects.map((e) => ({ ...e })),
-    };
-  }
-
-  /** 테스트용: 알 위치를 직접 설정한다 */
-  debugSetStone(id: number, x: number, y: number, alive = true, vx = 0, vy = 0): void {
-    const s = this.world.stones.find((st) => st.id === id);
-    if (s) Object.assign(s, { x, y, alive, vx, vy });
-  }
-
-  /** 테스트용: 보유 방해요소를 지정한다(랜덤 스트림은 정상 지급과 같은 방식으로 만든다) */
-  debugGrant(seat: Seat, kind: HazardKind): void {
-    this.grantOne(seat, false, kind);
-  }
-
   // ───────── 내부: 턴·라운드 ─────────
 
   private get round(): number {
-    return Math.floor(this.completedTurns / 2) + 1;
+    return Math.min(RULES.finalRound, Math.floor(this.completedTurns / 2) + 1);
   }
 
   private startTurn(reason: TurnChange['reason']): void {
@@ -554,7 +520,7 @@ export class Game {
     for (const seat of [0, 1] as const) this.grantOne(seat, replaced);
   }
 
-  private grantOne(seat: Seat, replaced: boolean, forceKind?: HazardKind): void {
+  protected grantOne(seat: Seat, replaced: boolean, forceKind?: HazardKind): void {
     const p = this.players[seat];
     if (replaced) this.clearEffectsFrom(seat);
     const kind = forceKind ?? HAZARD_KINDS[this.grantRng.int(HAZARD_KINDS.length)]!;
@@ -744,10 +710,13 @@ export class Game {
     this.keepInsideAndSeparate();
   }
 
-  /** 효과로 옮긴 알을 판 안으로 되돌리고 겹침을 푼다. 이 효과 자체로 알을 제거하지 않는다. */
+  /**
+   * 효과로 옮긴 알을 판 안으로 되돌리고 알끼리·벽과의 겹침을 푼다. 이 효과 자체로 알을 제거하지 않는다.
+   * 경계 clamp → 알 분리 → 벽 밀어내기를 겹침이 없어질 때까지 반복하고, 마지막은 항상 경계 clamp로 끝낸다.
+   */
   private keepInsideAndSeparate(): void {
     const R = PHYSICS.stoneRadius;
-    for (let pass = 0; pass < 20; pass++) {
+    for (let pass = 0; pass < 50; pass++) {
       for (const s of this.world.stones) {
         if (s.alive) [s.x, s.y] = clampInside(this.board, s.x, s.y);
       }
@@ -776,7 +745,16 @@ export class Game {
           moved = true;
         }
       }
-      if (!moved) break;
+      for (const s of g) {
+        for (const w of this.world.walls) {
+          const c = circleVsObb(s.x, s.y, R, w);
+          if (!c) continue;
+          s.x += c.nx * (c.depth + 1e-6);
+          s.y += c.ny * (c.depth + 1e-6);
+          moved = true;
+        }
+      }
+      if (!moved) return;
     }
     for (const s of this.world.stones) {
       if (s.alive) [s.x, s.y] = clampInside(this.board, s.x, s.y);

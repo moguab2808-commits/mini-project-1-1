@@ -7,9 +7,9 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 기술 스택과 아키텍처 ([DEC-013](DECISIONS.md#결정-색인), [ADR-0003](adr/0003-tech-stack-and-architecture.md)). 방 정보 DB 보관([DEC-023](DECISIONS.md#결정-색인)) |
-| 현재 구현 | 없음. 구현 현황은 [PROGRESS](PROGRESS.md), 근거는 연결된 worklog 참조 |
-| 확정된 상세 계약 | 게임([GAME](design/GAME.md))·로컬([LOCAL](design/LOCAL.md))·API([API](design/API.md))·DB([DATABASE](design/DATABASE.md))·인증([AUTH](design/AUTH.md))·운영([OPERATIONS](design/OPERATIONS.md)). 구현은 없음 |
-| 미정 | 물리·방해요소 수치(플레이 테스트 후 확정), 에셋 도구 이용 조건 확인(구현 단계) |
+| 현재 구현 | 프로젝트 골격([IMPL-001](TASKS.md#impl-001-프로젝트-골격)), `shared` 스키마·`game-core`([IMPL-002](TASKS.md#impl-002-game-core), PR 병합 전). 구현 현황은 [PROGRESS](PROGRESS.md), 근거는 연결된 worklog 참조 |
+| 확정된 상세 계약 | 게임([GAME](design/GAME.md))·로컬([LOCAL](design/LOCAL.md))·API([API](design/API.md))·DB([DATABASE](design/DATABASE.md))·인증([AUTH](design/AUTH.md))·운영([OPERATIONS](design/OPERATIONS.md)). 구현은 일부만 있음(위 현재 구현 참조) |
+| 미정 | 물리·방해요소 수치(플레이 테스트 후 확정), 발사 각도 범위, 에셋 도구 이용 조건 확인(구현 단계) |
 
 선택 이유와 대안은 [ADR-0003](adr/0003-tech-stack-and-architecture.md)에 있다. 제품 요구사항의 승인과 구현 설계의 승인을 구분한다.
 

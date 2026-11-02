@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'vitest';
 import type { GameView, Seat } from '@alkkagi/shared';
-import { Game, type CoreEvent } from './index.ts';
+import type { CoreEvent } from './index.ts';
+import { TestGame as Game } from './testing.ts';
 
 const T0 = 1_000_000;
 
@@ -552,5 +553,15 @@ describe('getViewFor: 상대 비공개', () => {
         );
       }
     }
+  });
+
+  test('발사 각도가 (−π, π] 밖이면 INVALID_INPUT이다', () => {
+    const g = mk();
+    for (const a of [7, -Math.PI, 1e300, Number.NaN]) {
+      const r = shoot(g, 0, T0 + 10, 50, a);
+      assert.equal(r.ok, false);
+      assert.equal(!r.ok && r.error.code, 'INVALID_INPUT');
+    }
+    assert.equal(shoot(g, 0, T0 + 20, 50, Math.PI).ok, true);
   });
 });

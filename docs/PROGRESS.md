@@ -30,4 +30,5 @@
 - 구현 전체: [IMPL-002~014](TASKS.md#impl-002-game-core). A는 `game-core`부터, B는 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)·[IMPL-006](TASKS.md#impl-006-db마이그레이션)부터 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
+- 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).
 - README 설치·실행 절차는 구현 뒤 작성한다([DOC-011](TASKS.md#doc-011-readme-설치실행-절차)).
