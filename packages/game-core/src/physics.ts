@@ -177,3 +177,34 @@ export function stopAll(w: World): void {
     s.vy = 0;
   }
 }
+
+/** 발사 한 번의 진행 시간과 정지 판정 누적 시간(초). 발사마다 새로 만든다 */
+export interface MotionClock {
+  elapsed: number;
+  settle: number;
+}
+
+export type MotionOutcome = 'moving' | 'settled' | 'forced';
+
+/**
+ * 움직이는 판을 한 틱 진행하고 정지 판정을 한다: 물리 → 경과 시간 → 정지 판정 → 시간 상한.
+ * 권한 측(`Game`)과 AI 미리보기(`previewShot`)가 이 함수 하나를 써서 정지 시점·결과가 어긋나지 않게 한다.
+ * 정지하면 속도를 0으로(`settled`), 시간 상한이면 떠 있는 알을 착지시킨다(`forced`).
+ */
+export function advanceMotion(
+  w: World,
+  clock: MotionClock,
+): { outcome: MotionOutcome; removed: number[] } {
+  const removed = stepPhysics(w);
+  clock.elapsed += DT;
+  clock.settle = allSlow(w) ? clock.settle + DT : 0;
+  if (clock.settle >= PHYSICS.settleSeconds) {
+    stopAll(w);
+    return { outcome: 'settled', removed };
+  }
+  if (clock.elapsed >= PHYSICS.maxSimSeconds) {
+    removed.push(...forceStop(w));
+    return { outcome: 'forced', removed };
+  }
+  return { outcome: 'moving', removed };
+}

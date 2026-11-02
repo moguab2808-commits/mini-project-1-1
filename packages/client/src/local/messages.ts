@@ -1,4 +1,4 @@
-// 로컬 창 ↔ SharedWorker 권한 측 메시지. LocalGameSession 내부 구현이며 GameSession 계약에 넣지 않는다.
+// 로컬 창 ↔ SharedWorker 권한 측(AI 대전은 전용 Worker) 메시지. LocalGameSession 내부 구현이며 GameSession 계약에 넣지 않는다.
 import type { BoardId, CommandResult, Seat } from '@alkkagi/shared';
 import type { GameEventMap } from '../session/game-session.ts';
 
@@ -10,7 +10,14 @@ export type LocalCommand =
   | { kind: 'rotate'; payload: unknown };
 
 export type ClientMessage =
-  | { t: 'hello'; seat: Seat; board?: BoardId; pieceCount?: number }
+  | {
+      t: 'hello';
+      seat: Seat;
+      board?: BoardId;
+      pieceCount?: number;
+      /** AI 대전: 화면 표시용 내 닉네임·캐릭터. 서버로 보내지 않는다. 로컬 2인은 쓰지 않는다 */
+      profile?: { nickname?: string; characterId?: string };
+    }
   | ({ t: 'cmd'; id: number } & LocalCommand)
   /** 발동 중인 후레쉬·물총 조준점(`hazard:aim`). 응답 없음 */
   | { t: 'hazardAim'; payload: unknown }

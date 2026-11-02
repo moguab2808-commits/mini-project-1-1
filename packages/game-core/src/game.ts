@@ -35,16 +35,7 @@ import {
 } from './geometry.ts';
 import { isStickyPlaceable, isWallPlaceable, type PlacementWorld } from './placement.ts';
 import { Prng, deriveSeed } from './prng.ts';
-import {
-  DT,
-  allSlow,
-  forceStop,
-  launch,
-  stepPhysics,
-  stopAll,
-  type Stone,
-  type World,
-} from './physics.ts';
+import { DT, advanceMotion, launch, type MotionClock, type Stone, type World } from './physics.ts';
 
 export interface GameConfig {
   gameId: string;
@@ -153,8 +144,7 @@ export class Game {
   private turnId = 0;
   private deadlineMs = 0;
   private shotCommitted = false;
-  private simElapsed = 0;
-  private settleTimer = 0;
+  private motion: MotionClock = { elapsed: 0, settle: 0 };
 
   protected readonly world: World;
   protected effects: Effect[] = [];
@@ -268,8 +258,7 @@ export class Game {
     this.shotCommitted = true;
     this.players[env.seat].timeoutStreak = 0;
     this.phase = 'moving';
-    this.simElapsed = 0;
-    this.settleTimer = 0;
+    this.motion = { elapsed: 0, settle: 0 };
     this.revision++;
     return OK;
   }
@@ -633,17 +622,9 @@ export class Game {
     }
     this.updateBlindCoverage();
     if (this.phase !== 'moving') return;
-    stepPhysics(this.world);
-    this.simElapsed += DT;
+    const { outcome } = advanceMotion(this.world, this.motion);
     this.revision++;
-    this.settleTimer = allSlow(this.world) ? this.settleTimer + DT : 0;
-    if (this.settleTimer >= PHYSICS.settleSeconds) {
-      stopAll(this.world);
-      this.resolveTurn('resolved');
-    } else if (this.simElapsed >= PHYSICS.maxSimSeconds) {
-      forceStop(this.world);
-      this.resolveTurn('resolved');
-    }
+    if (outcome !== 'moving') this.resolveTurn('resolved');
   }
 
   // ───────── 내부: 방해요소 ─────────
