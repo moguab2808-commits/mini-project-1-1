@@ -15,9 +15,14 @@ import type {
  * 같은 `RoomRuntime`을 쓰고 시계·전송·로거·종료 콜백만 다르게 넣는다(DEC-030).
  */
 
-/** 단조 시계. 벽시계(Date.now)가 아니라 되돌아가지 않는 시각을 돌려준다. */
+/**
+ * 단조 시계. 되돌아가지 않아야 하며(`Date.now` 직접 사용 금지), API가 시간 필드를 서버 기준
+ * epoch 밀리초로 정하므로 epoch 기준으로 맞춘 단조 시각이어야 한다
+ * (예: `Math.round(performance.timeOrigin + performance.now())`).
+ * 경기 시각·`serverNowMs`·마감 시각이 이 값을 그대로 쓴다.
+ */
 export interface RuntimeClock {
-  /** 단조 현재 시각(ms) */
+  /** epoch 기준 단조 현재 시각(ms) */
   now(): number;
   /** `delayMs` 뒤 한 번 호출한다. 돌려준 함수로 취소한다. */
   setTimer(callback: () => void, delayMs: number): () => void;
@@ -64,7 +69,8 @@ export interface RuntimeLogEntry {
   event: RuntimeLogEvent;
   /** 단조 시각(ms). UTC 시각(`ts`)과 roomId·userId는 서버 로거가 덧붙인다. */
   mono: number;
-  gameId: string;
+  /** 경기가 없는 대기실 이벤트(시작 전 `leave`)는 null이다. */
+  gameId: string | null;
   turnId?: number;
   serverTick?: number;
   ingressSeq?: number;
@@ -72,7 +78,7 @@ export interface RuntimeLogEntry {
   seat?: Seat;
   /** 명령 판정 결과는 API 오류 코드 이름, 성공은 `ok`. `tick_skipped`는 버린 지연(ms) 문자열 */
   result?: string;
-  /** 종료 사유 */
+  /** `leave`는 이탈 사유, `forfeit`는 기권 사유, `game_over`는 종료 사유 */
   reason?: string;
 }
 
@@ -80,7 +86,11 @@ export interface RuntimeLogger {
   log(entry: RuntimeLogEntry): void;
 }
 
-export type LeaveReason = 'leave' | 'disconnect' | 'session_replaced';
+/** OPERATIONS 서버 로그 `leave`의 `reason`과 같은 이름. `leave_button`은 `room:leave`로 직접 나가는 경우다. */
+export type LeaveReason = 'disconnect' | 'leave_button' | 'session_replaced';
+
+/** OPERATIONS 서버 로그 `forfeit`의 `reason` */
+export type ForfeitReason = 'leave' | 'command' | 'timeout';
 
 /** 런타임이 `Game`에서 쓰는 범위. 테스트가 대역을 넣을 수 있게 좁혀 둔다. */
 export type GameLike = Pick<

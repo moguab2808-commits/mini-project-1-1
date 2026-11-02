@@ -16,6 +16,7 @@ import {
   type ShotSubmit,
 } from '@alkkagi/shared';
 import type {
+  ForfeitReason,
   LeaveReason,
   RuntimeEventMap,
   RuntimeLogEntry,
@@ -60,6 +61,8 @@ interface Queued {
   observedAtMs: number;
   seat: Seat;
   kind: 'shot' | 'hazard_use' | 'forfeit';
+  /** `forfeit` 종류일 때 로그의 기권 사유 */
+  forfeitReason?: ForfeitReason;
   /** 큐에 넣을 때 이미 거부된 입력이면 결과가 들어 있다 */
   rejected?: CommandResult;
   done?: boolean;
@@ -132,7 +135,13 @@ export class RoomRuntime {
     };
     this.game = this.opts.createGame ? this.opts.createGame(gameConfig) : new Game(gameConfig);
     this.game.start();
-    this.log({ event: 'start_commit', gameId: config.gameId, result: 'ok' });
+    // 큐 밖에서 동기 호출되지만 순번을 하나 소비해 `leave`와 같은 순번 공간에서 순서를 가린다.
+    this.log({
+      event: 'start_commit',
+      gameId: config.gameId,
+      ingressSeq: this.ingressSeq++,
+      result: 'ok',
+    });
 
     for (const seat of [0, 1] as const) {
       const view = this.viewFor(seat);
@@ -177,8 +186,12 @@ export class RoomRuntime {
 
   forfeit(seat: Seat, cmd: GameForfeit): Promise<CommandResult> {
     const parsed = GameForfeitSchema.safeParse(cmd);
-    return this.enqueue(seat, 'forfeit', parsed.success, (game, env) =>
-      game.forfeit(env, parsed.data as GameForfeit),
+    return this.enqueue(
+      seat,
+      'forfeit',
+      parsed.success,
+      (game, env) => game.forfeit(env, parsed.data as GameForfeit),
+      { forfeitReason: 'command' },
     );
   }
 
@@ -187,15 +200,27 @@ export class RoomRuntime {
    * 진행 중인 경기가 없으면(시작 커밋 전·종료 후) 기권패 없이 `GAME_NOT_ACTIVE`를 돌려준다.
    */
   leave(seat: Seat, reason: LeaveReason): Promise<CommandResult> {
+    // 이탈이 관찰된 시점에 순번을 받는다. 경기가 없어도(시작 커밋 전·종료 후) 순번을 쓰므로
+    // `start_commit`과 같은 순번 공간에서 시작 직전 이탈을 가린다.
+    const ingressSeq = this.ingressSeq++;
     const game = this.game;
+    const active = this.isRunning;
     this.log({
       event: 'leave',
-      gameId: game?.gameId ?? '',
+      gameId: active ? game!.gameId : null,
+      ingressSeq,
       seat,
-      result: reason,
+      reason,
     });
-    if (!game || this.finished || this.closed) return Promise.resolve(NOT_ACTIVE);
-    return this.forfeit(seat, { gameId: game.gameId });
+    if (!game || !active) return Promise.resolve(NOT_ACTIVE);
+    const parsed = GameForfeitSchema.safeParse({ gameId: game.gameId });
+    return this.enqueue(
+      seat,
+      'forfeit',
+      parsed.success,
+      (g, env) => g.forfeit(env, { gameId: game.gameId }),
+      { ingressSeq, forfeitReason: 'leave' },
+    );
   }
 
   /** 타이머를 멈춘다. 방을 닫을 때 부른다. */
@@ -217,17 +242,21 @@ export class RoomRuntime {
     kind: Queued['kind'],
     valid: boolean,
     apply: (game: GameLike, env: Envelope) => CommandResult,
+    extra: { ingressSeq?: number; forfeitReason?: ForfeitReason } = {},
   ): Promise<CommandResult> {
-    const ingressSeq = this.ingressSeq++;
+    // `leave`는 이미 순번을 받았으므로 그 순번을 이어 쓴다.
+    const ingressSeq = extra.ingressSeq ?? this.ingressSeq++;
     const game = this.game;
     if (!game || this.finished || this.closed) {
-      this.log({
-        event: kind,
-        gameId: game?.gameId ?? '',
-        ingressSeq,
-        seat,
-        result: 'GAME_NOT_ACTIVE',
-      });
+      if (extra.ingressSeq === undefined) {
+        this.log({
+          event: kind,
+          gameId: null,
+          ingressSeq,
+          seat,
+          result: 'GAME_NOT_ACTIVE',
+        });
+      }
       return Promise.resolve(NOT_ACTIVE);
     }
     return new Promise<CommandResult>((resolve) => {
@@ -236,6 +265,7 @@ export class RoomRuntime {
         observedAtMs: this.gameNow(),
         seat,
         kind,
+        forfeitReason: extra.forfeitReason,
         rejected: valid ? undefined : INVALID,
         run: (env) => apply(game, env),
         resolve,
@@ -298,6 +328,8 @@ export class RoomRuntime {
         ingressSeq: q.ingressSeq,
         seat: q.seat,
         result: result.ok ? 'ok' : result.error.code,
+        // 기권패가 확정된 때만 사유를 남긴다.
+        reason: q.kind === 'forfeit' && result.ok ? q.forfeitReason : undefined,
       });
       this.settle(q, result);
       this.checkFinished(game);
@@ -386,6 +418,9 @@ export class RoomRuntime {
         return;
       case 'game:over': {
         const payload = this.withRematch(e.payload);
+        if (payload.reason === 'timeout_forfeit') {
+          this.log({ event: 'forfeit', gameId, reason: 'timeout' });
+        }
         this.log({ event: 'game_over', gameId, reason: payload.reason });
         this.broadcast('game:over', payload);
         try {

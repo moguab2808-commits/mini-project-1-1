@@ -211,7 +211,8 @@ describe('RoomRuntime', () => {
       assert.equal(!w.ok && w.error.code, 'NOT_YOUR_TURN');
       assert.equal(g.ok, true);
       const seqs = logs.filter((l) => l.event === 'shot').map((l) => l.ingressSeq);
-      assert.deepEqual(seqs, [0, 1, 2]);
+      // 시작 커밋이 순번 0을 쓴다
+      assert.deepEqual(seqs, [1, 2, 3]);
       // 거부된 두 명령 뒤에도 상태는 좋은 발사에서만 바뀐다
       const after = lastView(transport, 0);
       assert.ok(!before || !after || after.revision >= before.revision);
@@ -220,7 +221,7 @@ describe('RoomRuntime', () => {
     test('경기가 없으면 명령은 GAME_NOT_ACTIVE다', async () => {
       const clock = new FakeClock();
       const rt = new RoomRuntime({ clock, transport: new FakeTransport() });
-      const r = await rt.leave(0, 'leave');
+      const r = await rt.leave(0, 'leave_button');
       assert.equal(!r.ok && r.error.code, 'GAME_NOT_ACTIVE');
     });
   });
@@ -249,14 +250,17 @@ describe('RoomRuntime', () => {
 
     test('재도전으로 새 경기를 시작해도 ingressSeq는 이어진다', async () => {
       const { clock, logs, rt } = setup();
-      const p = rt.leave(0, 'leave');
+      const p = rt.leave(0, 'leave_button');
       clock.advance(20);
       await p;
       rt.startGame({ ...CONFIG, gameId: 'g2' });
       const q = rt.useHazard(0, { gameId: 'g2', hazardInstanceId: 'none' });
       clock.advance(20);
       await q;
-      const seqs = logs.filter((l) => l.ingressSeq !== undefined).map((l) => l.ingressSeq!);
+      // 기권 로그는 `leave`의 순번을 이어 쓰므로 순번 소비 이벤트만 센다
+      const seqs = logs
+        .filter((l) => l.ingressSeq !== undefined && l.event !== 'forfeit')
+        .map((l) => l.ingressSeq!);
       assert.ok(seqs.length >= 2);
       assert.deepEqual(
         seqs,
@@ -291,7 +295,7 @@ describe('RoomRuntime', () => {
       clock.advance(20);
       assert.equal((await p).ok, true, '전송 오류 뒤에도 틱이 돌아 명령이 처리된다');
       const n = errors.length;
-      const l = rt.leave(0, 'leave');
+      const l = rt.leave(0, 'leave_button');
       clock.advance(20);
       assert.equal((await l).ok, true);
       assert.ok(errors.length > n, 'onFinished 오류도 보고된다');
@@ -320,7 +324,7 @@ describe('RoomRuntime', () => {
 
     test('재대결 마감 시각은 종료 때 한 번만 정해진다', async () => {
       const { clock, transport, rt } = setup({ rematchWindowMs: 15_000 });
-      const p = rt.leave(0, 'leave');
+      const p = rt.leave(0, 'leave_button');
       clock.advance(20);
       await p;
       const over = transport.of('game:over', 0)[0]!.payload as RuntimeEventMap['game:over'];
@@ -380,6 +384,51 @@ describe('RoomRuntime', () => {
       clock.advance(50);
       assert.equal(transport.of('game:state').length, 2, '같은 revision은 다시 보내지 않는다');
       rt.dispose();
+    });
+  });
+  describe('서버 로그 (OPERATIONS)', () => {
+    test('start_commit·leave가 같은 순번 공간의 ingressSeq를 가지고 leave는 reason을 쓴다', async () => {
+      const clock = new FakeClock();
+      const logs: RuntimeLogEntry[] = [];
+      const rt = new RoomRuntime({
+        clock,
+        transport: new FakeTransport(),
+        logger: { log: (e) => logs.push(e) },
+      });
+      // 시작 커밋 전 이탈: 경기가 없어도 순번을 쓰고 gameId는 null이다
+      const before = await rt.leave(1, 'disconnect');
+      assert.equal(!before.ok && before.error.code, 'GAME_NOT_ACTIVE');
+      rt.startGame(CONFIG);
+      const p = rt.leave(0, 'session_replaced');
+      clock.advance(20);
+      assert.equal((await p).ok, true);
+
+      const seqLogs = logs.filter((l) => l.ingressSeq !== undefined);
+      const by = (event: string) => seqLogs.filter((l) => l.event === event);
+      assert.equal(by('leave').length, 2);
+      assert.equal(by('start_commit').length, 1);
+      const [pre, post] = by('leave');
+      assert.equal(pre!.gameId, null);
+      assert.equal(pre!.reason, 'disconnect');
+      assert.equal(post!.reason, 'session_replaced');
+      const commit = by('start_commit')[0]!;
+      // 시작 전 이탈 < 시작 커밋 < 시작 뒤 이탈
+      assert.ok(pre!.ingressSeq! < commit.ingressSeq!);
+      assert.ok(commit.ingressSeq! < post!.ingressSeq!);
+      // leave 한 번이 순번 하나만 쓴다(기권 로그가 같은 순번을 이어 쓴다)
+      const forfeit = by('forfeit')[0]!;
+      assert.equal(forfeit.ingressSeq, post!.ingressSeq);
+      assert.equal(forfeit.reason, 'leave');
+      assert.equal(new Set(seqLogs.map((l) => `${l.event}${l.ingressSeq}`)).size, seqLogs.length);
+    });
+
+    test('기권 명령의 forfeit 사유는 command다', async () => {
+      const { clock, logs, rt } = setup();
+      const p = rt.forfeit(1, { gameId: 'g1' });
+      clock.advance(20);
+      assert.equal((await p).ok, true);
+      const f = logs.find((l) => l.event === 'forfeit');
+      assert.equal(f?.reason, 'command');
     });
   });
 });

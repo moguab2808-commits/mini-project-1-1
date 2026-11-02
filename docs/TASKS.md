@@ -640,7 +640,13 @@ Issue·PR: [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 - [x] (예외, `LEAVE-FORFEIT` 기반) 이탈·기권·접속 대체가 같은 큐의 기권 명령으로 처리되고, 동시 이탈은 `ingressSeq`가 작은 쪽을 기권패로 한다. 시작 커밋보다 앞선 이탈은 대기실 처리다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-003-game-runtime). 4개 기준은 가짜 시계·전송 단위 테스트로 확인했다. 주입 인터페이스(`RuntimeClock`·`RuntimeTransport`·`RuntimeLogger`·`onFinished`)는 개발자 A의 초안이며 B와 합의하지 않았다. 합의 결과를 이 절에 남긴 뒤 병합한다.
+검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-003-game-runtime). 4개 기준은 가짜 시계·전송 단위 테스트로 확인했다.
+
+인터페이스 합의 결과(2026-11-02, 개발자 A·B, [PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57)): 시그니처는 `packages/game-runtime/src/types.ts`가 기준이다. 책임 분담은 다음과 같다.
+- 서버(B, IMPL-009): `RuntimeClock.now()`는 `Math.round(performance.timeOrigin + performance.now())`처럼 epoch에 맞춘 단조 시각, 타이머는 `setTimeout`으로 감싼다. `RuntimeTransport`는 좌석↔`users.id`↔소켓 매핑을 시작 커밋 때 메모리에 만들고 `volatile`은 `socket.volatile.emit`에 연결한다. `ts`·`roomId`·`userId`는 서버 로거가 덧붙인다. `onFinished`에서 `finishOnce`를 비동기로 부르고 오류는 서버가 자체 catch로 로그에 남기며 전적 반영을 포기한다(재시도 없음). `onError`는 오류 이름·메시지만 서버 로그로 보낸다. 사용자→좌석 변환, `gameId`·`seed` 생성(crypto 난수)과 시작 커밋 시점, `rematch:*` 성립 로직도 서버가 맡는다.
+- 런타임(A): `LeaveReason`은 `disconnect`·`leave_button`·`session_replaced`(로그 `leave`의 `reason`과 같은 이름)다. 비밀번호 변경으로 끊긴 연결은 `session_replaced`, 연결 끊김·로그아웃은 `disconnect`, `room:leave`는 `leave_button`으로 넘긴다. `start_commit`과 `leave`는 같은 `ingressSeq` 순번 공간을 쓰고, 경기 없는 `leave`는 `gameId`가 null이다. `forfeit` 로그의 `reason`은 `leave`·`command`·`timeout`이다. 런타임은 `onFinished` 반환값을 기다리지 않고 `game:over`의 재도전 마감 시각만 채운다.
+- 미정(IMPL-009에서 정함): 거부된 발사의 `shot` 기록 방식, `leave`·`forfeit` 이중 기록 정리.
+- 이 합의는 두 담당자의 PR 코멘트 대화에 근거한다.
 
 ## IMPL-004 로컬 2인 모드
 
