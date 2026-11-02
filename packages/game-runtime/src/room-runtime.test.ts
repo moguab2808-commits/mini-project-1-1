@@ -4,6 +4,7 @@ import { describe, test } from 'vitest';
 import type { CommandResult, GameView, Seat } from '@alkkagi/shared';
 import { MAX_CATCH_UP_MS, RoomRuntime, type StartGameConfig } from './index.ts';
 import type {
+  GameLike,
   RuntimeClock,
   RuntimeEventMap,
   RuntimeLogEntry,
@@ -262,6 +263,123 @@ describe('RoomRuntime', () => {
         [...seqs].sort((a, b) => a - b),
       );
       assert.equal(new Set(seqs).size, seqs.length);
+    });
+  });
+  describe('견고성', () => {
+    test('전송·종료 콜백이 던져도 틱 루프와 대기 명령이 멈추지 않는다', async () => {
+      const clock = new FakeClock();
+      const inner = new FakeTransport();
+      const errors: unknown[] = [];
+      let broken = true;
+      const rt = new RoomRuntime({
+        clock,
+        transport: {
+          send: (...a) => {
+            inner.send(...a);
+            if (broken) throw new Error('닫힌 소켓');
+          },
+        },
+        onFinished: () => {
+          throw new Error('DB 오류');
+        },
+        onError: (e) => errors.push(e),
+      });
+      rt.startGame(CONFIG);
+      assert.ok(errors.length > 0, '전송 오류가 보고된다');
+      broken = false;
+      const p = rt.submitShot(0, shotCmd(inner, 0, 1));
+      clock.advance(20);
+      assert.equal((await p).ok, true, '전송 오류 뒤에도 틱이 돌아 명령이 처리된다');
+      const n = errors.length;
+      const l = rt.leave(0, 'leave');
+      clock.advance(20);
+      assert.equal((await l).ok, true);
+      assert.ok(errors.length > n, 'onFinished 오류도 보고된다');
+      assert.equal(rt.isRunning, false);
+      const sent = inner.sent.length;
+      clock.advance(500);
+      assert.equal(inner.sent.length, sent, '종료 뒤 틱은 멈춘다');
+    });
+
+    test('dispose 뒤 명령은 대기하지 않고 거부되며 새 경기는 시작할 수 없다', async () => {
+      const { rt } = setup();
+      rt.dispose();
+      assert.equal(rt.isRunning, false);
+      const shot = await rt.submitShot(0, {
+        gameId: 'g1',
+        turnId: 0,
+        stoneId: 0,
+        angle: 0,
+        power: 1,
+      });
+      assert.equal(!shot.ok && shot.error.code, 'GAME_NOT_ACTIVE');
+      const left = await rt.leave(1, 'disconnect');
+      assert.equal(!left.ok && left.error.code, 'GAME_NOT_ACTIVE');
+      assert.throws(() => rt.startGame({ ...CONFIG, gameId: 'g2' }));
+    });
+
+    test('재대결 마감 시각은 종료 때 한 번만 정해진다', async () => {
+      const { clock, transport, rt } = setup({ rematchWindowMs: 15_000 });
+      const p = rt.leave(0, 'leave');
+      clock.advance(20);
+      await p;
+      const over = transport.of('game:over', 0)[0]!.payload as RuntimeEventMap['game:over'];
+      const deadline = over.rematchDeadlineMs;
+      assert.ok(deadline !== null);
+      clock.advance(5_000);
+      const view = lastView(transport, 0);
+      assert.ok(view?.result);
+      assert.equal(view.result.rematchDeadlineMs, deadline);
+    });
+
+    test('이벤트 없이 revision만 오른 상태도 신뢰 전송으로 보낸다', () => {
+      const clock = new FakeClock();
+      const transport = new FakeTransport();
+      const stub = {
+        gameId: 'g1',
+        rev: 1,
+        tick: 0,
+        start() {},
+        advanceTo() {
+          this.tick++;
+        },
+        drainEvents: () => [],
+        isFinished: false,
+        meta() {
+          return { tick: this.tick, revision: this.rev, phase: 'aiming' as const };
+        },
+        getViewFor() {
+          return {
+            gameId: 'g1',
+            serverTick: this.tick,
+            serverNowMs: 0,
+            revision: this.rev,
+            phase: 'aiming',
+          } as unknown as GameView;
+        },
+        submitShot: () => ({ ok: true }) as CommandResult,
+        useHazard: () => ({ ok: true }) as CommandResult,
+        forfeit: () => ({ ok: true }) as CommandResult,
+      };
+      const rt = new RoomRuntime({
+        clock,
+        transport,
+        createGame: () => stub as unknown as GameLike,
+      });
+      rt.startGame(CONFIG);
+      clock.advance(50);
+      assert.equal(transport.of('game:state').length, 0, '바뀐 것이 없으면 보내지 않는다');
+      stub.rev = 2;
+      clock.advance(20);
+      const states = transport.of('game:state');
+      assert.equal(states.length, 2);
+      for (const st of states) {
+        assert.equal((st.payload as GameView).revision, 2);
+        assert.equal(st.opts.volatile, false);
+      }
+      clock.advance(50);
+      assert.equal(transport.of('game:state').length, 2, '같은 revision은 다시 보내지 않는다');
+      rt.dispose();
     });
   });
 });

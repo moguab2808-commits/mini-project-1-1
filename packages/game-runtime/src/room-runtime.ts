@@ -15,7 +15,14 @@ import {
   type Seat,
   type ShotSubmit,
 } from '@alkkagi/shared';
-import type { LeaveReason, RuntimeEventMap, RuntimeLogEntry, RuntimeOptions } from './types.ts';
+import type {
+  LeaveReason,
+  RuntimeEventMap,
+  RuntimeLogEntry,
+  RuntimeOptions,
+  GameLike,
+  SendOptions,
+} from './types.ts';
 
 export const TICK_MS = 1000 / PHYSICS.tickHz;
 /** 한 번에 따라잡는 최대 지연(0.25초). 넘는 지연은 버리고 `tick_skipped`로 남긴다. */
@@ -55,6 +62,7 @@ interface Queued {
   kind: 'shot' | 'hazard_use' | 'forfeit';
   /** 큐에 넣을 때 이미 거부된 입력이면 결과가 들어 있다 */
   rejected?: CommandResult;
+  done?: boolean;
   run: (env: Envelope) => CommandResult;
   resolve: (result: CommandResult) => void;
 }
@@ -77,7 +85,7 @@ interface Sent {
  */
 export class RoomRuntime {
   private readonly opts: RuntimeOptions;
-  private game: Game | null = null;
+  private game: GameLike | null = null;
   private queue: Queued[] = [];
   private ingressSeq = 0;
   private skippedMs = 0;
@@ -86,7 +94,10 @@ export class RoomRuntime {
   private nextTickMono = 0;
   private cancelTimer: (() => void) | null = null;
   private sent: [Sent, Sent] = [freshSent(), freshSent()];
+  private inflight: Queued[] = [];
   private finished = false;
+  private closed = false;
+  private rematchDeadlineMs: number | null = null;
 
   constructor(options: RuntimeOptions) {
     this.opts = options;
@@ -94,34 +105,38 @@ export class RoomRuntime {
 
   /** 진행 중인 경기가 있는지(시작 커밋 이후, 종료 전) */
   get isRunning(): boolean {
-    return this.game !== null && !this.finished;
+    return this.game !== null && !this.finished && !this.closed;
   }
 
   /** 경기를 시작한다. `game:start`와 첫 이벤트를 보내고 틱을 시작한다. */
   startGame(config: StartGameConfig): void {
+    if (this.closed) throw new Error('닫힌 런타임이다');
     if (this.isRunning) throw new Error('이미 진행 중인 경기가 있다');
     this.stopTimer();
     const mono = this.opts.clock.now();
+    for (const q of this.queue) q.resolve(NOT_ACTIVE);
     this.queue = [];
+    this.rematchDeadlineMs = null;
     this.finished = false;
     this.sent = [freshSent(), freshSent()];
     this.skippedMs = 0;
     this.lastStepMono = mono;
     this.lastGameMs = mono;
-    this.game = new Game({
+    const gameConfig = {
       gameId: config.gameId,
       board: config.board,
       pieceCount: config.pieceCount,
       seed: config.seed,
       startMs: mono,
       firstSeat: config.firstSeat,
-    });
+    };
+    this.game = this.opts.createGame ? this.opts.createGame(gameConfig) : new Game(gameConfig);
     this.game.start();
     this.log({ event: 'start_commit', gameId: config.gameId, result: 'ok' });
 
     for (const seat of [0, 1] as const) {
       const view = this.viewFor(seat);
-      this.opts.transport.send(
+      this.send(
         seat,
         'game:start',
         {
@@ -179,12 +194,13 @@ export class RoomRuntime {
       seat,
       result: reason,
     });
-    if (!game || this.finished) return Promise.resolve(NOT_ACTIVE);
+    if (!game || this.finished || this.closed) return Promise.resolve(NOT_ACTIVE);
     return this.forfeit(seat, { gameId: game.gameId });
   }
 
   /** 타이머를 멈춘다. 방을 닫을 때 부른다. */
   dispose(): void {
+    this.closed = true;
     this.stopTimer();
     for (const q of this.queue) q.resolve(NOT_ACTIVE);
     this.queue = [];
@@ -200,11 +216,11 @@ export class RoomRuntime {
     seat: Seat,
     kind: Queued['kind'],
     valid: boolean,
-    apply: (game: Game, env: Envelope) => CommandResult,
+    apply: (game: GameLike, env: Envelope) => CommandResult,
   ): Promise<CommandResult> {
     const ingressSeq = this.ingressSeq++;
     const game = this.game;
-    if (!game || this.finished) {
+    if (!game || this.finished || this.closed) {
       this.log({
         event: kind,
         gameId: game?.gameId ?? '',
@@ -230,9 +246,27 @@ export class RoomRuntime {
   private step = (): void => {
     this.cancelTimer = null;
     const game = this.game;
-    if (!game || this.finished) return;
+    if (!game || this.finished || this.closed) return;
     const mono = this.opts.clock.now();
+    try {
+      this.runStep(game, mono);
+    } catch (error) {
+      // 한 틱의 오류가 틱 루프를 멈추거나 대기 명령을 영원히 붙잡지 않게 한다.
+      this.report(error);
+      for (const q of this.inflight) if (!q.done) this.settle(q, NOT_ACTIVE);
+    } finally {
+      this.inflight = [];
+      if (this.finished || this.closed) {
+        this.stopTimer();
+      } else {
+        this.nextTickMono += TICK_MS;
+        if (this.nextTickMono < mono) this.nextTickMono = mono;
+        this.scheduleNext();
+      }
+    }
+  };
 
+  private runStep(game: GameLike, mono: number): void {
     const elapsed = mono - this.lastStepMono;
     if (elapsed > MAX_CATCH_UP_MS) {
       const dropped = elapsed - MAX_CATCH_UP_MS;
@@ -249,10 +283,10 @@ export class RoomRuntime {
     // 대기 명령: ingressSeq 순. 거부된 명령도 순번을 소비하지만 상태는 바꾸지 않는다.
     const queued = this.queue;
     this.queue = [];
-    let changed = queued.length > 0;
+    this.inflight = queued;
     for (const q of queued) {
       if (this.finished) {
-        q.resolve(NOT_ACTIVE);
+        this.settle(q, NOT_ACTIVE);
         continue;
       }
       const observed = Math.min(Math.max(q.observedAtMs, this.lastGameMs), now);
@@ -265,7 +299,7 @@ export class RoomRuntime {
         seat: q.seat,
         result: result.ok ? 'ok' : result.error.code,
       });
-      q.resolve(result);
+      this.settle(q, result);
       this.checkFinished(game);
     }
 
@@ -273,22 +307,39 @@ export class RoomRuntime {
       game.advanceTo(now);
       this.lastGameMs = now;
     }
-    const events = this.flushEvents();
-    changed = changed || events > 0;
+    this.flushEvents();
     this.checkFinished(game);
 
-    this.publishViews(game, changed);
+    this.publishViews(game);
+  }
 
-    if (this.finished) {
-      this.stopTimer();
-      return;
+  private settle(q: Queued, result: CommandResult): void {
+    q.done = true;
+    q.resolve(result);
+  }
+
+  private report(error: unknown): void {
+    try {
+      this.opts.onError?.(error);
+    } catch {
+      // 오류 보고가 다시 던져도 틱 루프는 계속 돈다.
     }
-    this.nextTickMono += TICK_MS;
-    if (this.nextTickMono < mono) this.nextTickMono = mono;
-    this.scheduleNext();
-  };
+  }
 
-  private checkFinished(game: Game): void {
+  private send<K extends keyof RuntimeEventMap>(
+    seat: Seat,
+    type: K,
+    payload: RuntimeEventMap[K],
+    options: SendOptions,
+  ): void {
+    try {
+      this.opts.transport.send(seat, type, payload, options);
+    } catch (error) {
+      this.report(error);
+    }
+  }
+
+  private checkFinished(game: GameLike): void {
     if (this.finished || !game.isFinished) return;
     this.finished = true;
   }
@@ -312,11 +363,11 @@ export class RoomRuntime {
     return events.length;
   }
 
-  private deliver(game: Game, e: CoreEvent): void {
+  private deliver(game: GameLike, e: CoreEvent): void {
     const gameId = game.gameId;
     switch (e.type) {
       case 'hazard:granted':
-        this.opts.transport.send(e.toSeat, 'hazard:granted', e.payload, {
+        this.send(e.toSeat, 'hazard:granted', e.payload, {
           volatile: false,
         });
         return;
@@ -337,7 +388,11 @@ export class RoomRuntime {
         const payload = this.withRematch(e.payload);
         this.log({ event: 'game_over', gameId, reason: payload.reason });
         this.broadcast('game:over', payload);
-        this.opts.onFinished?.(payload);
+        try {
+          this.opts.onFinished?.(payload);
+        } catch (error) {
+          this.report(error);
+        }
         return;
       }
     }
@@ -345,14 +400,15 @@ export class RoomRuntime {
 
   private broadcast<K extends keyof RuntimeEventMap>(type: K, payload: RuntimeEventMap[K]): void {
     for (const seat of [0, 1] as const) {
-      this.opts.transport.send(seat, type, payload, { volatile: false });
+      this.send(seat, type, payload, { volatile: false });
     }
   }
 
   private withRematch(result: GameOver): GameOver {
     const w = this.opts.rematchWindowMs;
     if (w === undefined || result.rematchDeadlineMs !== null) return result;
-    return { ...result, rematchDeadlineMs: this.gameNow() + w };
+    this.rematchDeadlineMs ??= this.gameNow() + w;
+    return { ...result, rematchDeadlineMs: this.rematchDeadlineMs };
   }
 
   private viewFor(seat: Seat): GameView {
@@ -369,35 +425,29 @@ export class RoomRuntime {
   }
 
   /**
-   * 플레이어별 `game:state` 전송.
+   * 플레이어별 `game:state` 전송. 뷰는 보낼 때만 만든다(`meta()`로 먼저 가린다).
    * - 알 이동 중: 초당 30회 volatile. 첫 프레임은 바로 보낸다.
-   * - 그 밖: 상태(revision·phase)가 바뀔 때만 신뢰 전송한다. 이동이 끝나 phase가 바뀌면 최종 스냅샷이 된다.
+   * - 그 밖: revision·phase가 바뀌면 이벤트가 없어도 신뢰 전송한다. 이동이 끝나 phase가 바뀌면 최종 스냅샷이 된다.
    * - revision이 이미 보낸 것보다 작은 뷰는 보내지 않는다.
    */
-  private publishViews(game: Game, changed: boolean): void {
-    const probe = game.getViewFor(0);
-    const moving = probe.phase === 'moving';
-    const first = this.sent[0].phase !== 'moving';
-    const due = moving && (first || probe.serverTick - this.sent[0].tick >= SNAPSHOT_EVERY_TICKS);
-    if (!changed && !due && probe.phase === this.sent[0].phase) return;
+  private publishViews(game: GameLike): void {
+    const m = game.meta();
+    const last0 = this.sent[0];
+    if (m.phase === 'moving') {
+      const first = last0.phase !== 'moving';
+      if (!first && m.tick - last0.tick < SNAPSHOT_EVERY_TICKS) return;
+    } else if (m.revision === last0.revision && m.phase === last0.phase) {
+      return;
+    }
 
     for (const seat of [0, 1] as const) {
-      const view = seat === 0 ? this.viewFrom(probe) : this.viewFor(seat);
+      const view = this.viewFor(seat);
       const last = this.sent[seat];
       if (view.revision < last.revision) continue;
-      if (view.phase === 'moving') {
-        if (!(first || view.serverTick - last.tick >= SNAPSHOT_EVERY_TICKS)) continue;
-        this.opts.transport.send(seat, 'game:state', view, { volatile: true });
-      } else {
-        if (view.revision === last.revision && view.phase === last.phase) continue;
-        this.opts.transport.send(seat, 'game:state', view, { volatile: false });
-      }
+      const moving = view.phase === 'moving';
+      this.send(seat, 'game:state', view, { volatile: moving });
       this.markSent(seat, view);
     }
-  }
-
-  private viewFrom(view: GameView): GameView {
-    return view.result ? { ...view, result: this.withRematch(view.result) } : view;
   }
 
   private log(entry: Omit<RuntimeLogEntry, 'mono'>): void {
@@ -406,7 +456,7 @@ export class RoomRuntime {
     const game = this.game;
     logger.log({
       mono: this.opts.clock.now(),
-      serverTick: game ? game.getViewFor(0).serverTick : undefined,
+      serverTick: game?.meta().tick,
       ...entry,
     });
   }

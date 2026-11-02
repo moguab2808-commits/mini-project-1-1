@@ -1,3 +1,4 @@
+import type { Game, GameConfig } from '@alkkagi/game-core';
 import type {
   CommandResult,
   GameOver,
@@ -81,12 +82,31 @@ export interface RuntimeLogger {
 
 export type LeaveReason = 'leave' | 'disconnect' | 'session_replaced';
 
+/** 런타임이 `Game`에서 쓰는 범위. 테스트가 대역을 넣을 수 있게 좁혀 둔다. */
+export type GameLike = Pick<
+  Game,
+  | 'gameId'
+  | 'start'
+  | 'advanceTo'
+  | 'drainEvents'
+  | 'isFinished'
+  | 'getViewFor'
+  | 'meta'
+  | 'submitShot'
+  | 'useHazard'
+  | 'forfeit'
+>;
+
 export interface RuntimeOptions {
   clock: RuntimeClock;
   transport: RuntimeTransport;
   logger?: RuntimeLogger;
   /** 경기가 끝나면 한 번 호출한다. 전적 저장(`finishOnce`)은 서버가 여기서 한다. */
   onFinished?: (result: GameOver) => void;
+  /** 전송·콜백·로거·틱 처리에서 던진 오류를 받는다. 오류가 나도 틱 루프는 계속 돈다. */
+  onError?: (error: unknown) => void;
+  /** 기본은 `new Game(config)`. 테스트에서 대역을 넣을 때만 쓴다. */
+  createGame?: (config: GameConfig) => GameLike;
   /** 재도전 대기 시간(ms). `game:over`의 `rematchDeadlineMs`를 채운다. 없으면 null이다. */
   rematchWindowMs?: number;
 }
