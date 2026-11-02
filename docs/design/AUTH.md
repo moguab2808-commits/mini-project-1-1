@@ -51,7 +51,7 @@ REST와 Socket.IO ack의 오류 형식·코드 목록은 [API](API.md#오류-형
 | 단계 | 위치 | 검사 | 실패 시 |
 | --- | --- | --- | --- |
 | 1. 연결·입력 형태 | Socket.IO 연결 미들웨어, 이벤트 핸들러 | 세션 쿠키로 사용자 인증. 이벤트 입력을 `shared`의 Zod 스키마로 검증. 사용자는 세션에서만 얻고 입력에 사용자 번호를 받지 않는다 | 연결 거부 또는 ack `INVALID_INPUT` |
-| 2a. 사용자→좌석 변환 | `game-runtime`·서버(B). 시작 커밋 때 메모리에 만든 맵 | 연결의 사용자를 좌석 0·1로 바꿔 `game-core`에 전달한다. 좌석은 입력에서 받지 않는다. 맵에 없는 사용자(경기 중이 아님)의 경기 명령은 `GAME_NOT_ACTIVE`다(`NOT_IN_ROOM`은 `room:start` 전용) | ack `GAME_NOT_ACTIVE` |
+| 2a. 사용자→좌석 변환 | `game-runtime`·서버(B). 시작 커밋 때 메모리에 만든 맵 | 연결의 사용자를 좌석 0·1로 바꿔 `game-core`에 전달한다. 좌석은 입력에서 받지 않는다. 맵에 없는 사용자(경기 중이 아님)의 경기 명령은 `GAME_NOT_ACTIVE`다(방 명령의 `NOT_IN_ROOM`·`NOT_HOST`는 `room:start`와 함께 없앴다, DEC-040) | ack `GAME_NOT_ACTIVE` |
 | 2b. 경기 규칙 | `game-core`(A). 방별 단일 큐에서 틱 안에 검증하며 `users.id`를 모르고 좌석만 받는다 | 발사는 아래 순서로 첫 실패에서 멈춘다: `GAME_NOT_ACTIVE` → `STALE_TURN`(gameId·turnId. 마감 정산이 명령 처리보다 먼저라 마감 뒤 도착한 발사도 턴이 넘어가 이 코드) → `NOT_YOUR_TURN` → `SHOT_ALREADY_SUBMITTED`(`shotCommitted`) → `INVALID_STONE` → `PLAYER_STUNNED` → `OUT_OF_REACH`. 기본 판 돌리기는 `GAME_NOT_ACTIVE` → `STALE_TURN` → `NOT_YOUR_TURN` → `BOARD_ROTATE_NOT_ALLOWED`(조준 단계 아님·이미 발사함·기절) ([DEC-036](../DECISIONS.md#결정-색인), 제안). 방해요소는 `GAME_NOT_ACTIVE` → `STALE_HAZARD`(gameId·hazardInstanceId로 서버가 가진 내 보유 1개와 대조) → `HAZARD_NOT_USABLE` → `HAZARD_COOLDOWN`·`HAZARD_OVERHEATED` → `HAZARD_INVALID_TARGET` | 해당 오류 코드로 ack. 거부된 명령은 상태와 난수를 바꾸지 않는다 |
 
 - **무작위 지급의 공정성**: 지급·교체 추첨과 책상 흔들기 같은 난수는 서버가 가진 경기별 독립 PRNG 스트림만 쓴다. 클라이언트는 난수 값·시드를 보내거나 받지 않는다. 로컬·AI 모드는 같은 `game-core`를 브라우저에서 돌리며 서버 권한 대상이 아니다([DEC-021](../DECISIONS.md#결정-색인)).
@@ -70,6 +70,6 @@ REST와 Socket.IO ack의 오류 형식·코드 목록은 [API](API.md#오류-형
 - 초과 응답: HTTP `429`, 본문 `{ error: { code: "RATE_LIMITED", message } }`([API 오류 형식](API.md#오류-형식과-코드)), `Retry-After` 헤더(초). 응답은 닉네임·비밀번호와 무관하다. 클라이언트가 읽는 계약이라 [API](API.md#오류-형식과-코드)에도 적었다.
 - 학교·공용 NAT처럼 같은 IP를 여러 명이 쓰면 가입·로그인이 몰릴 수 있다. 플레이 테스트에서 걸리면 한도를 올린다.
 - 클라이언트 IP를 얻으려면 위 프록시 신뢰 설정이 필요하다.
-- `room:join`에도 연결당 빈도 제한을 둔다([API](API.md#방-이벤트-필드)). 한도는 연결당 분당 30회이며 초과하면 ack `RATE_LIMITED`를 돌려준다. 카운터는 `userId`를 키로 한 메모리 맵에 두어 재접속해도 초기화되지 않게 한다(6자리 코드 대입 방어). 서버가 재시작하면 사라진다.
+- `room:join`에도 사용자당 빈도 제한을 둔다([API](API.md#방-이벤트-필드)). 한도는 사용자당 분당 30회이며 초과하면 ack `RATE_LIMITED`를 돌려준다. 카운터는 `userId`를 키로 한 메모리 맵에 두어 재접속해도 초기화되지 않게 한다(6자리 코드 대입 방어). 서버가 재시작하면 사라진다.
 
 계정 삭제와 건의 기능은 MVP에서 제공하지 않으므로 해당 인가 경계는 두지 않는다. 비밀번호 길이는 제품 규칙(8~64자)을 따른다. 닉네임 중복 검사는 NFC 정규화·영문 대소문자 무시 기준([회원등록](../PRD.md#회원등록))으로 하며 DB의 `lower(nickname)` 유니크 인덱스가 강제한다([DATABASE](DATABASE.md)).

@@ -111,7 +111,7 @@ stateDiagram-v2
     aiming --> finished: 기권 / 이탈
     moving --> finished: 기권 / 이탈
     finished --> waiting: 15초 안에 양쪽 재도전 (새 gameId)
-    finished --> [*]: 재도전 만료 / 한쪽 나가기 → 대기실
+    finished --> [*]: 재도전 만료 / 한쪽 나가기 → 누르지 않은 쪽은 이탈 처리
 ```
 
 | 경기 상태 | 방 상태(`rooms.status`) | 비고 |
@@ -120,9 +120,9 @@ stateDiagram-v2
 | waiting(경기 생성)·aiming·moving·resolving | playing | 시작 커밋 이후. 이탈은 기권패 |
 | finished, 재도전 대기 15초 | playing | 결과 화면. 이 구간의 나가기는 기권이 아니며 결과도 바꾸지 않음 |
 | 재도전 성립 | playing 유지 | 같은 방·같은 설정으로 새 경기 생성 |
-| 재도전 만료·한쪽 나가기 | waiting | 두 사람(또는 남은 방장)이 대기실로 이동. 방장 이탈 시 방 닫힘 |
+| 재도전 만료·한쪽 나가기 | waiting(방장만 남은 경우) 또는 방 삭제 | 재도전하기를 누르지 않은 쪽은 나가기와 같게 처리한다([DEC-041](../DECISIONS.md#결정-색인)). 상대가 나가면 방장만 남아 상대를 기다리고, 방장이 나가면 방이 닫혀 둘 다 방 목록으로 이동 |
 
-- **시작 커밋**: 방 큐에서 시작 명령을 처리하며 `rooms.status`를 waiting → playing으로 바꾼 직후, `game:start` 전송 직전이다. 이 명령보다 ingressSeq가 앞선 이탈은 대기실 처리, 뒤의 이탈은 기권패와 전적 반영 대상이다. 첫 틱은 기준으로 쓰지 않는다 ([DEC-026](../DECISIONS.md#결정-색인)).
+- **시작 커밋**: 상대 입장([DEC-040](../DECISIONS.md#결정-색인))이 `rooms.status`를 waiting → playing으로 바꾼 직후, `game:start` 전송 직전이다. 시작 명령 이벤트는 없다. 방 큐와 `ingressSeq` 순번에 입장을 어떻게 올리는지는 IMPL-009에서 정한다. 이 시작 커밋보다 ingressSeq가 앞선 이탈은 대기실 처리, 뒤의 이탈은 기권패와 전적 반영 대상이다. 첫 틱은 기준으로 쓰지 않는다 ([DEC-026](../DECISIONS.md#결정-색인)).
 
 | 상태 | 의미 | 방해요소 입력 |
 | --- | --- | --- |
