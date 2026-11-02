@@ -31,7 +31,6 @@ export const STONE_REST_Y = R * STONE_FLATNESS;
 interface StoneSlot {
   group: Group;
   body: Mesh;
-  decal: Mesh;
   /** 이 프레임에 쓰였는가 */
   used: boolean;
   id: number;
@@ -70,13 +69,10 @@ export class StoneLayer {
     body.scale.y = STONE_FLATNESS;
     body.castShadow = true;
     body.receiveShadow = true;
-    const decal = new Mesh(this.kit.decalGeo, this.kit.decalMine);
-    decal.position.y = R * STONE_FLATNESS + 0.01;
-    decal.scale.y = 1;
-    group.add(body, decal);
+    group.add(body);
     group.visible = false;
     this.group.add(group);
-    return { group, body, decal, used: false, id: -1 };
+    return { group, body, used: false, id: -1 };
   }
 
   private acquire(id: number, owner: Seat, mySeat: Seat): StoneSlot | null {
@@ -91,9 +87,9 @@ export class StoneLayer {
       slot.id = id;
     }
     slot.used = true;
-    const mine = owner === mySeat;
+    const mine = owner === 0;
+    void mySeat;
     slot.body.material = mine ? this.kit.bodyMine : this.kit.bodyOpp;
-    slot.decal.material = mine ? this.kit.decalMine : this.kit.decalOpp;
     return slot;
   }
 

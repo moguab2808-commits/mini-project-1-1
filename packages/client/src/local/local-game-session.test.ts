@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { AimState, GameOver, GameStart, GameView, RematchState } from '@alkkagi/shared';
 import type { RuntimeClock } from '@alkkagi/game-runtime';
 import { GameStore } from '../game/game-store.ts';
+import { rematchUi } from '../game/hud/hud-model.ts';
 import { LocalAuthority, type PortLike } from './local-authority.ts';
 import {
   LocalGameSession,
@@ -177,6 +178,14 @@ describe('LocalAuthority + LocalGameSession', () => {
     const over = of<GameOver>(b.log, 'game:over');
     expect(over).toHaveLength(1);
     expect(over[0]).toMatchObject({ winnerId: 1, reason: 'forfeit' });
+    // 상대가 나갔으므로 남은 창의 재도전은 바로 무산된다(버튼이 남지 않는다)
+    const rematch = of<RematchState>(b.log, 'rematch:state');
+    expect(rematch.at(-1)).toMatchObject({ outcome: 'expired' });
+    expect(rematchUi(over[0]!, rematch.at(-1)!, clock.nowMs)).toMatchObject({
+      showRequest: false,
+      canRequest: false,
+      message: '상대가 나가서 재도전할 수 없어요. 나가기를 눌러 주세요.',
+    });
 
     const again = connect(0);
     await expect(again.session.connect()).rejects.toMatchObject({ reason: 'SEAT_DEPARTED' });

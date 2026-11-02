@@ -12,6 +12,8 @@ export interface AimRenderState {
   angle: number;
   /** 0~100. 충전 중이 아니면 0 */
   power: number;
+  /** 마우스로 당긴 거리의 정규화 값 */
+  pull?: number;
   /** 마우스 버튼을 누른 채 세기 막대가 움직이는 중 */
   charging: boolean;
   /** 손이 닿는가. false면 회색 조준선(칠 수 없음) */
@@ -68,7 +70,8 @@ export interface Reaction {
   id: number;
 }
 
-export const CAMERA_PRESETS = ['default', 'first', 'top', 'side', 'opponent'] as const;
+/** 기본 시점과 1인칭. 게임 화면은 기본만 쓰고 알을 칠 때 장면이 1인칭으로 바꾼다(개발 장면은 first 고정 가능) */
+export const CAMERA_PRESETS = ['default', 'first'] as const;
 export type CameraPreset = (typeof CAMERA_PRESETS)[number];
 
 export interface SceneProps {
@@ -78,19 +81,20 @@ export interface SceneProps {
   mySeat: Seat;
   aim: AimRenderState | null;
   placement: PlacementRenderState | null;
+  onLook?: (yaw: number, pitch: number) => void;
   onPointer: (event: BoardPointerEvent) => void;
   /** 좌석별 몸짓(팔 IK·몸 기울임·손에 든 방해요소). null이면 쉬는 자세 */
   poses: [CharacterPose | null, CharacterPose | null];
   /** 새로 생긴 반응(배열 끝이 최신). 장면은 처음 보는 id만 재생한다 */
   reactions: readonly Reaction[];
   /**
-   * 시점 프리셋. 바뀌면 그 시점으로 부드럽게 이동하고, 이후 사용자가 오른쪽 드래그로 돌리고
-   * 휠로 확대·축소할 수 있다(배치 모드 중 휠은 장면이 무시한다: `placement`가 있으면 휠 무시).
-   * `default`는 내 캐릭터 눈높이보다 조금 높은 곳에서 내려다보는 시점이다.
+   * 평소 시점(생략하면 `default`: 내 캐릭터 눈높이보다 조금 높은 곳에서 내려다본다).
+   * 알을 조준·발사하는 동안(`aim`이 있을 때)은 장면이 1인칭으로 바꾸고 끝나면 이 시점으로 돌아온다.
+   * 오른쪽 드래그는 고개를 돌리고 놓으면 정면으로 돌아온다. 휠 확대는 없다.
    */
-  cameraPreset: CameraPreset;
-  /** 프리셋을 다시 눌러도 이동하도록 증가시키는 번호 */
-  cameraPresetNonce: number;
+  cameraPreset?: CameraPreset;
+  /** 같은 시점을 다시 적용하도록 증가시키는 번호(개발 장면용) */
+  cameraPresetNonce?: number;
   /** 화면 흔들림 세기 0~1(바람·책상 흔들기·먼 거리 조준). 장면이 카메라를 흔든다 */
   shake: number;
 }

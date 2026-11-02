@@ -123,8 +123,7 @@ const flush = () => new Promise((r) => setImmediate(r));
 /** 알 0을 선택하고 (+x 방향) 오른쪽을 가리킨 상태 */
 function selectStone0(env: Env) {
   env.controller.onPointer(ptr('down', { x: -10, y: -11.5 }, 0));
-  env.controller.onPointer(ptr('up', { x: -10, y: -11.5 }, 0));
-  env.controller.onPointer(ptr('move', { x: 0, y: -11.5 }));
+  env.controller.onPointer(ptr('move', { x: -20, y: -11.5 }));
 }
 
 /** 시간을 ms만큼 100ms 단위로 흘린다 */
@@ -150,10 +149,10 @@ describe('알 선택과 각도', () => {
     const env = setup();
     env.controller.onPointer(ptr('down', { x: -10, y: -11.5 }, 0));
     env.controller.onPointer(ptr('move', { x: 0, y: -11.5 }));
-    expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(0);
+    expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(Math.PI);
     env.controller.onPointer(ptr('move', { x: -10, y: 5 }));
-    expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(Math.PI / 2);
-    env.controller.onPointer(ptr('move', { x: -20, y: -11.5 }));
+    expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(-Math.PI / 2);
+    env.controller.onPointer(ptr('move', { x: 0, y: -11.5 }));
     expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(Math.PI);
     // atan2(-0, -1) = -π 경계는 π로 돌려놓는다
     env.controller.onPointer(ptr('move', { x: -20, y: -11.5 - 0 }));
@@ -188,18 +187,18 @@ describe('알 선택과 각도', () => {
 });
 
 describe('세기 막대와 발사', () => {
-  it('2초 주기 삼각파로 0→100→0 진행한다', () => {
+  it('1초 주기 삼각파로 0→100→0 진행한다', () => {
     const env = setup();
     selectStone0(env);
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }));
     expect(env.controller.getSnapshot().aim).toMatchObject({ charging: true, power: 0 });
-    run(env, 500);
+    run(env, 250);
     expect(env.controller.getSnapshot().aim?.power).toBeCloseTo(50, 0);
-    run(env, 500);
+    run(env, 250);
     expect(env.controller.getSnapshot().aim?.power).toBeCloseTo(100, 0);
-    run(env, 500);
+    run(env, 250);
     expect(env.controller.getSnapshot().aim?.power).toBeCloseTo(50, 0);
-    run(env, 500);
+    run(env, 250);
     expect(env.controller.getSnapshot().aim?.power).toBeCloseTo(0, 0);
   });
 
@@ -219,7 +218,7 @@ describe('세기 막대와 발사', () => {
     );
     selectStone0(env);
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }));
-    run(env, 500);
+    run(env, 250);
     expect(env.controller.getSnapshot().aim?.power).toBeCloseTo(100, 0);
   });
 
@@ -233,8 +232,8 @@ describe('세기 막대와 발사', () => {
     env.controller.onPointer(ptr('up', { x: -10, y: 0 }));
     expect(env.shots).toHaveLength(1);
     expect(env.shots[0]).toMatchObject({ gameId: 'g1', turnId: 1, stoneId: 0 });
-    expect(env.shots[0]!.power).toBeCloseTo(50, 0);
-    expect(env.shots[0]!.angle).toBeCloseTo(Math.PI / 2);
+    expect(env.shots[0]!.power).toBeCloseTo(100, 0);
+    expect(env.shots[0]!.angle).toBeCloseTo(-Math.PI / 2);
     await flush();
   });
 
@@ -244,7 +243,7 @@ describe('세기 막대와 발사', () => {
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }));
     env.controller.onPointer(ptr('up', { x: 0, y: -11.5 }));
     expect(env.shots).toHaveLength(0);
-    expect(env.controller.getSnapshot().aim).toMatchObject({ stoneId: 0, charging: false });
+    expect(env.controller.getSnapshot().aim).toBeNull();
   });
 
   it('누른 채 오른쪽 클릭이나 ESC를 누르면 취소한다', () => {
@@ -255,7 +254,7 @@ describe('세기 막대와 발사', () => {
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }, null, 2));
     env.controller.onPointer(ptr('up', { x: 0, y: -11.5 }));
     expect(env.shots).toHaveLength(0);
-    expect(env.controller.getSnapshot().aim?.charging).toBe(false);
+    expect(env.controller.getSnapshot().aim).toBeNull();
 
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }));
     run(env, 500);
@@ -323,7 +322,7 @@ describe('세기 막대와 발사', () => {
 });
 
 describe('바람', () => {
-  it('활성 시간 동안 조준 각도를 초당 120도씩 바람 방향으로 돌린다', () => {
+  it('활성 시간 동안 조준 각도를 초당 30도씩 바람 방향으로 돌린다', () => {
     const env = setup(
       makeView({
         effects: [
@@ -339,10 +338,10 @@ describe('바람', () => {
     );
     selectStone0(env); // 각도 0
     expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(0);
-    run(env, 1000); // 1초 동안 약 120도(만료 시각 경계의 마지막 한 걸음은 제외)
+    run(env, 1000); // 1초 동안 약 30도(만료 시각 경계의 마지막 한 걸음은 제외)
     const deg = (env.controller.getSnapshot().aim!.angle * 180) / Math.PI;
-    expect(deg).toBeGreaterThan(112);
-    expect(deg).toBeLessThanOrEqual(120);
+    expect(deg).toBeGreaterThan(27);
+    expect(deg).toBeLessThanOrEqual(30);
     run(env, 1000); // 효과 만료 뒤에는 더 돌지 않는다
     expect((env.controller.getSnapshot().aim!.angle * 180) / Math.PI).toBeCloseTo(deg, 5);
   });
@@ -365,7 +364,7 @@ describe('바람', () => {
     selectStone0(env);
     run(env, 2000);
     expect(env.controller.getSnapshot().aim?.angle).toBeCloseTo(Math.PI / 6, 3);
-    env.controller.onPointer(ptr('move', { x: -10, y: 0 })); // 마우스를 위로 돌리면 입력이 더해진다
+    env.controller.onPointer(ptr('move', { x: -10, y: -23 })); // 마우스를 아래로 돌리면 입력이 더해진다
     expect(env.controller.getSnapshot().aim?.angle).toBeGreaterThan(Math.PI / 6);
   });
 
@@ -395,7 +394,13 @@ describe('방해요소 입력', () => {
   it.each(IMMEDIATE)('즉시형 %s는 E 키로 바로 hazard:use를 보낸다', (kind) => {
     const env = setup(makeView({ held: kind }));
     env.controller.onKey('e');
-    expect(env.hazards).toEqual([{ gameId: 'g1', hazardInstanceId: `h-${kind}` }]);
+    expect(env.hazards).toEqual([
+      {
+        gameId: 'g1',
+        hazardInstanceId: `h-${kind}`,
+        ...(kind === 'board_spin' ? { direction: 1 } : {}),
+      },
+    ]);
   });
 
   it('칸 클릭도 E 키와 같다', () => {
@@ -445,11 +450,11 @@ describe('방해요소 입력', () => {
     const env = setup(makeView({ held: 'stun' }));
     selectStone0(env);
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }));
-    run(env, 500);
+    run(env, 250);
     env.controller.onKey('e');
     expect(env.hazards).toHaveLength(1);
     expect(env.controller.getSnapshot().aim?.charging).toBe(true);
-    run(env, 500);
+    run(env, 250);
     expect(env.controller.getSnapshot().aim?.power).toBeCloseTo(100, 0);
 
     const wall = setup(makeView({ held: 'wall' }));
@@ -525,6 +530,22 @@ describe('방해요소 입력', () => {
       env.controller.onKey('r');
       env.controller.onPointer(ptr('down', { x: 3.3, y: 1.7 }));
       expect(env.hazards[0]!.target).toEqual({ x: 3.3, y: 1.7 });
+    });
+
+    it('전송이 거부(연결 끊김)되면 배치 모드를 풀고 안내하며 다시 쓸 수 있다', async () => {
+      const env = setup(makeView({ held: 'sticky' }));
+      (env.controller as unknown as { actions: { useHazard: unknown } }).actions.useHazard = () =>
+        Promise.reject(new Error('disconnected'));
+      env.controller.onPointer(ptr('move', { x: 3.3, y: 1.7 }));
+      env.controller.onKey('e');
+      env.controller.onPointer(ptr('down', { x: 3.3, y: 1.7 }));
+      await Promise.resolve();
+      await Promise.resolve();
+      const snap = env.controller.getSnapshot();
+      expect(snap.placement).toBeNull();
+      expect(snap.notice?.text).toBe('방해요소를 보내지 못했어요');
+      env.controller.onKey('e');
+      expect(env.controller.getSnapshot().placement).not.toBeNull();
     });
 
     it('ESC·오른쪽 클릭은 취소하며 아무것도 보내지 않는다', () => {
@@ -603,13 +624,13 @@ describe('손이 닿는 거리', () => {
     run(env, 500);
     env.controller.onPointer(ptr('up', { x: 10, y: 12 }));
     expect(env.shots).toHaveLength(0);
-    expect(env.controller.getSnapshot().aim).toMatchObject({ stoneId: 5, charging: false });
+    expect(env.controller.getSnapshot().aim).toBeNull();
   });
 
   it('먼 알(strain>0)은 조준 각도가 시간에 따라 최대 strain×4도 안에서 떨리고 화면이 흔들린다', () => {
     const env = setup(farView());
     env.controller.onPointer(ptr('down', { x: 0, y: 3 }, 6));
-    env.controller.onPointer(ptr('move', { x: 10, y: 3 })); // 마우스 각도 0
+    env.controller.onPointer(ptr('move', { x: -10, y: 3 })); // 마우스 각도 0
     const angles: number[] = [];
     for (let i = 0; i < 20; i++) {
       run(env, 50);
@@ -791,22 +812,24 @@ describe('기본 판 돌리기', () => {
 describe('후레쉬·물총 들기', () => {
   const face = { x: 0, y: 30, h: 24 };
 
-  it('E로 들고, 왼쪽 클릭으로 조준점에 발동한 뒤 효과가 활성인 동안 조준점을 약 20Hz로 보낸다', async () => {
+  it('E를 누르면 즉시 조준점에 발동하고 효과가 활성인 동안 조준점을 약 20Hz로 보낸다', async () => {
     const env = setup(makeView({ held: 'flashlight', deadlineMs: 60000 }));
     env.controller.onPointer(ptr('move', { x: 0, y: 5 }, null, 0, { x: 1, y: 30, h: 20 }));
     env.controller.onKey('e');
     let snap = env.controller.getSnapshot();
-    expect(snap.holding).toEqual({ kind: 'flashlight', fired: false });
-    expect(snap.hint).toBe('클릭해서 발동, ESC 취소');
+    expect(snap.holding).toEqual({ kind: 'flashlight', fired: true });
+    expect(snap.hint).toBe('E를 누르는 동안 발동, 마우스로 조준');
     expect(snap.pose).toEqual({
       mode: 'hold_hazard',
       kind: 'flashlight',
       target: { x: 1, y: 30, h: 20 },
     });
-    expect(env.hazards).toHaveLength(0);
+    expect(env.hazards).toHaveLength(1);
 
     env.controller.onPointer(ptr('down', { x: 0, y: 5 }, null, 0, face));
-    expect(env.hazards).toEqual([{ gameId: 'g1', hazardInstanceId: 'h-flashlight', target: face }]);
+    expect(env.hazards).toEqual([
+      { gameId: 'g1', hazardInstanceId: 'h-flashlight', target: { x: 1, y: 30, h: 20 } },
+    ]);
     await flush();
     snap = env.controller.getSnapshot();
     expect(snap.holding).toEqual({ kind: 'flashlight', fired: true });
@@ -861,26 +884,21 @@ describe('후레쉬·물총 들기', () => {
 
   it('조준점이 없으면 상대 얼굴 위치를 기본 조준점으로 쓴다', () => {
     const env = setup(makeView({ held: 'water_gun' }));
-    env.controller.onSlotClick();
-    env.controller.onPointer(ptr('down', { x: 0, y: 0 }));
+    env.controller.onKey('e');
     expect(env.hazards[0]!.target).toEqual(face);
   });
 
-  it('발동 전 ESC·오른쪽 클릭은 취소하고 아무것도 보내지 않는다', () => {
+  it('칸으로 들기만 한 상태에서는 마우스로 발동하지 않고 ESC로 접는다', () => {
     const env = setup(makeView({ held: 'water_gun' }));
-    env.controller.onKey('e');
+    env.controller.onSlotClick();
+    env.controller.onPointer(ptr('down', { x: 0, y: 0 }));
+    expect(env.hazards).toHaveLength(0);
     env.controller.onKey('escape');
     expect(env.controller.getSnapshot().holding).toBeNull();
-    env.controller.onKey('e');
-    env.controller.onPointer(ptr('down', { x: 0, y: 0 }, null, 2));
-    expect(env.controller.getSnapshot().holding).toBeNull();
-    expect(env.hazards).toHaveLength(0);
-    expect(env.hazardAims).toHaveLength(0);
   });
 
   it('들고 있는 동안 왼쪽 클릭은 알 선택·충전으로 가지 않고 발동만 한다', () => {
     const env = setup(makeView({ held: 'flashlight' }));
-    selectStone0(env);
     env.controller.onKey('e');
     expect(env.controller.getSnapshot().aim).toBeNull();
     env.controller.onPointer(ptr('down', { x: -10, y: -11.5 }, 0, 0, face));
@@ -918,12 +936,9 @@ describe('몸짓 중계', () => {
     env.t += 60;
     selectStone0(env); // 선택(각도 기본값) 직후 방향 변경은 50ms 뒤 tick에서 보낸다
     run(env, 50);
-    expect(env.poses.at(-1)).toMatchObject({ gameId: 'g1', mode: 'aim', stoneId: 0 });
+    expect(env.poses.at(-1)).toMatchObject({ gameId: 'g1', mode: 'charge', stoneId: 0 });
     expect(env.poses.at(-1)!.angle).toBeCloseTo(0);
-    // 같은 몸짓은 다시 보내지 않는다
-    const n = env.poses.length;
-    run(env, 200);
-    expect(env.poses).toHaveLength(n);
+    env.poses.length = 0;
     // 충전 중에는 세기가 바뀌므로 계속 보내되 50ms 간격을 넘지 않는다
     env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }));
     for (let i = 0; i < 60; i++) {
@@ -934,5 +949,51 @@ describe('몸짓 중계', () => {
     expect(charge.length).toBeGreaterThanOrEqual(16);
     expect(charge.length).toBeLessThanOrEqual(21);
     expect(charge.every((p) => p.power! >= 0 && p.power! <= 100)).toBe(true);
+  });
+});
+
+describe('드래그 발사 후속 계약', () => {
+  it('알을 누르고 뒤로 당겼다가 놓으면 반대 방향으로 발사하고 선택을 해제한다', () => {
+    const env = setup();
+    env.controller.onPointer(ptr('down', { x: -10, y: -11.5 }, 0));
+    env.controller.onPointer(ptr('move', { x: -20, y: -11.5 }));
+    run(env, 500);
+    env.controller.onPointer(ptr('up', { x: -20, y: -11.5 }));
+    expect(env.shots).toHaveLength(1);
+    expect(env.shots[0]!.angle).toBeCloseTo(0);
+    expect(env.controller.getSnapshot().aim).toBeNull();
+  });
+  it('알 범위 복귀는 선택을 유지하고 오른쪽 클릭하면 발사 없이 취소한다', () => {
+    const env = setup();
+    env.controller.onPointer(ptr('down', { x: -10, y: -11.5 }, 0));
+    env.controller.onPointer(ptr('move', { x: -20, y: -11.5 }));
+    run(env, 500);
+    env.controller.onPointer(ptr('move', { x: -10, y: -11.5 }, 0));
+    expect(env.controller.getSnapshot().aim?.stoneId).toBe(0);
+    env.controller.onPointer(ptr('down', { x: -10, y: -11.5 }, 0, 2));
+    env.controller.onPointer(ptr('up', { x: -10, y: -11.5 }, 0));
+    expect(env.shots).toHaveLength(0);
+    expect(env.controller.getSnapshot().aim).toBeNull();
+  });
+  it('E를 빠르게 떼어도 비동기 발동 응답 뒤 종료한다', async () => {
+    const env = setup(makeView({ held: 'flashlight' }));
+    env.controller.onKey('e');
+    env.controller.releaseHazard();
+    await flush();
+    expect(env.hazards).toHaveLength(1);
+    expect(env.hazardAims.at(-1)?.active).toBe(false);
+  });
+});
+
+describe('시선 중계', () => {
+  it('1인칭 시선이 바뀌면 몸짓과 함께 보내고 같은 값은 재전송하지 않는다', () => {
+    const env = setup();
+    env.controller.onLook(0.4, -0.3);
+    run(env, 100);
+    expect(env.poses.at(-1)).toMatchObject({ lookYaw: 0.4, lookPitch: -0.3 });
+    const count = env.poses.length;
+    env.controller.onLook(0.4, -0.3);
+    run(env, 100);
+    expect(env.poses).toHaveLength(count);
   });
 });

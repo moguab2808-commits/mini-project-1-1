@@ -9,12 +9,15 @@ import {
   CircleGeometry,
   ConeGeometry,
   CylinderGeometry,
+  DoubleSide,
   Group,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
+  Shape,
+  ShapeGeometry,
   SphereGeometry,
   TorusGeometry,
   Vector3,
@@ -255,6 +258,8 @@ interface HandState {
 
 /** 이번 프레임 캐릭터 입력. 좌표는 모두 좌석 로컬 */
 export interface CharacterFrame {
+  lookYaw?: number;
+  lookPitch?: number;
   dt: number;
   t: number;
   /** 조준·충전 중인 알과 방향(없으면 null) */
@@ -286,6 +291,8 @@ export interface CharacterFrame {
   camLocal: V3 | null;
   /** 몸통·머리 투명도(카메라를 가릴 때 낮춘다) */
   opacity: number;
+  /** 기절 중이면 머리 위에 별이 돈다 */
+  stunned?: boolean;
 }
 
 const UP = new Vector3(0, 1, 0);
@@ -329,6 +336,9 @@ export class CharacterRig {
   private readonly hands: [HandState, HandState];
   private readonly flashlight = new Group();
   private readonly waterGun = new Group();
+  /** 기절 표시: 머리 위를 도는 별 */
+  private readonly stunStars = new Group();
+  private readonly stunStarMeshes: Mesh[] = [];
   /** 빛·물이 나오는 곳 */
   readonly muzzle = new Object3D();
   private readonly layout: FaceLayout;
@@ -352,8 +362,6 @@ export class CharacterRig {
   private blinkIn = 2 + Math.random() * 3;
   private blinkT = 0;
   private tearT = 0;
-  private glanceIn = 4 + Math.random() * 4;
-  private glanceT = 0;
   /** 튕기기 연출 경과(초). 음수면 없음 */
   private flickT = -1;
   private readonly flickStone = v3();
@@ -509,6 +517,44 @@ export class CharacterRig {
 
     this.tongue = this.mouths.tongue;
     this.setFace('open', 'smile');
+    this.buildStunStars();
+  }
+
+  /** 머리 위 기절 별 5개(목에 붙여 머리를 따라간다) */
+  private buildStunStars() {
+    const shape = new Shape();
+    for (let i = 0; i < 10; i++) {
+      const r = i % 2 === 0 ? 2.2 : 0.95;
+      const a = Math.PI / 2 + (i * Math.PI) / 5;
+      if (i === 0) shape.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+      else shape.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    shape.closePath();
+    const geo = new ShapeGeometry(shape);
+    this.geos.push(geo);
+    const mat = new MeshBasicMaterial({ color: 0xffd84a, side: DoubleSide });
+    this.mats.push(mat);
+    for (let i = 0; i < 5; i++) {
+      const m = new Mesh(geo, mat);
+      this.stunStars.add(m);
+      this.stunStarMeshes.push(m);
+    }
+    this.stunStars.position.y = RIG.headUp + RIG.headRadius * HEAD_SCALE + 5;
+    this.stunStars.visible = false;
+    this.neck.add(this.stunStars);
+  }
+
+  private updateStunStars(on: boolean, t: number) {
+    this.stunStars.visible = on;
+    if (!on) return;
+    const n = this.stunStarMeshes.length;
+    const spin = t * 3.2;
+    this.stunStarMeshes.forEach((m, i) => {
+      const a = spin + (i * Math.PI * 2) / n;
+      m.position.set(Math.cos(a) * 8, Math.sin(t * 6 + i) * 0.8, Math.sin(a) * 8);
+      m.rotation.set(0, -a + t * 4, 0);
+      m.scale.setScalar(0.85 + 0.2 * Math.sin(t * 8 + i * 1.3));
+    });
   }
 
   // ───── 생성 도우미 ─────
@@ -929,25 +975,18 @@ export class CharacterRig {
       if (g.focusOpponent) look = f.opponentHead;
       else if (f.watch) look = f.watch;
       else {
-        this.glanceIn -= dt;
-        if (this.glanceIn <= 0) {
-          this.glanceT = 1.4;
-          this.glanceIn = 5 + Math.random() * 5;
-        }
-        if (this.glanceT > 0) {
-          this.glanceT -= dt;
-          look = f.opponentHead;
-        } else {
-          // 평소에는 판 너머(상대 쪽)를 보아 얼굴이 상대 화면에 보이게 한다
-          setV(this.lookV, 0, 6, SEAT_GEOMETRY.anchorDistance + 18);
-          look = this.lookV;
-        }
+        setV(this.lookV, 0, 6, SEAT_GEOMETRY.anchorDistance + 18);
+        look = this.lookV;
       }
     }
     headCenter(this.body, this.tH);
     const la = lookAngles(this.tH, look, this.look);
-    const yawL = clamp(la.yaw - st.yaw, -1.0, 1.0);
-    const pitchL = clamp(la.pitch - st.lean + st.pitchAdd, -0.6, 0.9);
+    const yawL = clamp(f.lookYaw ?? la.yaw - st.yaw, -1.0, 1.0);
+    const pitchL = clamp(
+      f.lookPitch !== undefined ? f.lookPitch : la.pitch - st.lean + st.pitchAdd,
+      -0.6,
+      0.9,
+    );
     st.hy += (yawL - st.hy) * k;
     st.hp += (pitchL - st.hp) * k;
     this.neck.rotation.set(st.hp, st.hy, st.roll + Math.sin(t * 11) * st.wobble, 'YXZ');
@@ -987,6 +1026,8 @@ export class CharacterRig {
 
     // ── 팔
     for (const h of this.hands) this.updateArm(h, dt, t, jitter, f);
+
+    this.updateStunStars(!!f.stunned, t);
 
     // ── 1인칭·투명도
     const hide = f.firstPerson;

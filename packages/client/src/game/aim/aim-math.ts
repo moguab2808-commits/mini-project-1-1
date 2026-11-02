@@ -16,7 +16,7 @@ export function shortestAngleDelta(from: number, to: number): number {
 }
 
 /** 세기 막대가 0→100→0을 한 번 오르내리는 시간(초) */
-export const BAR_PERIOD_SEC = 2;
+export const BAR_PERIOD_SEC = 1;
 
 /** 막대 위상(주기 단위, 0 이상 2 미만으로 감김)을 0~100 세기로 바꾸는 삼각파 */
 export function powerFromPhase(phase: number): number {

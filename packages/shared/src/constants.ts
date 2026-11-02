@@ -69,7 +69,7 @@ export interface HazardMeta {
 }
 
 export const HAZARDS: Record<HazardKind, HazardMeta> = {
-  board_spin: { kind: 'board_spin', category: 'fatigue', durationMs: 1000, fatigueCost: 50 },
+  board_spin: { kind: 'board_spin', category: 'fatigue', durationMs: 1000, fatigueCost: 25 },
   flashlight: { kind: 'flashlight', category: 'fatigue', durationMs: 4000, fatigueCost: 40 },
   water_gun: { kind: 'water_gun', category: 'fatigue', durationMs: 5000, fatigueCost: 45 },
   desk_shake: { kind: 'desk_shake', category: 'fatigue', durationMs: 500, fatigueCost: 40 },
@@ -93,11 +93,12 @@ export const HAZARD_TUNING = {
   stickyDiameter: 13.2,
   /** 끈끈이 안의 지면 알에 더해지는 감속 cm/s² */
   stickyExtraFriction: 900,
-  /** 바람이 상대 조준 방향을 돌리는 속도(°/s) */
-  windDegPerSec: 120,
-  barSpeedMultiplier: 2,
-  /** 랜덤형은 지급 시각부터 이 길이 구간마다 1회 발동 */
-  randomIntervalMs: 15000,
+  /** 바람이 상대 조준 방향을 돌리는 속도(°/s). 보유 중 상시 적용이라 약하게 둔다 */
+  windDegPerSec: 30,
+  /** 바람 방향이 무작위로 바뀌는 간격(ms) 범위 */
+  windShiftMinMs: 2000,
+  windShiftMaxMs: 4000,
+  barSpeedMultiplier: 3,
   /** 흐림 최대 면적 비율 */
   blindMaxCoverage: 0.7,
   /** 후레쉬·물총 발동 영역(원뿔) 반각. 상대 얼굴 방향과 이 각 안이면 맞은 것이다 */

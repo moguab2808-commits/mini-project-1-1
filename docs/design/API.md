@@ -274,3 +274,9 @@ sequenceDiagram
 - 호환성·버전 변경
 
 이벤트명은 `shared`에 한 곳으로 정의하며 LOCAL의 [`GameSession`](LOCAL.md#gamesession-시그니처)과 같은 타입을 쓴다. 표에 있는 30초 등의 제품 값은 [게임 규칙](../PRD.md#게임-규칙)을 참조하며 여기서 새로 결정하지 않는다.
+
+### 로컬 입력 후속 계약 (2026-11-02)
+
+`hazard:use.direction?: -1 | 1`은 판 돌리기 방향이며 생략하면 기존 방향이다. `hazard:aim.active?: boolean`이 false이면 해당 시전자의 해당 활성 효과를 종료한다. 온라인 연동 전 개발자 B 확인 대상이다.
+
+`aim:update`/`aim:state`의 `lookYaw?: number`(-1.1~1.1), `lookPitch?: number`(-0.6~0.6)는 좌석 로컬 시선 각도(라디안), `pull?: number`(0~1)는 손 당김이다. 기존 20Hz 몸짓 중계로 전송하고 권한 게임 상태를 변경하지 않는다.

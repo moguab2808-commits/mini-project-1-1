@@ -156,6 +156,14 @@ export class AimController {
   private poseSent: CharacterPose | null = null;
   private poseSentMs: number | null = null;
 
+  private pull = 0;
+  private look: { yaw: number; pitch: number } | undefined;
+
+  onLook = (yaw: number, pitch: number): void => {
+    this.look = { yaw, pitch };
+    this.refresh();
+  };
+
   private pointer: Point | null = null;
   private lastAdvanceMs: number | null = null;
   private notice: AimNotice | null = null;
@@ -263,9 +271,24 @@ export class AimController {
   /** 키 입력. `e` 방해요소 사용, `r` 벽 방향 전환, `escape` 취소 */
   onKey(key: ControllerKey): void {
     this.advance();
-    if (key === 'e') this.useSlot();
-    else if (key === 'r') this.rotatePlacement();
+    if (key === 'e') {
+      this.useSlot();
+      this.fireHold();
+    } else if (key === 'r') this.rotatePlacement();
     else this.cancelCurrent();
+    this.refresh();
+  }
+
+  releaseHazard(): void {
+    const h = this.hold;
+    if (h && this.view)
+      this.actions.aimHazard({
+        gameId: this.view.gameId,
+        hazardInstanceId: h.instanceId,
+        target: this.aimPoint ?? opponentFacePoint(this.mySeat),
+        active: false,
+      });
+    this.hold = null;
     this.refresh();
   }
 
@@ -339,7 +362,7 @@ export class AimController {
     if (this.hold) {
       // 들기·발동 중 클릭은 알 선택·충전으로 전달하지 않는다
       if (this.hold.phase === 'aiming') {
-        if (event.button === 0) this.fireHold();
+        if (event.button === 0) return;
         else if (event.button === 2) this.hold = null;
       }
       return;
@@ -358,6 +381,9 @@ export class AimController {
         this.stoneId = event.stoneId;
         this.windBias = 0;
       }
+      this.charging = true;
+      this.phase = 0;
+      this.power = 0;
       return;
     }
     if (this.stoneId === null || this.charging) return;
@@ -376,6 +402,8 @@ export class AimController {
     this.charging = false;
     this.phase = 0;
     this.power = 0;
+    this.stoneId = null;
+    this.pull = 0;
   }
 
   private fire(): void {
@@ -384,9 +412,10 @@ export class AimController {
     const power = this.power;
     const nowMs = this.now();
     const angle = this.finalAngle(nowMs);
+    const reachable = this.currentReach()?.reachable;
     this.cancelCharge();
     if (!view || stoneId === null || !this.canAim() || !(power > 0)) return; // 세기 0이면 조준 상태로 복귀
-    if (!this.currentReach()?.reachable) return; // 손이 안 닿으면 보내지 않는다(HUD 안내 유지)
+    if (!reachable) return; // 손이 안 닿으면 보내지 않는다(HUD 안내 유지)
     const key = turnKeyOf(view);
     this.shotSentKey = key;
     this.submitting = true;
@@ -432,8 +461,17 @@ export class AimController {
     if (input === 'immediate') {
       // 세기 막대 충전을 끊지 않고 보낸다
       void this.actions
-        .useHazard({ gameId: view.gameId, hazardInstanceId: held.hazardInstanceId })
-        .then((result) => this.onHazardResult(result, false));
+        .useHazard({
+          gameId: view.gameId,
+          hazardInstanceId: held.hazardInstanceId,
+          ...(held.kind === 'board_spin'
+            ? { direction: this.rotateDir() < 0 ? (-1 as const) : (1 as const) }
+            : {}),
+        })
+        .then(
+          (result) => this.onHazardResult(result),
+          () => this.onHazardResult(null),
+        );
       return;
     }
     if (this.charging) return; // 충전 중에는 배치·들기 모드로 들어가지 않는다
@@ -458,15 +496,14 @@ export class AimController {
     this.movePlacement();
   }
 
-  private onHazardResult(result: CommandResult, leavePlacement: boolean): void {
-    if (!result.ok) {
-      this.showNotice(noticeFor(result.error.code));
-      // 위치만 틀렸으면 배치 모드를 유지해 다른 곳을 고르게 한다
-      if (result.error.code !== 'HAZARD_INVALID_TARGET') leavePlacement = true;
-    } else {
-      leavePlacement = true;
-    }
-    if (leavePlacement) this.placement = null;
+  /** 즉시 사용·배치 결과. null은 전송 실패(연결 끊김 등으로 거부된 Promise) */
+  private onHazardResult(result: CommandResult | null): void {
+    if (!result) this.showNotice('방해요소를 보내지 못했어요');
+    else if (!result.ok) this.showNotice(noticeFor(result.error.code));
+    // 위치만 틀렸으면 배치 모드를 유지해 다른 곳을 고르게 한다
+    const keepPlacement =
+      result !== null && !result.ok && result.error.code === 'HAZARD_INVALID_TARGET';
+    if (!keepPlacement) this.placement = null;
     this.placementSending = false;
     this.refresh();
   }
@@ -493,7 +530,16 @@ export class AimController {
 
   private onHoldResult(instanceId: string, target: Point3, result: CommandResult | null): void {
     const h = this.hold;
-    if (!h || h.instanceId !== instanceId) return; // 이미 접힌 들기 상태
+    if (!h || h.instanceId !== instanceId) {
+      if (result?.ok && this.view)
+        this.actions.aimHazard({
+          gameId: this.view.gameId,
+          hazardInstanceId: instanceId,
+          target,
+          active: false,
+        });
+      return;
+    }
     if (result?.ok) {
       const nowMs = this.now();
       h.phase = 'active';
@@ -530,7 +576,7 @@ export class AimController {
     const active = this.beamActive(h.kind, nowMs);
     if (active) h.effectSeen = true;
     const graceEnd = h.firedAtMs + HAZARDS[h.kind].durationMs + BEAM_GRACE_MS;
-    if ((h.effectSeen && !active) || nowMs >= graceEnd) {
+    if ((h.effectSeen && !active) || (!active && nowMs >= graceEnd)) {
       this.hold = null;
       return;
     }
@@ -594,7 +640,10 @@ export class AimController {
           ...(p.kind === 'wall' ? { orientation: p.orientation } : {}),
         },
       })
-      .then((result) => this.onHazardResult(result, false));
+      .then(
+        (result) => this.onHazardResult(result),
+        () => this.onHazardResult(null),
+      );
   }
 
   private placementValid(p: NonNullable<typeof this.placement>): boolean {
@@ -748,8 +797,10 @@ export class AimController {
     const dx = point.x - stone.x;
     const dy = point.y - stone.y;
     // 알 중심 바로 위는 방향이 정해지지 않으므로 직전 값을 유지한다
-    if (Math.hypot(dx, dy) < PHYSICS.stoneRadius * 0.25) return;
-    this.mouseAngle = Math.atan2(dy, dx);
+
+    if (Math.hypot(dx, dy) < PHYSICS.stoneRadius) return;
+    this.pull = Math.min(1, Math.hypot(dx, dy) / 12);
+    this.mouseAngle = Math.atan2(-dy, -dx);
   }
 
   /** 떨림 없는 조준 각도(마우스 + 바람 편향) */
@@ -860,6 +911,7 @@ export class AimController {
         angle: this.finalAngle(nowMs),
         power: this.charging ? this.power : 0,
         charging: this.charging,
+        pull: this.pull,
         reachable: reach?.reachable ?? false,
         strain: reach?.strain ?? 0,
       };
@@ -905,6 +957,9 @@ export class AimController {
       pose = { mode: 'idle' };
     }
 
+    if (aim) pose.pull = aim.pull;
+    pose.lookYaw = this.look?.yaw;
+    pose.lookPitch = this.look?.pitch;
     return {
       aim,
       placement,
@@ -942,6 +997,9 @@ function samePoint3(a: Point3 | null | undefined, b: Point3 | null | undefined):
 
 function samePose(a: CharacterPose, b: CharacterPose): boolean {
   return (
+    a.pull === b.pull &&
+    a.lookYaw === b.lookYaw &&
+    a.lookPitch === b.lookPitch &&
     a.mode === b.mode &&
     a.stoneId === b.stoneId &&
     a.angle === b.angle &&

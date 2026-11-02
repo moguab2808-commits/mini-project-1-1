@@ -412,11 +412,13 @@ describe('명령 거부', () => {
     assert.equal(w.private.usable, false);
     assert.equal(code(use(g, 0, T0)), 'HAZARD_NOT_USABLE');
     g.debugGrant(0, 'board_spin');
-    assert.equal(code(use(g, 0, T0 + 1)), 'OK');
-    assert.equal(code(use(g, 0, T0 + 2)), 'OK');
+    // 판 돌리기 피로도 25: 네 번 쓰면 과열
+    for (let i = 1; i <= 3; i++) assert.equal(code(use(g, 0, T0 + i)), 'OK');
+    assert.equal(g.getViewFor(0).private.overheated, false);
+    assert.equal(code(use(g, 0, T0 + 4)), 'OK');
     assert.equal(g.getViewFor(0).private.overheated, true);
     assert.equal(g.getViewFor(0).private.usable, false);
-    assert.equal(code(use(g, 0, T0 + 3)), 'HAZARD_OVERHEATED');
+    assert.equal(code(use(g, 0, T0 + 5)), 'HAZARD_OVERHEATED');
     g.advanceTo(T0 + 19_000);
     assert.equal(g.getViewFor(0).private.overheated, true, '게이지가 남아 있다');
     g.advanceTo(T0 + 20_100);
@@ -425,27 +427,44 @@ describe('명령 거부', () => {
   });
 });
 
-describe('랜덤형 자동 발동', () => {
-  test('15초 구간마다 1회, 상대에게 1초 발동한다', () => {
+describe('바람 상시 적용', () => {
+  test('보유하면 상대에게 계속 적용되고 방향은 2~4초마다 무작위로 바뀐다', () => {
     const g = mk();
     g.debugGrant(0, 'wind');
-    g.drainEvents();
-    g.advanceTo(T0 + 29_999);
-    g.advanceTo(T0 + 30_000); // 턴 변경
-    g.advanceTo(T0 + 44_999);
     const starts = g
       .drainEvents()
       .flatMap((e) =>
         e.type === 'hazard:triggered' && e.payload.phase === 'start' ? [e.payload] : [],
       );
-    assert.equal(starts.length, 3);
-    starts.forEach((p, i) => {
-      assert.equal(p.kind, 'wind');
-      assert.equal(p.targetSeat, 1);
-      assert.equal(p.expiresAtMs - p.startsAtMs, 1000);
-      assert.ok(p.startsAtMs >= T0 + i * 15_000 && p.startsAtMs < T0 + (i + 1) * 15_000 - 1000 + 1);
-      assert.ok(typeof p.params?.directionRad === 'number');
-    });
+    assert.equal(starts.length, 1);
+    assert.equal(starts[0]!.kind, 'wind');
+    assert.equal(starts[0]!.targetSeat, 1);
+    const windOf = () => g.getViewFor(1).effects.find((e) => e.kind === 'wind');
+    const dirs = new Set<number>();
+    for (let ms = 0; ms <= 20_000; ms += 500) {
+      g.advanceTo(T0 + ms);
+      const w = windOf();
+      assert.ok(w, `${ms}ms에도 바람이 적용 중이다`);
+      assert.equal(w.targetSeat, 1);
+      dirs.add(w.params!.directionRad!);
+    }
+    // 20초 동안 2~4초 간격이면 5~10번 바뀐다
+    assert.ok(dirs.size >= 5 && dirs.size <= 11, `${dirs.size}`);
+    const ends = g
+      .drainEvents()
+      .filter((e) => e.type === 'hazard:triggered' && e.payload.phase === 'end');
+    assert.equal(ends.length, 0, '방향 변경은 효과를 끝내지 않는다');
+  });
+
+  test('다른 방해요소로 교체하면 바람이 끝난다', () => {
+    const g = mk();
+    g.debugGrant(0, 'wind');
+    const grant = g as unknown as { grantOne(seat: Seat, replaced: boolean, kind: 'wall'): void };
+    grant.grantOne(0, true, 'wall');
+    assert.equal(
+      g.getViewFor(1).effects.some((e) => e.kind === 'wind'),
+      false,
+    );
   });
 });
 
@@ -760,7 +779,7 @@ describe('후레쉬·물총 조준과 가림 (DEC-036)', () => {
     g.advanceTo(T0 + 3999);
     assert.equal(coverage(g), 0, '0 아래로 내려가지 않는다');
     g.advanceTo(T0 + 4000);
-    assert.equal(g.getViewFor(1).private.blind, undefined, '후레쉬 4초 뒤 끝난다');
+    assert.equal(g.getViewFor(1).private.blind?.kind, 'flashlight', 'E 유지 중에는 계속 활성');
   });
 
   test('조준점 없이 발동하면 빗나감으로 시작해 가림이 오르지 않는다', () => {
@@ -769,7 +788,7 @@ describe('후레쉬·물총 조준과 가림 (DEC-036)', () => {
     g.advanceTo(T0 + 1000);
     assert.equal(coverage(g), 0);
     assert.equal(g.getViewFor(1).private.blind?.kind, 'water_gun');
-    assert.equal(g.getViewFor(1).private.blind!.expiresAtMs - T0, 5000);
+    assert.ok(g.getViewFor(1).private.blind!.expiresAtMs > T0 + 5000);
   });
 
   test('판을 돌려도 조준점은 그대로다(좌석 공간 기준)', () => {
@@ -784,5 +803,45 @@ describe('후레쉬·물총 조준과 가림 (DEC-036)', () => {
     assert.deepEqual([eff.params!.aimX, eff.params!.aimY, eff.params!.aimH], [0, 30, 24]);
     g.advanceTo(T0 + 600);
     assert.ok(close(coverage(g)!, 0.48), `${coverage(g)}`);
+  });
+});
+
+describe('추가 방해요소 계약', () => {
+  test('막대 가속은 보유 중 상시이며 교체하면 제거된다', () => {
+    const g = mk();
+    g.debugGrant(0, 'bar_speed');
+    g.advanceTo(T0 + 20000);
+    assert.ok(g.getViewFor(1).effects.some((e) => e.kind === 'bar_speed' && e.targetSeat === 1));
+    const grant = g as unknown as { grantOne(seat: Seat, replaced: boolean, kind: 'wall'): void };
+    grant.grantOne(0, true, 'wall');
+    assert.equal(
+      g.getViewFor(1).effects.some((e) => e.kind === 'bar_speed' && e.targetSeat === 1),
+      false,
+    );
+  });
+  test('책상 흔들기는 지급되지 않으며 상대 턴의 판 돌리기는 양방향 가능하다', () => {
+    for (let seed = 1; seed <= 100; seed++) {
+      const g = mk({ seed });
+      for (const seat of [0, 1] as const)
+        assert.notEqual(g.getViewFor(seat).private.held?.kind, 'desk_shake');
+    }
+    for (const direction of [-1, 1] as const) {
+      const g = mk();
+      g.debugGrant(1, 'board_spin');
+      const v = g.getViewFor(1);
+      assert.equal(
+        g.rotateBoard(env(1, T0), { gameId: 'g1', turnId: v.turnId, deltaDeg: 10 }).ok,
+        false,
+      );
+      assert.equal(
+        g.useHazard(env(1, T0), {
+          gameId: 'g1',
+          hazardInstanceId: v.private.held!.hazardInstanceId,
+          direction,
+        }).ok,
+        true,
+      );
+      assert.notEqual(g.getViewFor(1).boardRotationDeg, 0);
+    }
   });
 });

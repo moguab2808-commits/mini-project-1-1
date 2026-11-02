@@ -6,10 +6,9 @@ import type { Seat } from '@alkkagi/shared';
 import { AimController, type RotateDir } from './aim/aim-controller.ts';
 import type { GameClientState, GameStore } from './game-store.ts';
 import { Hud } from './hud/Hud.tsx';
-import { cameraPresetForCode } from './hud/hud-model.ts';
 import { ReactionTracker } from './reactions.ts';
 import { GameScene } from './scene/GameScene.tsx';
-import type { CameraPreset, CharacterPose } from './scene/scene-contract.ts';
+import type { CharacterPose } from './scene/scene-contract.ts';
 import { useFrameRecording } from './use-frame-recording.ts';
 import type { GameSession } from '../session/game-session.ts';
 import './hud/hud.css';
@@ -62,10 +61,6 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
   const [reactionTracker] = useState(() => new ReactionTracker(session.playerId));
   const aim = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   const reactions = useSyncExternalStore(reactionTracker.subscribe, reactionTracker.getReactions);
-  const [camera, setCamera] = useState<{ preset: CameraPreset; nonce: number }>({
-    preset: 'default',
-    nonce: 0,
-  });
   const [, setTick] = useState(0);
 
   useFrameRecording(state);
@@ -107,22 +102,15 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
   }, [state.start]);
 
   // 창 단위 키보드·휠·컨텍스트 메뉴 연결.
-  // 키는 `code`로 판단해 한글 입력 상태에서도 같다: E 방해요소, R 벽 방향, A·D·←·→ 판 돌리기,
-  // 1~5 시점, ESC 취소.
+  // 키는 `code`로 판단해 한글 입력 상태에서도 같다: E 방해요소, R 벽 방향, A·D·←·→ 판 돌리기, ESC 취소.
+  // 시점은 기본 하나이고 알을 칠 때만 장면이 1인칭으로 바꾼다(시점 선택 키·버튼 없음).
   useEffect(() => {
-    const selectCamera = (preset: CameraPreset) =>
-      setCamera((c) => ({ preset, nonce: c.nonce + 1 }));
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return;
       const rotate = ROTATE_KEYS[e.code];
       if (rotate !== undefined) {
         if (e.code.startsWith('Arrow')) e.preventDefault(); // 페이지 스크롤 방지
         if (!e.repeat) controller.pressRotate(e.code, rotate);
-        return;
-      }
-      const preset = cameraPresetForCode(e.code);
-      if (preset) {
-        if (!e.repeat) selectCamera(preset);
         return;
       }
       if (e.code === 'KeyE') {
@@ -134,11 +122,13 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'KeyE') controller.releaseHazard();
       if (ROTATE_KEYS[e.code] !== undefined) controller.releaseRotate(e.code);
     };
     const onWheel = () => controller.onWheel();
-    const onContextMenu = (e: Event) => e.preventDefault(); // 오른쪽 클릭은 취소·시점 회전에 쓴다
+    const onContextMenu = (e: Event) => e.preventDefault(); // 오른쪽 클릭은 취소·고개 돌리기에 쓴다
     const onBlur = () => {
+      controller.releaseHazard();
       controller.releaseAllRotate();
       controller.onPointer({
         type: 'cancel',
@@ -188,10 +178,9 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
           aim={aim.aim}
           placement={aim.placement}
           onPointer={controller.onPointer}
+          onLook={controller.onLook}
           poses={poses}
           reactions={reactions}
-          cameraPreset={camera.preset}
-          cameraPresetNonce={camera.nonce}
           shake={aim.shake}
         />
       </div>
@@ -208,8 +197,6 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
         canRotate={aim.canRotate}
         onRotatePress={(dir) => controller.pressRotate(dir === 1 ? 'btn-ccw' : 'btn-cw', dir)}
         onRotateRelease={(dir) => controller.releaseRotate(dir === 1 ? 'btn-ccw' : 'btn-cw')}
-        cameraPreset={camera.preset}
-        onCameraPreset={(preset) => setCamera((c) => ({ preset, nonce: c.nonce + 1 }))}
         nowServerMs={nowServerMs}
         nowClientMs={nowServerMs - state.clockOffsetMs}
         onSlotClick={() => controller.onSlotClick()}

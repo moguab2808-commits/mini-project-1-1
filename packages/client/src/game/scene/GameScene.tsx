@@ -3,9 +3,10 @@
 // 서버는 판 돌리기 때 알·설치물의 좌표를 이미 회전해 보내므로, 표시 회전이 따라잡는 동안만 이 차이가 0이 아니다.
 // 캐릭터·카메라·후레쉬/물총 효과는 좌석에 고정된 월드 좌표를 쓴다(좌석은 판 돌리기와 무관).
 //
-// 카메라 조작: 오른쪽 버튼을 DRAG_CLICK_PX(6px) 넘게 끌면 회전(1인칭이면 고개 돌리기)이고 onPointer로 보내지 않는다.
-// 그보다 적게 움직이고 놓으면 클릭으로 보고 놓는 순간 onPointer에 오른쪽 down → up을 차례로 보낸다(조준·배치 취소).
-// 휠은 확대·축소(1인칭·배치 모드에서는 무시).
+// 카메라 조작: 시점은 기본과 1인칭뿐이다. 알을 조준·발사하는 동안만 1인칭이고 끝나면 기본으로 돌아온다.
+// 오른쪽 버튼을 DRAG_CLICK_PX(6px) 넘게 끌면 고개 돌리기이고, 놓으면 정면으로 돌아온다.
+// 오른쪽 버튼을 누르는 순간 onPointer에 오른쪽 down을 보낸다(조준·배치 취소). 왼쪽 버튼을 누른 채 오른쪽을
+// 누르면 브라우저는 pointerdown 대신 pointermove(버튼 조합 변경)만 보내므로 그 경우도 오른쪽 down으로 바꿔 보낸다.
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { BOARDS, HAZARD_TUNING, PHYSICS, SEAT_GEOMETRY, type Seat } from '@alkkagi/shared';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -17,7 +18,6 @@ import {
   aimPointFromRay,
   applyDrag,
   applyPreset,
-  applyWheel,
   aspectDistanceScale,
   createCameraState,
   createRightDrag,
@@ -26,7 +26,9 @@ import {
   dragMove,
   dragUp,
   orbitPosition,
+  releaseLook,
   stepCamera,
+  stunRoll,
 } from './camera-math.ts';
 import { stepFall, startFall, type FallState } from './fall.ts';
 import { AimLayer, HazardLayer, StoneLayer, STONE_REST_Y, type HazardDraw } from './layers.ts';
@@ -132,13 +134,15 @@ interface Runtime {
   prevSeen: Int32Array;
   frameNo: number;
   cam: ReturnType<typeof createCameraState>;
-  preset: { name: SceneProps['cameraPreset']; nonce: number; seat: Seat };
+  preset: { name: NonNullable<SceneProps['cameraPreset']>; nonce: number; seat: Seat };
   drag: ReturnType<typeof createRightDrag>;
   reactions: ReturnType<typeof createReactionTracker>;
   seats: [SeatAnim, SeatAnim];
   blinds: [BlindDraw | null, BlindDraw | null];
   blindStore: [BlindDraw, BlindDraw];
   coverage: [number, number];
+  /** 좌석별 기절 진행도 0~1(기절 아니면 null) */
+  stun: [number | null, number | null];
   fpLook: Vector3;
   lookV: Vector3;
 }
@@ -268,8 +272,12 @@ function SceneWorld(props: SceneProps) {
       prevSp: new Float64Array(MAX_IDS),
       prevSeen: new Int32Array(MAX_IDS).fill(-10),
       frameNo: 0,
-      cam: createCameraState(props.cameraPreset, props.mySeat),
-      preset: { name: props.cameraPreset, nonce: props.cameraPresetNonce, seat: props.mySeat },
+      cam: createCameraState(props.cameraPreset ?? 'default', props.mySeat),
+      preset: {
+        name: props.cameraPreset ?? 'default',
+        nonce: props.cameraPresetNonce ?? 0,
+        seat: props.mySeat,
+      },
       drag: createRightDrag(),
       reactions: createReactionTracker(),
       seats: [makeSeatAnim(), makeSeatAnim()],
@@ -279,6 +287,7 @@ function SceneWorld(props: SceneProps) {
         { kind: 'flashlight', from: v3(), to: v3(), strength: 0 },
       ],
       coverage: [0, 0],
+      stun: [null, null],
       fpLook: new Vector3(0, 0, 0),
       lookV: new Vector3(),
     };
@@ -325,7 +334,24 @@ function SceneWorld(props: SceneProps) {
       );
       latest.current.onPointer({ type, point, aimPoint, stoneId, button });
     };
+    const rightDown = (e: PointerEvent) => {
+      emit('down', e, 2);
+      dragDown(rt.drag, e.clientX, e.clientY);
+    };
+    const rightUp = (e: PointerEvent) => {
+      if (dragUp(rt.drag) === 'click') emit('up', e, 2);
+      releaseLook(rt.cam);
+    };
     const onMove = (e: PointerEvent) => {
+      // 다른 버튼을 누른 채 버튼을 더 누르거나 떼면 pointerdown·pointerup 대신 pointermove가 온다
+      if (e.button === 2) {
+        if (e.buttons & 2) rightDown(e);
+        else rightUp(e);
+      } else if (e.button === 0 && !(e.buttons & 1)) {
+        emit('up', e, 0);
+      } else if (e.button === 0 && e.buttons & 1) {
+        emit('down', e, 0);
+      }
       const dd = dragMove(rt.drag, e.clientX, e.clientY);
       if (dd) applyDrag(rt.cam, dd.dx, dd.dy);
       emit('move', e);
@@ -337,43 +363,35 @@ function SceneWorld(props: SceneProps) {
         // 캡처 실패는 입력을 막지 않는다
       }
       if (e.button === 2) {
-        dragDown(rt.drag, e.clientX, e.clientY);
+        rightDown(e);
         return;
       }
       emit('down', e);
     };
     const onUp = (e: PointerEvent) => {
       if (e.button === 2) {
-        if (dragUp(rt.drag) === 'click') {
-          emit('down', e, 2);
-          emit('up', e, 2);
-        }
+        rightUp(e);
         return;
       }
       emit('up', e);
     };
     const onCancel = (e: PointerEvent) => {
       dragUp(rt.drag);
+      releaseLook(rt.cam);
       emit('cancel', e);
     };
     const onContext = (e: Event) => e.preventDefault();
-    const onWheel = (e: WheelEvent) => {
-      if (latest.current.placement) return;
-      if (applyWheel(rt.cam, e.deltaY)) e.preventDefault();
-    };
     el.addEventListener('pointermove', onMove);
     el.addEventListener('pointerdown', onDown);
     el.addEventListener('pointerup', onUp);
     el.addEventListener('pointercancel', onCancel);
     el.addEventListener('contextmenu', onContext);
-    el.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerdown', onDown);
       el.removeEventListener('pointerup', onUp);
       el.removeEventListener('pointercancel', onCancel);
       el.removeEventListener('contextmenu', onContext);
-      el.removeEventListener('wheel', onWheel);
     };
   }, [gl, camera, rt]);
 
@@ -381,6 +399,7 @@ function SceneWorld(props: SceneProps) {
   const tmp = useMemo(
     () => ({
       w: v3(),
+      gaze: new Vector3(),
       l: v3(),
       orb: v3(),
       fp: new Vector3(),
@@ -402,11 +421,13 @@ function SceneWorld(props: SceneProps) {
 
     // 시점 프리셋
     const pr = rt.preset;
-    if (pr.name !== p.cameraPreset || pr.nonce !== p.cameraPresetNonce || pr.seat !== mySeat) {
-      pr.name = p.cameraPreset;
-      pr.nonce = p.cameraPresetNonce;
+    const presetName = p.cameraPreset ?? 'default';
+    const presetNonce = p.cameraPresetNonce ?? 0;
+    if (pr.name !== presetName || pr.nonce !== presetNonce || pr.seat !== mySeat) {
+      pr.name = presetName;
+      pr.nonce = presetNonce;
       pr.seat = mySeat;
-      applyPreset(rt.cam, p.cameraPreset, mySeat);
+      applyPreset(rt.cam, presetName, mySeat);
     }
 
     // 스냅샷 보간·낙하
@@ -440,8 +461,15 @@ function SceneWorld(props: SceneProps) {
     rt.blinds[1] = null;
     rt.coverage[0] = 0;
     rt.coverage[1] = 0;
+    rt.stun[0] = null;
+    rt.stun[1] = null;
     for (const e of p.view.effects) {
-      if (e.kind === 'desk_shake') {
+      if (e.kind === 'stun') {
+        if (nowServer >= e.startsAtMs && nowServer < e.expiresAtMs) {
+          const span = Math.max(1, e.expiresAtMs - e.startsAtMs);
+          rt.stun[e.targetSeat] = (nowServer - e.startsAtMs) / span;
+        }
+      } else if (e.kind === 'desk_shake') {
         const span = Math.max(1, e.expiresAtMs - e.startsAtMs);
         const progress = (nowServer - e.startsAtMs) / span;
         [sx, sz] = deskShakeOffset(progress, nowServer / 1000, HAZARD_TUNING.deskShakeMaxDistance);
@@ -556,6 +584,8 @@ function SceneWorld(props: SceneProps) {
       const other = rigs[seat === 0 ? 1 : 0];
       const fr = sa.frame;
       const pose = p.poses[seat];
+      fr.lookYaw = pose?.lookYaw;
+      fr.lookPitch = pose?.lookPitch;
       stepSmoothPose(sa.pose, pose, dt, seat === mySeat ? 30 : 12);
       const sp = sa.pose;
       // 내 조준은 로컬 상태가 더 빠르므로 그것을 우선한다
@@ -614,9 +644,14 @@ function SceneWorld(props: SceneProps) {
           setV(tmp.w, wx + sx, STONE_REST_Y + s.h, wz + sz);
           worldToSeat(seat, tmp.w, sa.aim.stone);
           serverDirToSeat(seat, angle + rt.deltaDeg * DEG, sa.aim.dir);
-          sa.aim.stoneId = s.id;
-          sa.aim.pull = mode === 'charge' ? power / 100 : 0;
           const mine = seat === mySeat && p.aim;
+          sa.aim.stoneId = s.id;
+          sa.aim.pull =
+            mode === 'charge'
+              ? mine
+                ? (p.aim?.pull ?? power / 100)
+                : (pose?.pull ?? power / 100)
+              : 0;
           const reachD = Math.hypot(sa.aim.stone.x, sa.aim.stone.z);
           sa.aim.reachable = mine ? p.aim!.reachable : reachD <= SEAT_GEOMETRY.maxReach;
           sa.aim.strain = mine ? p.aim!.strain : strainOf(sa.aim.stone);
@@ -677,6 +712,7 @@ function SceneWorld(props: SceneProps) {
       fr.opponentHead = sa.oppHead;
       fr.watch = watchFound ? worldToSeat(seat, tmp.watchW, sa.watchLocal) : null;
       fr.blind = rt.coverage[seat];
+      fr.stunned = rt.stun[seat] !== null;
 
       // 1인칭·투명도(카메라와 판 사이를 가리는 캐릭터는 반투명)
       const fp = seat === mySeat && rt.cam.fpBlend > 0.5;
@@ -706,6 +742,9 @@ function SceneWorld(props: SceneProps) {
     blindFx.update(rt.blinds, t);
 
     // 카메라
+    // 알을 조준·발사하는 동안만 1인칭, 끝나면 평소 시점(기본)으로 돌아온다
+    rt.cam.fpOn = true;
+    rt.cam.fpLiftGoal = p.aim ? 0 : rt.preset.name === 'first' ? 0 : 1;
     stepCamera(rt.cam, dt);
     const e0 = rt.cam.fpBlend;
     const e = e0 * e0 * (3 - 2 * e0);
@@ -751,6 +790,16 @@ function SceneWorld(props: SceneProps) {
       cam.rotateY(rt.cam.fpYaw * e);
       cam.rotateX(rt.cam.fpPitch * e);
     }
+    if (rt.cam.fpOn && p.onLook) {
+      cam.getWorldDirection(tmp.gaze);
+      const sign = mySeat === 0 ? -1 : 1;
+      const yaw = Math.atan2(tmp.gaze.x * sign, tmp.gaze.z * sign);
+      const pitch = Math.atan2(-tmp.gaze.y, Math.hypot(tmp.gaze.x, tmp.gaze.z));
+      p.onLook(
+        Math.round(Math.max(-1.1, Math.min(1.1, yaw)) * 100) / 100,
+        Math.round(Math.max(-0.6, Math.min(0.6, pitch)) * 100) / 100,
+      );
+    }
     // 흔들림: 호출 쪽 값·책상 흔들기·1인칭 먼 거리 조준 중 큰 것
     const strain = meSa.frame.aim ? meSa.frame.aim.strain : 0;
     const shake = Math.max(p.shake, deskShake, strain * 0.35 * e);
@@ -761,6 +810,9 @@ function SceneWorld(props: SceneProps) {
       cam.position.z += Math.sin(t * 41 + 2) * a;
       cam.rotateZ(Math.sin(t * 37) * shake * 0.012);
     }
+    // 기절: 내 화면이 기절 시간 동안 한 바퀴(360°) 돈다
+    const myStun = rt.stun[mySeat];
+    if (myStun !== null) cam.rotateZ(stunRoll(myStun));
     const fov = 42 + (20 - EYE_LIFT.fovLess * rt.cam.fpLift) * e;
     if (Math.abs(cam.fov - fov) > 0.01) {
       cam.fov = fov;
@@ -771,8 +823,9 @@ function SceneWorld(props: SceneProps) {
 
   return (
     <>
-      <color attach="background" args={['#1a110c']} />
-      <hemisphereLight args={[0xffe2b8, 0x24160e, 0.55]} />
+      <color attach="background" args={['#3a2a1f']} />
+      <ambientLight color={0xfff0dc} intensity={0.35} />
+      <hemisphereLight args={[0xffe8c8, 0x4a3324, 1.0]} />
       <spotLight
         position={[0, 78, 0]}
         target-position={[0, 0, 0]}
@@ -787,7 +840,7 @@ function SceneWorld(props: SceneProps) {
         shadow-camera-near={20}
         shadow-camera-far={160}
       />
-      <directionalLight position={[-60, 50, 30]} intensity={0.5} color={0xa9b8ff} />
+      <directionalLight position={[-60, 50, 30]} intensity={0.9} color={0xc8d2ff} />
       <primitive object={stage.room} />
       <group ref={tableRef}>
         <primitive object={stage.table} />

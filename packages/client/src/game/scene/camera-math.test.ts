@@ -2,26 +2,24 @@ import { SEAT_GEOMETRY } from '@alkkagi/shared';
 import { PerspectiveCamera, Raycaster, Vector2 } from 'three';
 import { describe, expect, it } from 'vitest';
 import {
-  PHI_MAX,
-  PHI_MIN,
-  R_MAX,
+  FP_YAW_MAX,
   aimPointFromRay,
   applyDrag,
   applyPreset,
-  applyWheel,
   createCameraState,
   createRightDrag,
   dragDown,
   dragMove,
   dragUp,
-  nearestAngle,
   orbitPosition,
   presetOrbit,
+  releaseLook,
   stepCamera,
+  stunRoll,
 } from './camera-math.ts';
 import { v3 } from './rig-math.ts';
 
-describe('orbit 수학', () => {
+describe('시점 수학', () => {
   it('구면 좌표: theta=0은 +Z, phi=0은 바로 위', () => {
     const p = orbitPosition({ theta: 0, phi: Math.PI / 2, r: 10, tx: 0, ty: 0, tz: 0 }, 1, v3());
     expect(p.z).toBeCloseTo(10);
@@ -31,65 +29,50 @@ describe('orbit 수학', () => {
     expect(top.x).toBeCloseTo(1);
   });
 
-  it('default 시점은 내 캐릭터 머리 뒤 위에 있다(좌석 0은 +Z, 좌석 1은 −Z)', () => {
+  it('default 시점의 기준 orbit은 내 쪽(좌석 0은 +Z, 좌석 1은 −Z)에 있다', () => {
     for (const seat of [0, 1] as const) {
       const p = orbitPosition(presetOrbit('default', seat), 1, v3());
       const side = seat === 0 ? 1 : -1;
       expect(p.z * side).toBeGreaterThan(SEAT_GEOMETRY.anchorDistance);
       expect(p.y).toBeGreaterThan(SEAT_GEOMETRY.headHeight);
     }
-    const opp = orbitPosition(presetOrbit('opponent', 0), 1, v3());
-    expect(opp.z).toBeLessThan(-SEAT_GEOMETRY.anchorDistance);
   });
 
-  it('nearestAngle은 한 바퀴 넘게 돌지 않는다', () => {
-    expect(nearestAngle(0.1, Math.PI * 2)).toBeCloseTo(0);
-    expect(nearestAngle(6.0, 0)).toBeCloseTo(Math.PI * 2);
-    expect(nearestAngle(-3, 3)).toBeCloseTo(3 - Math.PI * 2);
-  });
-
-  it('프리셋으로 바꾸면 현재값이 목표로 부드럽게 수렴한다', () => {
-    const cs = createCameraState('default', 0);
-    applyPreset(cs, 'top', 0);
-    stepCamera(cs, 1 / 60);
-    expect(cs.phi).toBeLessThan(presetOrbit('default', 0).phi);
-    expect(cs.phi).toBeGreaterThan(PHI_MIN);
-    for (let i = 0; i < 300; i++) stepCamera(cs, 1 / 60);
-    expect(cs.phi).toBeCloseTo(PHI_MIN, 3);
-  });
-
-  it('first는 1인칭 비율을 올리고, 드래그는 고개를 돌린다', () => {
-    const cs = createCameraState('default', 1);
-    applyPreset(cs, 'first', 1);
-    for (let i = 0; i < 300; i++) stepCamera(cs, 1 / 60);
-    expect(cs.fpBlend).toBe(1);
-    const theta = cs.goal.theta;
-    applyDrag(cs, 100, 0);
-    expect(cs.goal.theta).toBe(theta);
-    expect(cs.fpYaw).toBeLessThan(0);
-    expect(applyWheel(cs, 100)).toBe(false);
-  });
-
-  it('default는 눈보다 높은 1인칭 계열이고, 드래그·휠을 하면 자유 회전으로 넘어간다', () => {
+  it('default와 first는 모두 눈 위치 기준이고 높이만 다르다', () => {
     const cs = createCameraState('default', 0);
     expect(cs.fpOn).toBe(true);
+    expect(cs.fpBlend).toBe(1);
     expect(cs.fpLift).toBe(1);
     applyPreset(cs, 'first', 0);
     expect(cs.fpLiftGoal).toBe(0);
-    applyPreset(cs, 'default', 0);
-    applyDrag(cs, 30, 0);
-    expect(cs.fpOn).toBe(false);
-    const cs2 = createCameraState('default', 1);
-    expect(applyWheel(cs2, 100)).toBe(true);
-    expect(cs2.fpOn).toBe(false);
+    for (let i = 0; i < 300; i++) stepCamera(cs, 1 / 60);
+    expect(cs.fpLift).toBeCloseTo(0, 3);
+    expect(cs.fpBlend).toBe(1);
   });
 
-  it('드래그는 극각을 제한하고 휠은 거리를 제한한다', () => {
-    const cs = createCameraState('default', 0);
-    applyDrag(cs, 0, -10000);
-    expect(cs.goal.phi).toBe(PHI_MAX);
-    for (let i = 0; i < 50; i++) applyWheel(cs, 200);
-    expect(cs.goal.r).toBe(R_MAX);
+  it('오른쪽 드래그는 기본 시점에서도 고개를 돌리고(자유 회전 없음), 놓으면 정면으로 돌아온다', () => {
+    const cs = createCameraState('default', 1);
+    const theta = cs.goal.theta;
+    applyDrag(cs, 100, 40);
+    expect(cs.fpOn).toBe(true);
+    expect(cs.goal.theta).toBe(theta);
+    expect(cs.fpYaw).toBeLessThan(0);
+    expect(cs.fpPitch).toBeLessThan(0);
+    for (let i = 0; i < 60; i++) stepCamera(cs, 1 / 60);
+    expect(cs.fpYaw).toBeLessThan(0); // 누르고 있는 동안 유지
+    releaseLook(cs);
+    for (let i = 0; i < 300; i++) stepCamera(cs, 1 / 60);
+    expect(cs.fpYaw).toBe(0);
+    expect(cs.fpPitch).toBe(0);
+    applyDrag(cs, -100000, 0);
+    expect(cs.fpYaw).toBe(FP_YAW_MAX);
+  });
+
+  it('기절 화면 회전은 0에서 시작해 한 바퀴(2π)로 끝난다', () => {
+    expect(stunRoll(0)).toBe(0);
+    expect(stunRoll(0.5)).toBeCloseTo(Math.PI);
+    expect(stunRoll(1)).toBeCloseTo(Math.PI * 2);
+    expect(stunRoll(2)).toBeCloseTo(Math.PI * 2);
   });
 });
 
@@ -137,10 +120,10 @@ describe('조준점(aimPoint) 광선 교차', () => {
     expect(aimPointFromRay(v3(0, 40, 60), v3(0, 1, 1), 1)).toBeNull();
   });
 
-  it('회전한 orbit 카메라의 화면 중앙 광선도 같은 규칙으로 교차한다', () => {
+  it('기울인 orbit 카메라의 화면 중앙 광선도 같은 규칙으로 교차한다', () => {
     const cs = createCameraState('default', 0);
-    applyDrag(cs, -60, 40);
-    for (let i = 0; i < 400; i++) stepCamera(cs, 1 / 60);
+    cs.theta += 0.5;
+    cs.phi = 0.4;
     const pos = orbitPosition(cs, 1, v3());
     const cam = new PerspectiveCamera(42, 16 / 9, 1, 900);
     cam.position.set(pos.x, pos.y, pos.z);

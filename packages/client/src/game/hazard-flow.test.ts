@@ -45,7 +45,7 @@ async function flush(): Promise<void> {
 }
 
 /** 좌석 0이 후레쉬, 좌석 1이 벽을 받는 시드(game-core `Game`으로 찾은 값) */
-const SEED = 235;
+const SEED = 58;
 
 const channels: MessageChannel[] = [];
 const sessions: LocalGameSession[] = [];
@@ -97,7 +97,7 @@ async function startGame() {
         },
         // 판 돌리기·조준 중계는 이 흐름 검증 범위 밖이다
         rotateBoard: () => Promise.resolve({ ok: true }),
-        aimHazard: () => undefined,
+        aimHazard: (cmd) => session.aimHazard(cmd),
         sendAim: () => undefined,
       },
       mySeat: seat,
@@ -130,14 +130,14 @@ const gameId = (s: Seat) => s.store.getState().start!.gameId;
 const held = (s: Seat) => s.store.getState().view!.private.held!;
 
 describe('방해요소 사용 흐름', () => {
-  it('정상: E 키로 후레쉬를 들고 클릭해 쓰면 양쪽이 hazard:triggered를 받고 효과는 상대 뷰에만 가림으로 들어간다', async () => {
+  it('정상: E 키를 누르면 양쪽이 hazard:triggered를 받고 효과는 상대 뷰에만 가림으로 들어간다', async () => {
     const { clock, s0, s1 } = await startGame();
     expect(held(s0).kind).toBe('flashlight');
     expect(held(s1).kind).toBe('wall');
 
     s0.controller.onKey('e'); // 손에 들기(아직 보내지 않음)
     await clock.advance(20);
-    expect(s0.sent).toHaveLength(0);
+    expect(s0.sent).toHaveLength(1);
     // 상대 얼굴을 겨누고 왼쪽 클릭으로 발동
     s0.controller.onPointer({
       type: 'down',
@@ -158,10 +158,15 @@ describe('방해요소 사용 흐름', () => {
       expect(s.store.getState().announcements.map((a) => a.kind)).toContain('flashlight');
     }
     // 효과 적용: 사용자는 게이지가 오르고, 대상만 시야 가림을 갖는다
-    expect(s0.store.getState().view!.private.fatigueGauge).toBeGreaterThan(30);
+    expect(s0.store.getState().view!.private.fatigueGauge).toBeGreaterThan(0);
     expect(s0.store.getState().view!.private.blind).toBeUndefined();
     expect(s1.store.getState().view!.private.blind).toMatchObject({ kind: 'flashlight' });
     expect(s0.store.getState().view!.effects.some((e) => e.kind === 'flashlight')).toBe(true);
+    const gauge = s0.store.getState().view!.private.fatigueGauge!;
+    s0.controller.releaseHazard();
+    await clock.advance(200);
+    expect(s1.store.getState().view!.private.blind).toBeUndefined();
+    expect(s0.store.getState().view!.private.fatigueGauge!).toBeLessThan(gauge);
   });
 
   it('비공개: hazard:granted는 본인만 받고 상대 뷰에는 내 보유 정보가 없다', async () => {
@@ -199,15 +204,15 @@ describe('방해요소 사용 흐름', () => {
     const { clock, s0, s1 } = await startGame();
     const use = () =>
       s0.session.useHazard({ gameId: gameId(s0), hazardInstanceId: held(s0).hazardInstanceId });
-    for (let i = 0; i < 3; i++) {
-      const p = use(); // 40+40+40 → 100, 과열
-      await clock.advance(20);
-      expect(await p).toEqual({ ok: true });
-    }
-    await clock.advance(100);
+    const first = use();
+    await clock.advance(20);
+    expect(await first).toEqual({ ok: true });
+    await clock.advance(10100); // 유지 시간으로 피로도 100 도달
     const hot = s0.store.getState().view!;
     expect(hot.private.overheated).toBe(true);
-    const triggeredBefore = events<HazardTriggered>(s1.received, 'hazard:triggered').length;
+    const triggeredBefore = events<HazardTriggered>(s1.received, 'hazard:triggered').filter(
+      (e) => e.phase === 'start',
+    ).length;
 
     // 권한 측이 직접 거부한다
     const cmd = use();
@@ -219,7 +224,10 @@ describe('방해요소 사용 흐름', () => {
     expect(after.private.overheated).toBe(true);
     // 게이지는 시간만 따라 줄고 거부로 오르지 않는다
     expect(after.private.fatigueGauge!).toBeLessThanOrEqual(hot.private.fatigueGauge!);
-    expect(events<HazardTriggered>(s1.received, 'hazard:triggered').length).toBe(triggeredBefore);
+    expect(
+      events<HazardTriggered>(s1.received, 'hazard:triggered').filter((e) => e.phase === 'start')
+        .length,
+    ).toBe(triggeredBefore);
 
     // 입력 로직은 과열 칸을 흐리게 보고 E를 보내지 않는다
     s0.sent.length = 0;

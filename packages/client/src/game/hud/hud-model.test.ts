@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { GameOver, GameView, RematchState } from '@alkkagi/shared';
 import {
   blindCoverage,
-  cameraPresetForCode,
   dropletsFor,
   flashRadiusPct,
   visibleDroplets,
+  waterFilmStrength,
   outcomeFor,
   rematchUi,
   remainingSeconds,
@@ -173,17 +173,17 @@ describe('시야 가림', () => {
     expect(dropletsFor(5, 0.7)).toEqual(dropletsFor(5, 0.7));
     expect(dropletsFor(5, 0.7)).not.toEqual(dropletsFor(6, 0.7));
   });
-});
 
-describe('시점 키', () => {
-  it('숫자 1~5(숫자 패드 포함)를 기본·1인칭·위·옆·상대 시점으로 바꾼다', () => {
-    expect(cameraPresetForCode('Digit1')).toBe('default');
-    expect(cameraPresetForCode('Digit2')).toBe('first');
-    expect(cameraPresetForCode('Numpad3')).toBe('top');
-    expect(cameraPresetForCode('Digit4')).toBe('side');
-    expect(cameraPresetForCode('Digit5')).toBe('opponent');
-    expect(cameraPresetForCode('Digit6')).toBeNull();
-    expect(cameraPresetForCode('KeyA')).toBeNull();
+  it('물방울은 화면 전체(모든 칸)에 퍼지고 물막 세기는 가림에 비례한다', () => {
+    const drops = dropletsFor(3, 0.7);
+    expect(drops).toHaveLength(48);
+    const cells = new Set(
+      drops.map((d) => `${Math.floor(d.cx / 12.5)},${Math.floor(d.cy / 9.375)}`),
+    );
+    expect(cells.size).toBe(48);
+    expect(waterFilmStrength(0, 0.7)).toBe(0);
+    expect(waterFilmStrength(0.35, 0.7)).toBeCloseTo(0.5);
+    expect(waterFilmStrength(0.7, 0.7)).toBe(1);
   });
 });
 

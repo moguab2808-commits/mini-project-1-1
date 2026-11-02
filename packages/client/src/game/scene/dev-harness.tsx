@@ -1,11 +1,12 @@
 // 개발용 장면 하네스. `npm run dev -w @alkkagi/client` 후 /scene-harness.html 로 연다(운영 빌드의 입력이 아니다).
 // 쿼리:
-//   seat=0|1 board=standard|circle chars=bear,cat cam=default|first|top|side|opponent shake=0~1
+//   seat=0|1 board=standard|circle chars=bear,cat cam=default|first shake=0~1
 //   walls=1 sticky=1 place=wall|sticky invalid=1 lift=1 spin=1 fall=1 desk=1
 //   aim=<내 알 번호 0~6> charge=<세기> unreach=1 strain=0~1   (내 조준: aim 상태 + 내 포즈)
 //   opp=aim|charge|rotate|hold oppstone=<상대 알 번호> hold=flashlight|water_gun   (상대 포즈, 20Hz로 흔들며 보냄)
 //   me=rotate|hold                                          (내 포즈)
 //   beam=flashlight|water_gun beamby=0|1 coverage=0~1        (발동 중인 후레쉬·물총 효과)
+//   stun=0|1                                                 (그 좌석 기절: 머리 위 별, 내 좌석이면 화면 한 바퀴 회전, 8초)
 //   react0=win react1=lose                                   (시작 0.3초 뒤 반응)
 //   flick=1                                                  (1초 뒤 상대가 조준하던 알을 쏜다)
 //   interactive=1                                            (왼쪽 드래그로 조준)
@@ -123,6 +124,15 @@ function staticEffects(): GameView['effects'] {
       startsAtMs: now,
       expiresAtMs: now + 600000,
       params: { aimX: 1.5, aimY: ty, aimH: 23, coverage: Number(q.get('coverage') ?? '0.8') },
+    });
+  }
+  const stun = q.get('stun');
+  if (stun === '0' || stun === '1') {
+    fx.push({
+      kind: 'stun',
+      targetSeat: stun === '0' ? 0 : 1,
+      startsAtMs: now + 500,
+      expiresAtMs: now + 8500,
     });
   }
   return fx;

@@ -104,7 +104,8 @@ export interface PlayerState {
   overheated: boolean;
   cooldownEndsAtMs: number | null;
   timeoutStreak: number;
-  random: { rng: Prng; grantedAtMs: number; interval: number; nextAtMs: number } | null;
+  /** 바람 방향 변경 일정(바람 보유 중에만) */
+  random: { rng: Prng; nextAtMs: number } | null;
 }
 
 const TICK_MS = 1000 / PHYSICS.tickHz;
@@ -311,7 +312,7 @@ export class Game {
     }
 
     // ── 검증 통과: 여기서부터 상태·난수를 바꾼다 ──
-    if (meta.category === 'fatigue') {
+    if (meta.category === 'fatigue' && !isBlind(meta.kind)) {
       p.gauge = Math.min(HAZARD_TUNING.fatigueMax, p.gauge + (meta.fatigueCost ?? 0));
       if (p.gauge >= HAZARD_TUNING.fatigueMax) p.overheated = true;
     } else {
@@ -331,7 +332,7 @@ export class Game {
         : sticky
           ? { x: sticky.cx, y: sticky.cy }
           : meta.kind === 'board_spin'
-            ? { angleDeg: HAZARD_TUNING.boardSpinDeg }
+            ? { angleDeg: HAZARD_TUNING.boardSpinDeg * (cmd.direction ?? 1) }
             : isBlind(meta.kind)
               ? { ...(aim ? { aimX: aim.x, aimY: aim.y, aimH: aim.h } : {}), coverage: 0 }
               : undefined;
@@ -346,7 +347,8 @@ export class Game {
       if (aim) eff.aim = aim;
     }
     this.syncWorld();
-    if (meta.kind === 'board_spin') this.applyBoardRotation(-HAZARD_TUNING.boardSpinDeg);
+    if (meta.kind === 'board_spin')
+      this.applyBoardRotation(-HAZARD_TUNING.boardSpinDeg * (cmd.direction ?? 1));
     else if (meta.kind === 'desk_shake') this.applyDeskShake();
     this.emitTriggered(eff, 'start');
     this.revision++;
@@ -416,6 +418,11 @@ export class Game {
           )
         : undefined;
     if (!eff) return fail('STALE_HAZARD', '발동 중인 후레쉬·물총이 아니다');
+    if (cmd.active === false) {
+      eff.expiresAtMs = env.observedAtMs;
+      this.revision++;
+      return OK;
+    }
     eff.aim = { x: t.x, y: t.y, h: t.h };
     eff.params = { ...eff.params, aimX: t.x, aimY: t.y, aimH: t.h };
     return OK;
@@ -585,7 +592,7 @@ export class Game {
     for (const seat of [0, 1] as const) {
       const p = this.players[seat];
       while (p.random && p.held && p.random.nextAtMs <= t) {
-        this.fireRandom(seat, p.random.nextAtMs);
+        this.shiftWind(seat, p.random.nextAtMs);
       }
     }
     // 효과 만료
@@ -604,7 +611,22 @@ export class Game {
 
   private physicsTick(): void {
     for (const p of this.players) {
-      if (p.gauge > 0) {
+      const beam = this.effects.find(
+        (e) => isBlind(e.kind) && this.players[e.source] === p && e.expiresAtMs > this.now,
+      );
+      if (beam) {
+        const meta = HAZARDS[beam.kind];
+        beam.expiresAtMs = this.now + meta.durationMs;
+        this.revision++;
+        p.gauge = Math.min(
+          HAZARD_TUNING.fatigueMax,
+          p.gauge + ((meta.fatigueCost ?? 0) * DT) / (meta.durationMs / 1000),
+        );
+        if (p.gauge >= HAZARD_TUNING.fatigueMax) {
+          p.overheated = true;
+          beam.expiresAtMs = this.now;
+        }
+      } else if (p.gauge > 0) {
         p.gauge = Math.max(0, p.gauge - HAZARD_TUNING.fatigueDecayPerSec * DT);
         if (p.gauge === 0) p.overheated = false;
       }
@@ -655,21 +677,37 @@ export class Game {
   protected grantOne(seat: Seat, replaced: boolean, forceKind?: HazardKind): void {
     const p = this.players[seat];
     if (replaced) this.clearEffectsFrom(seat);
-    const kind = forceKind ?? HAZARD_KINDS[this.grantRng.int(HAZARD_KINDS.length)]!;
+    const pool = HAZARD_KINDS.filter((k) => k !== 'desk_shake');
+    const kind = forceKind ?? pool[this.grantRng.int(pool.length)]!;
     const instanceId = `${this.gameId}-h${++this.grantCounter}`;
     p.held = { instanceId, kind, round: this.round };
     p.gauge = 0;
     p.overheated = false;
     p.cooldownEndsAtMs = null;
-    if (HAZARDS[kind].category === 'random') {
+    if (kind === 'bar_speed') {
+      p.random = null;
+      const effect = this.addEffect(
+        kind,
+        seat,
+        other(seat),
+        this.now,
+        Number.MAX_SAFE_INTEGER - this.now,
+        { multiplier: HAZARD_TUNING.barSpeedMultiplier },
+      );
+      this.emitTriggered(effect, 'start');
+    } else if (kind === 'wind') {
+      // 바람: 보유 중 상대에게 상시 적용하고 방향은 몇 초마다 무작위로 바뀐다
       const rng = new Prng(deriveSeed(this.seed, 100 + this.grantCounter));
-      const interval = HAZARD_TUNING.randomIntervalMs;
-      p.random = {
-        rng,
-        grantedAtMs: this.now,
-        interval: 0,
-        nextAtMs: this.now + rng.next() * (interval - 1000),
-      };
+      const effect = this.addEffect(
+        kind,
+        seat,
+        other(seat),
+        this.now,
+        Number.MAX_SAFE_INTEGER - this.now,
+        { directionRad: rng.next() * 2 * Math.PI },
+      );
+      p.random = { rng, nextAtMs: this.now + windShiftDelay(rng) };
+      this.emitTriggered(effect, 'start');
     } else {
       p.random = null;
     }
@@ -686,23 +724,15 @@ export class Game {
     });
   }
 
-  private fireRandom(seat: Seat, at: number): void {
-    const p = this.players[seat];
-    const r = p.random!;
-    const kind = p.held!.kind;
-    const meta = HAZARDS[kind];
-    const params: HazardParams =
-      kind === 'wind'
-        ? { directionRad: r.rng.next() * 2 * Math.PI }
-        : { multiplier: HAZARD_TUNING.barSpeedMultiplier };
-    const eff = this.addEffect(kind, seat, other(seat), at, meta.durationMs, params);
-    this.emitTriggered(eff, 'start');
-    r.interval++;
-    r.nextAtMs =
-      r.grantedAtMs +
-      r.interval * HAZARD_TUNING.randomIntervalMs +
-      r.rng.next() * (HAZARD_TUNING.randomIntervalMs - 1000);
-    this.revision++;
+  /** 바람 방향을 무작위로 바꾼다(효과는 그대로 이어지고 상태 revision만 오른다) */
+  private shiftWind(seat: Seat, at: number): void {
+    const r = this.players[seat].random!;
+    const eff = this.effects.find((e) => e.kind === 'wind' && e.source === seat);
+    if (eff) {
+      eff.params = { ...eff.params, directionRad: r.rng.next() * 2 * Math.PI };
+      this.revision++;
+    }
+    r.nextAtMs = at + windShiftDelay(r.rng);
   }
 
   private addEffect(
@@ -888,4 +918,10 @@ export class Game {
       if (s.alive) [s.x, s.y] = clampInside(this.board, s.x, s.y);
     }
   }
+}
+
+/** 다음 바람 방향 변경까지의 시간(ms) */
+function windShiftDelay(rng: Prng): number {
+  const { windShiftMinMs: lo, windShiftMaxMs: hi } = HAZARD_TUNING;
+  return lo + rng.next() * (hi - lo);
 }

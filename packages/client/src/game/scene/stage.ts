@@ -215,7 +215,7 @@ export function buildStage(board: BoardId): Stage {
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = FLOOR_Y;
   room.add(floor);
-  const wallMat = new MeshStandardMaterial({ color: 0x2c1d15, roughness: 0.95, side: BackSide });
+  const wallMat = new MeshStandardMaterial({ color: 0x6a4a35, roughness: 0.95, side: BackSide });
   k.mats.push(wallMat);
   const walls = k.mesh(new BoxGeometry(400, 300, 400), wallMat, false, true);
   walls.position.y = FLOOR_Y + 150;
@@ -381,76 +381,24 @@ export function buildStage(board: BoardId): Stage {
   return { room, table, boardPivot, lamp, dispose: k.dispose };
 }
 
-/** 알 무늬: 내 알은 어두운 바탕에 금색 별, 상대 알은 아이보리 바탕에 붉은 가위표 */
-function createStoneDecal(mine: boolean): Texture {
-  return canvasTexture(128, (g, s) => {
-    const c = s / 2;
-    g.clearRect(0, 0, s, s);
-    if (mine) {
-      g.strokeStyle = '#f2c14e';
-      g.fillStyle = '#f2c14e';
-      g.lineWidth = 7;
-      g.beginPath();
-      g.arc(c, c, c - 8, 0, Math.PI * 2);
-      g.stroke();
-      g.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const r = i % 2 === 0 ? c * 0.62 : c * 0.26;
-        const a = -Math.PI / 2 + (i * Math.PI) / 5;
-        g.lineTo(c + Math.cos(a) * r, c + Math.sin(a) * r);
-      }
-      g.closePath();
-      g.fill();
-    } else {
-      g.strokeStyle = '#b3282d';
-      g.lineWidth = 11;
-      g.lineCap = 'round';
-      g.beginPath();
-      g.arc(c, c, c - 8, 0, Math.PI * 2);
-      g.stroke();
-      g.beginPath();
-      g.moveTo(c * 0.5, c * 0.5);
-      g.lineTo(c * 1.5, c * 1.5);
-      g.moveTo(c * 1.5, c * 0.5);
-      g.lineTo(c * 0.5, c * 1.5);
-      g.stroke();
-    }
-  });
-}
-
 export interface StoneKit {
   bodyGeo: BufferGeometry;
-  decalGeo: BufferGeometry;
   bodyMine: Material;
   bodyOpp: Material;
-  decalMine: Material;
-  decalOpp: Material;
   dispose: () => void;
 }
 
 export function createStoneKit(radius: number): StoneKit {
   const bodyGeo = new SphereGeometry(radius, 24, 12);
-  const decalGeo = new CircleGeometry(radius * 0.55, 20);
-  decalGeo.rotateX(-Math.PI / 2);
   const bodyMine = new MeshStandardMaterial({ color: 0x24282f, roughness: 0.3, metalness: 0.1 });
   const bodyOpp = new MeshStandardMaterial({ color: 0xf1ebdd, roughness: 0.4 });
-  const tMine = createStoneDecal(true);
-  const tOpp = createStoneDecal(false);
-  const decalMine = new MeshBasicMaterial({ map: tMine, transparent: true, depthWrite: false });
-  const decalOpp = new MeshBasicMaterial({ map: tOpp, transparent: true, depthWrite: false });
   return {
     bodyGeo,
-    decalGeo,
     bodyMine,
     bodyOpp,
-    decalMine,
-    decalOpp,
     dispose: () => {
       bodyGeo.dispose();
-      decalGeo.dispose();
-      for (const m of [bodyMine, bodyOpp, decalMine, decalOpp]) m.dispose();
-      tMine.dispose();
-      tOpp.dispose();
+      for (const m of [bodyMine, bodyOpp]) m.dispose();
     },
   };
 }

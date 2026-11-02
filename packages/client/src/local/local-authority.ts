@@ -267,6 +267,9 @@ export class LocalAuthority {
       cancelTimer,
       outcome: 'pending',
     };
+    // 이탈 기권은 큐를 거쳐 다음 틱에 끝나므로 depart()의 expireRematch()보다 늦게 여기에 온다.
+    // 두 좌석이 모두 연결돼 있지 않으면 재도전은 열자마자 무산으로 알린다.
+    if (!this.seats[0] || !this.seats[1]) this.expireRematch();
   }
 
   private requestRematch(seat: Seat, payload: unknown): CommandResult {

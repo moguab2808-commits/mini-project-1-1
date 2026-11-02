@@ -9,7 +9,6 @@ import {
   type RematchState,
   type Seat,
 } from '@alkkagi/shared';
-import { CAMERA_PRESETS, type CameraPreset } from '../scene/scene-contract.ts';
 
 export const HAZARD_NAMES: Record<HazardKind, string> = {
   board_spin: '판 돌리기',
@@ -90,10 +89,14 @@ export function rematchUi(
   const deadline = rematch?.deadlineMs ?? result.rematchDeadlineMs;
   const left = deadline === null ? null : remainingSeconds(deadline, nowServerMs);
   if (rematch?.outcome === 'expired' || (rematch === null && left === 0 && deadline !== null)) {
+    // 마감 전에 무산됐으면 상대가 나간 것이다
+    const early = rematch?.outcome === 'expired' && left !== null && left > 0;
     return {
       canRequest: false,
       showRequest: false,
-      message: '재도전 시간이 지났어요. 나가기를 눌러 주세요.',
+      message: early
+        ? '상대가 나가서 재도전할 수 없어요. 나가기를 눌러 주세요.'
+        : '재도전 시간이 지났어요. 나가기를 눌러 주세요.',
       secondsLeft: null,
     };
   }
@@ -166,16 +169,45 @@ export interface Droplet {
   r: number;
 }
 
-/** 물방울 자국: 100×56.25 좌표. 전체 면적 합이 대략 최대 가림 면적이 된다 */
-export function dropletsFor(pattern: number, maxCoverage: number, count = 28): Droplet[] {
+/** 물방울 격자(가로×세로). 화면 전체에 고르게 퍼지도록 칸마다 하나씩 흩뿌린다 */
+export const DROPLET_COLS = 8;
+export const DROPLET_ROWS = 6;
+
+/**
+ * 물방울 자국: 100×56.25 좌표. 화면 전체를 칸으로 나눠 칸마다 하나씩 흩뿌리고(빈 곳 없이 전체에 퍼짐),
+ * 순서를 섞어 가림이 오를수록 화면 곳곳에 고르게 늘어난다. 물방울 면적 합은 화면 전체와 비슷하다.
+ */
+export function dropletsFor(
+  pattern: number,
+  maxCoverage: number,
+  count = DROPLET_COLS * DROPLET_ROWS,
+): Droplet[] {
   const rand = seededRandom(pattern);
-  const total = 100 * 56.25 * Math.min(0.7, maxCoverage) * 1.25;
+  const cw = 100 / DROPLET_COLS;
+  const ch = 56.25 / DROPLET_ROWS;
+  const total = 100 * 56.25 * (0.6 + 0.4 * Math.min(1, maxCoverage / BLIND_CAP));
   const base = Math.sqrt(total / count / Math.PI);
-  return Array.from({ length: count }, () => ({
-    cx: rand() * 100,
-    cy: rand() * 56.25,
-    r: base * (0.6 + rand() * 0.9),
-  }));
+  const drops = Array.from({ length: count }, (_, i) => {
+    const cell = i % (DROPLET_COLS * DROPLET_ROWS);
+    const col = cell % DROPLET_COLS;
+    const row = Math.floor(cell / DROPLET_COLS);
+    return {
+      cx: (col + 0.15 + rand() * 0.7) * cw,
+      cy: (row + 0.15 + rand() * 0.7) * ch,
+      r: base * (0.7 + rand() * 0.6),
+    };
+  });
+  for (let i = drops.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [drops[i], drops[j]] = [drops[j]!, drops[i]!];
+  }
+  return drops;
+}
+
+/** 물총 물막(화면 전체 흐림·푸른 기)의 세기 0~1. 가림 비율을 최대 가림 대비로 본다 */
+export function waterFilmStrength(coverage: number, maxCoverage: number): number {
+  const cap = Math.min(BLIND_CAP, maxCoverage);
+  return cap > 0 ? Math.min(1, Math.max(0, coverage / cap)) : 0;
 }
 
 /** 바람 방향 화살표의 화면 회전각(도, CSS 시계 방향). 후공 화면은 판이 180도 돌아 보이므로 반대로 그린다 */
@@ -194,21 +226,6 @@ export function nicknameOf(start: GameStart, seat: Seat): string {
   return start.players[seat].nickname;
 }
 
-/** 시점 버튼(숫자 키 1~5와 같은 순서). 장면 계약 `CAMERA_PRESETS` 순서를 따른다 */
-export const CAMERA_LABELS: Record<CameraPreset, string> = {
-  default: '기본',
-  first: '1인칭',
-  top: '위에서',
-  side: '옆에서',
-  opponent: '상대 쪽',
-};
-
-/** 숫자 키(`Digit1`~`Digit5`, 숫자 패드 포함)의 시점. 해당 없으면 null */
-export function cameraPresetForCode(code: string): CameraPreset | null {
-  const m = /^(?:Digit|Numpad)([1-5])$/.exec(code);
-  return m ? CAMERA_PRESETS[Number(m[1]) - 1]! : null;
-}
-
 /** 조작 도움말 한 줄 */
 export const CONTROLS_HELP =
-  '알 클릭 후 누르고 떼서 발사 · A·D/←→ 판 돌리기 · E 방해요소 · 1~5 시점 · 오른쪽 드래그 시점 회전 · 휠 확대';
+  '알을 누른 채 뒤로 당겨 놓아 발사 · 오른쪽 클릭 취소 · A·D/←→ 판 돌리기 · E 방해요소(물총·후레쉬는 유지) · 오른쪽 드래그 둘러보기';

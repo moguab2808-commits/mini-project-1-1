@@ -5,11 +5,13 @@
   --accent: #f0b553;
   --danger: #d9694f;
   --ok: #7fb069;
-  position: relative;
-  width: 100vw;
+  position: fixed;
+  inset: 0;
+  width: 100%;
   height: 100vh;
-  min-width: 1280px;
-  min-height: 720px;
+  min-width: 0;
+  min-height: 0;
+  height: 100dvh;
   overflow: hidden;
   background: #1b130e;
   color: var(--cream);
@@ -412,19 +414,15 @@
     transform 0.25s linear,
     opacity 0.3s linear;
 }
+.gs-blind-water {
+  transition:
+    opacity 0.3s linear,
+    background-color 0.35s linear;
+}
 .gs-drop {
   transition: opacity 0.35s linear;
 }
 
-/* 시점 버튼(시안 .cams) */
-.gs-cams {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  display: flex;
-  gap: 6px;
-  pointer-events: auto;
-}
 .gs-chip {
   position: relative;
   font: inherit;
@@ -491,4 +489,113 @@
   font-size: 13px;
   opacity: 0.85;
   white-space: nowrap;
+}
+
+.gs-stone-badge {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.55),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.25);
+}
+.gs-stone-badge.seat-0 {
+  background: radial-gradient(circle at 35% 30%, #5a606a 0%, #24282f 45%, #0c0d10 100%);
+}
+.gs-stone-badge.seat-1 {
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f1ebdd 50%, #c9c1b0 100%);
+}
+@media (max-width: 900px), (max-height: 600px) {
+  .gs-profile {
+    gap: 4px;
+    padding: 3px;
+  }
+  .gs-profile.opponent {
+    left: 8px;
+    top: 8px;
+  }
+  .gs-profile.me {
+    right: 8px;
+    bottom: 76px;
+  }
+  .gs-nick {
+    font-size: 16px;
+    max-width: 180px;
+    overflow-wrap: anywhere;
+  }
+  .gs-face svg {
+    width: 42px;
+    height: 42px;
+  }
+  .gs-stone-badge {
+    width: 32px;
+    height: 32px;
+  }
+  .gs-chip {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+  .gs-help {
+    width: calc(100% - 16px);
+    white-space: normal;
+    text-align: center;
+    font-size: 11px;
+    bottom: 4px;
+  }
+  .gs-spin {
+    bottom: 45px;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .gs-hint {
+    bottom: 80px;
+    max-width: 65%;
+    white-space: normal;
+    font-size: 13px;
+  }
+  .gs-time {
+    font-size: 30px;
+  }
+}
+@media (max-width: 480px) {
+  .gs-top {
+    left: auto;
+    right: 8px;
+    transform: none;
+  }
+  .gs-profile.me {
+    bottom: 140px;
+  }
+}
+
+@media (max-width: 900px), (max-height: 600px) {
+  .gs-slot-wrap {
+    right: 10px;
+    bottom: 175px;
+  }
+  .gs-slot {
+    width: 54px;
+    height: 54px;
+  }
+  .gs-gauge {
+    width: 54px;
+  }
+  .gs-result-box {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
+    padding: 20px;
+  }
+  .gs-result-title {
+    font-size: 36px;
+  }
+}
+@media (max-width: 480px) {
+  .gs-slot-wrap {
+    bottom: 235px;
+  }
+  .gs-slot-name {
+    max-width: 100px;
+  }
 }

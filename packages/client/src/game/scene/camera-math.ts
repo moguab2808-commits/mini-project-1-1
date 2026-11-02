@@ -1,17 +1,15 @@
-// 카메라의 순수 계산: 구면 좌표 orbit, 시점 프리셋, 오른쪽 드래그·휠, 조준점(aimPoint) 광선 교차.
+// 카메라의 순수 계산: 기본·1인칭 두 시점, 오른쪽 드래그 고개 돌리기, 조준점(aimPoint) 광선 교차.
 // three·React에 의존하지 않는다. 좌표는 월드(cm)이며 scene-math.ts의 대응(서버 (x, y) → 월드 (x, −y))을 따른다.
+// 시점은 기본(눈보다 조금 높고 뒤)과 1인칭(눈 위치) 두 가지뿐이다. 알을 칠 때만 1인칭으로 바뀌고,
+// 오른쪽 드래그는 두 시점 모두에서 고개를 돌리며 버튼을 놓으면 정면으로 돌아온다.
 import { SEAT_GEOMETRY, type Seat } from '@alkkagi/shared';
 import type { CameraPreset } from './scene-contract.ts';
 import { clamp, damp, type V3 } from './rig-math.ts';
 
-export const PHI_MIN = 0.02;
-export const PHI_MAX = 1.45;
-export const R_MIN = 40;
-export const R_MAX = 200;
-/** 1인칭 고개 돌리기 한도(라디안) */
+/** 고개 돌리기 한도(라디안) */
 export const FP_YAW_MAX = 1.1;
 export const FP_PITCH_MAX = 0.6;
-/** 오른쪽 버튼을 이만큼(px) 넘게 움직이면 클릭이 아니라 회전이다 */
+/** 오른쪽 버튼을 이만큼(px) 넘게 움직이면 클릭이 아니라 고개 돌리기다 */
 export const DRAG_CLICK_PX = 6;
 
 export interface OrbitTarget {
@@ -24,20 +22,21 @@ export interface OrbitTarget {
 }
 
 export interface CameraState extends OrbitTarget {
-  /** 목표값(프리셋·드래그·휠이 바꾸고 현재값이 따라간다) */
   goal: OrbitTarget;
-  /** 1인칭 비율 0~1 */
+  /** 눈 위치 시점 비율 0~1. 두 시점 모두 눈 위치 기준이라 항상 1로 수렴한다 */
   fpBlend: number;
   fpOn: boolean;
   /**
    * 눈높이 위로 올리는 비율 0~1. default 시점은 1(눈보다 조금 높고 조금 뒤),
-   * first는 0(눈 위치). 1인칭 계열이라 내 몸은 숨기고 팔만 보인다(DEC-036)
+   * first는 0(눈 위치). 내 몸은 숨기고 팔만 보인다(DEC-036)
    */
   fpLift: number;
   fpLiftGoal: number;
-  /** 1인칭 고개 돌리기(드래그) */
+  /** 고개 돌리기(오른쪽 드래그) */
   fpYaw: number;
   fpPitch: number;
+  /** 오른쪽 버튼을 누르고 있는 동안 true. 놓으면 고개가 정면으로 돌아온다 */
+  lookHeld: boolean;
 }
 
 /** 좌석의 "내 쪽" 방위각. θ=0은 카메라가 +Z(좌석 0 쪽)에 있다 */
@@ -46,91 +45,52 @@ export function seatTheta(seat: Seat): number {
 }
 
 /**
- * 프리셋 → orbit 목표. first는 1인칭이므로 orbit 목표는 default와 같게 두고 fpOn으로 구분한다.
- * default는 first와 같은 1인칭 계열이며 fpLift=1로 눈보다 조금 높은 곳에서 내려다본다.
- * orbit 목표는 1인칭에서 다른 시점으로 옮길 때의 출발점으로만 쓴다.
+ * 시점의 orbit 목표. 두 시점 모두 눈 위치 기준이며(fpBlend=1) orbit 값은 시선 기본 대상점으로만 쓴다.
  */
-export function presetOrbit(preset: CameraPreset, seat: Seat): OrbitTarget {
-  const t0 = seatTheta(seat);
+export function presetOrbit(_preset: CameraPreset, seat: Seat): OrbitTarget {
   const s = seat === 0 ? 1 : -1;
-  switch (preset) {
-    case 'top':
-      return { theta: t0, phi: PHI_MIN, r: 112, tx: 0, ty: 0, tz: 0 };
-    case 'side':
-      return { theta: t0 + Math.PI / 2, phi: 1.0, r: 108, tx: 0, ty: -2, tz: 0 };
-    case 'opponent':
-      return { theta: t0 + Math.PI, phi: 0.66, r: 102, tx: 0, ty: 1, tz: 9 * s };
-    case 'first':
-    case 'default':
-      return { theta: t0, phi: 0.66, r: 102, tx: 0, ty: 1, tz: -9 * s };
-  }
+  return { theta: seatTheta(seat), phi: 0.66, r: 102, tx: 0, ty: 1, tz: -9 * s };
+}
+
+export function liftOf(preset: CameraPreset): number {
+  return preset === 'default' ? 1 : 0;
 }
 
 export function createCameraState(preset: CameraPreset, seat: Seat): CameraState {
   const g = presetOrbit(preset, seat);
-  const fp = isEyePreset(preset);
-  const lift = preset === 'default' ? 1 : 0;
+  const lift = liftOf(preset);
   return {
     ...g,
     goal: { ...g },
-    fpBlend: fp ? 1 : 0,
-    fpOn: fp,
+    fpBlend: 1,
+    fpOn: true,
     fpLift: lift,
     fpLiftGoal: lift,
     fpYaw: 0,
     fpPitch: 0,
+    lookHeld: false,
   };
 }
 
-/**
- * default(눈보다 조금 높은 시점)에서 드래그·휠을 하면 자유 orbit으로 넘어간다.
- * orbit 목표는 default의 머리 뒤 위 위치라 화면이 이어지듯 옮겨 간다. first는 고개 돌리기를 유지한다.
- */
-function leaveDefaultEye(cs: CameraState): void {
-  if (cs.fpOn && cs.fpLiftGoal > 0.5) cs.fpOn = false;
-}
-
-/** 캐릭터 눈 위치 기준 시점인가(default·first) */
-export function isEyePreset(preset: CameraPreset): boolean {
-  return preset === 'default' || preset === 'first';
-}
-
-/** cur에서 target과 같은 각 중 가장 가까운 값(한 바퀴 넘게 돌지 않게) */
-export function nearestAngle(cur: number, target: number): number {
-  const t = Math.PI * 2;
-  const d = ((((target - cur) % t) + t * 1.5) % t) - Math.PI;
-  return cur + d;
-}
-
-/** 프리셋 적용: 목표를 바꾸고 고개 돌리기를 초기화한다 */
+/** 시점 적용: 목표 높이를 바꾸고 고개 돌리기를 초기화한다 */
 export function applyPreset(cs: CameraState, preset: CameraPreset, seat: Seat): void {
-  const g = presetOrbit(preset, seat);
-  g.theta = nearestAngle(cs.theta, g.theta);
-  cs.goal = g;
-  cs.fpOn = isEyePreset(preset);
-  if (cs.fpOn) cs.fpLiftGoal = preset === 'default' ? 1 : 0;
+  cs.goal = presetOrbit(preset, seat);
+  cs.fpOn = true;
+  cs.fpLiftGoal = liftOf(preset);
   cs.fpYaw = 0;
   cs.fpPitch = 0;
 }
 
-/** 오른쪽 드래그(px). 1인칭이면 고개를 돌리고, 아니면 orbit을 돈다 */
+/** 오른쪽 드래그(px): 고개를 돌린다 */
 export function applyDrag(cs: CameraState, dx: number, dy: number): void {
-  leaveDefaultEye(cs);
-  if (cs.fpOn) {
-    cs.fpYaw = clamp(cs.fpYaw - dx * 0.004, -FP_YAW_MAX, FP_YAW_MAX);
-    cs.fpPitch = clamp(cs.fpPitch - dy * 0.003, -FP_PITCH_MAX, FP_PITCH_MAX);
-    return;
-  }
-  cs.goal.theta -= dx * 0.008;
-  cs.goal.phi = clamp(cs.goal.phi - dy * 0.006, PHI_MIN, PHI_MAX);
+  cs.lookHeld = true;
+  cs.fpYaw = clamp(cs.fpYaw - dx * 0.004, -FP_YAW_MAX, FP_YAW_MAX);
+  cs.fpPitch = clamp(cs.fpPitch - dy * 0.003, -FP_PITCH_MAX, FP_PITCH_MAX);
 }
 
-/** 휠. 1인칭에서는 무시한다(배치 모드 무시는 호출 쪽이 판단). 바뀌었으면 true */
-export function applyWheel(cs: CameraState, deltaY: number): boolean {
-  leaveDefaultEye(cs);
-  if (cs.fpOn) return false;
-  cs.goal.r = clamp(cs.goal.r * (1 + clamp(deltaY, -200, 200) * 0.001), R_MIN, R_MAX);
-  return true;
+/** 오른쪽 버튼을 놓음: 고개가 정면(기본 시점)으로 돌아온다 */
+export function releaseLook(cs: CameraState): void {
+  cs.lookHeld = false;
 }
 
 /** 현재값이 목표값을 따라간다 */
@@ -144,6 +104,18 @@ export function stepCamera(cs: CameraState, dt: number, rate = 6): void {
   cs.fpBlend = damp(cs.fpBlend, cs.fpOn ? 1 : 0, 4, dt);
   if (Math.abs(cs.fpBlend - (cs.fpOn ? 1 : 0)) < 1e-3) cs.fpBlend = cs.fpOn ? 1 : 0;
   cs.fpLift = damp(cs.fpLift, cs.fpLiftGoal, 4, dt);
+  if (!cs.lookHeld) {
+    cs.fpYaw = damp(cs.fpYaw, 0, 6, dt);
+    cs.fpPitch = damp(cs.fpPitch, 0, 6, dt);
+    if (Math.abs(cs.fpYaw) < 1e-4) cs.fpYaw = 0;
+    if (Math.abs(cs.fpPitch) < 1e-4) cs.fpPitch = 0;
+  }
+}
+
+/** 기절 화면 회전(라디안): 지속 시간 동안 한 바퀴(360°)를 천천히 시작해 천천히 끝낸다 */
+export function stunRoll(progress: number): number {
+  const p = clamp(progress, 0, 1);
+  return Math.PI * 2 * p * p * (3 - 2 * p);
 }
 
 /** default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°) */

@@ -24,7 +24,7 @@ const TEXT: Partial<Record<GameErrorCode, string>> = {
 /** 지속 안내(조건이 이어지는 동안 표시) */
 export const HINTS = {
   outOfReach: '손이 안 닿아요 — 판을 돌려 보세요',
-  holdHazard: '클릭해서 발동, ESC 취소',
+  holdHazard: 'E를 누르는 동안 발동, 마우스로 조준',
   aimHazard: '마우스로 상대 얼굴을 겨누세요',
 } as const;
 

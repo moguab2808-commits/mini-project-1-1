@@ -58,6 +58,7 @@ export const HazardUseSchema = z.object({
   gameId: z.string().min(1),
   hazardInstanceId: z.string().min(1),
   target: HazardTargetSchema.optional(),
+  direction: z.union([z.literal(-1), z.literal(1)]).optional(),
 });
 export type HazardUse = z.infer<typeof HazardUseSchema>;
 
@@ -74,6 +75,7 @@ export const HazardAimSchema = z.object({
   gameId: z.string().min(1),
   hazardInstanceId: z.string().min(1),
   target: Point3Schema,
+  active: z.boolean().optional(),
 });
 export type HazardAim = z.infer<typeof HazardAimSchema>;
 
@@ -85,6 +87,9 @@ export const AIM_MODES = ['idle', 'aim', 'charge', 'rotate', 'hold_hazard'] as c
 export const AimUpdateSchema = z.object({
   gameId: z.string().min(1),
   mode: z.enum(AIM_MODES),
+  pull: finite.min(0).max(1).optional(),
+  lookYaw: finite.min(-1.1).max(1.1).optional(),
+  lookPitch: finite.min(-0.6).max(0.6).optional(),
   stoneId: z.number().int().nonnegative().optional(),
   /** 판 좌표계 라디안 */
   angle: finite.optional(),

@@ -5,7 +5,6 @@ import type { GameOver, GameStart, GameView, RematchState, Seat } from '@alkkagi
 import type { Announcement, GameClientState } from '../game-store.ts';
 import { heldHazardState } from '../aim/hazard-state.ts';
 import type { AimNotice, RotateDir } from '../aim/aim-controller.ts';
-import { CAMERA_PRESETS, type CameraPreset } from '../scene/scene-contract.ts';
 import { CharacterFace } from './CharacterFace.tsx';
 import { HazardIcon } from './HazardIcon.tsx';
 import {
@@ -13,7 +12,6 @@ import {
   HAZARD_NAMES,
   OUTCOME_TEXT,
   REASON_TEXT,
-  CAMERA_LABELS,
   CONTROLS_HELP,
   blindCoverage,
   dropletsFor,
@@ -26,7 +24,10 @@ import {
   stoneDots,
   turnSecondsLeft,
   visibleDroplets,
+  waterFilmStrength,
   windArrowRotationDeg,
+  DROPLET_COLS,
+  DROPLET_ROWS,
 } from './hud-model.ts';
 import './hud.css';
 
@@ -45,8 +46,6 @@ export interface HudProps {
   canRotate: boolean;
   onRotatePress: (dir: RotateDir) => void;
   onRotateRelease: (dir: RotateDir) => void;
-  cameraPreset: CameraPreset;
-  onCameraPreset: (preset: CameraPreset) => void;
   /** 권한 측 현재 시각 추정(ms) */
   nowServerMs: number;
   /** 클라이언트 시계 현재 시각(ms). 받음 카드·발동 안내의 만료 비교용 */
@@ -150,7 +149,6 @@ export function Hud(props: HudProps) {
       <BlindOverlay view={view} nowServerMs={nowServerMs} />
       {!finished && (
         <>
-          <CameraButtons current={props.cameraPreset} onSelect={props.onCameraPreset} />
           <RotateButtons
             enabled={props.canRotate}
             onPress={props.onRotatePress}
@@ -189,6 +187,11 @@ function Profile(props: {
       <span className="gs-face">
         <CharacterFace characterId={player.characterId} />
       </span>
+      <span
+        className={`gs-stone-badge seat-${props.seat}`}
+        role="img"
+        aria-label={props.seat === 0 ? '검은 돌' : '흰 돌'}
+      />
       <div>
         <div className="gs-nick">{player.nickname}</div>
         {/* 로컬 경기는 전적이 없어 승률을 '-'로 표시한다 */}
@@ -302,7 +305,7 @@ function Announcements(props: {
 }
 
 /** 시야 가림 물방울 개수(최대 면적 기준 배치) */
-const DROPLET_COUNT = 28;
+const DROPLET_COUNT = DROPLET_COLS * DROPLET_ROWS;
 
 /**
  * 후레쉬·물총 시야 가림. 본인 뷰(`private.blind`)에만 있어 상대 화면에는 나타나지 않는다.
@@ -329,52 +332,50 @@ function BlindOverlay(props: { view: GameView; nowServerMs: number }) {
   }
   const drops = dropletsFor(blind.pattern, blind.maxCoverage, DROPLET_COUNT);
   const shown = visibleDroplets(DROPLET_COUNT, coverage, blind.maxCoverage);
+  // 화면 전체에 물막(흐림·푸른 기)이 덮이고 그 위에 물방울이 맺힌다. 반투명이라 완전히 가리지는 않는다
+  const film = waterFilmStrength(coverage, blind.maxCoverage);
   return (
-    <svg className="gs-blind" viewBox="0 0 100 56.25" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <filter id="gs-blur">
-          <feGaussianBlur stdDeviation="0.5" />
-        </filter>
-      </defs>
-      <g
-        filter="url(#gs-blur)"
-        fill="rgba(170,210,235,0.62)"
-        stroke="rgba(240,250,255,0.55)"
-        strokeWidth="0.25"
+    <>
+      <div
+        className="gs-blind gs-blind-water"
+        style={{
+          opacity: film > 0 ? 1 : 0,
+          backdropFilter: `blur(${(film * 5).toFixed(2)}px)`,
+          WebkitBackdropFilter: `blur(${(film * 5).toFixed(2)}px)`,
+          backgroundColor: `rgba(120, 175, 215, ${(film * 0.28).toFixed(3)})`,
+        }}
+        aria-hidden="true"
+      />
+      <svg
+        className="gs-blind"
+        viewBox="0 0 100 56.25"
+        preserveAspectRatio="none"
+        aria-hidden="true"
       >
-        {drops.map((d, i) => (
-          <circle
-            key={i}
-            className="gs-drop"
-            cx={d.cx}
-            cy={d.cy}
-            r={d.r}
-            style={{ opacity: i < shown ? 1 : 0 }}
-          />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-function CameraButtons(props: { current: CameraPreset; onSelect: (preset: CameraPreset) => void }) {
-  return (
-    <div className="gs-cams" role="group" aria-label="시점">
-      {CAMERA_PRESETS.map((preset, i) => (
-        <button
-          key={preset}
-          type="button"
-          className={`gs-chip${props.current === preset ? ' on' : ''}`}
-          aria-pressed={props.current === preset}
-          title={`${CAMERA_LABELS[preset]} 시점 (${i + 1})`}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={() => props.onSelect(preset)}
+        <defs>
+          <filter id="gs-blur">
+            <feGaussianBlur stdDeviation="0.5" />
+          </filter>
+        </defs>
+        <g
+          filter="url(#gs-blur)"
+          fill="rgba(170,210,235,0.62)"
+          stroke="rgba(240,250,255,0.55)"
+          strokeWidth="0.25"
         >
-          {CAMERA_LABELS[preset]}
-          <span className="gs-chip-key">{i + 1}</span>
-        </button>
-      ))}
-    </div>
+          {drops.map((d, i) => (
+            <circle
+              key={i}
+              className="gs-drop"
+              cx={d.cx}
+              cy={d.cy}
+              r={d.r}
+              style={{ opacity: i < shown ? 1 : 0 }}
+            />
+          ))}
+        </g>
+      </svg>
+    </>
   );
 }
 
