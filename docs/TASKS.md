@@ -48,7 +48,7 @@
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32) |
 | [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 완료 | 개발자 A | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35)·[PR #51](https://github.com/moguab2808-commits/mini-project-1-1/pull/51) |
 | [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 예정 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
-| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 진행 중 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36) |
+| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 예정 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
 | [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
@@ -606,12 +606,12 @@ Issue·PR: [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-002 `game-core`
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 A
 의존성: GAME-001, GAME-002, IMPL-001
 범위: 규칙·물리·상태 머신·방해요소 훅·시드 PRNG·`getViewFor`를 순수 TypeScript로 구현한다. 시간·명령·난수는 외부에서 주입받는다. 입력·출력 시그니처는 IMPL-003(같은 담당)과 서버 쪽 소비자인 IMPL-009(B)가 쓰므로 IMPL-003 완료 전에 공개한다. `shared`의 Zod 스키마·`Seat` 값의 `…Id` 이름도 여기서 정한다.
 관련 문서: [GAME](design/GAME.md#상세-계약-초안-game-001)·[기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [API 공통 타입](design/API.md#공통-타입)
-Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)
+Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53)
 
 수용 기준:
 - [x] (정상, `HAZARD-GRANT`) 게임 시작과 3·5·7·9라운드 시작에 각 플레이어의 보유 방해요소 1개가 새 것으로 교체되고 누적되지 않는다. 단위 테스트가 확인한다.
@@ -619,9 +619,9 @@ Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 - [x] (정상, 판정) 모든 알이 멈춘 뒤 승패를 판정하고, 동시 제거는 무승부이며 최종 라운드는 남은 알 수로 비교한다. 판 이탈·떠오름 착지 판정이 기술 초기값의 허용 오차 안에서 같은 입력에 같은 결과를 낸다(시드 고정).
 - [x] (오류) 거부된 명령은 상태와 난수를 바꾸지 않고 [API 오류 코드](design/API.md#오류-형식과-코드)의 해당 코드를 돌려준다. 발사·방해요소의 검사 순서는 [AUTH 검증 경계](design/AUTH.md#검증-경계)와 같다.
 - [x] (예외, 비공개) `getViewFor`가 만든 뷰에 상대 보유 방해요소·게이지·쿨타임·시드·`users.id`가 없다. 허용 목록 방식 테스트가 [API 비공개 점검표](design/API.md#상대-비공개-필드-점검)의 필드와 일치한다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #53, `main` 16b757c)
 
-검증 근거: [2026-11-01 worklog](worklogs/2026-11-01.md#impl-002-game-core). 5개 기준은 단위 테스트로 확인했고 PR·병합이 남았다. 구현자가 고른 해석은 worklog의 "사용자 확인 필요" 절에 있다.
+검증 근거: [2026-11-01 worklog](worklogs/2026-11-01.md#impl-002-game-core). 5개 기준은 단위 테스트로 확인했고 PR #53으로 병합했다. 구현자가 고른 해석은 worklog의 "사용자 확인 필요" 절에 있으며 승인된 결정이 아니다.
 
 ## IMPL-003 `game-runtime`
 
