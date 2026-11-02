@@ -11,6 +11,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "vitest run --config config/vitest.config.ts",
+    "test:db": "vitest run --config config/vitest.db.config.ts",
     "lint": "eslint --config config/eslint.config.js .",
     "format": "prettier --config config/prettier.json --ignore-path config/prettier.ignore --check .",
     "format:write": "prettier --config config/prettier.json --ignore-path config/prettier.ignore --write ."
