@@ -17,7 +17,7 @@
 - `game-core`·`shared` 스키마: 규칙·물리·상태 머신·방해요소·`getViewFor`([IMPL-002](TASKS.md#impl-002-game-core), PR #53). 단위 테스트로 확인했고 플레이 테스트·성능 측정은 없다
 - DB 스키마·마이그레이션·연결 풀([IMPL-006](TASKS.md#impl-006-db마이그레이션), PR #54). 마이그레이션은 임시 DB에서 검증했고 개발 DB에는 아직 적용하지 않았다
 - `game-runtime`: 방별 명령 큐·120Hz 틱 스케줄러·플레이어별 뷰 배포와 시계·전송·로거·종료 콜백 주입 인터페이스([IMPL-003](TASKS.md#impl-003-game-runtime), PR #57, B와 합의). 가짜 시계 테스트와 실제 시계 한 건으로 확인했고 Socket.IO·워커 연결과 부하 측정은 없다
-- 인증 API·세션·IP당 빈도 제한·Socket.IO 연결 인증과 중복 접속 대체([IMPL-007](TASKS.md#impl-007-인증)). argon2id 해시 시간은 이 PC에서만 측정했고 Render 측정은 [IMPL-013](TASKS.md#impl-013-배포)으로 옮겼다
+- 인증 API·세션·IP당 빈도 제한·Socket.IO 연결 인증과 중복 접속 대체([IMPL-007](TASKS.md#impl-007-인증), PR #59). argon2id 해시 시간은 이 PC에서만 측정했고 Render 측정은 [IMPL-013](TASKS.md#impl-013-배포)으로 옮겼다
 - 구현 작업 13건 등록([PLAN-001](TASKS.md#plan-001-구현-작업-등록), [IMPL-001~013](TASKS.md#impl-001-프로젝트-골격))
 
 ## 현재 작업 범위

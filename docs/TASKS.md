@@ -53,7 +53,7 @@
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
 | [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
-| [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 완료 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41) |
+| [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 완료 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)·[PR #59](https://github.com/moguab2808-commits/mini-project-1-1/pull/59) |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 예정 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42) |
 | [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 예정 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43) |
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44) |
@@ -711,14 +711,14 @@ Issue·PR: [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 의존성: AUTH-001, API-001, IMPL-006
 범위: 가입·로그인·로그아웃·`GET /api/me`·비밀번호 변경·캐릭터 변경 API, 세션, IP당 요청 빈도 제한, argon2id 해시, Socket.IO 연결 인증을 구현한다.
 관련 문서: [AUTH](design/AUTH.md) / [API REST](design/API.md#rest-api) / [로그인](PRD.md#로그인)·[회원등록](PRD.md#회원등록)·[캐릭터 변경](PRD.md#캐릭터-변경) / [DEC-025·028](DECISIONS.md#결정-색인)
-Issue·PR: [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)
+Issue·PR: [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)·[PR #59](https://github.com/moguab2808-commits/mini-project-1-1/pull/59)
 
 수용 기준:
 - [x] (정상) 가입은 세션을 만들지 않고 `201`만 응답하며, 로그인하면 세션 쿠키(`httpOnly`, 브라우저 종료 시 만료)와 `Me`가 돌아온다. 비밀번호 변경 뒤 현재 세션만 남고 다른 세션과 그 Socket.IO 연결이 끝난다.
 - [x] (오류) 입력 오류 `INVALID_INPUT`, 닉네임 중복 `NICKNAME_TAKEN`(NFC·대소문자 무시), 닉네임 없음과 비밀번호 틀림이 같은 `INVALID_CREDENTIALS`, 세션 없음 `UNAUTHENTICATED`를 [API](design/API.md#rest-api)의 상태 코드로 돌려준다.
 - [x] (예외) `/api/auth/*`가 IP당 분당 20회를 넘으면 `429 RATE_LIMITED`와 `Retry-After`가 응답되고, 로그인 연속 실패로는 잠기지 않는다. 같은 계정의 새 연결은 기존 연결에 `session:replaced`를 보내고 끊는다.
 - [x] argon2id 해시 시간을 측정해 worklog에 남겼고(이 PC 기준. Render 무료 인스턴스 측정은 [IMPL-013](#impl-013-배포)으로 옮겼다), 만료·정리 기본값을 공식 문서로 확인했다.
-- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #59)
 
 검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-007-인증)
 
