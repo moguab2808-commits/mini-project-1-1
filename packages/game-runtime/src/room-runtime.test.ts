@@ -1,5 +1,6 @@
 // 실행: 루트에서 npm test (Vitest)
 import assert from 'node:assert/strict';
+import { monitorEventLoopDelay, performance } from 'node:perf_hooks';
 import { describe, test } from 'vitest';
 import type { CommandResult, GameView, Seat } from '@alkkagi/shared';
 import { MAX_CATCH_UP_MS, RoomRuntime, type StartGameConfig } from './index.ts';
@@ -430,5 +431,66 @@ describe('RoomRuntime', () => {
       const f = logs.find((l) => l.event === 'forfeit');
       assert.equal(f?.reason, 'command');
     });
+  });
+  describe('시간초과 기권·실제 시계', () => {
+    test('같은 플레이어의 연속 시간초과 3회는 forfeit(reason timeout)과 game_over로 기록된다', () => {
+      const { clock, logs, transport, finished } = setup();
+      // 아무도 발사하지 않는다: 턴마다 30초 뒤 시간초과, 좌석 0·1이 번갈아 3회씩
+      for (let i = 0; i < 7 && finished.length === 0; i++) clock.advance(31_000);
+      assert.equal(finished.length, 1);
+      const forfeit = logs.filter((l) => l.event === 'forfeit');
+      assert.equal(forfeit.length, 1);
+      assert.equal(forfeit[0]!.reason, 'timeout');
+      const over = logs.find((l) => l.event === 'game_over');
+      assert.equal(over?.reason, 'timeout_forfeit');
+      // forfeit 로그가 game_over 앞에 남는다
+      assert.ok(logs.indexOf(forfeit[0]!) < logs.indexOf(over!));
+      assert.equal(transport.of('game:over', 0).length, 1);
+    });
+
+    test('실제 setTimeout 시계로도 틱·전송·종료 스냅샷이 동작한다', async () => {
+      const clock: RuntimeClock = {
+        now: () => Math.round(performance.timeOrigin + performance.now()),
+        setTimer: (cb, ms) => {
+          const h = setTimeout(cb, ms);
+          return () => clearTimeout(h);
+        },
+      };
+      const transport = new FakeTransport();
+      const logs: RuntimeLogEntry[] = [];
+      const rt = new RoomRuntime({ clock, transport, logger: { log: (e) => logs.push(e) } });
+      const loop = monitorEventLoopDelay({ resolution: 5 });
+      loop.enable();
+      const started = performance.now();
+      rt.startGame(CONFIG);
+      const shot = await rt.submitShot(0, shotCmd(transport, 0, 40));
+      const ackMs = performance.now() - started;
+      assert.equal(shot.ok, true);
+      // 알이 멈춰 턴이 넘어갈 때까지 기다린다(최대 5초)
+      const deadline = performance.now() + 5_000;
+      while (transport.of('turn:change', 0).length < 2 && performance.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 25));
+      }
+      loop.disable();
+      rt.dispose();
+
+      assert.equal(transport.of('turn:change', 0).length, 2, '실제 시계로 턴이 넘어갔다');
+      const states = transport.of('game:state', 0);
+      const volatiles = states.filter((s) => s.opts.volatile);
+      assert.ok(volatiles.length >= 5, `이동 중 스냅샷 ${volatiles.length}개`);
+      const last = states.at(-1)!;
+      assert.equal(last.opts.volatile, false);
+      assert.notEqual((last.payload as GameView).phase, 'moving');
+      assert.equal(
+        logs.filter((l) => l.event === 'tick_skipped').length,
+        0,
+        '정상 부하에서는 틱을 건너뛰지 않는다',
+      );
+      // 참고 수치(합격 기준 아님): 이 PC·무부하 한 번의 측정
+      console.log(
+        `[실제 시계] 발사 ack ${ackMs.toFixed(1)}ms, 스냅샷 ${volatiles.length}개(volatile), ` +
+          `이벤트 루프 지연 p99 ${(loop.percentile(99) / 1e6).toFixed(1)}ms, max ${(loop.max / 1e6).toFixed(1)}ms`,
+      );
+    }, 10_000);
   });
 });
