@@ -1,7 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { sql } from 'drizzle-orm';
 import { CharacterIdSchema, type CharacterId, type Me } from '@alkkagi/shared';
-import type { Db } from '../db/pool.ts';
+import type { Db, DbOrTx } from '../db/pool.ts';
 import { users } from '../db/schema.ts';
 
 export type User = typeof users.$inferSelect;
@@ -41,7 +41,11 @@ export async function insertUser(
   });
 }
 
-export async function updateUserPassword(db: Db, id: number, passwordHash: string): Promise<void> {
+export async function updateUserPassword(
+  db: DbOrTx,
+  id: number,
+  passwordHash: string,
+): Promise<void> {
   await db
     .update(users)
     .set({ password: passwordHash })

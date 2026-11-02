@@ -73,7 +73,6 @@ export function createAppServer(options: AppOptions): AppServer {
 
   const { auth, me } = createAuthRouter({
     db,
-    pool,
     registry,
     sessionCookieName: SESSION_COOKIE_NAME,
   });

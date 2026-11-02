@@ -2,6 +2,7 @@ import type { AddressInfo } from 'node:net';
 import request from 'supertest';
 import { io as connect, type Socket as ClientSocket } from 'socket.io-client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { SessionReplacedSchema } from '@alkkagi/shared';
 import { createAppServer, type AppServer } from '../app.ts';
 import { createTempDatabase, type TempDatabase } from '../db/temp-database.ts';
 
@@ -57,8 +58,9 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
     });
   }
 
+  /** 이벤트를 한 번 받아 페이로드를 돌려준다. */
   const once = (socket: ClientSocket, event: string) =>
-    new Promise<void>((resolve) => socket.once(event, () => resolve()));
+    new Promise<unknown>((resolve) => socket.once(event, (payload: unknown) => resolve(payload)));
 
   beforeAll(async () => {
     tempDb = await createTempDatabase(baseUrl!);
@@ -132,8 +134,9 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
         'SELECT extract(epoch FROM (expire - localtimestamp))::float AS seconds FROM session',
       );
       const seconds = Math.max(...row.rows.map((r) => r.seconds));
+      // 만료 시각은 앱 서버 시계로, 비교 기준은 DB 서버 시계라 두 시계 차이를 허용한다.
       expect(seconds).toBeGreaterThan(86_400 - 120);
-      expect(seconds).toBeLessThanOrEqual(86_400);
+      expect(seconds).toBeLessThanOrEqual(86_400 + 60);
 
       // 만료된 행을 넣고 정리 함수를 호출하면 지워지고 유효한 세션은 남는다.
       await tempDb.pool.query(
@@ -174,7 +177,7 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
 
       await me(a.cookie).expect(200);
       await me(bCookie).expect(401);
-      await replaced;
+      expect(SessionReplacedSchema.parse(await replaced)).toEqual({ reason: 'password_changed' });
       await disconnected;
       expect(bSocket.connected).toBe(false);
 
@@ -336,7 +339,7 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
       const disconnected = once(first, 'disconnect');
 
       const second = await openSocket(secondCookie);
-      await replaced;
+      expect(SessionReplacedSchema.parse(await replaced)).toEqual({ reason: 'new_connection' });
       await disconnected;
       expect(first.connected).toBe(false);
       expect(second.connected).toBe(true);

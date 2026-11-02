@@ -5,7 +5,6 @@ import {
   type RequestHandler,
   type Response,
 } from 'express';
-import type pg from 'pg';
 import type { z } from 'zod';
 import {
   CharacterChangeSchema,
@@ -31,7 +30,6 @@ import {
 
 export type AuthDeps = {
   db: Db;
-  pool: pg.Pool;
   registry: ConnectionRegistry;
   sessionCookieName: string;
 };
@@ -65,7 +63,7 @@ type AuthedLocals = { user: User };
 export type AuthedResponse = Response<unknown, AuthedLocals>;
 
 export function createAuthRouter(deps: AuthDeps): { auth: Router; me: Router } {
-  const { db, pool, registry, sessionCookieName } = deps;
+  const { db, registry, sessionCookieName } = deps;
 
   /** 세션이 없거나 사용자가 사라졌으면 401. 통과하면 res.locals.user에 사용자를 둔다. */
   const requireAuth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -129,9 +127,13 @@ export function createAuthRouter(deps: AuthDeps): { auth: Router; me: Router } {
     const user = res.locals.user;
     if (!(await verifyPassword(user.password, currentPassword))) throw errors.invalidCredentials();
 
-    await updateUserPassword(db, user.id, await hashPassword(newPassword));
-    // 현재 세션만 남기고 같은 사용자의 다른 세션과 그 연결을 끝낸다(DEC-028).
-    await deleteOtherSessions(pool, user.id, req.sessionID);
+    const passwordHash = await hashPassword(newPassword);
+    // 새 비밀번호 저장과 다른 세션 삭제를 한 트랜잭션으로 묶어, 중간에 실패해도 비밀번호만 바뀐 채
+    // 다른 세션이 남지 않게 한다. 연결 끊기는 커밋 뒤에 한다(DEC-028).
+    await db.transaction(async (tx) => {
+      await updateUserPassword(tx, user.id, passwordHash);
+      await deleteOtherSessions(tx, user.id, req.sessionID);
+    });
     registry.replaceIfNotSession(user.id, req.sessionID);
     res.status(204).end();
   });

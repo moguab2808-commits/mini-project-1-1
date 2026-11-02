@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ApiErrorBodySchema,
   CharacterChangeSchema,
   LoginSchema,
   NicknameSchema,
   PasswordChangeSchema,
+  SessionReplacedSchema,
   SignupSchema,
   normalizeNickname,
 } from './auth.ts';
@@ -87,5 +89,23 @@ describe('CharacterChangeSchema', () => {
       expect(CharacterChangeSchema.safeParse({ characterId: id }).success, id).toBe(true);
     }
     expect(CharacterChangeSchema.safeParse({ characterId: 'dog' }).success).toBe(false);
+  });
+});
+
+describe('ApiErrorBodySchema·SessionReplacedSchema', () => {
+  it('REST 오류 본문은 INTERNAL_ERROR를 포함한 코드만 받는다', () => {
+    expect(
+      ApiErrorBodySchema.safeParse({ error: { code: 'INTERNAL_ERROR', message: 'x' } }).success,
+    ).toBe(true);
+    expect(ApiErrorBodySchema.safeParse({ error: { code: 'NOPE', message: 'x' } }).success).toBe(
+      false,
+    );
+  });
+
+  it('session:replaced의 reason은 new_connection·password_changed만 받는다', () => {
+    expect(SessionReplacedSchema.safeParse({ reason: 'new_connection' }).success).toBe(true);
+    expect(SessionReplacedSchema.safeParse({ reason: 'password_changed' }).success).toBe(true);
+    expect(SessionReplacedSchema.safeParse({ reason: 'other' }).success).toBe(false);
+    expect(SessionReplacedSchema.safeParse({}).success).toBe(false);
   });
 });

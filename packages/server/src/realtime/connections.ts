@@ -1,4 +1,5 @@
 import type { Socket } from 'socket.io';
+import type { SessionReplaced } from '@alkkagi/shared';
 
 export const SESSION_REPLACED = 'session:replaced';
 
@@ -13,7 +14,7 @@ export class ConnectionRegistry {
   register(userId: number, socket: Socket): Socket | undefined {
     const previous = this.#byUser.get(userId);
     this.#byUser.set(userId, socket);
-    if (previous && previous !== socket) this.#replace(previous);
+    if (previous && previous !== socket) this.#replace(previous, 'new_connection');
     return previous;
   }
 
@@ -31,11 +32,14 @@ export class ConnectionRegistry {
     const socket = this.#byUser.get(userId);
     if (!socket || socket.data.sid === currentSid) return false;
     this.#byUser.delete(userId);
-    this.#replace(socket);
+    this.#replace(socket, 'password_changed');
     return true;
   }
 
-  /** 로그아웃: 그 세션으로 연결된 소켓을 알림 없이 끊는다. */
+  /**
+   * 로그아웃: 그 세션으로 연결된 소켓을 `session:replaced` 없이 끊는다. 클라이언트는 단순 `disconnect`를
+   * 받으므로 직전에 로그아웃을 요청했는지로 네트워크 단절과 구분한다(API).
+   */
   disconnectSession(userId: number, sid: string): void {
     const socket = this.#byUser.get(userId);
     if (!socket || socket.data.sid !== sid) return;
@@ -43,8 +47,9 @@ export class ConnectionRegistry {
     socket.disconnect(true);
   }
 
-  #replace(socket: Socket): void {
-    socket.emit(SESSION_REPLACED);
+  #replace(socket: Socket, reason: SessionReplaced['reason']): void {
+    const payload: SessionReplaced = { reason };
+    socket.emit(SESSION_REPLACED, payload);
     socket.disconnect(true);
   }
 }

@@ -2,13 +2,18 @@
 import { z } from 'zod';
 import { CharacterIdSchema } from './protocol.ts';
 
-/** 인증 API가 쓰는 오류 코드. 경기 오류 코드(ERROR_CODES)와 따로 둔다. */
+/**
+ * REST API가 쓰는 오류 코드. 경기 오류 코드(`protocol.ts`의 ERROR_CODES)와 도메인별로 나눠 두며
+ * `INVALID_INPUT`은 양쪽에 있다. 코드 표의 기준은 docs/design/API.md다.
+ * `INTERNAL_ERROR`는 처리하지 못한 서버 오류(500)다.
+ */
 export const AUTH_ERROR_CODES = [
   'INVALID_INPUT',
   'UNAUTHENTICATED',
   'INVALID_CREDENTIALS',
   'NICKNAME_TAKEN',
   'RATE_LIMITED',
+  'INTERNAL_ERROR',
 ] as const;
 export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number];
 
@@ -73,4 +78,12 @@ export const MeSchema = z.object({
 });
 export type Me = z.infer<typeof MeSchema>;
 
-export type ApiErrorBody = { error: { code: AuthErrorCode; message: string } };
+export const ApiErrorBodySchema = z.object({
+  error: z.object({ code: z.enum(AUTH_ERROR_CODES), message: z.string() }),
+});
+export type ApiErrorBody = z.infer<typeof ApiErrorBodySchema>;
+
+/** `session:replaced`의 `reason`. 새 연결로 대체됐거나 비밀번호 변경으로 끊긴 경우다(API). */
+export const SESSION_REPLACED_REASONS = ['new_connection', 'password_changed'] as const;
+export const SessionReplacedSchema = z.object({ reason: z.enum(SESSION_REPLACED_REASONS) });
+export type SessionReplaced = z.infer<typeof SessionReplacedSchema>;
