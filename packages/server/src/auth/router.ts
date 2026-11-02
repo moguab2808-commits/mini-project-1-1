@@ -1,10 +1,4 @@
-import {
-  Router,
-  type NextFunction,
-  type Request,
-  type RequestHandler,
-  type Response,
-} from 'express';
+import { Router, type Response } from 'express';
 import type { z } from 'zod';
 import {
   CharacterChangeSchema,
@@ -13,12 +7,13 @@ import {
   SignupSchema,
 } from '@alkkagi/shared';
 import type { Db } from '../db/pool.ts';
+import { UNIQUE_VIOLATION, findPgError } from '../db/pg-error.ts';
 import type { ConnectionRegistry } from '../realtime/connections.ts';
 import { errors } from './errors.ts';
+import { createRequireAuth } from './require-auth.ts';
 import { getDummyHash, hashPassword, verifyPassword } from './password.ts';
 import { deleteOtherSessions, endSession, startSession } from './sessions.ts';
 import {
-  findUserById,
   findUserByNickname,
   insertUser,
   randomCharacterId,
@@ -35,19 +30,6 @@ export type AuthDeps = {
 };
 
 const NICKNAME_UNIQUE_INDEX = 'users_nickname_lower_idx';
-const UNIQUE_VIOLATION = '23505';
-
-type PgErrorLike = { code?: string; constraint?: string };
-
-/** drizzle이 감싼 오류의 원인(cause)까지 내려가 PostgreSQL 오류를 찾는다. */
-function findPgError(error: unknown): PgErrorLike | undefined {
-  for (let current = error; current && typeof current === 'object';) {
-    const candidate = current as PgErrorLike & { cause?: unknown };
-    if (typeof candidate.code === 'string') return candidate;
-    current = candidate.cause;
-  }
-  return undefined;
-}
 
 function parse<S extends z.ZodType>(schema: S, body: unknown): z.infer<S> {
   const result = schema.safeParse(body);
@@ -65,18 +47,7 @@ export type AuthedResponse = Response<unknown, AuthedLocals>;
 export function createAuthRouter(deps: AuthDeps): { auth: Router; me: Router } {
   const { db, registry, sessionCookieName } = deps;
 
-  /** 세션이 없거나 사용자가 사라졌으면 401. 통과하면 res.locals.user에 사용자를 둔다. */
-  const requireAuth: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.session.userId;
-    if (userId === undefined) throw errors.unauthenticated();
-    const user = await findUserById(db, userId);
-    if (!user) {
-      await endSession(req);
-      throw errors.unauthenticated();
-    }
-    res.locals.user = user;
-    next();
-  };
+  const requireAuth = createRequireAuth(db);
 
   const auth = Router();
 
@@ -84,7 +55,11 @@ export function createAuthRouter(deps: AuthDeps): { auth: Router; me: Router } {
     const { nickname, password } = parse(SignupSchema, req.body);
     const passwordHash = await hashPassword(password);
     try {
-      await insertUser(db, { nickname, passwordHash, characterId: randomCharacterId() });
+      await insertUser(db, {
+        nickname,
+        passwordHash,
+        characterId: randomCharacterId(),
+      });
     } catch (error) {
       // 먼저 조회하지 않고 INSERT가 유니크 인덱스에 걸린 것으로 판별해 동시 가입 경합도 막는다.
       const pgError = findPgError(error);

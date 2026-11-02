@@ -18,6 +18,7 @@
 - DB 스키마·마이그레이션·연결 풀([IMPL-006](TASKS.md#impl-006-db마이그레이션), PR #54). 마이그레이션은 임시 DB에서 검증했고 개발 DB에는 아직 적용하지 않았다
 - `game-runtime`: 방별 명령 큐·120Hz 틱 스케줄러·플레이어별 뷰 배포와 시계·전송·로거·종료 콜백 주입 인터페이스([IMPL-003](TASKS.md#impl-003-game-runtime), PR #57, B와 합의). 가짜 시계 테스트와 실제 시계 한 건으로 확인했고 Socket.IO·워커 연결과 부하 측정은 없다
 - 인증 API·세션·IP당 빈도 제한·Socket.IO 연결 인증과 중복 접속 대체([IMPL-007](TASKS.md#impl-007-인증), PR #59). argon2id 해시 시간은 이 PC에서만 측정했고 Render 측정은 [IMPL-013](TASKS.md#impl-013-배포)으로 옮겼다
+- 로비·방 서버([IMPL-008](TASKS.md#impl-008-로비방-서버)): `GET /api/rooms`, `room:create`·`join`·`quickJoin`·`leave`, `room:state`·`room:closed`, 상대 입장 즉시 시작(DEC-040), 동시 입장 조건부 갱신, `room:join` 빈도 제한, 서버 시작 때 `rooms` 정리. 임시 DB와 실제 Socket.IO 클라이언트로 확인했다. 시작 뒤 경기 연결과 경기 중 이탈의 기권패는 [IMPL-009](TASKS.md#impl-009-온라인-대전-서버)다
 - 구현 작업 13건 등록([PLAN-001](TASKS.md#plan-001-구현-작업-등록), [IMPL-001~013](TASKS.md#impl-001-프로젝트-골격))
 
 ## 현재 작업 범위
@@ -31,7 +32,7 @@
 
 ## 남은 일과 한계
 
-- 구현 전체: [IMPL-004~014](TASKS.md#impl-004-로컬-2인-모드). A는 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드)부터, B는 IMPL-006·007이 끝나 [IMPL-008](TASKS.md#impl-008-로비방-서버)과 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)를 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
+- 구현 전체: [IMPL-004~014](TASKS.md#impl-004-로컬-2인-모드). A는 [IMPL-004](TASKS.md#impl-004-로컬-2인-모드)부터, B는 IMPL-006·007·008이 끝나 [IMPL-009](TASKS.md#impl-009-온라인-대전-서버)와 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)를 시작할 수 있다. 로컬 2인 모드를 온라인보다 먼저 만든다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
 - 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).

@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | PostgreSQL(Neon), Drizzle ORM + node-postgres, 세션 테이블은 connect-pg-simple ([DEC-013](../DECISIONS.md#결정-색인)). 랭킹·레이팅·`matches` 제외([DEC-022](../DECISIONS.md#결정-색인)), 방 정보는 `rooms`([DEC-023](../DECISIONS.md#결정-색인)), 사용자·방 컬럼과 입장·종료 처리([DEC-027](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 스키마·마이그레이션·연결 풀(`packages/server/src/db`, [IMPL-006](../TASKS.md#impl-006-db마이그레이션)). 방 입장·종료 저장 같은 쿼리는 IMPL-008·011 |
+| 현재 구현 | 스키마·마이그레이션·연결 풀(`packages/server/src/db`, [IMPL-006](../TASKS.md#impl-006-db마이그레이션)). 방 생성·입장·즉시 참가·퇴장·시작 커밋·서버 시작 정리 쿼리(`packages/server/src/rooms/room-store.ts`, [IMPL-008](../TASKS.md#impl-008-로비방-서버)). 종료 저장 쿼리는 IMPL-011 |
 | 확정 (DB-001 완료) | 아래 [DB-001](../TASKS.md#db-001-db-스키마-확정) 스키마. 이전의 `[제안]` 표시는 개발자 B가 확정해 제거했다 |
 | 미정 | 아래 미정 사항 |
 
@@ -66,16 +66,16 @@
 | 시점 | 처리 |
 | --- | --- |
 | 방 생성(PvP) | 행 추가. AI 대전은 서버·DB에 아무것도 남기지 않는다([DEC-021](../DECISIONS.md#결정-색인)) |
-| 입장 | 아래 동시성 처리. 성공하면 `guest_id`를 채운다 |
-| 시작 커밋 | 방 큐의 시작 명령 처리로 `status`를 `waiting` → `playing`으로 바꾼다([GAME](GAME.md#상태-전이와-순서)) |
+| 입장 | 아래 동시성 처리. 성공하면 `guest_id`를 채우고 **같은 UPDATE 한 문장에서 `status`를 `playing`으로 바꾼다**(상대가 입장하면 바로 시작, [DEC-040](../DECISIONS.md#결정-색인)) |
+| 시작 커밋 | 별도 시작 명령은 없다. 위 입장 UPDATE가 `status`를 `waiting` → `playing`으로 바꾸는 것이 시작 커밋이다([GAME](GAME.md#상태-전이와-순서)) |
 | 재도전 성립 | `status`는 `playing`을 유지하고 `guest_id`도 그대로 둔다(같은 방·같은 설정으로 새 경기). 상태 전이는 [GAME의 방 상태 표](GAME.md#상태-전이와-순서)를 따른다 |
-| 재도전 만료 | 두 사람이 같은 방 대기실로 돌아가므로 `status`만 `waiting`으로 바꾸고 `guest_id`는 비우지 않는다([게임 화면](../PRD.md#게임-화면)) |
+| 재도전 만료 | 재도전하기를 누르지 않은 사람을 나가기와 같게 처리한다([DEC-041](../DECISIONS.md#결정-색인)). 방장이 누르지 않았으면 방장 이탈이라 행을 삭제하고, 방장만 눌렀으면 참여자 이탈이라 `guest_id`를 비우고 `status`를 `waiting`으로 바꾼다. 입장 즉시 시작이라 두 사람이 남은 채 `waiting`이 되는 일은 없다 |
 | 상대(참여자)가 나감 | `guest_id = null`로 비운다(방 유지, 다시 대기). 대기실·경기 중·결과 화면 어디서 나가도 같고, `status`가 `playing`이었다면 같은 UPDATE 한 문장에서 `waiting`으로 바꿔 중간 상태를 남기지 않는다. 경기 중 이탈이면 기권패 전적 저장(`finishOnce`)을 먼저 끝낸 뒤 이 UPDATE를 한다. 두 작업은 한 트랜잭션으로 묶지 않으며, 전적 저장이 실패해도 방 정리는 진행한다([경기 종료 저장](#경기-종료-저장)) |
 | 방장이 나감 | 행 삭제(방 닫힘). 경기 중이면 기권패 전적 저장(`finishOnce`) 뒤에 행을 삭제한다. 방이 닫히면 이력을 남기지 않는다 |
 | 서버 시작 | `rooms`를 전부 삭제한다. 배포·재시작으로 메모리의 연결·경기가 사라지는데 방만 남으면 유령 방이 목록에 보인다 |
 
-- **방 삭제 시점**: 방은 ①방장이 나갈 때(나가기·연결 끊김·기권 이탈 포함)와 ②서버 시작 때만 삭제한다. 경기 종료·재도전 만료·참여자 이탈로는 삭제하지 않는다.
-- **입장 동시성**: 두 사람이 같은 방에 동시에 들어와도 한 명만 성공하도록 조건부 갱신을 쓴다. `UPDATE rooms SET guest_id = $me WHERE id = $id AND guest_id IS NULL AND status = 'waiting' RETURNING *`가 0행이면 방 상태를 다시 읽어 `ROOM_FULL`·`ROOM_PLAYING`·`ROOM_NOT_FOUND`로 구분한다. 비공개 방은 입력한 코드가 `code`와 같을 때만 갱신한다. 즉시 참가는 공개·`guest_id IS NULL`·`status = 'waiting'`인 방 중 무작위 1개를 골라 같은 조건부 갱신을 한다. 이미 다른 방의 참여자인 사용자가 입장하면 조건부 UPDATE가 0행이 되는 대신 `guest_id` 유니크 위반(PostgreSQL `23505`)이 DB 오류로 난다. 서버는 위반한 제약 이름으로 구분해 `ALREADY_IN_ROOM`으로 매핑한다. 방 생성의 `host_id` 유니크 위반도 `ALREADY_IN_ROOM`, `code` 유니크 위반은 `CODE_TAKEN`으로 매핑한다.
+- **방 삭제 시점**: 방은 ①방장이 나갈 때(나가기·연결 끊김·기권 이탈·재도전 15초 동안 누르지 않음 포함)와 ②서버 시작 때만 삭제한다. 경기 종료·참여자 이탈로는 삭제하지 않는다.
+- **입장 동시성**: 두 사람이 같은 방에 동시에 들어와도 한 명만 성공하도록 조건부 갱신을 쓴다. `UPDATE rooms SET guest_id = $me, status = 'playing' WHERE id = $id AND guest_id IS NULL AND status = 'waiting' RETURNING *`가 0행이면 방 상태를 다시 읽어 `ROOM_PLAYING`(상대가 있는 방은 항상 게임 중)·`ROOM_NOT_FOUND`로 구분한다. 비공개 방은 입력한 코드가 `code`와 같을 때만 갱신한다. 즉시 참가는 공개·`guest_id IS NULL`·`status = 'waiting'`인 방 중 무작위 1개를 골라 같은 조건부 갱신을 한 문장으로 한다(`FOR UPDATE SKIP LOCKED`로 동시 즉시 참가가 같은 방을 잡지 않게 한다). 이미 다른 방의 참여자인 사용자가 입장하면 조건부 UPDATE가 0행이 되는 대신 `guest_id` 유니크 위반(PostgreSQL `23505`)이 DB 오류로 난다. 서버는 위반한 제약 이름으로 구분해 `ALREADY_IN_ROOM`으로 매핑한다. 방 생성의 `host_id` 유니크 위반도 `ALREADY_IN_ROOM`, `code` 유니크 위반은 `CODE_TAKEN`으로 매핑한다.
 - **DB 접속 최소화**: 방 목록은 폴링하지 않고 로비 진입·새로고침 때만 조회한다([DEC-024](../DECISIONS.md#결정-색인)). DB 접속이 계속 있으면 Neon이 중지되지 않아 월 100 CU-hour 한도([ADR-0003](../adr/0003-tech-stack-and-architecture.md))를 더 쓴다.
 
 ## 경기 종료 저장
@@ -100,5 +100,6 @@ Drizzle 마이그레이션 파일을 저장소에 커밋하고 배포 시작 단
 
 - (해소: IMPL-006에서 생성된 SQL과 Neon의 `pg_indexes`로 `lower(nickname)` 유니크 인덱스를 확인했다. [worklog](../worklogs/2026-11-02.md#impl-006-db마이그레이션))
 - 백업·복구 절차는 [운영](OPERATIONS.md)
+- (해소: 재도전 15초 만료는 누르지 않은 사람을 나가기와 같게 처리한다. [DEC-041](../DECISIONS.md#결정-색인). 두 사람 모두 누르지 않은 경우는 방장 기준으로 방이 닫히는 해석이며 개발자 A의 확인이 필요하다)
 
 제품 정책이 바뀌면 스키마 편의로 정하지 말고 PRD와 결정 기록을 먼저 갱신한다.
