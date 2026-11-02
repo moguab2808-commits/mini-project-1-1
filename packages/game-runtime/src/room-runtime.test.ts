@@ -243,7 +243,7 @@ describe('RoomRuntime', () => {
       const over = transport.of('game:over', 0)[0]!.payload as RuntimeEventMap['game:over'];
       assert.equal(over.winnerId, 0);
       assert.equal(over.reason, 'forfeit');
-      assert.ok(over.rematchDeadlineMs !== null && over.rematchDeadlineMs > 0);
+      assert.equal(over.rematchDeadlineMs, null);
       // 종료 뒤에는 틱이 멈춘다
       const n = transport.sent.length;
       clock.advance(1000);
@@ -326,7 +326,7 @@ describe('RoomRuntime', () => {
 
     test('재대결 마감 시각은 종료 때 한 번만 정해진다', async () => {
       const { clock, transport, rt } = setup({ rematchWindowMs: 15_000 });
-      const p = rt.leave(0, 'leave_button');
+      const p = rt.forfeit(0, { gameId: CONFIG.gameId });
       clock.advance(20);
       await p;
       const over = transport.of('game:over', 0)[0]!.payload as RuntimeEventMap['game:over'];

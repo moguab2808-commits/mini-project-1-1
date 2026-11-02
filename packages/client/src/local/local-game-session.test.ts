@@ -180,11 +180,12 @@ describe('LocalAuthority + LocalGameSession', () => {
     expect(over[0]).toMatchObject({ winnerId: 1, reason: 'forfeit' });
     // 상대가 나갔으므로 남은 창의 재도전은 바로 무산된다(버튼이 남지 않는다)
     const rematch = of<RematchState>(b.log, 'rematch:state');
-    expect(rematch.at(-1)).toMatchObject({ outcome: 'expired' });
-    expect(rematchUi(over[0]!, rematch.at(-1)!, clock.nowMs)).toMatchObject({
+    expect(over[0]!.rematchDeadlineMs).toBeNull();
+    expect(rematch).toHaveLength(0);
+    expect(rematchUi(over[0]!, null, clock.nowMs)).toMatchObject({
       showRequest: false,
       canRequest: false,
-      message: '상대가 나가서 재도전할 수 없어요. 나가기를 눌러 주세요.',
+      message: null,
     });
 
     const again = connect(0);

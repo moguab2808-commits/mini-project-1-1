@@ -4,7 +4,23 @@
 
 ## 설치·실행
 
-아직 구현 코드와 실행 설정이 없어 설치·실행·테스트 명령은 없다. 기술·실행 구성이 정해지고 실제 검증을 마친 뒤 이 절에 준비 조건·설치·실행·접속·테스트 절차를 추가한다. 환경변수 실제 값과 비밀정보는 문서에 적지 않는다.
+Node.js 24 이상과 npm을 사용한다.
+
+```bash
+npm ci
+npm test
+npm run lint
+npm run format
+npm run build
+```
+
+클라이언트 개발 서버는 `npm run dev -w @alkkagi/client`로 실행한다. `/local?seat=0`·`/local?seat=1`은 같은 브라우저의 두 창, `/ai`는 AI 대전, `/online`은 인증된 계정의 온라인 연결 확인 경로다. 개발 서버의 `/api`·`/socket.io`는 `127.0.0.1:3000`으로 전달한다.
+
+온라인 서버는 PostgreSQL 연결 설정 `DATABASE_URL`과 32자 이상인 `SESSION_SECRET`이 필요하다. 환경에 값을 설정한 뒤 `npm run db:migrate -w @alkkagi/server`, `npm run dev -w @alkkagi/server`를 실행한다. 마이그레이션 명령은 루트 `.env`도 읽지만 개발 서버 명령은 프로세스 환경을 읽는다. `/online`은 같은 출처의 인증 API로 로그인한 세션 쿠키가 필요하다. 실제 로그인·로비 화면은 [IMPL-012](docs/TASKS.md#impl-012-계정로비대기실결과-화면) 범위다.
+
+DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 실행한다. 연결 계정에 임시 DB 생성·삭제 권한이 필요하고, 테스트는 임시 DB를 만들었다가 지운다. 환경변수 실제 값과 비밀정보는 문서에 적지 않는다.
+
+현재 브랜치의 [검증 조건·한계](docs/worklogs/2026-11-03.md#impl-010-온라인-대전-클라이언트)를 확인한다. 새 환경 전체 설치·개발 서버 watch·배포 검증은 [DOC-011](docs/TASKS.md#doc-011-readme-설치실행-절차)에서 마무리한다.
 
 ## 문서 안내
 

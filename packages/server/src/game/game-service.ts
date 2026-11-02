@@ -25,8 +25,6 @@ import { stdoutSink, toLogLine, type GameLogSink } from './game-log.ts';
 
 /** 재도전 대기 시간. 결과 화면에서 이 시간 안에 누르지 않으면 나가기와 같게 처리한다(PRD 게임 화면). */
 export const REMATCH_WINDOW_MS = 15_000;
-/** 시작 커밋 직후 이탈이 경기 생성을 기다리는 최대 시간. 경기 생성은 보통 즉시 끝난다. */
-const START_WAIT_MS = 5_000;
 
 const NOT_ACTIVE: CommandResult = {
   ok: false,
@@ -87,6 +85,8 @@ interface Session {
 
 export type GameServiceOptions = {
   registry: ConnectionRegistry;
+  /** 시작 준비도 같은 완료 신호에 포함해 지연·실패 때 이탈과 경합하지 않게 한다. */
+  beforeStart?: RoomHooks['onStarted'];
   /** 재도전 만료 때 누르지 않은 사람을 나가기와 같게 처리한다. 사용자별 직렬화는 호출한 쪽이 맡는다. */
   leaveRoom: (userId: number, options: LeaveOptions) => Promise<void>;
   /**
@@ -280,6 +280,7 @@ export class GameService {
     const { room, host, guest } = view;
     const session = this.#sessionOf(room.id);
     try {
+      await this.#opts.beforeStart?.(view);
       if (!guest) throw new Error('참여자가 없는 방은 시작할 수 없다');
       session.userIds = [host.id, guest.id];
       session.players = [
@@ -306,7 +307,7 @@ export class GameService {
   async #onLeave(room: RoomView['room'], userId: number, reason: LeaveReason): Promise<void> {
     let session = this.#sessionOf(room.id);
     if (room.status === 'playing' && session.phase === 'idle') {
-      await this.#waitStarted(session);
+      await session.started.promise;
       session = this.#sessionOf(room.id); // 경기 생성이 실패해 버려졌을 수 있다
     }
     if (session.userIds[0] === null) session.userIds[0] = room.hostId;
@@ -334,19 +335,6 @@ export class GameService {
       session.userIds[1] = null;
       session.players = null;
       session.started = deferred();
-    }
-  }
-
-  async #waitStarted(session: Session): Promise<void> {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const timeout = new Promise<void>((resolve) => {
-      timer = setTimeout(resolve, START_WAIT_MS);
-      timer.unref();
-    });
-    try {
-      await Promise.race([session.started.promise, timeout]);
-    } finally {
-      clearTimeout(timer);
     }
   }
 

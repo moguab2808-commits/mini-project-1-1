@@ -58,6 +58,7 @@
   | `rooms_code_unique` | `CODE_TAKEN` |
 
   CHECK 제약(`rooms_public_code`·`rooms_piece_count`·`rooms_status`·`rooms_not_own_guest`)과 `users`의 제약(`users_nickname_lower_idx`·`users_*_nonneg`·`users_record_within_total`)은 입력 검증이 먼저 막으므로 서버가 오류 코드로 매핑하지 않는 방어선이다.
+
 - **자기 방 입장 금지**: `CHECK (guest_id IS NULL OR guest_id <> host_id)`.
 - **타입 매핑**: Drizzle의 `serial`·`varchar({길이})`·`integer`·`boolean`·`check()`·`uniqueIndex()`로 그대로 옮긴다.
 
@@ -79,6 +80,8 @@
 - **경기 생성 실패**: 입장 UPDATE 뒤 경기를 열지 못하면(`onStarted` 실패) 입장을 되돌린다. `guest_id`를 비우고 `status`를 `waiting`으로 돌리는 한 문장이며, 되돌리기도 실패하면 행을 삭제한다([DEC-043](../DECISIONS.md#결정-색인)).
 - **대기 중 방장 이탈과 입장의 경합**: 방장이 대기 중인 방을 지울 때는 `status = waiting`일 때만 지운다. 그 사이 입장 UPDATE가 끼어들어 0행이면 시작 커밋 뒤 이탈로 다시 처리한다(기권패 처리 뒤 삭제).
 - **DB 접속 최소화**: 방 목록은 폴링하지 않고 로비 진입·새로고침 때만 조회한다([DEC-024](../DECISIONS.md#결정-색인)). DB 접속이 계속 있으면 Neon이 중지되지 않아 월 100 CU-hour 한도([ADR-0003](../adr/0003-tech-stack-and-architecture.md))를 더 쓴다.
+
+방 이탈 처리는 `RoomService`가 방별로 직렬화하고 잠금을 얻은 뒤 현재 행을 다시 읽는다. 참여자 이탈 훅과 DB 대기 전환 사이에 방장 이탈이 끼어 오래된 `playing`을 읽고 다음 경기 시작을 기다리는 일을 막는다. 경기 시작 준비의 성공·실패는 `GameService`의 동일한 완료 신호로 전달하며 이탈은 임의의 대기 시간 뒤 시작을 건너뛰지 않는다.
 
 ## 경기 종료 저장
 

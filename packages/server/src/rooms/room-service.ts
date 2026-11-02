@@ -5,6 +5,7 @@ import { findUserById, toMe } from '../auth/users.ts';
 import type { Db } from '../db/pool.ts';
 import type { ConnectionRegistry } from '../realtime/connections.ts';
 import { roomErrors } from './errors.ts';
+import { KeyedMutex } from './keyed-mutex.ts';
 import {
   claimGuestSeat,
   claimRandomPublicRoom,
@@ -44,6 +45,8 @@ export type LeaveOptions = {
 };
 
 export class RoomService {
+  // 두 좌석의 이탈이 같은 경기 정리와 DB 상태 변경을 동시에 실행하지 않게 한다.
+  readonly #leaves = new KeyedMutex<number>();
   constructor(
     private readonly db: Db,
     private readonly registry: ConnectionRegistry,
@@ -98,6 +101,12 @@ export class RoomService {
    * 지우려는 사이에 상대가 입장했다면 지우기가 0행이 되고, 시작 커밋 뒤 이탈로 다시 처리한다.
    */
   async leave(userId: number, options: LeaveOptions = {}): Promise<void> {
+    const room = await findRoomOf(this.db, userId);
+    if (!room) return;
+    await this.#leaves.run(room.id, () => this.#leave(userId, options));
+  }
+
+  async #leave(userId: number, options: LeaveOptions): Promise<void> {
     const reason = options.reason ?? 'leave_button';
     for (;;) {
       const room = await findRoomOf(this.db, userId);

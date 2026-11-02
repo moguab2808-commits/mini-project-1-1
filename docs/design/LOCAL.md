@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 모노레포 패키지 경계와 `GameSession` 교체 구조 ([DEC-013](../DECISIONS.md#결정-색인)), 로컬 2인의 창 2개 진행·방해요소 입력([DEC-020](../DECISIONS.md#결정-색인)), AI 대전의 클라이언트 실행([DEC-021](../DECISIONS.md#결정-색인)), 공통 실행 모듈 `game-runtime`·좌석 PlayerId·세션 수명·`RoomClient` 분리([DEC-030](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 없음 |
+| 현재 구현 | 로컬 2인 SharedWorker·AI 전용 Worker와 공통 `GameScreen`. 온라인은 작업 브랜치에 `RoomClient`·`RemoteGameSession`을 구현했으며 기준 브랜치 병합 전이다. |
 | 검토 초안 | LOCAL-001의 아래 `GameSession` 시그니처와 로컬 권한 측 구성. 이벤트 이름·명령 필드·ack 형식은 [API](API.md)와 맞음을 개발자 B가 확인(PR #18 검토) |
 | 미정 | 아래 미정 사항 |
 
@@ -60,8 +60,8 @@ interface GameSession {
   readonly playerId: PlayerId;            // 이 창이 맡은 좌석
   submitShot(cmd: ShotSubmit): Promise<CommandResult>;  // shot:submit
   useHazard(cmd: HazardUse): Promise<CommandResult>;    // hazard:use
-  forfeit(): Promise<CommandResult>;      // game:forfeit
-  requestRematch(): Promise<CommandResult>; // rematch:request
+  forfeit(cmd: GameForfeit): Promise<CommandResult>;      // game:forfeit
+  requestRematch(gameId: string): Promise<CommandResult>; // rematch:request
   rotateBoard(cmd: BoardRotate): Promise<CommandResult>; // board:rotate (DEC-036)
   aimHazard(cmd: HazardAim): void;        // hazard:aim, 응답 없음
   sendAim(update: AimUpdate): void;       // aim:update, 응답 없음
@@ -96,6 +96,14 @@ interface GameEventMap {
 - **PlayerId**: 경기 안의 좌석 값 0·1이다. 알의 `ownerId`·`activePlayerId`도 같은 값을 쓴다. 로컬에는 `users.id`가 없고, 온라인에서 상대에게 사용자 번호를 보내지 않기 위해서다. 서버만 좌석과 `users.id`를 매핑해 전적을 저장한다 ([DEC-030](../DECISIONS.md#결정-색인)).
 - **세션 수명**: `GameSession` 하나가 같은 방의 재도전 경기까지 이어 간다. `game:over` 뒤 같은 세션으로 `requestRematch()`를 보내고, 성립하면 새 gameId의 `game:start`를 받는다. 이벤트의 gameId로 경기를 구분하고, 새 `game:start`에서 화면 상태를 초기화한다. 재도전이 만료되면 누르지 않은 사람은 나가기와 같게 처리된다([DEC-041](../DECISIONS.md#결정-색인)). `room:closed`(`rematch_timeout`·`host_left`)를 받은 클라이언트는 세션을 `dispose()`하고 로비로 간다. 방장만 눌렀으면 방장은 `room:state`(`waiting`)를 받고 세션을 유지한 채 다음 입장자의 `game:start`를 같은 세션으로 받는다([API 순서 규칙](API.md#이벤트-순서)). 방을 나가거나 창을 닫을 때만 `dispose()`한다 ([DEC-030](../DECISIONS.md#결정-색인)).
 - **방·접속 이벤트**: `room:*` 명령·이벤트와 `session:replaced`는 `GameSession`에 넣지 않고 온라인 전용 `RoomClient`가 처리한다(로비·대기실). `GameSession`은 경기만 맡는다. 온라인 `dispose()`는 `RoomClient`를 통해 `room:leave`를 보내고, 경기 중이면 서버가 이탈 기권패로 처리한다. 로컬·AI는 방이 없으므로 `RoomClient`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)). 상대 입장은 `room:state` → `game:start` → 입장 ack 순서로 오므로(API 순서 규칙 2), 온라인 클라이언트는 ack가 아니라 `room:state`(`playing`)로 경기 화면 전환을 시작하고 `RemoteGameSession`의 경기 이벤트 구독은 소켓 연결 시점(늦어도 `room:state` 처리 중 동기적으로)에 걸어 `game:start`를 놓치지 않는다.
+
+### 온라인 연결 구성
+
+`client/src/online/room-client.ts`의 `RoomClient`가 소켓 수명과 방 상태를 소유한다. `createRoomClient`는 같은 출처의 쿠키를 쓰고 자동 연결·재연결을 끈다. 구독을 준비한 뒤 `connect()`한다. `room:state`를 받는 중 동기적으로 좌석별 `RemoteGameSession`과 `GameStore`를 만들므로 입장 ack보다 먼저 오는 시작·지급 이벤트도 저장한다. 화면은 `getState()`·`subscribe()`로 방과 `{ session, store }`를 받아 기존 `GameScreen`에 넘긴다.
+
+원격 세션은 payload와 ack를 바꾸지 않고, 다른 경기·이미 지난 시작·증가하지 않은 뷰 revision·종료 뒤 상태 이벤트만 버린다. 같은 방의 재도전과 방장 혼자 대기한 뒤 다음 참여자의 경기에도 같은 세션을 쓴다. 방 폐쇄·직접 나가기 뒤 늦게 오는 방 상태·시작·성공 ack는 다시 화면을 열지 않는다. 시작 실패 ack는 선행 `playing` 상태를 정리한다. ack 자체에 시간 제한을 두지 않으며 연결 종료·정리 때 대기 중 명령을 끝낸다.
+
+`session:replaced`·연결 실패·연결 끊김은 세션·스토어·소켓 구독을 정리하고 `onLoginRequired`를 한 번 호출한다. `/online` 연결 확인 화면은 이를 `/login` 이동에 연결한다. 실제 로그인·로비 화면은 IMPL-012 범위다. `RemoteGameSession.dispose()`는 `RoomClient.leave()`로 나가기 이벤트를 보내고, 연결 전체를 닫을 때는 `RoomClient.dispose()`를 호출한다.
 
 ### 로컬 2인 구성 (창 2개)
 
