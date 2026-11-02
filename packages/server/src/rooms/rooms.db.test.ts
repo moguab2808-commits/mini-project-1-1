@@ -391,7 +391,7 @@ describe.skipIf(!baseUrl)('로비·방 (IMPL-008)', () => {
 
       const closed = once(guest.socket, 'room:closed');
       expect(await emit(host.socket, 'room:leave')).toEqual({ ok: true });
-      expect(RoomClosedSchema.parse(await closed)).toEqual({ reason: 'host_left' });
+      expect(RoomClosedSchema.parse(await closed)).toEqual({ roomId, reason: 'host_left' });
       expect((await roomRows()).rows).toHaveLength(0);
     });
 

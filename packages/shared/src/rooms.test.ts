@@ -53,8 +53,9 @@ test('방 입장: roomId·code 중 하나는 있어야 하고 code 형식은 검
   assert.equal(RoomJoinSchema.safeParse({ roomId: 1.5 }).success, false);
 });
 
-test('room:closed 사유는 방장 이탈과 재도전 시간 초과만 받는다', () => {
-  assert.equal(RoomClosedSchema.safeParse({ reason: 'host_left' }).success, true);
-  assert.equal(RoomClosedSchema.safeParse({ reason: 'rematch_timeout' }).success, true);
-  assert.equal(RoomClosedSchema.safeParse({ reason: 'other' }).success, false);
+test('room:closed는 roomId가 필요하고 사유는 방장 이탈과 재도전 시간 초과만 받는다', () => {
+  assert.equal(RoomClosedSchema.safeParse({ roomId: 1, reason: 'host_left' }).success, true);
+  assert.equal(RoomClosedSchema.safeParse({ roomId: 1, reason: 'rematch_timeout' }).success, true);
+  assert.equal(RoomClosedSchema.safeParse({ roomId: 1, reason: 'other' }).success, false);
+  assert.equal(RoomClosedSchema.safeParse({ reason: 'host_left' }).success, false); // roomId 필수
 });

@@ -104,7 +104,11 @@ export type RoomState = z.infer<typeof RoomStateSchema>;
  * 서버가 나가기로 처리한 사람 본인에게 보내는 알림이다(DEC-041).
  */
 export const ROOM_CLOSED_REASONS = ['host_left', 'rematch_timeout'] as const;
-export const RoomClosedSchema = z.object({ reason: z.enum(ROOM_CLOSED_REASONS) });
+export const RoomClosedSchema = z.object({
+  /** 닫힌(또는 본인이 나간) 방. 클라이언트는 이 방의 이후 `room:state`·`game:start`를 버린다. */
+  roomId: z.number().int(),
+  reason: z.enum(ROOM_CLOSED_REASONS),
+});
 export type RoomClosed = z.infer<typeof RoomClosedSchema>;
 
 /** 방 명령의 ack. 성공에는 명령별 값(`roomId` 등)이 붙는다. */

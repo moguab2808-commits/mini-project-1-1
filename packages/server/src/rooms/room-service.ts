@@ -81,7 +81,7 @@ export class RoomService {
     const closed = await deleteRoomOfHost(this.db, userId);
     if (closed) {
       if (closed.guestId !== null) {
-        const payload: RoomClosed = { reason: 'host_left' };
+        const payload: RoomClosed = { roomId: closed.id, reason: 'host_left' };
         this.registry.get(closed.guestId)?.emit('room:closed', payload);
       }
       return;
