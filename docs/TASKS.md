@@ -48,8 +48,8 @@
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32) |
 | [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 완료 | 개발자 A | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35)·[PR #51](https://github.com/moguab2808-commits/mini-project-1-1/pull/51) |
 | [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 예정 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
-| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 진행 중 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36) |
-| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 예정 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37) |
+| [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
+| [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 완료 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)·[PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 예정 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
 | [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 예정 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
@@ -606,12 +606,12 @@ Issue·PR: [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-002 `game-core`
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 A
 의존성: GAME-001, GAME-002, IMPL-001
 범위: 규칙·물리·상태 머신·방해요소 훅·시드 PRNG·`getViewFor`를 순수 TypeScript로 구현한다. 시간·명령·난수는 외부에서 주입받는다. 입력·출력 시그니처는 IMPL-003(같은 담당)과 서버 쪽 소비자인 IMPL-009(B)가 쓰므로 IMPL-003 완료 전에 공개한다. `shared`의 Zod 스키마·`Seat` 값의 `…Id` 이름도 여기서 정한다.
 관련 문서: [GAME](design/GAME.md#상세-계약-초안-game-001)·[기술 초기값](design/GAME.md#기술-초기값-조정-대상) / [게임 규칙](PRD.md#게임-규칙)·[방해요소 규칙](PRD.md#방해요소-규칙) / [API 공통 타입](design/API.md#공통-타입)
-Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)
+Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53)
 
 수용 기준:
 - [x] (정상, `HAZARD-GRANT`) 게임 시작과 3·5·7·9라운드 시작에 각 플레이어의 보유 방해요소 1개가 새 것으로 교체되고 누적되지 않는다. 단위 테스트가 확인한다.
@@ -619,28 +619,34 @@ Issue·PR: [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 - [x] (정상, 판정) 모든 알이 멈춘 뒤 승패를 판정하고, 동시 제거는 무승부이며 최종 라운드는 남은 알 수로 비교한다. 판 이탈·떠오름 착지 판정이 기술 초기값의 허용 오차 안에서 같은 입력에 같은 결과를 낸다(시드 고정).
 - [x] (오류) 거부된 명령은 상태와 난수를 바꾸지 않고 [API 오류 코드](design/API.md#오류-형식과-코드)의 해당 코드를 돌려준다. 발사·방해요소의 검사 순서는 [AUTH 검증 경계](design/AUTH.md#검증-경계)와 같다.
 - [x] (예외, 비공개) `getViewFor`가 만든 뷰에 상대 보유 방해요소·게이지·쿨타임·시드·`users.id`가 없다. 허용 목록 방식 테스트가 [API 비공개 점검표](design/API.md#상대-비공개-필드-점검)의 필드와 일치한다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #53, `main` 16b757c)
 
-검증 근거: [2026-11-01 worklog](worklogs/2026-11-01.md#impl-002-game-core). 5개 기준은 단위 테스트로 확인했고 PR·병합이 남았다. 구현자가 고른 해석은 worklog의 "사용자 확인 필요" 절에 있다.
+검증 근거: [2026-11-01 worklog](worklogs/2026-11-01.md#impl-002-game-core). 5개 기준은 단위 테스트로 확인했고 PR #53으로 병합했다. 구현자가 고른 해석은 worklog의 "사용자 확인 필요" 절에 있으며 승인된 결정이 아니다.
 
 ## IMPL-003 `game-runtime`
 
 우선순위: P0
-상태: 예정
+상태: 완료
 담당: 개발자 A (2026-10-31 [DEC-035](DECISIONS.md#결정-색인)로 B에서 변경)
 의존성: GAME-001, LOCAL-001, IMPL-001, IMPL-002
 범위: 방별 단일 명령 큐(`ingressSeq`·`observedAtMs` 부여), 단조 시계 고정 틱 스케줄러, 플레이어별 뷰 배포를 구현하고 시계·전송·로거·종료 콜백을 주입받게 한다. 주입 인터페이스의 형태를 이 작업에서 정한다([DEC-030](DECISIONS.md#결정-색인)). 서버가 이 인터페이스에 Socket.IO 전송·서버 시계를 주입하므로(IMPL-009, B) 형태를 확정하기 전에 B와 합의하고 결과를 이 절에 남긴다.
 관련 문서: [GAME 명령 경합과 시간](design/GAME.md#명령-경합과-시간)·[구현 경계](design/GAME.md#구현-경계-ab)·[전송과 표시](design/GAME.md#전송과-표시-초안) / [LOCAL](design/LOCAL.md#로컬온라인-모드-경계-승인)
-Issue·PR: [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)
+Issue·PR: [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)·[PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57)
 
 수용 기준:
-- [ ] (정상) 가짜 시계·가짜 전송을 주입해 틱 진행, 같은 틱 명령의 `ingressSeq` 순서 처리, 플레이어별 뷰 전송이 테스트로 확인된다. 서버·워커가 같은 코드를 쓰며 시계·전송만 다르다.
-- [ ] (정상) 알 이동 중 스냅샷은 volatile, 모든 알 정지 뒤 최종 스냅샷·`turn:change`·`hazard:triggered`·`game:over`는 신뢰 전송으로 나간다. `revision`이 오래된 상태를 만들지 않는다.
-- [ ] (오류) 틱이 지연되면 따라잡기 상한까지만 처리하고 넘긴 시간을 `tick_skipped`로 로거에 남긴다. 거부된 명령은 큐 순서만 소비하고 상태를 바꾸지 않는다.
-- [ ] (예외, `LEAVE-FORFEIT` 기반) 이탈·기권·접속 대체가 같은 큐의 기권 명령으로 처리되고, 동시 이탈은 `ingressSeq`가 작은 쪽을 기권패로 한다. 시작 커밋보다 앞선 이탈은 대기실 처리다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] (정상) 가짜 시계·가짜 전송을 주입해 틱 진행, 같은 틱 명령의 `ingressSeq` 순서 처리, 플레이어별 뷰 전송이 테스트로 확인된다. 서버·워커가 같은 코드를 쓰며 시계·전송만 다르다.
+- [x] (정상) 알 이동 중 스냅샷은 volatile, 모든 알 정지 뒤 최종 스냅샷·`turn:change`·`hazard:triggered`·`game:over`는 신뢰 전송으로 나간다. `revision`이 오래된 상태를 만들지 않는다.
+- [x] (오류) 틱이 지연되면 따라잡기 상한까지만 처리하고 넘긴 시간을 `tick_skipped`로 로거에 남긴다. 거부된 명령은 큐 순서만 소비하고 상태를 바꾸지 않는다.
+- [x] (예외, `LEAVE-FORFEIT` 기반) 이탈·기권·접속 대체가 같은 큐의 기권 명령으로 처리되고, 동시 이탈은 `ingressSeq`가 작은 쪽을 기권패로 한다. 시작 커밋보다 앞선 이탈은 대기실 처리다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #57, `main` 5945490)
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-003-game-runtime). 4개 기준은 가짜 시계·전송 단위 테스트로 확인했다.
+
+인터페이스 합의 결과(2026-11-02, 개발자 A·B, [PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57)): 시그니처는 `packages/game-runtime/src/types.ts`가 기준이다. 책임 분담은 다음과 같다.
+- 서버(B, IMPL-009): `RuntimeClock.now()`는 `Math.round(performance.timeOrigin + performance.now())`처럼 epoch에 맞춘 단조 시각, 타이머는 `setTimeout`으로 감싼다. `RuntimeTransport`는 좌석↔`users.id`↔소켓 매핑을 시작 커밋 때 메모리에 만들고 `volatile`은 `socket.volatile.emit`에 연결한다. `ts`·`roomId`·`userId`는 서버 로거가 덧붙인다. `onFinished`에서 `finishOnce`를 비동기로 부르고 오류는 서버가 자체 catch로 로그에 남기며 전적 반영을 포기한다(재시도 없음). `onError`는 오류 이름·메시지만 서버 로그로 보낸다. 사용자→좌석 변환, `gameId`·`seed` 생성(crypto 난수)과 시작 커밋 시점, `rematch:*` 성립 로직도 서버가 맡는다.
+- 런타임(A): `LeaveReason`은 `disconnect`·`leave_button`·`session_replaced`(로그 `leave`의 `reason`과 같은 이름)다. 비밀번호 변경으로 끊긴 연결은 `session_replaced`, 연결 끊김·로그아웃은 `disconnect`, `room:leave`는 `leave_button`으로 넘긴다. `start_commit`과 `leave`는 같은 `ingressSeq` 순번 공간을 쓰고, 경기 없는 `leave`는 `gameId`가 null이다. `forfeit` 로그의 `reason`은 `leave`·`command`·`timeout`이다. 런타임은 `onFinished` 반환값을 기다리지 않고 `game:over`의 재도전 마감 시각만 채운다.
+- 미정(IMPL-009에서 정함): 거부된 발사의 `shot` 기록 방식, `leave`·`forfeit` 이중 기록 정리.
+- 이 합의는 두 담당자의 PR 코멘트 대화에 근거한다.
 
 ## IMPL-004 로컬 2인 모드
 
