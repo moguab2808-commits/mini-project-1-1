@@ -275,6 +275,7 @@ sequenceDiagram
 
 ## 계약 확정 전 확인할 항목
 
+- 승인·미구현: 추가 방해요소 10종의 `HazardKind` 값·`hazard:use` 대상 형식·속임수형(가짜벽·분신술·알 무게)의 상대 비공개 필드는 [HAZ-001](../TASKS.md#haz-001-방해요소-10종-추가와-턴-교체-설계), 감정표현 이벤트·빈도 제한은 [EMOTE-001](../TASKS.md#emote-001-감정표현-설계)에서 정한다([DEC-055](../DECISIONS.md#결정-색인)·[DEC-056](../DECISIONS.md#결정-색인)).
 - 인증 전달·실패 응답·권한 검사 위치: [인증 설계](AUTH.md)
 - 발사 각도 범위 (제안 (−π, π], 승인 전)
 - DEC-036의 `board:rotate`·`hazard:aim`·`aim:update`/`aim:state`, `OUT_OF_REACH`·`BOARD_ROTATE_NOT_ALLOWED`, `hazard:use` target의 `h`, 효과 params의 `aimX`·`aimY`·`aimH`·`coverage`, private `blind.coverage`: 개발자 A 제안이며 서버 구현(IMPL-009) 전에 개발자 B와 합의한다. 스키마는 `packages/shared/src/protocol.ts`
