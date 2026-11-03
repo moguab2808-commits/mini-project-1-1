@@ -65,6 +65,7 @@ interface GameSession {
   rotateBoard(cmd: BoardRotate): Promise<CommandResult>; // board:rotate (DEC-036)
   aimHazard(cmd: HazardAim): void;        // hazard:aim, 응답 없음
   sendAim(update: AimUpdate): void;       // aim:update, 응답 없음
+  // 미구현 제안(EMOTE-001): sendEmote(cmd: EmoteSend): Promise<CommandResult>; // emote:send, 'emote:shown' 구독 추가
   on<K extends keyof GameEventMap>(type: K, handler: (e: GameEventMap[K]) => void): () => void;
   dispose(): void;                        // 창 닫기·이동. 진행 중이면 이탈로 처리
 }
@@ -143,6 +144,18 @@ interface GameEventMap {
 - `Alt`는 브라우저 메뉴·포커스 이동과 겹쳐 쓰지 않는다. `E`는 키 입력 기본 동작이 없어 `preventDefault` 없이 처리할 수 있다.
 - 배치 모드에서는 왼쪽 클릭이 알 선택·세기 충전으로 전달되지 않는다. 세기 막대를 누르고 있는 중에는 벽·끈끈이 배치 모드로 들어가지 않고, 즉시형은 충전을 끊지 않고 사용한다.
 - 사용 불가 상태(쿨타임·피로도 과열)는 칸을 흐리게 표시하고 입력을 보내지 않는다. 표시와 별개로 권한 측이 다시 검증한다.
+
+추가 방해요소 10종의 입력(HAZ-001 제안, 미구현 [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 대상 형식은 [API 추가 방해요소 10종 필드](API.md#추가-방해요소-10종-필드-haz-001-제안), 크기는 [GAME](GAME.md#추가-방해요소-10종과-턴-교체-haz-001-제안)을 따른다.
+
+| 종류 | 입력 |
+| --- | --- |
+| 자석·방향 반전 구역·폭탄·바닥 없어지기 | 끈끈이와 같은 배치 모드. 효과 범위 원을 미리 보이고 왼쪽 클릭으로 확정, ESC·오른쪽 클릭으로 취소 |
+| 중력 구역 | 배치 모드에서 정사각 구역과 경사 화살표를 미리 보인다. 마우스 휠 또는 `R` 키로 방향을 45°씩 돌린다(8방향, [DEC-058](../DECISIONS.md#결정-색인)). 기본은 내 화면 기준 상대 쪽 |
+| 가짜벽 | 벽과 같은 격자 배치 모드에 나란한 벽 3개를 미리 보인다. 휠·`R`로 가로·세로 전환 |
+| 이동 장애물 | 벽과 같은 격자 배치 모드에 벽과 왕복 경로를 함께 미리 보인다. 휠·`R`로 왕복 축을 가로·세로 전환. 경로 전체가 다른 설치물과 겹치면 빨간색 |
+| 분신술 | 알 선택 모드. 내 멈춘 지면 알에 마우스를 올리면 강조하고 왼쪽 클릭으로 확정. 상대 알·움직이는 알은 선택할 수 없다. ESC·오른쪽 클릭 취소 |
+| 미끄럼 장판·알 무게 변화 | 즉시형. `E` 한 번으로 바로 보낸다 |
+| 턴당 1회형 공통 | 이번 턴에 쓴 뒤에는 칸을 흐리게 표시하고 입력을 보내지 않는다 |
 
 ### AI 대전
 
