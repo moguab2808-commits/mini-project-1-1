@@ -68,7 +68,7 @@
 | [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 진행 중 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81) |
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
-| [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 예정 | 미정 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -1006,7 +1006,7 @@ Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: CHAR-001, IMPL-012(캐릭터 변경 창·API)
 범위: [DEC-048](DECISIONS.md#결정-색인)·[DEC-054](DECISIONS.md#결정-색인)·[DEC-059](DECISIONS.md#결정-색인)의 사람 아바타를 `shared` 외형 타입·부품 데이터, DB 마이그레이션, API, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI 외형에 구현하고 동물 6종을 없앤다. UI 꾸밈은 바꾸지 않는다([DEC-060](DECISIONS.md#결정-색인)).
 관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE users](design/DATABASE.md#users) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
-Issue·PR: 미생성
+Issue·PR: [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82)(중간 PR)
 
 수용 기준:
 - [x] (정상, 첫 단계) 시험용 머리(이목구비 한 세트·머리카락 2종)를 개발용 화면에 띄운 스크린샷으로 화풍을 사용자에게 확인받은 뒤 나머지 선택지를 만든다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
