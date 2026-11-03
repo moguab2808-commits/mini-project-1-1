@@ -37,7 +37,7 @@
 
 ## 남은 일과 한계
 
-- 다음 구현: [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)과 [IMPL-013](TASKS.md#impl-013-배포). [IMPL-012](TASKS.md#impl-012-계정로비대기실결과-화면)는 작업 브랜치에서 구현을 마쳤고 PR·리뷰·병합이 남았다.
+- 다음 구현: [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)과 [IMPL-013](TASKS.md#impl-013-배포). [IMPL-012](TASKS.md#impl-012-계정로비대기실결과-화면)는 구현을 마치고 PR #66으로 리뷰 중이며 병합이 남았다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
 - 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).
