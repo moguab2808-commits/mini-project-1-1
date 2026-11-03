@@ -66,7 +66,7 @@
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
 | [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 취소 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
 | [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
-| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 진행 중 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81) |
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 예정 | 미정 | 미생성 |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 예정 | 미정 | 미생성 |
@@ -964,7 +964,7 @@ Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: HAZ-001
 범위: [DEC-055](DECISIONS.md#결정-색인)를 `shared`·`game-core`·서버·클라이언트·AI에 구현한다. 발사 턴마다 두 사람 교체와 직전 종류 제외, 추가 10종의 물리·배치·연출, 속임수형의 상대 뷰 숨김을 포함한다.
 관련 문서: [PRD 추가 방해요소 10종](PRD.md#추가-방해요소-10종-dec-055) / [GAME](design/GAME.md) / [API](design/API.md)
-Issue·PR: 미생성
+Issue·PR: [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81)(중간 PR)
 
 수용 기준:
 - [x] (정상, `HAZARD-GRANT`) 턴이 바뀔 때마다 두 사람이 새 방해요소를 받고 효과·게이지·쿨타임·설치물이 사라진다. 직전 종류는 나오지 않는다(`game-core` 테스트, 시드 고정).
