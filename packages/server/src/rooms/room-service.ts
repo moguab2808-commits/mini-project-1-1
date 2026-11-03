@@ -29,6 +29,11 @@ export type RoomHooks = {
    */
   onStarted?: (view: RoomView) => Promise<void> | void;
   /**
+   * 시작 커밋은 났지만 `onStarted`에 닿기 전에 시작 처리가 실패했다(예: 사용자 조회 DB 오류). 경기 서버가
+   * `onStarted`의 완료 신호를 기다리는 이탈을 풀어 주는 자리다. 이 뒤에 입장을 되돌린다(`#undoJoin`).
+   */
+  onStartAborted?: (room: RoomRow) => Promise<void> | void;
+  /**
    * 사용자가 방을 나갈 때 불린다(연결 끊김·접속 대체 포함). `playing`인 방은 DB 정리 **앞**에 불려
    * 경기 서버가 기권패 처리와 전적 저장을 끝내게 하고(DATABASE 방 생명주기), `waiting`인 방은 DB 정리 뒤에 불린다.
    */
@@ -186,18 +191,33 @@ export class RoomService {
    * 알림 순서는 `room:state` → `onStarted` → 호출자의 ack다(API 문서의 이벤트 순서).
    */
   async #startOnJoin(joined: RoomRow): Promise<void> {
-    const [host, guest] = await Promise.all([
-      findUserById(this.db, joined.hostId),
-      findUserById(this.db, joined.guestId!),
-    ]);
-    if (!host || !guest) return; // 사용자 행은 지워지지 않는다(FK restrict)
-    const view: RoomView = { room: joined, host, guest };
-    this.#emitState(view);
+    // 시작 커밋 뒤 어느 단계에서 실패해도 입장을 되돌린다. `onStarted`에 닿기 전 실패는 `onStartAborted`로
+    // 알려 시작 완료를 기다리는 이탈이 영원히 대기하지 않게 한다.
+    let reachedStart = false;
     try {
+      const [host, guest] = await Promise.all([
+        findUserById(this.db, joined.hostId),
+        findUserById(this.db, joined.guestId!),
+      ]);
+      // 사용자 행은 지워지지 않는다(FK restrict). 그래도 없으면 경기 없는 playing 방이 남지 않게 실패로 다룬다.
+      if (!host || !guest) throw new Error('입장한 방의 사용자를 찾지 못했다');
+      const view: RoomView = { room: joined, host, guest };
+      this.#emitState(view);
+      reachedStart = true;
       await this.hooks.onStarted?.(view);
     } catch (error) {
+      if (!reachedStart) await this.#abortStart(joined);
       await this.#undoJoin(joined);
       throw error;
+    }
+  }
+
+  /** `onStarted`에 닿기 전 실패를 경기 서버에 알린다. 이 알림이 실패해도 입장 되돌리기는 계속한다. */
+  async #abortStart(joined: RoomRow): Promise<void> {
+    try {
+      await this.hooks.onStartAborted?.(joined);
+    } catch {
+      // 원래 오류를 올려 로그로 남긴다.
     }
   }
 

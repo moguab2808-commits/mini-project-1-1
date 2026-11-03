@@ -131,6 +131,7 @@ export class GameService {
     this.#sink = options.logSink ?? stdoutSink;
     this.hooks = {
       onStarted: (view) => this.#onStarted(view),
+      onStartAborted: (room) => this.#onStartAborted(room.id),
       onLeave: (info) => this.#onLeave(info.room, info.userId, info.reason),
     };
   }
@@ -297,6 +298,18 @@ export class GameService {
     } finally {
       session.started.resolve();
     }
+  }
+
+  /**
+   * 시작 커밋 뒤 `onStarted`에 닿기 전에 시작이 중단됐다(RoomService가 이 뒤에 입장을 되돌린다).
+   * `#onStarted` 실패와 같게 세션을 버리고 완료 신호를 풀어, 그 사이 들어온 이탈이 기다리지 않게 한다.
+   * 이탈이 먼저 만든 세션의 신호를 풀어야 하므로 `#sessionOf`로 같은 세션을 찾는다.
+   */
+  #onStartAborted(roomId: number): void {
+    const session = this.#sessionOf(roomId);
+    if (session.phase !== 'idle') return; // 이미 열린 경기는 건드리지 않는다
+    this.#discard(session);
+    session.started.resolve();
   }
 
   /**

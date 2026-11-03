@@ -113,6 +113,9 @@ export function createAppServer(options: AppOptions): AppServer {
     onStarted: async (view) => {
       await gameService.hooks.onStarted?.(view);
     },
+    onStartAborted: async (room) => {
+      await gameService.hooks.onStartAborted?.(room);
+    },
     onLeave: async (info) => {
       await options.roomHooks?.onLeave?.(info);
       await gameService.hooks.onLeave?.(info);
