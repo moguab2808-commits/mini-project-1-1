@@ -7,7 +7,7 @@
 | 승인된 미구현 설계 | 전송 방식: 계정·조회는 REST, 방·대전은 Socket.IO, 세션 쿠키 공유 ([DEC-013](../DECISIONS.md#결정-색인)) |
 | 현재 구현 | `shared`의 Zod 스키마와 이벤트 필드 타입([IMPL-002](../TASKS.md#impl-002-game-core), PR 병합 전). 서버·클라이언트 연동은 없음. 방 이벤트·`GET /api/rooms`는 서버가 구현했다(`packages/server/src/rooms`, [IMPL-008](../TASKS.md#impl-008-로비방-서버)). 경기 이벤트의 서버 연동은 IMPL-009 |
 | 확정 (API-001·API-002 완료) | REST 경로 8개와 요청·응답 필드, 방 목록 새로고침 조회, `sim:result` 삭제, Socket.IO 이벤트 필드, 오류 형식·코드, 이벤트 순서, 상대 비공개 점검, 이름·식별자 확인, 본인 private 뷰의 게이지·쿨타임 필드 ([API-001](../TASKS.md#api-001-api실시간-이벤트-계약-확정), [API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)) |
-| 미정 | 발사 각도 범위. 제안 (−π, π]·범위 밖·NaN은 `INVALID_INPUT`을 IMPL-002가 임시로 따랐으나 승인 전이다(승인되면 DEC를 연결해 이 표시를 지운다) |
+| 미정 | 없음. 발사 각도 범위는 (−π, π]로 확정([DEC-061](../DECISIONS.md#결정-색인)) |
 
 상위 구조는 [DESIGN](../DESIGN.md), 제품 동작은 [PRD](../PRD.md)를 따른다. 이 문서는 전송 방식·메시지·요청·응답·오류·검증 경계를 관리한다. 선택 이유는 [결정 기록](../DECISIONS.md)에 둔다. 아래 필드는 `shared`의 Zod 스키마로 옮길 수 있는 수준으로 적었고, 필드 이름은 `camelCase`다.
 
@@ -17,7 +17,8 @@
 
 | 타입 | 값·필드 | 비고 |
 | --- | --- | --- |
-| `CharacterId` | `bear`·`cat`·`fox`·`rabbit`·`owl`·`frog` | [캐릭터 6종](../PRD.md#캐릭터-변경). 이름은 제안. 사람 아바타 외형 타입으로 바뀔 예정이며 형식은 [CHAR-001](../TASKS.md#char-001-사람-아바타-전환과-꾸미기-설계)에서 정한다([DEC-048](../DECISIONS.md#결정-색인)) |
+| `CharacterId` | `bear`·`cat`·`fox`·`rabbit`·`owl`·`frog` | 현재 구현의 [동물 6종](../PRD.md#캐릭터-변경). [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)에서 아래 `Appearance`로 바꾸고 삭제한다([DEC-059](../DECISIONS.md#결정-색인)) |
+| `Appearance` (미구현) | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 선택지 모양 정의(번호 → 부품)는 `shared`의 데이터 한 곳에 두고 3D·SVG가 같이 쓴다. 항목이 늘면 필드를 더하고 없는 필드는 0으로 읽는다 |
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-052](../DECISIONS.md#결정-색인)·[DEC-053](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
@@ -25,6 +26,8 @@
 | `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
 | `Member` | `{ nickname, characterId, record: Record }` | 사용자 번호는 넣지 않는다 |
 | `Me` | `{ nickname, characterId, record: Record }` | `GET /api/me`·로그인 응답 |
+
+사람 아바타 구현([IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)) 뒤에는 `Member`·`Me`·`game:start.players[]`의 `characterId`를 `appearance: Appearance`로 바꾸고, `PATCH /api/me/character`를 `PATCH /api/me/appearance` `{ appearance: Appearance }` → `200 { user: Me }`(오류는 같음)로 바꾼다. 꾸미기 창의 저장 버튼이 이 요청을 한 번 보낸다. AI 대전의 AI 좌석 외형은 브라우저가 경기 시작 때 무작위로 만들어 `game:start`에 담고 재도전에서는 그대로 쓴다([DEC-059](../DECISIONS.md#결정-색인)).
 
 ### REST API
 
@@ -158,7 +161,7 @@
 | `hazard:use` (C → S) | `{ gameId, hazardInstanceId, target? }`. `target`은 `wall`·`sticky`에만 필수이며 `{ x, y, orientation? }`다. `orientation`(`horizontal`·`vertical`)은 `wall`에만 필수다. 좌표는 판 좌표계다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_HAZARD`, `HAZARD_COOLDOWN`, `HAZARD_OVERHEATED`, `HAZARD_INVALID_TARGET`, `HAZARD_NOT_USABLE`, `GAME_NOT_ACTIVE`. 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용한다. 랜덤형은 서버가 자동 발동한다 (DEC-015·017·031) |
 | `hazard:triggered` (S → C) | — | `{ gameId, kind, phase, sourceSeat, targetSeat, startsAtMs, expiresAtMs, params? }`. `phase`는 `start`·`end`. `params`는 `wall`·`sticky`의 `{ x, y, orientation? }`(`wall`은 판 좌표계 기준 절대각을 `angleDeg`(도, 가로 0·세로 90에서 판 돌리기로 회전한 값)로 함께 보낸다. `orientation`은 설치 때의 방향이라 클라이언트는 `angleDeg`만으로 그린다), `wind`의 `{ directionRad }`, `bar_speed`의 `{ multiplier }`, `board_spin`의 `{ angleDeg }`이며 양쪽에 같게 보낸다. 시야 가림(`flashlight`·`water_gun`)의 가림 모양은 넣지 않고 대상의 `game:state`로만 보낸다 |
 | `game:state` (S → C) | — | `GameView`(아래). 알이 움직이는 동안은 volatile, 조준 중에는 바뀔 때만, 알이 모두 멈춘 최종 스냅샷은 신뢰 전송이다 ([GAME](GAME.md#전송과-표시-초안)) |
-| `shot:submit` (C → S) | `{ gameId, turnId, stoneId, angle, power }`. 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), `angle`은 판 좌표계 라디안이다. 범위는 미정이다(제안 (−π, π], 범위 밖·NaN은 `INVALID_INPUT`) | `{ ok: true }`. `INVALID_INPUT`, `GAME_NOT_ACTIVE`, `STALE_TURN`, `SHOT_ALREADY_SUBMITTED`, `NOT_YOUR_TURN`, `INVALID_STONE`, `PLAYER_STUNNED` ([DEC-026](../DECISIONS.md#결정-색인)). 적용 결과는 `game:state`로 받는다 |
+| `shot:submit` (C → S) | `{ gameId, turnId, stoneId, angle, power }`. 세기는 0 초과 100 이하(세기 0은 발사하지 않음, [PRD](../PRD.md#게임-규칙)), `angle`은 판 좌표계 라디안이다. 범위는 (−π, π]이고 범위 밖·NaN은 `INVALID_INPUT`이다([DEC-061](../DECISIONS.md#결정-색인)) | `{ ok: true }`. `INVALID_INPUT`, `GAME_NOT_ACTIVE`, `STALE_TURN`, `SHOT_ALREADY_SUBMITTED`, `NOT_YOUR_TURN`, `INVALID_STONE`, `PLAYER_STUNNED` ([DEC-026](../DECISIONS.md#결정-색인)). 적용 결과는 `game:state`로 받는다 |
 | `turn:change` (S → C) | — | `{ gameId, turnId, round, activePlayerId: Seat, deadlineMs, serverNowMs, reason }`. `reason`은 `start`(경기 첫 턴)·`resolved`(발사 처리 뒤)·`timeout`(시간초과) |
 | `game:forfeit` (C → S) | `{ gameId }` | `{ ok: true }`. `GAME_NOT_ACTIVE`, `INVALID_INPUT` |
 | `game:over` (S → C) | — | `{ gameId, winnerId: Seat \| null, reason, remainingStones: [n0, n1], rematchDeadlineMs: number \| null }`. `winnerId`가 `null`이면 무승부다. `reason`은 `all_stones_out`(알 모두 제거)·`final_round`(최종 라운드 알 수 비교)·`forfeit`(기권·이탈)·`timeout_forfeit`(연속 시간초과 강제 기권). 상대가 나가 재도전할 수 없으면 `rematchDeadlineMs`는 `null`이다. 레이팅은 없다 ([DEC-022](../DECISIONS.md#결정-색인)) |
@@ -318,7 +321,6 @@ sequenceDiagram
 
 - 승인·미구현: 추가 방해요소 10종의 `HazardKind` 값·`hazard:use` 대상 형식·속임수형 상대 비공개 필드는 [추가 방해요소 10종 필드](#추가-방해요소-10종-필드-haz-001-제안)에 제안했고 [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)에서 구현한다. 서버 연동 전에 개발자 B와 확인한다. 감정표현 이벤트·빈도 제한은 [감정표현 필드](#감정표현-필드-emote-001-제안)에 제안했다([DEC-055](../DECISIONS.md#결정-색인)·[DEC-056](../DECISIONS.md#결정-색인)).
 - 인증 전달·실패 응답·권한 검사 위치: [인증 설계](AUTH.md)
-- 발사 각도 범위 (제안 (−π, π], 승인 전)
 - DEC-036의 `board:rotate`·`hazard:aim`·`aim:update`/`aim:state`, `OUT_OF_REACH`·`BOARD_ROTATE_NOT_ALLOWED`, `hazard:use` target의 `h`, 효과 params의 `aimX`·`aimY`·`aimH`·`coverage`, private `blind.coverage`: 개발자 A 제안이며 서버 구현(IMPL-009) 전에 개발자 B와 합의한다. 스키마는 `packages/shared/src/protocol.ts`
 - 호환성·버전 변경
 

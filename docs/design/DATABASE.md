@@ -23,6 +23,7 @@
 | `nickname` | varchar(12) not null | 로그인 식별자, 변경 불가. 앱이 NFC로 정규화해 저장한다 |
 | `password` | text not null | **argon2id 해시값을 저장한다(원문 아님).** 컬럼명이 원문처럼 보이므로 스키마에 주석으로 남긴다 |
 | `character_id` | varchar(16) not null | 캐릭터 6종([API `CharacterId`](API.md#공통-타입)). 가입 시 무작위 기본값. 값은 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 캐릭터가 늘어도 마이그레이션이 필요 없다 |
+| `appearance` (미구현) | jsonb not null default 기본 외형 | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현) 마이그레이션에서 기본값(모든 항목 0)으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 `character_id`를 지운다. 값 범위는 앱(Zod)만 검사한다 |
 | `total_games` | integer not null default 0 | CHECK >= 0. 승·패·무 모두 포함 |
 | `wins` / `losses` | integer not null default 0 | CHECK >= 0, `wins + losses <= total_games`. 무 = `total_games - wins - losses` |
 
@@ -107,7 +108,7 @@ Drizzle 마이그레이션 파일을 저장소에 커밋하고 배포 시작 단
 - (해소: IMPL-006에서 생성된 SQL과 Neon의 `pg_indexes`로 `lower(nickname)` 유니크 인덱스를 확인했다. [worklog](../worklogs/2026-11-02.md#impl-006-db마이그레이션))
 - 백업·복구 절차는 [운영](OPERATIONS.md)
 - (해소: 재도전 15초 만료는 누르지 않은 사람을 나가기와 같게 처리한다. [DEC-041](../DECISIONS.md#결정-색인). 두 사람 모두 누르지 않은 경우는 방장 기준으로 방이 닫히는 해석이며 개발자 A의 확인이 필요하다)
-- 사람 아바타 외형 저장 형식([DEC-048](../DECISIONS.md#결정-색인)): 지금 `character_id` 한 컬럼을 외형 객체로 넓히는 방식(JSON 한 컬럼 또는 항목별 컬럼)과 기존 동물 값 처리는 [CHAR-001](../TASKS.md#char-001-사람-아바타-전환과-꾸미기-설계)에서 정한다
+- (해소: 사람 아바타 외형은 `users.appearance` jsonb 한 컬럼에 저장하고 기존 동물 값은 고정 기본 외형으로 바꾼다. [DEC-059](../DECISIONS.md#결정-색인))
 - (해소: 방 테마는 `rooms.theme` 컬럼에 저장한다. [DEC-052](../DECISIONS.md#결정-색인))
 
 제품 정책이 바뀌면 스키마 편의로 정하지 말고 PRD와 결정 기록을 먼저 갱신한다.

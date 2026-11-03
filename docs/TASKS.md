@@ -15,6 +15,7 @@
 | 막힘 | 진행 불가 조건과 해소 조건을 해당 작업에 기록 |
 | 리뷰 중 | 검증 근거와 변경을 PR로 제출하고 리뷰를 기다림 |
 | 완료 | 수용 기준 충족, 검증 근거 연결, 리뷰 후 기준 브랜치 병합 |
+| 취소 | 결정 철회 등으로 하지 않기로 함. 근거 DEC와 사유를 해당 작업에 기록 |
 
 우선순위는 P0(현재 진행을 막는 작업), P1(다음 착수 대상), P2(이후 검토)로 표시한다. 우선순위·작업 등록은 미정 제품 정책·기술안을 승인하는 행위가 아니다.
 
@@ -60,14 +61,15 @@
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
-| [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 예정 | 미정 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
+| [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
 | [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
-| [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 예정 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
+| [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 취소 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
 | [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
 | [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 예정 | 미정 | 미생성 |
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
-| [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, CHAR-001 뒤 등록하는 사람 아바타 구현 작업 | 예정 | 미정 | 미생성 |
+| [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 예정 | 미정 | 미생성 |
+| [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 예정 | 미정 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -855,21 +857,21 @@ Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## CHAR-001 사람 아바타 전환과 꾸미기 설계
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
 의존성: IMPL-012(지금의 캐릭터 변경 창·API)
 범위: [DEC-048](DECISIONS.md#결정-색인)에 따라 동물 6종을 사람 아바타로 바꾸고 꾸미기(캐릭터·헤어스타일·이목구비·악세사리 등)를 추가하기 위한 미정 사항을 정하고, 시험용 머리로 화풍을 확인한 뒤 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
 관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경)·[화면 미정 사항](PRD.md#화면-미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획) / [DATABASE](design/DATABASE.md#미정-사항) / [API 공통 타입](design/API.md#공통-타입) / [DEC-033](DECISIONS.md#결정-색인)·[DEC-048](DECISIONS.md#결정-색인)
 Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)
 
 수용 기준:
-- [ ] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 꾸미기 항목·선택지 수·꾸미기 시점·저장 시점·기본 외형·AI 상대 외형이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
-- [ ] (정상) 3D·2D 제작 방식(코드 도형 유지 여부, 이목구비 표현, 프로필·카드 2D 얼굴 방식)을 정해 TECH_STACK에 기록했고, DEC-033과 다르면 대체 관계를 남겼다.
-- [ ] (정상) 시험용 머리(이목구비 한 세트·헤어 2종·악세사리 1종)를 개발용 화면에서 띄워 스크린샷으로 화풍을 사용자에게 확인받았다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
-- [ ] (예외) 외형 저장 형식(DATABASE)·API 타입과 기존 계정의 동물 캐릭터 값 처리 방식을 정했다. 외형은 상대에게도 보여야 하므로 방 목록·대기실·`game:start`로 전달되는 경로를 포함한다.
+- [x] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 꾸미기 항목·선택지 수·꾸미기 시점·저장 시점·기본 외형·AI 상대 외형이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다. ([DEC-054](DECISIONS.md#결정-색인)·[DEC-059](DECISIONS.md#결정-색인))
+- [x] (정상) 3D·2D 제작 방식(코드 도형 유지 여부, 이목구비 표현, 프로필·카드 2D 얼굴 방식)을 정해 TECH_STACK에 기록했고, DEC-033과 다르면 대체 관계를 남겼다. (DEC-033 안이라 대체 없음)
+- [x] (정상) ~~시험용 머리를 개발용 화면에서 띄워 화풍을 확인받는다~~ → 사용자 요청("구현 전에 필요한 결정 전부 물어봐 바로 구현할 수 있게", 2026-11-03)에 따라 [IMPL-018](#impl-018-사람-아바타-구현)의 첫 수용 기준으로 옮겼다.
+- [x] (예외) 외형 저장 형식(DATABASE)·API 타입과 기존 계정의 동물 캐릭터 값 처리 방식을 정했다. ([DATABASE users](design/DATABASE.md#users)·[API 공통 타입](design/API.md#공통-타입)) 외형은 상대에게도 보여야 하므로 방 목록·대기실·`game:start`로 전달되는 경로를 포함한다.
 - [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: 꾸미기 항목 7개(두상·머리카락·눈썹·눈·코·입술·피부색)와 항목별 선택지 5개를 [DEC-054](DECISIONS.md#결정-색인)로 정했다. 머리색·악세사리 포함 여부, 해금, 꾸미기·저장 시점, 기본 외형, AI 상대 외형, 동물 값 처리, 제작 방식, 저장 형식, 시험용 머리 확인은 남았다.
+진행: 꾸미기 항목 7개와 선택지 5개([DEC-054](DECISIONS.md#결정-색인)), 나머지 사항([DEC-059](DECISIONS.md#결정-색인))을 정해 PRD·API·DATABASE·TECH_STACK에 반영하고 구현을 [IMPL-018](#impl-018-사람-아바타-구현)으로 등록했다. 리뷰·병합이 남았다.
 
 검증 근거: [2026-11-03 worklog CHAR-001 절](worklogs/2026-11-03.md#char-001-사람-아바타-전환과-꾸미기-설계)
 
@@ -918,7 +920,7 @@ Issue·PR: 없음
 ## UI-003 사람 아바타 화풍 UI 적용 설계
 
 우선순위: P2
-상태: 예정
+상태: 취소 ([DEC-060](DECISIONS.md#결정-색인)으로 [DEC-051](DECISIONS.md#결정-색인) 철회. UI는 지금 화풍 유지)
 담당: 미정
 의존성: CHAR-001(아바타 부품 구조·시험용 머리로 확인한 화풍)
 범위: [DEC-051](DECISIONS.md#결정-색인)에 따라 사람 아바타와 어울리는 화풍을 로그인·회원가입·방 목록·환경설정·게임 화면을 **제외한** 나머지 화면에 적용하기 위한 미정 사항을 정하고 시안·구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다. 아바타 모델·꾸미기 기능 자체는 [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계)이 맡는다.
@@ -987,19 +989,40 @@ Issue·PR: 미생성
 수용 기준:
 - [x] (정상) 종류 6개·사용 방법(숫자키 1~6·버튼 메뉴)·사용 시점(경기 중)·쿨타임 3초·표시(몸짓·말풍선·효과음)·끄기 설정 없음·AI 사용이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
 - [x] (정상) API에 감정표현 보내기·받기 이벤트와 필드, 서버 빈도 제한과 거부 오류를 정했다. 로컬 2인·AI 경로를 포함한다. ([API 감정표현 필드](design/API.md#감정표현-필드-emote-001-제안))
-- [ ] (예외) 사람 아바타 구조가 정해진 뒤 6종의 몸짓을 아바타 몸짓으로 정의했다([CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) 이후).
+- [x] (예외) 사람 아바타 구조가 정해진 뒤 6종의 몸짓을 아바타 몸짓으로 정의했다([CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) 이후). (상반신 [DEC-059](DECISIONS.md#결정-색인), 몸짓 [DEC-062](DECISIONS.md#결정-색인))
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: 제품 규칙을 [DEC-056](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다. API 계약(`emote:send`·`emote:shown`, `game-runtime` 쿨타임 2.8초 검사, `EMOTE_COOLDOWN`)을 제안했다. 아바타 몸짓 정의는 CHAR-001 이후로 남았다.
+진행: 제품 규칙을 [DEC-056](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다. API 계약(`emote:send`·`emote:shown`, `game-runtime` 쿨타임 2.8초 검사, `EMOTE_COOLDOWN`)을 제안했다. 상반신 몸짓 6종을 [DEC-062](DECISIONS.md#결정-색인)로 정했다. 리뷰·병합이 남았다.
 
 검증 근거: [2026-11-03 worklog HAZ-001·EMOTE-001 절](worklogs/2026-11-03.md#haz-001emote-001-방해요소-10종감정표현-결정-기록)
+
+## IMPL-018 사람 아바타 구현
+
+우선순위: P1
+상태: 예정
+담당: 미정
+의존성: CHAR-001, IMPL-012(캐릭터 변경 창·API)
+범위: [DEC-048](DECISIONS.md#결정-색인)·[DEC-054](DECISIONS.md#결정-색인)·[DEC-059](DECISIONS.md#결정-색인)의 사람 아바타를 `shared` 외형 타입·부품 데이터, DB 마이그레이션, API, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI 외형에 구현하고 동물 6종을 없앤다. UI 꾸밈은 바꾸지 않는다([DEC-060](DECISIONS.md#결정-색인)).
+관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE users](design/DATABASE.md#users) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, 첫 단계) 시험용 머리(이목구비 한 세트·머리카락 2종)를 개발용 화면에 띄운 스크린샷으로 화풍을 사용자에게 확인받은 뒤 나머지 선택지를 만든다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
+- [ ] (정상) `shared`에 `Appearance`(7항목, 0~4)·기본 외형·부품 데이터가 있고, `users.appearance` 마이그레이션이 기존 행을 고정 기본 외형으로 채우고 `character_id`를 지운다(실제 DB 테스트). 신규 가입도 기본 외형이다.
+- [ ] (정상) 로비 프로필에서 연 꾸미기 창(왼쪽 3D 미리보기 + 오른쪽 항목 탭)에서 바꾼 값은 저장을 눌러야 `PATCH /api/me/appearance`로 한 번 저장되고, 닫으면 취소된다.
+- [ ] (예외) 범위 밖 값·없는 항목·여분 필드는 `INVALID_INPUT`이고 저장되지 않는다.
+- [ ] (정상) 프로필바·방 카드·대기실·결과 화면의 2D 얼굴과 게임 장면의 3D 상반신이 같은 외형으로 보이고, 상대에게도 방 목록·`room:state`·`game:start`로 같은 외형이 보인다(온라인 두 계정). AI는 경기마다 무작위이고 재도전에서 같다.
+- [ ] (경계) 3D 아바타 두 명이 있는 게임 화면의 프레임 시간을 동물 캐릭터 때와 같은 조건으로 기록해 비교했다([검증 계획](ENGINEERING-VALIDATION.md)).
+- [ ] 동물 6종 코드·`CharacterId`를 지우고 API·DATABASE·TECH_STACK의 "미구현" 표시를 고치며, 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
 
 ## IMPL-017 감정표현 구현
 
 우선순위: P2
 상태: 예정
 담당: 미정
-의존성: EMOTE-001, CHAR-001 뒤 등록하는 사람 아바타 구현 작업(동물 캐릭터에 먼저 만들지 않는다, [DEC-056](DECISIONS.md#결정-색인))
+의존성: EMOTE-001, [IMPL-018](#impl-018-사람-아바타-구현)(동물 캐릭터에 먼저 만들지 않는다, [DEC-056](DECISIONS.md#결정-색인))
 범위: 감정표현 6종의 입력(숫자키·버튼 메뉴), 서버 중계·빈도 제한, 아바타 몸짓·말풍선·효과음, AI 사용을 구현한다.
 관련 문서: [PRD 감정표현](PRD.md#감정표현-dec-056) / [API](design/API.md)
 Issue·PR: 미생성
