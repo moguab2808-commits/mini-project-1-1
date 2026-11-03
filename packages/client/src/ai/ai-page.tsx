@@ -6,8 +6,8 @@ import { GameScreen } from '../game/GameScreen.tsx';
 import { GameStore } from '../game/game-store.ts';
 import { startAiGame, type AiGameSession, type AiMatchSettings } from './ai-game-session.ts';
 
-const BOARD_LABEL: Record<BoardId, string> = { standard: '기본판', circle: '원형판' };
-const PIECE_COUNTS = [5, 7, 9] as const;
+export const BOARD_LABEL: Record<BoardId, string> = { standard: '기본판', circle: '원형판' };
+export const PIECE_COUNTS = [5, 7, 9] as const;
 
 export interface AiSetupFormProps {
   initial?: AiMatchSettings;

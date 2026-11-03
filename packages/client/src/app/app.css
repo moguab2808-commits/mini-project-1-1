@@ -1,0 +1,561 @@
+/* 계정·로비·대기실 화면. 색·글꼴은 시안(알까기 바 (2).html)과 게임 HUD(hud.css)를 따른다.
+   글꼴 Jua는 반입 확인 전이라 시스템 글꼴로 대체된다. */
+:root {
+  --ink: #2b1d14;
+  --cream: #faf3e4;
+  --wood: #3b2a1d;
+  --wood-light: #5a4130;
+  --accent: #f0b553;
+  --accent-ink: #22170f;
+  --danger: #d9694f;
+  --ok: #7fb069;
+  --sub: #bba78e;
+}
+body {
+  margin: 0;
+  background: #1b130e;
+  color: var(--cream);
+  font-family: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+}
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ul {
+  margin: 0;
+}
+ul {
+  padding: 0;
+  list-style: none;
+}
+button,
+input {
+  font: inherit;
+}
+
+/* 공통 컨트롤 */
+.btn {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 2px solid var(--cream);
+  border-radius: 10px;
+  background: var(--wood-light);
+  color: var(--cream);
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) {
+  background: #6d513c;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #f6c473;
+}
+.btn-small {
+  min-height: 32px;
+  padding: 0 12px;
+}
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--wood-light);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field > span {
+  color: var(--sub);
+  font-size: 14px;
+}
+.field input:not([type='range']) {
+  height: 40px;
+  padding: 0 12px;
+  border: 2px solid var(--wood-light);
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--ink);
+}
+.field input:focus,
+.code-cell:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+.hint {
+  color: var(--sub);
+  font-size: 14px;
+}
+.msg {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+.msg-error {
+  background: rgba(217, 105, 79, 0.2);
+  color: #ffb4a3;
+}
+.msg-info {
+  background: rgba(240, 181, 83, 0.18);
+  color: var(--accent);
+}
+.masked {
+  letter-spacing: 2px;
+}
+.logo {
+  font-size: 36px;
+  text-align: center;
+  color: var(--accent);
+}
+
+/* 토스트 */
+.toast-layer {
+  position: fixed;
+  top: 16px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.toast {
+  max-width: min(480px, calc(100vw - 32px));
+  padding: 10px 18px;
+  border: 2px solid var(--cream);
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--cream);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* 부팅·로그인 */
+.boot-page,
+.auth-page,
+.waiting-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.auth-card,
+.waiting-card {
+  width: min(420px, 100%);
+  padding: 24px;
+  box-sizing: border-box;
+  border: 3px solid var(--wood-light);
+  border-radius: 16px;
+  background: var(--wood);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+.tab {
+  flex: 1;
+  height: 40px;
+  border: 2px solid var(--wood-light);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--sub);
+  cursor: pointer;
+}
+.tab-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* 로비 */
+.lobby {
+  min-height: 100dvh;
+  display: flex;
+}
+.profile-bar {
+  width: 220px;
+  flex: none;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--wood);
+  border-right: 3px solid var(--wood-light);
+}
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid var(--wood-light);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+}
+.profile-card:hover {
+  border-color: var(--accent);
+}
+.profile-name {
+  font-size: 20px;
+  word-break: break-all;
+}
+.profile-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.profile-stats dt {
+  color: var(--sub);
+  font-size: 13px;
+}
+.profile-stats dd {
+  font-size: 16px;
+}
+.profile-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.room-area {
+  flex: 1;
+  min-width: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.room-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.empty {
+  margin: auto;
+  color: var(--sub);
+  font-size: 18px;
+}
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+.room-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 3px solid var(--wood-light);
+  border-radius: 14px;
+  background: var(--wood);
+  cursor: pointer;
+  user-select: none;
+}
+.room-card:hover {
+  border-color: #8a6a4d;
+}
+.room-card-on {
+  border-color: var(--accent);
+  background: #4a3626;
+}
+.room-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.room-title {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.badge {
+  flex: none;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 13px;
+}
+.room-host {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.room-host-name {
+  font-size: 16px;
+}
+.room-host-record {
+  color: var(--sub);
+  font-size: 13px;
+}
+
+/* 플로팅 창 */
+.float-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: none;
+}
+.float-window {
+  pointer-events: auto;
+  width: min(380px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  box-sizing: border-box;
+  border: 3px solid var(--accent);
+  border-radius: 16px;
+  background: var(--wood);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.float-window-wide {
+  width: min(480px, 100%);
+}
+.float-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 10px 18px;
+  border-bottom: 2px solid var(--wood-light);
+}
+.float-head h2 {
+  font-size: 20px;
+}
+.float-body {
+  padding: 16px 18px 18px;
+}
+.choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.choice legend {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 2px solid var(--wood-light);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.chip-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.chip:has(input:focus-visible) {
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+}
+/* 방 생성 창의 AI 설정은 `/ai`의 `AiSetupForm`을 그대로 쓴다(DEC-042). 그 마크업에 칩 모양을 입힌다. */
+.ai-setup form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ai-setup fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ai-setup legend {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+.ai-setup label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 2px solid var(--wood-light);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.ai-setup input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.ai-setup label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.ai-setup label:has(input:focus-visible) {
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+}
+.ai-setup p {
+  color: var(--sub);
+  font-size: 14px;
+}
+.ai-setup button[type='submit'] {
+  min-height: 40px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+.board-preview {
+  width: 24px;
+  height: 24px;
+  fill: #b98a54;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.code-box {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px dashed var(--wood-light);
+  border-radius: 10px;
+}
+.code-text {
+  font-size: 24px;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+.code-cells {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.code-cell {
+  width: 44px;
+  height: 52px;
+  box-sizing: border-box;
+  border: 2px solid var(--wood-light);
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 24px;
+  text-align: center;
+  text-transform: uppercase;
+}
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.character-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 3px solid var(--wood-light);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+}
+.character-pick:hover:not(:disabled) {
+  border-color: #8a6a4d;
+}
+.character-on {
+  border-color: var(--accent);
+  background: #4a3626;
+}
+.rules h3 {
+  margin: 12px 0 4px;
+  color: var(--accent);
+  font-size: 17px;
+}
+.rules ul {
+  padding-left: 18px;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 15px;
+}
+.rules .btn {
+  margin-top: 16px;
+  width: 100%;
+}
+
+/* 대기실 */
+.waiting-title {
+  font-size: 26px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.waiting-info {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+.waiting-info dt {
+  color: var(--sub);
+  font-size: 13px;
+}
+.waiting-host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.waiting-status {
+  text-align: center;
+  color: var(--accent);
+  font-size: 18px;
+}

@@ -103,7 +103,7 @@ interface GameEventMap {
 
 원격 세션은 payload와 ack를 바꾸지 않고, 다른 경기·이미 지난 시작·증가하지 않은 뷰 revision·종료 뒤 상태 이벤트만 버린다. 같은 방의 재도전과 방장 혼자 대기한 뒤 다음 참여자의 경기에도 같은 세션을 쓴다. 방 폐쇄·직접 나가기 뒤 늦게 오는 방 상태·시작·성공 ack는 다시 화면을 열지 않는다. 시작 실패 ack는 선행 `playing` 상태를 정리한다. ack 자체에 시간 제한을 두지 않으며 연결 종료·정리 때 대기 중 명령을 끝낸다.
 
-`session:replaced`·연결 실패·연결 끊김은 세션·스토어·소켓 구독을 정리하고 `onLoginRequired`를 한 번 호출한다. `/online` 연결 확인 화면은 이를 `/login` 이동에 연결한다. 실제 로그인·로비 화면은 IMPL-012 범위다. `RemoteGameSession.dispose()`는 `RoomClient.leave()`로 나가기 이벤트를 보내고, 연결 전체를 닫을 때는 `RoomClient.dispose()`를 호출한다.
+`session:replaced`·연결 실패·연결 끊김은 세션·스토어·소켓 구독을 정리하고 `onLoginRequired`를 한 번 호출한다. 계정·로비 화면(`client/src/app/`, IMPL-012)의 `MainShell`이 이를 로그인 화면 이동(끊김 사유 안내)에 연결한다. `RemoteGameSession.dispose()`는 `RoomClient.leave()`로 나가기 이벤트를 보내고, 연결 전체를 닫을 때는 `RoomClient.dispose()`를 호출한다.
 
 ### 로컬 2인 구성 (창 2개)
 

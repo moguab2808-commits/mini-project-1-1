@@ -16,7 +16,7 @@
 | 영역 | 채택 | 관련 설계 |
 | --- | --- | --- |
 | 언어·저장소 | TypeScript, npm workspaces 모노레포 (`client`, `server`, `game-core`, `game-runtime`, `shared`) | [LOCAL](LOCAL.md) |
-| 클라이언트 | Vite, React, React Router, Zustand, 일반 CSS(CSS Modules) | [LOCAL](LOCAL.md) |
+| 클라이언트 | Vite, React, 일반 CSS(전역 CSS 파일). React Router·Zustand·CSS Modules는 쓰지 않고, 화면은 로그인·방 상태로 전환하며 상태는 React 상태와 `RoomClient` 구독으로 관리한다([DEC-045](../DECISIONS.md#결정-색인)) | [LOCAL](LOCAL.md) |
 | 렌더링 | Three.js, React Three Fiber, drei | [GAME](GAME.md) |
 | 오디오 | Howler.js | [OPERATIONS](OPERATIONS.md) |
 | 서버·통신 | Node.js 24 LTS, Express, Socket.IO | [API](API.md) |
