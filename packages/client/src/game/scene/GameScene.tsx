@@ -8,11 +8,18 @@
 // 오른쪽 버튼을 누르는 순간 onPointer에 오른쪽 down을 보낸다(조준·배치 취소). 왼쪽 버튼을 누른 채 오른쪽을
 // 누르면 브라우저는 pointerdown 대신 pointermove(버튼 조합 변경)만 보내므로 그 경우도 오른쪽 down으로 바꿔 보낸다.
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { BOARDS, HAZARD_TUNING, PHYSICS, SEAT_GEOMETRY, type Seat } from '@alkkagi/shared';
+import {
+  BOARDS,
+  HAZARD_TUNING,
+  PHYSICS,
+  SEAT_GEOMETRY,
+  type Appearance,
+  type Seat,
+} from '@alkkagi/shared';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { Group, PCFShadowMap, PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three';
 import type { BoardPointerEvent, SceneProps } from './scene-contract.ts';
-import { CharacterRig, type CharacterFrame, type CharacterId } from './characters.ts';
+import { CharacterRig, type CharacterFrame } from './characters.ts';
 import { BlindFxLayer, type BlindDraw } from './blind-fx.ts';
 import {
   aimPointFromRay,
@@ -242,11 +249,16 @@ function SceneWorld(props: SceneProps) {
 
   const worldGroup = useRef<Group>(null);
   const tableRef = useRef<Group>(null);
-  const char0 = players[0].characterId as CharacterId;
-  const char1 = players[1].characterId as CharacterId;
+  // 외형 객체는 새로 받아도 값이 같으면 모델을 다시 만들지 않는다
+  const look0 = JSON.stringify(players[0].appearance);
+  const look1 = JSON.stringify(players[1].appearance);
   const rigs = useMemo(
-    () => [new CharacterRig(char0, 0), new CharacterRig(char1, 1)] as [CharacterRig, CharacterRig],
-    [char0, char1],
+    () =>
+      [
+        new CharacterRig(JSON.parse(look0) as Appearance, 0),
+        new CharacterRig(JSON.parse(look1) as Appearance, 1),
+      ] as [CharacterRig, CharacterRig],
+    [look0, look1],
   );
   useEffect(
     () => () => {

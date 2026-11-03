@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   THEME_LABEL,
-  type CharacterId,
+  type Appearance,
   type Me,
   type RoomAck,
   type RoomCreate,
@@ -10,13 +10,13 @@ import {
   type RoomSummary,
 } from '@alkkagi/shared';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
-import { CharacterFace } from '../game/hud/CharacterFace.tsx';
+import { AvatarFace } from '../avatar/AvatarFace.tsx';
 import type { RoomClient } from '../online/room-client.ts';
 import { ApiError, describeApiError, type Api } from './api.ts';
 import { canEnter, formatRecord, formatWinRate } from './logic.ts';
 import { roomErrorMessage } from './messages.ts';
 import {
-  CharacterModal,
+  AvatarModal,
   CodeModal,
   CreateRoomModal,
   type CreateResult,
@@ -193,9 +193,10 @@ export function LobbyScreen({
     }
   };
 
-  const pickCharacter = async (characterId: CharacterId): Promise<string | null> => {
+  const saveAppearance = async (appearance: Appearance): Promise<string | null> => {
     try {
-      onMeChange(await api.changeCharacter(characterId));
+      onMeChange(await api.changeAppearance(appearance));
+      setModal(null);
       return null;
     } catch (error) {
       if (error instanceof ApiError && error.code === 'UNAUTHENTICATED') {
@@ -216,13 +217,13 @@ export function LobbyScreen({
         <button
           type="button"
           className="profile-card"
-          aria-label="캐릭터 변경"
+          aria-label="캐릭터 꾸미기"
           disabled={locked}
           onClick={() => {
             setModal({ t: 'character' });
           }}
         >
-          <CharacterFace characterId={me.characterId} size={72} />
+          <AvatarFace appearance={me.appearance} size={72} />
           <strong className="profile-name">{me.nickname}</strong>
         </button>
         <dl className="profile-stats">
@@ -344,7 +345,7 @@ export function LobbyScreen({
                       {THEME_LABEL[room.theme]}
                     </span>
                     <div className="room-host">
-                      <CharacterFace characterId={room.host.characterId} size={44} />
+                      <AvatarFace appearance={room.host.appearance} size={44} />
                       <div>
                         <div className="room-host-name">{room.host.nickname}</div>
                         <div className="room-host-record">
@@ -389,7 +390,7 @@ export function LobbyScreen({
         />
       )}
       {modal?.t === 'character' && (
-        <CharacterModal current={me.characterId} onPick={pickCharacter} onClose={closeModal} />
+        <AvatarModal current={me.appearance} onSave={saveAppearance} onClose={closeModal} />
       )}
       {modal?.t === 'settings' && (
         <SettingsModal

@@ -51,7 +51,7 @@ const INVALID: CommandResult = {
 
 export interface PlayerSeed {
   nickname: string;
-  characterId: GameStart['players'][0]['characterId'];
+  appearance: GameStart['players'][0]['appearance'];
 }
 
 export interface StartGameConfig {

@@ -1,3 +1,4 @@
+import { DEFAULT_APPEARANCE, type Appearance } from '@alkkagi/shared';
 import { describe, expect, it } from 'vitest';
 import { isPlacementValid, previewShot, Prng, reachOf } from '@alkkagi/game-core';
 import { RoomRuntime, type RuntimeClock } from '@alkkagi/game-runtime';
@@ -185,9 +186,12 @@ describe('AiController + RoomRuntime', () => {
     seed: 42,
     firstSeat,
     players: [
-      { nickname: 'me', characterId: 'bear' as const },
-      { nickname: 'AI', characterId: 'cat' as const },
-    ] as [{ nickname: string; characterId: 'bear' }, { nickname: string; characterId: 'cat' }],
+      { nickname: 'me', appearance: DEFAULT_APPEARANCE },
+      { nickname: 'AI', appearance: DEFAULT_APPEARANCE },
+    ] as [
+      { nickname: string; appearance: Appearance },
+      { nickname: string; appearance: Appearance },
+    ],
   });
 
   it('AI 턴이면 조준 시간(1.5~3초) 뒤 사람과 같은 명령으로 발사하고 수락된다', async () => {
@@ -267,8 +271,8 @@ describe('AiController 방해요소', () => {
       gameId: 'g',
       seat: 1,
       players: [
-        { seat: 0, nickname: 'me', characterId: 'bear' },
-        { seat: 1, nickname: 'AI', characterId: 'cat' },
+        { seat: 0, nickname: 'me', appearance: DEFAULT_APPEARANCE },
+        { seat: 1, nickname: 'AI', appearance: DEFAULT_APPEARANCE },
       ],
       board: 'standard',
       pieceCount: 5,
@@ -418,8 +422,8 @@ describe('AiController 계획 시간 나누기', () => {
       gameId: 'g',
       seat: 1,
       players: [
-        { seat: 0, nickname: 'me', characterId: 'bear' },
-        { seat: 1, nickname: 'AI', characterId: 'cat' },
+        { seat: 0, nickname: 'me', appearance: DEFAULT_APPEARANCE },
+        { seat: 1, nickname: 'AI', appearance: DEFAULT_APPEARANCE },
       ],
       board: 'standard',
       pieceCount: 9,

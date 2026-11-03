@@ -2,7 +2,7 @@ import type { AddressInfo } from 'node:net';
 import request from 'supertest';
 import { io as connect, type Socket as ClientSocket } from 'socket.io-client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { SessionReplacedSchema } from '@alkkagi/shared';
+import { DEFAULT_APPEARANCE, SessionReplacedSchema } from '@alkkagi/shared';
 import { createAppServer, type AppServer } from '../app.ts';
 import { createTempDatabase, type TempDatabase } from '../db/temp-database.ts';
 
@@ -10,7 +10,6 @@ import { createTempDatabase, type TempDatabase } from '../db/temp-database.ts';
 const baseUrl = process.env.DATABASE_URL;
 
 const PASSWORD = 'correct-horse';
-const CHARACTERS = ['bear', 'cat', 'fox', 'rabbit', 'owl', 'frog'];
 
 describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
   let tempDb: TempDatabase;
@@ -105,7 +104,7 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
       expect(Object.keys(res.body)).toEqual(['user']);
       expect(res.body.user).toEqual({
         nickname: '로그인성공',
-        characterId: expect.stringMatching(new RegExp(`^(${CHARACTERS.join('|')})$`)),
+        appearance: DEFAULT_APPEARANCE,
         record: { totalGames: 0, wins: 0, losses: 0, draws: 0 },
       });
       expect(JSON.stringify(res.body)).not.toMatch(/argon2|password|"id"/i);
@@ -117,15 +116,16 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
       expect(res.body.user.nickname).toBe('내정보');
     });
 
-    it('캐릭터를 바꾸면 바로 저장돼 /api/me에 반영된다', async () => {
-      const { cookie } = await signupAndLogin('캐릭터변경');
+    it('외형을 저장하면 /api/me에 반영된다', async () => {
+      const { cookie } = await signupAndLogin('외형변경');
+      const appearance = { ...DEFAULT_APPEARANCE, hair: 3, eyes: 2, skinTone: 4 };
       const res = await api()
-        .patch('/api/me/character')
+        .patch('/api/me/appearance')
         .set('Cookie', cookie)
-        .send({ characterId: 'owl' })
+        .send({ appearance })
         .expect(200);
-      expect(res.body.user.characterId).toBe('owl');
-      expect((await me(cookie).expect(200)).body.user.characterId).toBe('owl');
+      expect(res.body.user.appearance).toEqual(appearance);
+      expect((await me(cookie).expect(200)).body.user.appearance).toEqual(appearance);
     });
 
     it('세션은 마지막 사용 후 24시간 뒤 만료되고 만료된 행은 정리된다', async () => {
@@ -249,7 +249,7 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
         await api()
           .patch('/api/me/password')
           .send({ currentPassword: 'x', newPassword: 'long-enough' }),
-        await api().patch('/api/me/character').send({ characterId: 'cat' }),
+        await api().patch('/api/me/appearance').send({ appearance: DEFAULT_APPEARANCE }),
       ];
       for (const res of responses) {
         expect(res.status).toBe(401);
@@ -269,7 +269,7 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
       await login(ip, '현재비번틀림', PASSWORD).expect(200);
     });
 
-    it('새 비밀번호가 8자 미만이거나 캐릭터 값이 없으면 INVALID_INPUT 400이다', async () => {
+    it('새 비밀번호가 8자 미만이거나 외형 값이 잘못되면 INVALID_INPUT 400이고 저장되지 않는다', async () => {
       const { cookie } = await signupAndLogin('입력검사');
       const short = await api()
         .patch('/api/me/password')
@@ -277,12 +277,23 @@ describe.skipIf(!baseUrl)('인증 API·세션·Socket.IO 인증', () => {
         .send({ currentPassword: PASSWORD, newPassword: 'short' })
         .expect(400);
       expect(short.body.error.code).toBe('INVALID_INPUT');
-      const badCharacter = await api()
-        .patch('/api/me/character')
-        .set('Cookie', cookie)
-        .send({ characterId: 'dragon' })
-        .expect(400);
-      expect(badCharacter.body.error.code).toBe('INVALID_INPUT');
+      const bad = [
+        { appearance: { ...DEFAULT_APPEARANCE, hair: 5 } },
+        { appearance: { ...DEFAULT_APPEARANCE, eyes: -1 } },
+        { appearance: { ...DEFAULT_APPEARANCE, hat: 1 } },
+        { appearance: { hair: 1 } },
+        { appearance: DEFAULT_APPEARANCE, extra: true },
+        { characterId: 'owl' },
+      ];
+      for (const body of bad) {
+        const res = await api()
+          .patch('/api/me/appearance')
+          .set('Cookie', cookie)
+          .send(body)
+          .expect(400);
+        expect(res.body.error.code, JSON.stringify(body)).toBe('INVALID_INPUT');
+      }
+      expect((await me(cookie).expect(200)).body.user.appearance).toEqual(DEFAULT_APPEARANCE);
     });
   });
 

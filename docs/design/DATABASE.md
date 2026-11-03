@@ -22,8 +22,7 @@
 | `id` | serial PK | |
 | `nickname` | varchar(12) not null | 로그인 식별자, 변경 불가. 앱이 NFC로 정규화해 저장한다 |
 | `password` | text not null | **argon2id 해시값을 저장한다(원문 아님).** 컬럼명이 원문처럼 보이므로 스키마에 주석으로 남긴다 |
-| `character_id` | varchar(16) not null | 캐릭터 6종([API `CharacterId`](API.md#공통-타입)). 가입 시 무작위 기본값. 값은 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 캐릭터가 늘어도 마이그레이션이 필요 없다 |
-| `appearance` (미구현) | jsonb not null default 기본 외형 | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현) 마이그레이션에서 기본값(모든 항목 0)으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 `character_id`를 지운다. 값 범위는 앱(Zod)만 검사한다 |
+| `appearance` | jsonb not null default 기본 외형(모든 항목 0) | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). 마이그레이션 `0002_user_appearance`([IMPL-018](../TASKS.md#impl-018-사람-아바타-구현))가 기본값으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 동물 캐릭터 컬럼 `character_id`를 지웠다. 값 범위는 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 읽을 때 없는 필드는 0으로 읽는다 |
 | `total_games` | integer not null default 0 | CHECK >= 0. 승·패·무 모두 포함 |
 | `wins` / `losses` | integer not null default 0 | CHECK >= 0, `wins + losses <= total_games`. 무 = `total_games - wins - losses` |
 

@@ -1,7 +1,7 @@
 // 실행: 루트에서 npm test (Vitest). 계정·로비 화면의 순수 로직·REST 클라이언트·저장 설정을 검증한다.
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { ROOM_CODE_ALPHABET, RoomCodeSchema } from '@alkkagi/shared';
+import { DEFAULT_APPEARANCE, ROOM_CODE_ALPHABET, RoomCodeSchema } from '@alkkagi/shared';
 import { ApiError, createApi } from './api.ts';
 import {
   applyCodeCellInput,
@@ -170,7 +170,8 @@ function jsonResponse(
   });
 }
 
-const me = { nickname: '곰돌이', characterId: 'bear', record: record(0, 0, 0) } as const;
+const me = { nickname: '곰돌이', appearance: DEFAULT_APPEARANCE, record: record(0, 0, 0) };
+const look = { ...DEFAULT_APPEARANCE, hair: 2, lips: 4 };
 
 test('REST 클라이언트: 경로·메서드·본문과 성공 응답 해석', async () => {
   const calls: { path: string; method: string | undefined; body: unknown }[] = [];
@@ -189,7 +190,7 @@ test('REST 클라이언트: 경로·메서드·본문과 성공 응답 해석', 
   await api.signup({ nickname: '곰돌이', password: 'password1' });
   assert.deepEqual(await api.login({ nickname: '곰돌이', password: 'password1' }), me);
   assert.deepEqual(await api.me(), me);
-  assert.deepEqual(await api.changeCharacter('fox'), me);
+  assert.deepEqual(await api.changeAppearance(look), me);
   await api.changePassword({ currentPassword: 'password1', newPassword: 'password2' });
   assert.deepEqual(await api.listRooms(), []);
   await api.logout();
@@ -199,13 +200,13 @@ test('REST 클라이언트: 경로·메서드·본문과 성공 응답 해석', 
       'POST /api/auth/signup',
       'POST /api/auth/login',
       'GET /api/me',
-      'PATCH /api/me/character',
+      'PATCH /api/me/appearance',
       'PATCH /api/me/password',
       'GET /api/rooms',
       'POST /api/auth/logout',
     ],
   );
-  assert.deepEqual(calls[3]?.body, { characterId: 'fox' });
+  assert.deepEqual(calls[3]?.body, { appearance: look });
   assert.equal(calls[2]?.body, undefined);
 });
 

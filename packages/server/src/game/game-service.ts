@@ -11,9 +11,10 @@ import {
 } from '@alkkagi/game-runtime';
 import {
   RematchRequestSchema,
+  normalizeAppearance,
   type BoardId,
   type ThemeId,
-  type CharacterId,
+  type Appearance,
   type CommandResult,
   type GameOver,
   type RematchState,
@@ -55,7 +56,7 @@ const realClock: RuntimeClock = {
   },
 };
 
-type Player = { nickname: string; characterId: CharacterId };
+type Player = { nickname: string; appearance: Appearance };
 type Rematch = {
   gameId: string;
   deadlineMs: number;
@@ -286,8 +287,8 @@ export class GameService {
       if (!guest) throw new Error('참여자가 없는 방은 시작할 수 없다');
       session.userIds = [host.id, guest.id];
       session.players = [
-        { nickname: host.nickname, characterId: host.characterId as CharacterId },
-        { nickname: guest.nickname, characterId: guest.characterId as CharacterId },
+        { nickname: host.nickname, appearance: normalizeAppearance(host.appearance) },
+        { nickname: guest.nickname, appearance: normalizeAppearance(guest.appearance) },
       ];
       session.config = {
         board: room.board as BoardId,

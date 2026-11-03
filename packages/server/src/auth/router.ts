@@ -1,7 +1,7 @@
 import { Router, type Response } from 'express';
 import type { z } from 'zod';
 import {
-  CharacterChangeSchema,
+  AppearanceChangeSchema,
   LoginSchema,
   PasswordChangeSchema,
   SignupSchema,
@@ -16,9 +16,8 @@ import { deleteOtherSessions, endSession, startSession } from './sessions.ts';
 import {
   findUserByNickname,
   insertUser,
-  randomCharacterId,
   toMe,
-  updateUserCharacter,
+  updateUserAppearance,
   updateUserPassword,
   type User,
 } from './users.ts';
@@ -55,11 +54,7 @@ export function createAuthRouter(deps: AuthDeps): { auth: Router; me: Router } {
     const { nickname, password } = parse(SignupSchema, req.body);
     const passwordHash = await hashPassword(password);
     try {
-      await insertUser(db, {
-        nickname,
-        passwordHash,
-        characterId: randomCharacterId(),
-      });
+      await insertUser(db, { nickname, passwordHash });
     } catch (error) {
       // 먼저 조회하지 않고 INSERT가 유니크 인덱스에 걸린 것으로 판별해 동시 가입 경합도 막는다.
       const pgError = findPgError(error);
@@ -113,9 +108,9 @@ export function createAuthRouter(deps: AuthDeps): { auth: Router; me: Router } {
     res.status(204).end();
   });
 
-  me.patch('/character', async (req, res: AuthedResponse) => {
-    const { characterId } = parse(CharacterChangeSchema, req.body);
-    const updated = await updateUserCharacter(db, res.locals.user.id, characterId);
+  me.patch('/appearance', async (req, res: AuthedResponse) => {
+    const { appearance } = parse(AppearanceChangeSchema, req.body);
+    const updated = await updateUserAppearance(db, res.locals.user.id, appearance);
     res.status(200).json({ user: toMe(updated) });
   });
 

@@ -6,13 +6,15 @@ import {
   BOARD_IDS,
   DEFAULT_THEME,
   THEME_IDS,
-  CharacterIdSchema,
+  AppearanceSchema,
+  DEFAULT_APPEARANCE,
+  randomAppearance,
+  type Appearance,
   RematchRequestSchema,
   RULES,
   type BoardId,
   type CommandResult,
   type GameOver,
-  type GameStart,
   type RematchState,
   type Seat,
   type ThemeId,
@@ -51,8 +53,6 @@ export interface AiAuthorityOptions {
   onError?: (error: unknown) => void;
 }
 
-type CharacterId = GameStart['players'][0]['characterId'];
-
 export class AiAuthority {
   private readonly opts: AiAuthorityOptions;
   private readonly random: () => number;
@@ -60,10 +60,12 @@ export class AiAuthority {
   private runtime: RoomRuntime | null = null;
   private controller: AiController | null = null;
   private config: { board: BoardId; theme: ThemeId; pieceCount: number } | null = null;
-  private human: { nickname: string; characterId: CharacterId } = {
+  private human: { nickname: string; appearance: Appearance } = {
     nickname: '나',
-    characterId: 'bear',
+    appearance: { ...DEFAULT_APPEARANCE },
   };
+  /** AI 외형: 대전을 열 때 무작위로 정하고 재도전에서는 그대로 쓴다(DEC-059) */
+  private aiAppearance: Appearance = { ...DEFAULT_APPEARANCE };
   private gameCount = 0;
   private rematch: { gameId: string; deadlineMs: number; cancel: () => void } | null = null;
   private closed = false;
@@ -100,12 +102,13 @@ export class AiAuthority {
           ? (msg.pieceCount as number)
           : DEFAULT_PIECE_COUNT,
       };
-      const character = CharacterIdSchema.safeParse(msg.profile?.characterId);
+      const look = AppearanceSchema.safeParse(msg.profile?.appearance);
       const nickname = typeof msg.profile?.nickname === 'string' ? msg.profile.nickname.trim() : '';
       this.human = {
         nickname: nickname.slice(0, 20) || '나',
-        characterId: character.success ? character.data : 'bear',
+        appearance: look.success ? look.data : { ...DEFAULT_APPEARANCE },
       };
+      this.aiAppearance = randomAppearance(this.random);
       port.postMessage({ t: 'welcome', seat: HUMAN_SEAT });
       this.startGame();
       return;
@@ -202,10 +205,7 @@ export class AiAuthority {
       theme: config.theme,
       pieceCount: config.pieceCount,
       seed: this.seed(),
-      players: [
-        this.human,
-        { nickname: AI_NICKNAME, characterId: aiCharacterFor(this.human.characterId) },
-      ],
+      players: [this.human, { nickname: AI_NICKNAME, appearance: this.aiAppearance }],
     });
   }
 
@@ -284,9 +284,4 @@ export class AiAuthority {
       this.opts.onError?.(error);
     }
   }
-}
-
-/** 사람과 다른 캐릭터를 고른다 */
-function aiCharacterFor(human: CharacterId): CharacterId {
-  return human === 'cat' ? 'fox' : 'cat';
 }

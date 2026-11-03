@@ -1,3 +1,4 @@
+import { DEFAULT_APPEARANCE } from '@alkkagi/shared';
 import { describe, expect, it } from 'vitest';
 import type {
   AimUpdate,
@@ -99,8 +100,8 @@ function setup(view: GameView = makeView(), seat: 0 | 1 = 0): Env {
     gameId: view.gameId,
     seat,
     players: [
-      { seat: 0, nickname: 'a', characterId: 'bear' },
-      { seat: 1, nickname: 'b', characterId: 'cat' },
+      { seat: 0, nickname: 'a', appearance: DEFAULT_APPEARANCE },
+      { seat: 1, nickname: 'b', appearance: DEFAULT_APPEARANCE },
     ],
     board: 'standard',
     theme: 'bar',

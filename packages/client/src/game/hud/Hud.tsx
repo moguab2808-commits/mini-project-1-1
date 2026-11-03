@@ -5,7 +5,7 @@ import type { GameOver, GameStart, GameView, RematchState, Seat } from '@alkkagi
 import type { Announcement, GameClientState } from '../game-store.ts';
 import { heldHazardState } from '../aim/hazard-state.ts';
 import type { AimNotice, RotateDir } from '../aim/aim-controller.ts';
-import { CharacterFace } from './CharacterFace.tsx';
+import { AvatarFace } from '../../avatar/AvatarFace.tsx';
 import { HazardIcon } from './HazardIcon.tsx';
 import {
   HAZARD_HINTS,
@@ -185,7 +185,7 @@ function Profile(props: {
   return (
     <div className={`gs-profile ${props.className}${props.active ? ' active' : ''}`}>
       <span className="gs-face">
-        <CharacterFace characterId={player.characterId} />
+        <AvatarFace appearance={player.appearance} />
       </span>
       <span
         className={`gs-stone-badge seat-${props.seat}`}

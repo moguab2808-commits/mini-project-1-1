@@ -1,3 +1,4 @@
+import type { Appearance } from '@alkkagi/shared';
 import { sql } from 'drizzle-orm';
 import {
   boolean,
@@ -5,6 +6,7 @@ import {
   index,
   integer,
   json,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -28,8 +30,14 @@ export const users = pgTable(
     nickname: varchar('nickname', { length: 12 }).notNull(),
     // argon2id 해시값이다(원문 아님). 컬럼명이 원문처럼 보이므로 주의한다.
     password: text('password').notNull(),
-    // 캐릭터 값은 앱(Zod)만 검사하고 DB CHECK는 두지 않는다.
-    characterId: varchar('character_id', { length: 16 }).notNull(),
+    // 사람 아바타 외형(Appearance). 값 범위는 앱(Zod)만 검사하고 DB CHECK는 두지 않는다.
+    // 기본값은 고정 기본 외형(모든 항목 0)이며, 읽을 때 없는 필드는 0으로 읽는다(normalizeAppearance).
+    appearance: jsonb('appearance')
+      .$type<Appearance>()
+      .notNull()
+      .default(
+        sql`'{"headShape":0,"hair":0,"eyebrows":0,"eyes":0,"nose":0,"lips":0,"skinTone":0}'::jsonb`,
+      ),
     // 승·패·무 모두 포함한다. 무 = total_games - wins - losses.
     totalGames: integer('total_games').notNull().default(0),
     wins: integer('wins').notNull().default(0),

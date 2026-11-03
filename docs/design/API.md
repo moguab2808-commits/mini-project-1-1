@@ -17,17 +17,16 @@
 
 | 타입 | 값·필드 | 비고 |
 | --- | --- | --- |
-| `CharacterId` | `bear`·`cat`·`fox`·`rabbit`·`owl`·`frog` | 현재 구현의 [동물 6종](../PRD.md#캐릭터-변경). [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)에서 아래 `Appearance`로 바꾸고 삭제한다([DEC-059](../DECISIONS.md#결정-색인)) |
-| `Appearance` (미구현) | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 선택지 모양 정의(번호 → 부품)는 `shared`의 데이터 한 곳에 두고 3D·SVG가 같이 쓴다. 항목이 늘면 필드를 더하고 없는 필드는 0으로 읽는다 |
+| `Appearance` | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 요청 검사는 `shared`의 `AppearanceSchema`(7항목 모두 필요, 여분 필드 거부)이고, 선택지 모양 정의(번호 → 부품)는 같은 파일(`avatar.ts`)의 `AVATAR_PARTS` 한 곳에 두고 3D·SVG가 같이 쓴다. 저장값을 읽을 때는 없는 필드·범위 밖 값을 0으로 읽는다(`normalizeAppearance`). 항목이 늘면 필드를 더한다. 동물 6종 `CharacterId`는 [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)에서 지웠다 |
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-052](../DECISIONS.md#결정-색인)·[DEC-053](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
 | `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소](../PRD.md#방해요소-규칙). [DEC-055](../DECISIONS.md#결정-색인)([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체))로 `magnet`(자석)·`gravity_zone`(중력 구역)·`ice_floor`(미끄럼 장판)·`decoy`(분신술)·`fake_wall`(가짜벽)·`heavy_stones`(알 무게 변화)·`reverse_zone`(방향 반전 구역)·`mine`(폭탄)·`pit`(바닥 없어지기)·`moving_wall`(이동 장애물)을 더한다. `desk_shake`는 지급하지 않지만 기존 이벤트 파싱을 위해 값은 남긴다 |
 | `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
-| `Member` | `{ nickname, characterId, record: Record }` | 사용자 번호는 넣지 않는다 |
-| `Me` | `{ nickname, characterId, record: Record }` | `GET /api/me`·로그인 응답 |
+| `Member` | `{ nickname, appearance: Appearance, record: Record }` | 사용자 번호는 넣지 않는다 |
+| `Me` | `{ nickname, appearance: Appearance, record: Record }` | `GET /api/me`·로그인 응답 |
 
-사람 아바타 구현([IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)) 뒤에는 `Member`·`Me`·`game:start.players[]`의 `characterId`를 `appearance: Appearance`로 바꾸고, `PATCH /api/me/character`를 `PATCH /api/me/appearance` `{ appearance: Appearance }` → `200 { user: Me }`(오류는 같음)로 바꾼다. 꾸미기 창의 저장 버튼이 이 요청을 한 번 보낸다. AI 대전의 AI 좌석 외형은 브라우저가 경기 시작 때 무작위로 만들어 `game:start`에 담고 재도전에서는 그대로 쓴다([DEC-059](../DECISIONS.md#결정-색인)).
+꾸미기 창의 저장 버튼이 `PATCH /api/me/appearance`를 한 번 보낸다. AI 대전의 AI 좌석 외형은 브라우저가 대전을 열 때 무작위로 만들어 `game:start`에 담고 재도전에서는 그대로 쓴다. 로컬 2인은 계정이 없어 두 사람에게 서로 다른 고정 외형을 쓴다([DEC-059](../DECISIONS.md#결정-색인), [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)).
 
 ### REST API
 
@@ -40,7 +39,7 @@
 | POST | `/api/auth/logout` | 없음 | `204` (세션이 없어도 204) | `RATE_LIMITED` 429 |
 | GET | `/api/me` | 없음 | `200 { user: Me }` | `UNAUTHENTICATED` 401 |
 | PATCH | `/api/me/password` | `{ currentPassword, newPassword }`. 새 비밀번호 8~64자 | `204`. 현재 세션만 남기고 다른 세션을 끝낸다 ([AUTH](AUTH.md#세션)) | `INVALID_INPUT` 400, `UNAUTHENTICATED` 401, `INVALID_CREDENTIALS` 401(현재 비밀번호 틀림) |
-| PATCH | `/api/me/character` | `{ characterId: CharacterId }` | `200 { user: Me }` | `INVALID_INPUT` 400, `UNAUTHENTICATED` 401 |
+| PATCH | `/api/me/appearance` | `{ appearance: Appearance }` | `200 { user: Me }` | `INVALID_INPUT` 400(범위 밖 값·없는 항목·여분 필드), `UNAUTHENTICATED` 401 |
 | GET | `/api/rooms` | 없음 | `200 { rooms: RoomSummary[] }` | `UNAUTHENTICATED` 401 |
 | GET | `/health` | 없음 (세션 불필요) | `200 { status: "ok" }`. DB를 조회하지 않는다 ([운영](OPERATIONS.md)) | 없음 |
 
@@ -156,7 +155,7 @@
 
 | 이벤트 | 요청 | 응답(ack) 또는 전송 내용 |
 | --- | --- | --- |
-| `game:start` (S → C) | — | `{ gameId, seat: Seat, players: [{ seat, nickname, characterId }, { seat, nickname, characterId }], board: BoardId, theme: ThemeId, pieceCount, finalRound, turnSeconds, view: GameView }`. `seat`는 받는 사람의 좌석이다. `view`는 받는 사람의 초기 `GameView`다. `finalRound`(10)와 `turnSeconds`(30)는 [PRD](../PRD.md#게임-규칙) 값이다. `theme`은 방의 테마이며 장면 표시에만 쓴다. 로컬 2인·AI 대전도 같은 필드를 보낸다 |
+| `game:start` (S → C) | — | `{ gameId, seat: Seat, players: [{ seat, nickname, appearance }, { seat, nickname, appearance }], board: BoardId, theme: ThemeId, pieceCount, finalRound, turnSeconds, view: GameView }`. `seat`는 받는 사람의 좌석이다. `view`는 받는 사람의 초기 `GameView`다. `finalRound`(10)와 `turnSeconds`(30)는 [PRD](../PRD.md#게임-규칙) 값이다. `theme`은 방의 테마이며 장면 표시에만 쓴다. 로컬 2인·AI 대전도 같은 필드를 보낸다 |
 | `hazard:granted` (S → C) | — | `{ gameId, hazardInstanceId, kind: HazardKind, round, replaced }`. 받은 플레이어에게만 보낸다. `replaced`는 이전 보유를 교체했는지 여부다. 게이지·쿨타임 상태는 `game:state`의 `private`로 받는다 |
 | `hazard:use` (C → S) | `{ gameId, hazardInstanceId, target? }`. `target`은 `wall`·`sticky`에만 필수이며 `{ x, y, orientation? }`다. `orientation`(`horizontal`·`vertical`)은 `wall`에만 필수다. 좌표는 판 좌표계다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_HAZARD`, `HAZARD_COOLDOWN`, `HAZARD_OVERHEATED`, `HAZARD_INVALID_TARGET`, `HAZARD_NOT_USABLE`, `GAME_NOT_ACTIVE`. 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용한다. 랜덤형은 서버가 자동 발동한다 (DEC-015·017·031) |
 | `hazard:triggered` (S → C) | — | `{ gameId, kind, phase, sourceSeat, targetSeat, startsAtMs, expiresAtMs, params? }`. `phase`는 `start`·`end`. `params`는 `wall`·`sticky`의 `{ x, y, orientation? }`(`wall`은 판 좌표계 기준 절대각을 `angleDeg`(도, 가로 0·세로 90에서 판 돌리기로 회전한 값)로 함께 보낸다. `orientation`은 설치 때의 방향이라 클라이언트는 `angleDeg`만으로 그린다), `wind`의 `{ directionRad }`, `bar_speed`의 `{ multiplier }`, `board_spin`의 `{ angleDeg }`이며 양쪽에 같게 보낸다. 시야 가림(`flashlight`·`water_gun`)의 가림 모양은 넣지 않고 대상의 `game:state`로만 보낸다 |

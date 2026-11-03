@@ -1,3 +1,4 @@
+import { DEFAULT_APPEARANCE } from '@alkkagi/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RuntimeClock } from '@alkkagi/game-runtime';
 import type { GameOver } from '@alkkagi/shared';
@@ -18,8 +19,8 @@ const view: RoomView = {
     pieceCount: 5,
     status: 'playing',
   },
-  host: { id: 10, nickname: '가', characterId: 'bear' } as RoomView['host'],
-  guest: { id: 11, nickname: '나', characterId: 'cat' } as RoomView['host'],
+  host: { id: 10, nickname: '가', appearance: DEFAULT_APPEARANCE } as RoomView['host'],
+  guest: { id: 11, nickname: '나', appearance: DEFAULT_APPEARANCE } as RoomView['host'],
 };
 const clock: RuntimeClock = {
   now: () => Date.now(),

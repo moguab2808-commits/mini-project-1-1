@@ -31,7 +31,7 @@ export interface LocalGameSessionOptions {
   /** 하트비트 ping 주기(ms). 0이면 보내지 않는다. 기본 2000. */
   heartbeatMs?: number;
   /** AI 대전: 화면 표시용 내 정보 */
-  profile?: { nickname?: string; characterId?: string };
+  profile?: { nickname?: string; appearance?: unknown };
 }
 
 export class LocalSessionRejectedError extends Error {
