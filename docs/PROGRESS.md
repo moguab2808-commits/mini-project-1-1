@@ -20,6 +20,7 @@
 - 인증 API·세션·IP당 빈도 제한·Socket.IO 연결 인증과 중복 접속 대체([IMPL-007](TASKS.md#impl-007-인증), PR #59). argon2id 해시 시간은 이 PC에서만 측정했고 Render 측정은 [IMPL-013](TASKS.md#impl-013-배포)으로 옮겼다
 - 로비·방 서버([IMPL-008](TASKS.md#impl-008-로비방-서버), PR #61): `GET /api/rooms`, `room:create`·`join`·`quickJoin`·`leave`, `room:state`·`room:closed`, 상대 입장 즉시 시작(DEC-040), 동시 입장 조건부 갱신, `room:join` 빈도 제한, 서버 시작 때 `rooms` 정리. 임시 DB와 실제 Socket.IO 클라이언트로 확인했다. 시작 뒤 경기 연결과 경기 중 이탈의 기권패는 [IMPL-009](TASKS.md#impl-009-온라인-대전-서버)다
 - [IMPL-009](TASKS.md#impl-009-온라인-대전-서버): 완료(PR #63, `main` 34a8d06). 방별 `RoomRuntime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 온라인 경기를 진행한다. 이탈·접속 대체의 기권패 변환, 입장 직후 이탈 처리, 재도전 15초 만료(DEC-041), 서버 로그를 구현했고 `onStarted` 실패·INTERNAL_ERROR 정책을 정했다([DEC-043](DECISIONS.md#결정-색인)). 임시 DB와 실제 Socket.IO 클라이언트로 확인했다. 경기 종료 전적(전체·승·패, 무승부=전체−승−패) 저장과 프로필·방 목록 표시도 이 작업에 포함했다([DEC-044](DECISIONS.md#결정-색인), [IMPL-011](TASKS.md#impl-011-경기-종료-전적)).
+- [IMPL-012](TASKS.md#impl-012-계정로비대기실결과-화면): 완료(PR #66, `main` 5a537ad). 로그인·회원등록, 로비(방 목록·방 생성·즉시 참가·코드 입력), 캐릭터 변경·환경설정·규칙 카드 창, 대기실, 결과를 `/`에 연결했고 개발용 `/online`은 삭제했다. headless Chrome 두 계정과 임시 PostgreSQL에서 확인했다. 조건·한계는 [worklog](worklogs/2026-11-03.md#impl-012-계정로비대기실결과-화면)에 있다.
 - 구현 작업 13건 등록([PLAN-001](TASKS.md#plan-001-구현-작업-등록), [IMPL-001~013](TASKS.md#impl-001-프로젝트-골격))
 
 ## 현재 작업 범위
@@ -27,7 +28,7 @@
 - 구현 작업 [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록)·[IMPL-001~013](TASKS.md#impl-001-프로젝트-골격)은 Issue [#34~#47](https://github.com/moguab2808-commits/mini-project-1-1/issues)로 등록했다.
 - [API-002](TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정): 이름 확인과 본인 private 뷰의 게이지·쿨타임 필드를 정해 GAME·API에 반영했다. 수용 기준을 충족하고 PR #33으로 병합돼 완료했다.
 - [VAL-002](TASKS.md#val-002-개발용-프레임-시간-기록): 기록 모듈을 게임 화면에 연결하고(IMPL-004), 실제 브라우저에서 판 시작부터 결과까지의 기록·내려받기와 운영 빌드 제외를 확인했다. 결과 직전 간격을 원자료에 넣도록 보정했다. PR #65 리뷰·병합이 남았다. 실제 GPU 기기의 fps 측정은 하지 않았다.
-- [IMPL-012](TASKS.md#impl-012-계정로비대기실결과-화면): 작업 브랜치에 로그인·회원등록 탭, 로비(프로필바·2열 방 목록·방 생성·즉시 참가·코드 입력·새로고침), 캐릭터 변경·환경설정·규칙 카드 플로팅 창, 대기실, 토스트와 오류 문구를 구현해 `/`에 연결했다. 방 연결·경기 세션은 IMPL-010의 `RoomClient`를 쓴다. headless Chrome 두 계정과 임시 PostgreSQL에서 정상·오류·예외 흐름을 확인했다. 브라우저 확인 조건·한계는 [worklog](worklogs/2026-11-03.md#impl-012-계정로비대기실결과-화면)에 있다.
+- [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample): 작업 브랜치에 패키지 의존 경계 ESLint 규칙(`client`↔`server`, `game-core`의 네트워크·DB·DOM·Node 입출력)과 `.env.example`을 추가했다. 위반 예시 실패와 현재 코드 통과를 확인해 완료했다. [worklog](worklogs/2026-11-03.md#impl-014-패키지-의존-경계-린트와-envexample)
 - 구현 담당 재분배([DEC-035](DECISIONS.md#결정-색인)): A는 게임 줄(IMPL-001·002·003·004·005·010), B는 서버·계정 줄(IMPL-014·006~009·011~013). 경계 린트·`.env.example`은 [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)로 분리했다.
 - [IMPL-004](TASKS.md#impl-004-로컬-2인-모드): PR #60으로 완료 처리했다(리뷰 4건 반영). `/local` 두 창 경기에 시안 연출(DEC-036)과 후속 조작·화면 수정(DEC-037~039: 드래그 발사·조준 중 오른쪽 취소, 기본/1인칭 시점, 바람 상시·기절 연출, 방해요소 강화)을 반영했다. 새 API 이벤트는 개발자 B 합의 전 제안(IMPL-009 전 합의)이다. fps 측정·실제 GPU·사람의 실플레이 체감은 확인하지 않았다
 - [IMPL-005](TASKS.md#impl-005-ai-대전): PR #62가 `main`에 병합돼 완료했다. AI 전용 Worker·컨트롤러와 개발용 `/ai`를 제공하며 로비 방 생성 창 연결은 IMPL-012다.
@@ -37,7 +38,7 @@
 
 ## 남은 일과 한계
 
-- 다음 구현: [IMPL-014](TASKS.md#impl-014-패키지-의존-경계-린트와-envexample)과 [IMPL-013](TASKS.md#impl-013-배포). [IMPL-012](TASKS.md#impl-012-계정로비대기실결과-화면)는 구현을 마치고 PR #66으로 리뷰 중이며 병합이 남았다.
+- 다음 구현: [IMPL-013](TASKS.md#impl-013-배포). IMPL-014는 완료했다.
 - 물리·방해요소 수치는 제안값이며 플레이 테스트 후 [DECISIONS](DECISIONS.md)로 확정한다.
 - 에셋 도구·글꼴 이용 조건 확인은 반입 시(구현 단계)로 남았다([DEC-033](DECISIONS.md#결정-색인)).
 - 발사 각도 범위는 승인 전이다. IMPL-002가 제안 (−π, π]를 임시로 따랐다([API](design/API.md)).
