@@ -19,6 +19,7 @@
 | --- | --- | --- |
 | `CharacterId` | `bear`·`cat`·`fox`·`rabbit`·`owl`·`frog` | [캐릭터 6종](../PRD.md#캐릭터-변경). 이름은 제안. 사람 아바타 외형 타입으로 바뀔 예정이며 형식은 [CHAR-001](../TASKS.md#char-001-사람-아바타-전환과-꾸미기-설계)에서 정한다([DEC-048](../DECISIONS.md#결정-색인)) |
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
+| `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-051](../DECISIONS.md#결정-색인)·[DEC-052](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
 | `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소 9종](../PRD.md#방해요소-규칙). 이름은 제안 |
 | `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
@@ -40,7 +41,7 @@
 | GET | `/api/rooms` | 없음 | `200 { rooms: RoomSummary[] }` | `UNAUTHENTICATED` 401 |
 | GET | `/health` | 없음 (세션 불필요) | `200 { status: "ok" }`. DB를 조회하지 않는다 ([운영](OPERATIONS.md)) | 없음 |
 
-`RoomSummary`는 `{ roomId, title, isPublic, status, host: Member }`다. `status`는 `waiting`(대기 중) 또는 `playing`(게임 중)이다. **비공개 방의 코드는 응답에 포함하지 않는다.** 알 개수·판·참여 인원도 포함하지 않는다([로비](../PRD.md#로비)). 방 수가 적어 페이지를 나누지 않고, 로비 진입·새로고침 때만 호출한다([DEC-024](../DECISIONS.md#결정-색인)).
+`RoomSummary`는 `{ roomId, title, isPublic, status, theme: ThemeId, host: Member }`다. `status`는 `waiting`(대기 중) 또는 `playing`(게임 중)이다. **비공개 방의 코드는 응답에 포함하지 않는다.** 알 개수·판·참여 인원도 포함하지 않는다([로비](../PRD.md#로비)). 방 수가 적어 페이지를 나누지 않고, 로비 진입·새로고침 때만 호출한다([DEC-024](../DECISIONS.md#결정-색인)).
 
 - 랭킹·최근 경기 조회 경로는 두지 않는다 ([DEC-022](../DECISIONS.md#결정-색인)). 닉네임 변경 경로도 없다.
 - 로그인한 사용자 본인 외의 사용자 번호는 어떤 응답에도 넣지 않는다.
@@ -124,11 +125,11 @@
 
 | 이벤트 | 요청 | 응답(ack) 또는 오류 |
 | --- | --- | --- |
-| `room:create` | `{ title, isPublic, pieceCount, board, code? }`. 방 테마 필드 추가 여부는 [THEME-001](../TASKS.md#theme-001-방-테마-선택-설계)에서 정한다([DEC-049](../DECISIONS.md#결정-색인)). 제목 1~20자, 알 개수 5·7·9, `board`는 `BoardId`. 비공개면 `code` 필수(6자리, 영문 대문자·숫자에서 0/O·1/I 제외), 공개면 `code`를 보내지 않는다 | 방장에게 `room:state`가 먼저 가고 ack `{ ok: true, roomId }`가 뒤따른다. `INVALID_INPUT`, `CODE_TAKEN`(코드 중복), `ALREADY_IN_ROOM` |
+| `room:create` | `{ title, isPublic, pieceCount, board, theme?, code? }`. 제목 1~20자, 알 개수 5·7·9, `board`는 `BoardId`. `theme`은 `ThemeId`이고 생략하면 `bar`, 없는 값이면 `INVALID_INPUT`이다([DEC-051](../DECISIONS.md#결정-색인)). 비공개면 `code` 필수(6자리, 영문 대문자·숫자에서 0/O·1/I 제외), 공개면 `code`를 보내지 않는다 | 방장에게 `room:state`가 먼저 가고 ack `{ ok: true, roomId }`가 뒤따른다. `INVALID_INPUT`, `CODE_TAKEN`(코드 중복), `ALREADY_IN_ROOM` |
 | `room:join` | `{ roomId?, code? }`. 공개 방은 `roomId`, 비공개 방은 `code`(`roomId`는 선택, 함께 보내면 같은 방이어야 한다). 둘 다 없으면 `INVALID_INPUT` | 양쪽에 `room:state`(`status: "playing"`)가 먼저 가고 곧바로 경기가 시작되며, ack `{ ok: true, roomId }`는 그 뒤에 간다. `INVALID_INPUT`, `ROOM_NOT_FOUND`, `ROOM_PLAYING`, `INVALID_CODE`, `ALREADY_IN_ROOM`, `RATE_LIMITED` |
 | `room:quickJoin` | 없음 | 양쪽에 `room:state`가 먼저 가고 곧바로 경기가 시작되며, ack `{ ok: true, roomId }`는 그 뒤에 간다. `ROOM_NOT_FOUND`, `ALREADY_IN_ROOM` |
 | `room:leave` | 없음 | `{ ok: true }` (방에 없어도 성공). 경기 중이면 서버가 기권패로 처리한다 |
-| `room:state` (S → C) | — | `{ roomId, title, isPublic, pieceCount, board, status, host: Member, guest: Member \| null, isHost, code? }`. `code`는 **방장에게만** 담고 상대·목록에는 넣지 않는다. 상대 입장(곧바로 시작해 `status`가 `playing`)·퇴장(`guest`가 비고 `waiting`)·재도전 만료 때 방 안 사용자 각각에게 보낸다. 방장 혼자 있으면 `guest`가 `null`이다 |
+| `room:state` (S → C) | — | `{ roomId, title, isPublic, pieceCount, board, theme, status, host: Member, guest: Member \| null, isHost, code? }`. `code`는 **방장에게만** 담고 상대·목록에는 넣지 않는다. 상대 입장(곧바로 시작해 `status`가 `playing`)·퇴장(`guest`가 비고 `waiting`)·재도전 만료 때 방 안 사용자 각각에게 보낸다. 방장 혼자 있으면 `guest`가 `null`이다 |
 | `room:closed` (S → C) | — | `{ roomId, reason: "host_left" \| "rematch_timeout" }`. `roomId`는 닫힌(또는 본인이 나간) 방이다. `host_left`는 방장이 나가 방이 닫힘, `rematch_timeout`은 재도전 15초 동안 누르지 않아 서버가 나가기로 처리한 사람 본인에게 보낸다. 방장이 누르지 않아 방이 닫힐 때 참여자가 누르지 않았어도(두 사람 모두 안 누름) 참여자에게도 `rematch_timeout`을 보낸다([DEC-041](../DECISIONS.md#결정-색인)). 받은 클라이언트는 로비로 이동한다 |
 
 - 입장은 서버가 `rooms`의 조건부 갱신(참여자가 비어 있고 상태가 `waiting`이면 `guest_id`를 채우고 같은 문장에서 `playing`으로 바꿈)으로 처리해 동시 입장 중 한 명만 성공시킨다. 시작 버튼·`room:start`·카운트다운은 없다([DEC-040](../DECISIONS.md#결정-색인)) ([DB-001](../TASKS.md#db-001-db-스키마-확정)). 목록이 오래된 채 입장해도 이 시점에 최신 상태로 다시 검사한다.
@@ -149,7 +150,7 @@
 
 | 이벤트 | 요청 | 응답(ack) 또는 전송 내용 |
 | --- | --- | --- |
-| `game:start` (S → C) | — | `{ gameId, seat: Seat, players: [{ seat, nickname, characterId }, { seat, nickname, characterId }], board: BoardId, pieceCount, finalRound, turnSeconds, view: GameView }`. `seat`는 받는 사람의 좌석이다. `view`는 받는 사람의 초기 `GameView`다. `finalRound`(10)와 `turnSeconds`(30)는 [PRD](../PRD.md#게임-규칙) 값이다 |
+| `game:start` (S → C) | — | `{ gameId, seat: Seat, players: [{ seat, nickname, characterId }, { seat, nickname, characterId }], board: BoardId, theme: ThemeId, pieceCount, finalRound, turnSeconds, view: GameView }`. `seat`는 받는 사람의 좌석이다. `view`는 받는 사람의 초기 `GameView`다. `finalRound`(10)와 `turnSeconds`(30)는 [PRD](../PRD.md#게임-규칙) 값이다. `theme`은 방의 테마이며 장면 표시에만 쓴다. 로컬 2인·AI 대전도 같은 필드를 보낸다 |
 | `hazard:granted` (S → C) | — | `{ gameId, hazardInstanceId, kind: HazardKind, round, replaced }`. 받은 플레이어에게만 보낸다. `replaced`는 이전 보유를 교체했는지 여부다. 게이지·쿨타임 상태는 `game:state`의 `private`로 받는다 |
 | `hazard:use` (C → S) | `{ gameId, hazardInstanceId, target? }`. `target`은 `wall`·`sticky`에만 필수이며 `{ x, y, orientation? }`다. `orientation`(`horizontal`·`vertical`)은 `wall`에만 필수다. 좌표는 판 좌표계다 | `{ ok: true }`. `INVALID_INPUT`, `STALE_HAZARD`, `HAZARD_COOLDOWN`, `HAZARD_OVERHEATED`, `HAZARD_INVALID_TARGET`, `HAZARD_NOT_USABLE`, `GAME_NOT_ACTIVE`. 내 턴·상대 턴과 알 이동 여부에 관계없이 쿨타임·피로도 과열 제한을 충족하면 허용한다. 랜덤형은 서버가 자동 발동한다 (DEC-015·017·031) |
 | `hazard:triggered` (S → C) | — | `{ gameId, kind, phase, sourceSeat, targetSeat, startsAtMs, expiresAtMs, params? }`. `phase`는 `start`·`end`. `params`는 `wall`·`sticky`의 `{ x, y, orientation? }`(`wall`은 판 좌표계 기준 절대각을 `angleDeg`(도, 가로 0·세로 90에서 판 돌리기로 회전한 값)로 함께 보낸다. `orientation`은 설치 때의 방향이라 클라이언트는 `angleDeg`만으로 그린다), `wind`의 `{ directionRad }`, `bar_speed`의 `{ multiplier }`, `board_spin`의 `{ angleDeg }`이며 양쪽에 같게 보낸다. 시야 가림(`flashlight`·`water_gun`)의 가림 모양은 넣지 않고 대상의 `game:state`로만 보낸다 |

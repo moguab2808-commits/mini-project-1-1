@@ -61,7 +61,8 @@
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 예정 | 미정 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
-| [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 예정 | 미정 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
+| [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 리뷰 중 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
+| [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | 없음 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -868,22 +869,44 @@ Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/6
 ## THEME-001 방 테마 선택 설계
 
 우선순위: P2
-상태: 예정
-담당: 미정
+상태: 리뷰 중
+담당: Claude — 사용자 요청 수행
 의존성: IMPL-012(지금의 방 생성 창)
 범위: [DEC-049](DECISIONS.md#결정-색인)에 따라 방을 만들 때 방 테마를 고르는 기능의 미정 사항을 정하고 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
 관련 문서: [PRD 방 생성](PRD.md#방-생성)·[화면 미정 사항](PRD.md#화면-미정-사항) / [DATABASE](design/DATABASE.md#미정-사항) / [API 방 명령](design/API.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
 Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72)
 
 수용 기준:
-- [ ] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 테마 종류·바뀌는 범위·판 선택과의 관계·고르는 사람과 시점·표시 위치·기본 테마가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
-- [ ] (정상) 테마별 에셋 제작 방식과 용량이 [에셋 한도](design/TECH_STACK.md#에셋-조달-계획)(DEC-033) 안에 드는지 확인해 기록했다.
-- [ ] (예외) 테마를 `rooms`·`room:create`·`room:state`·`game:start`에 어떻게 싣는지와, 테마가 게임 규칙·물리·판정에 영향을 주지 않는지를 정했다. AI 대전·로컬 2인 적용 여부를 포함한다.
+- [x] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 테마 종류·바뀌는 범위·판 선택과의 관계·고르는 사람과 시점·표시 위치·기본 테마가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
+- [x] (정상) 테마별 에셋 제작 방식과 용량이 [에셋 한도](design/TECH_STACK.md#에셋-조달-계획)(DEC-033) 안에 드는지 확인해 기록했다.
+- [x] (예외) 테마를 `rooms`·`room:create`·`room:state`·`game:start`에 어떻게 싣는지와, 테마가 게임 규칙·물리·판정에 영향을 주지 않는지를 정했다. AI 대전·로컬 2인 적용 여부를 포함한다.
 - [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: 개수(2개)·범위(배경·조명·책상, 판과 별개)·방 생성 때 선택·방 카드와 대기실 표시·AI와 로컬 적용·기본 테마(지금 화면)·규칙과 물리 무영향을 [DEC-050](DECISIONS.md#결정-색인)으로 정했다. 두 번째 테마의 종류와 이름, 표시 모양, 로컬 2인의 선택 위치, 저장·전송 형식은 남았다.
+진행: [DEC-050](DECISIONS.md#결정-색인)에 이어 [DEC-051](DECISIONS.md#결정-색인)로 두 번째 테마(밤 옥상)·글자 라벨 표시·로컬 2인 URL 값·판과 같은 저장·전송 형식을 정했다. 구현은 [IMPL-015](#impl-015-방-테마-구현)로 등록했다. 이후 [DEC-052](DECISIONS.md#결정-색인)로 테마를 4개(교실·해변 추가)로 늘렸다. 남은 기준은 리뷰 후 병합이다.
 
 검증 근거: [2026-11-03 worklog THEME-001 절](worklogs/2026-11-03.md#theme-001-방-테마-선택-설계)
+
+## IMPL-015 방 테마 구현
+
+우선순위: P2
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
+의존성: THEME-001, IMPL-004(로컬 2인), IMPL-005(AI 대전), IMPL-008(방 서버), IMPL-012(방 생성 창·방 카드·대기실)
+범위: [DEC-049](DECISIONS.md#결정-색인)·[DEC-050](DECISIONS.md#결정-색인)·[DEC-051](DECISIONS.md#결정-색인)·[DEC-052](DECISIONS.md#결정-색인)의 방 테마 4종(바·밤 옥상·교실·해변)을 저장·전송·선택·표시·장면에 구현한다. 판·알·의자·캐릭터 모양과 게임 규칙은 바꾸지 않는다.
+관련 문서: [PRD 방 생성](PRD.md#방-생성)·[로비](PRD.md#로비)·[대기실](PRD.md#대기실) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE rooms](design/DATABASE.md#rooms) / [LOCAL](design/LOCAL.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
+Issue·PR: 없음
+
+수용 기준:
+- [ ] (정상) `shared`에 `ThemeId`(`bar`·`rooftop`·`classroom`·`beach`)와 스키마가 있고, `rooms.theme` 마이그레이션(기본 `bar`)이 기존 행이 있는 DB에 적용된다. `room:create`에 `theme`을 주면 저장되고 생략하면 `bar`다. 방 목록·`room:state`·`game:start`에 같은 값이 담긴다(서버 테스트).
+- [ ] (예외) 없는 테마 값의 `room:create`는 `INVALID_INPUT`이고 방이 만들어지지 않는다. `/local?theme=`에 없거나 잘못된 값이면 `bar`로 시작한다.
+- [ ] (정상) 방 생성 창에서 사람·AI 모두 테마를 고를 수 있고 기본 선택은 바다. 방 카드와 대기실에 테마 이름이 글자 라벨로 보인다.
+- [ ] (정상) 밤 옥상·교실·해변 테마는 배경·조명·책상이 바와 다르고, 바 테마 장면은 지금과 같다. 네 테마 스크린샷을 worklog에 남기고 사용자에게 확인받았다. 파일 에셋을 더하지 않았다(코드 도형·절차 텍스처).
+- [ ] (경계) 테마는 `game-core`·`game-runtime`에 넘기지 않으며, 같은 시드·같은 명령으로 테마와 무관하게 경기 결과가 같다(테스트). 추가한 세 테마의 프레임 시간을 바와 같은 조건으로 기록해 비교했다([검증 계획](ENGINEERING-VALIDATION.md)).
+- [ ] API·DATABASE·LOCAL의 "미구현" 표시를 현재 구현으로 고치고, 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+
+진행: 저장·전송·선택·표시·장면 4종과 단위 테스트를 구현했다. 남은 것은 DB 테스트(실제 DB), 프레임 시간 비교, 화면 브라우저 확인, 사용자 화풍 확인, 리뷰·병합이다.
+
+검증 근거: [2026-11-03 worklog IMPL-015 절](worklogs/2026-11-03.md#impl-015-방-테마-구현)
 
 ## DOC-011 README 설치·실행 절차
 
