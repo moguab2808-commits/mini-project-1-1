@@ -1,7 +1,7 @@
 # Render 웹 서비스 1개(OPERATIONS 배포 구성). 값은 대시보드에서 넣고 이 파일에는 적지 않는다.
 services:
   - type: web
-    name: alkkagi-bar
+    name: alkkagi
     runtime: node
     plan: free
     region: singapore
