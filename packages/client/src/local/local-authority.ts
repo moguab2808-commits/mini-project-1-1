@@ -3,10 +3,12 @@
 import { RoomRuntime, type RuntimeClock } from '@alkkagi/game-runtime';
 import {
   BOARD_IDS,
+  DEFAULT_APPEARANCE,
   DEFAULT_THEME,
   THEME_IDS,
   RematchRequestSchema,
   SeatSchema,
+  type Appearance,
   type BoardId,
   type CommandResult,
   type GameOver,
@@ -16,6 +18,12 @@ import {
 } from '@alkkagi/shared';
 import type { GameEventMap } from '../session/game-session.ts';
 import type { ClientMessage, RejectReason, WorkerMessage } from './messages.ts';
+
+/** 로컬 2인 두 사람의 고정 외형(계정이 없다). 두 사람이 구분되게 머리카락·피부색을 다르게 둔다 */
+const LOCAL_LOOKS: readonly [Appearance, Appearance] = [
+  { ...DEFAULT_APPEARANCE },
+  { ...DEFAULT_APPEARANCE, hair: 1, skinTone: 1, eyes: 1 },
+];
 
 /** `MessagePort`에서 권한 측이 쓰는 부분 */
 export interface PortLike {
@@ -250,8 +258,8 @@ export class LocalAuthority {
       pieceCount: config.pieceCount,
       seed: Math.floor(this.random() * 0x1_0000_0000),
       players: [
-        { nickname: '플레이어 1', characterId: 'bear' },
-        { nickname: '플레이어 2', characterId: 'cat' },
+        { nickname: '플레이어 1', appearance: LOCAL_LOOKS[0] },
+        { nickname: '플레이어 2', appearance: LOCAL_LOOKS[1] },
       ],
     });
   }

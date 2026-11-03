@@ -40,7 +40,7 @@ describe.skipIf(!baseUrl)('DB 스키마·마이그레이션', () => {
 
   const addUser = (nickname: string) =>
     pool.query<{ id: number }>(
-      `INSERT INTO users (nickname, password, character_id) VALUES ($1, 'hash', 'c1') RETURNING id`,
+      `INSERT INTO users (nickname, password) VALUES ($1, 'hash') RETURNING id`,
       [nickname],
     );
 
@@ -133,7 +133,7 @@ describe.skipIf(!baseUrl)('DB 스키마·마이그레이션', () => {
       await addUser('Dupe');
       await expectViolation(
         pool,
-        `INSERT INTO users (nickname, password, character_id) VALUES ($1, 'h', 'c1')`,
+        `INSERT INTO users (nickname, password) VALUES ($1, 'h')`,
         ['dUPE'],
         UNIQUE,
         'users_nickname_lower_idx',
@@ -141,7 +141,7 @@ describe.skipIf(!baseUrl)('DB 스키마·마이그레이션', () => {
     });
 
     it('음수 전적과 wins + losses > total_games를 거부한다', async () => {
-      const ins = `INSERT INTO users (nickname, password, character_id, total_games, wins, losses) VALUES ($1, 'h', 'c1', $2, $3, $4)`;
+      const ins = `INSERT INTO users (nickname, password, total_games, wins, losses) VALUES ($1, 'h', $2, $3, $4)`;
       // total_games가 음수면 wins + losses <= total_games도 함께 깨져 어느 제약이 먼저 보고될지 정해져 있지 않다.
       await expectViolation(pool, ins, ['음수1', -1, 0, 0], CHECK);
       await expectViolation(pool, ins, ['음수2', 0, -1, 0], CHECK, 'users_wins_nonneg');

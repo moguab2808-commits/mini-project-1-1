@@ -14,7 +14,7 @@ export interface AiMatchSettings {
 
 export interface AiGameSessionOptions extends AiMatchSettings {
   /** 화면 표시용 내 정보(로그인 사용자). 서버로 보내지 않는다 */
-  profile?: { nickname?: string; characterId?: string };
+  profile?: { nickname?: string; appearance?: unknown };
 }
 
 export class AiGameSession extends LocalGameSession {

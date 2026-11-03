@@ -218,10 +218,14 @@ function Connected({
         notify('이 브라우저는 AI 대전을 지원하지 않아요.');
         return;
       }
-      const session = startAiGame(settings);
+      // 게임 화면에 내 닉네임·외형을 보인다(브라우저 안에서만 쓰고 서버로 보내지 않는다)
+      const session = startAiGame({
+        ...settings,
+        profile: { nickname: me.nickname, appearance: me.appearance },
+      });
       setAi({ session, store: new GameStore(session) });
     },
-    [notify],
+    [notify, me.nickname, me.appearance],
   );
 
   if (ai) {

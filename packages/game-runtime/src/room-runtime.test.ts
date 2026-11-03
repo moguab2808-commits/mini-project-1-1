@@ -1,3 +1,4 @@
+import { DEFAULT_APPEARANCE } from '@alkkagi/shared';
 // 실행: 루트에서 npm test (Vitest)
 import assert from 'node:assert/strict';
 import { monitorEventLoopDelay, performance } from 'node:perf_hooks';
@@ -76,8 +77,8 @@ const CONFIG: StartGameConfig = {
   seed: 42,
   firstSeat: 0,
   players: [
-    { nickname: '가', characterId: 'bear' },
-    { nickname: '나', characterId: 'cat' },
+    { nickname: '가', appearance: DEFAULT_APPEARANCE },
+    { nickname: '나', appearance: DEFAULT_APPEARANCE },
   ],
 };
 

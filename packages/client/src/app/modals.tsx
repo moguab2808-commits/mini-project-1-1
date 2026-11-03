@@ -3,17 +3,20 @@ import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   BOARD_IDS,
-  CharacterIdSchema,
+  APPEARANCE_CHOICES,
+  APPEARANCE_KEYS,
   DEFAULT_THEME,
   PASSWORD_MAX,
   ROOM_CODE_LENGTH,
   ROOM_TITLE_MAX,
   type BoardId,
-  type CharacterId,
+  type Appearance,
+  type AppearanceKey,
   type RoomCreate,
   type ThemeId,
 } from '@alkkagi/shared';
-import { CharacterFace } from '../game/hud/CharacterFace.tsx';
+import { AvatarFace } from '../avatar/AvatarFace.tsx';
+import { AvatarPreview } from '../avatar/AvatarPreview.tsx';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS, ThemeChoice } from '../ai/ai-page.tsx';
 import { ApiError, describeApiError, type Api } from './api.ts';
@@ -29,13 +32,15 @@ import {
 import { clampVolume, loadVolume, saveVolume } from './settings.ts';
 import { useToast } from './toast.tsx';
 
-export const CHARACTER_LABEL: Record<CharacterId, string> = {
-  bear: '곰',
-  cat: '고양이',
-  fox: '여우',
-  rabbit: '토끼',
-  owl: '부엉이',
-  frog: '개구리',
+/** 꾸미기 항목 이름(PRD 캐릭터 변경, DEC-054) */
+export const APPEARANCE_LABEL: Record<AppearanceKey, string> = {
+  headShape: '두상',
+  hair: '머리카락',
+  eyebrows: '눈썹',
+  eyes: '눈',
+  nose: '코',
+  lips: '입술',
+  skinTone: '피부색',
 };
 
 /** 클립보드 복사. 막힌 환경이면 false를 돌려준다. */
@@ -341,45 +346,91 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
   );
 }
 
-/* ───────── 캐릭터 변경 ───────── */
+/* ───────── 캐릭터 꾸미기 ───────── */
 
-export function CharacterModal({
+/**
+ * 꾸미기 창(DEC-059): 왼쪽 3D 미리보기 + 오른쪽 항목 탭. 창 안에서 마음대로 바꿔 본 뒤
+ * 저장을 눌러야 한 번 저장되고, 닫으면 바꾼 것이 버려진다.
+ */
+export function AvatarModal({
   current,
-  onPick,
+  onSave,
   onClose,
 }: {
-  current: CharacterId;
-  /** 고르는 즉시 저장한다. 실패하면 오류 문구를 돌려준다. */
-  onPick: (characterId: CharacterId) => Promise<string | null>;
+  current: Appearance;
+  /** 저장 요청. 실패하면 오류 문구를 돌려준다 */
+  onSave: (appearance: Appearance) => Promise<string | null>;
   onClose: () => void;
 }) {
+  const [draft, setDraft] = useState<Appearance>(current);
+  const [tab, setTab] = useState<AppearanceKey>('headShape');
   const [busy, setBusy] = useState(false);
   const notify = useToast();
+  const changed = APPEARANCE_KEYS.some((k) => draft[k] !== current[k]);
+  const choices = Array.from({ length: APPEARANCE_CHOICES }, (_, i) => i);
   return (
-    <FloatingWindow title="캐릭터 변경" onClose={onClose}>
-      <div className="character-grid">
-        {CharacterIdSchema.options.map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={id === current ? 'character-pick character-on' : 'character-pick'}
-            aria-pressed={id === current}
-            disabled={busy}
-            onClick={() => {
-              if (id === current) return;
-              setBusy(true);
-              void onPick(id).then((message) => {
-                setBusy(false);
-                if (message) notify(message);
-              });
-            }}
-          >
-            <CharacterFace characterId={id} size={64} />
-            <span>{CHARACTER_LABEL[id]}</span>
-          </button>
-        ))}
+    <FloatingWindow title="캐릭터 꾸미기" onClose={onClose} wide>
+      <div className="avatar-editor">
+        <AvatarPreview appearance={draft} />
+        <div className="avatar-options">
+          <div className="avatar-tabs" role="tablist" aria-label="꾸미기 항목">
+            {APPEARANCE_KEYS.map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                aria-selected={k === tab}
+                className={k === tab ? 'avatar-tab avatar-tab-on' : 'avatar-tab'}
+                onClick={() => {
+                  setTab(k);
+                }}
+              >
+                {APPEARANCE_LABEL[k]}
+              </button>
+            ))}
+          </div>
+          <div className="avatar-choices" role="tabpanel" aria-label={APPEARANCE_LABEL[tab]}>
+            {choices.map((i) => {
+              const on = draft[tab] === i;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={on ? 'avatar-choice avatar-choice-on' : 'avatar-choice'}
+                  aria-pressed={on}
+                  aria-label={`${APPEARANCE_LABEL[tab]} ${String(i + 1)}`}
+                  disabled={busy}
+                  onClick={() => {
+                    setDraft((d) => ({ ...d, [tab]: i }));
+                  }}
+                >
+                  <AvatarFace appearance={{ ...draft, [tab]: i }} size={64} />
+                </button>
+              );
+            })}
+          </div>
+          <div className="avatar-actions">
+            <button type="button" className="btn" disabled={busy} onClick={onClose}>
+              취소
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={busy || !changed}
+              onClick={() => {
+                setBusy(true);
+                void onSave(draft).then((message) => {
+                  setBusy(false);
+                  if (message) notify(message);
+                });
+              }}
+            >
+              {busy ? '저장 중…' : '저장'}
+            </button>
+          </div>
+          <p className="hint">저장을 눌러야 계정에 반영돼요. 닫으면 바꾼 것이 취소돼요.</p>
+        </div>
       </div>
-      <p className="hint">고르면 바로 적용되고 계정에 저장돼요.</p>
     </FloatingWindow>
   );
 }

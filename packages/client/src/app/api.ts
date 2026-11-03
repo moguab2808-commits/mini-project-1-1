@@ -1,6 +1,6 @@
 // 같은 출처의 REST API(docs/design/API.md). 세션은 쿠키가 맡는다. fetch를 주입할 수 있어 단위 검증이 쉽다.
 import { NETWORK_ERROR_MESSAGE, authErrorMessage } from './messages.ts';
-import type { CharacterId, Login, Me, PasswordChange, RoomSummary, Signup } from '@alkkagi/shared';
+import type { Appearance, Login, Me, PasswordChange, RoomSummary, Signup } from '@alkkagi/shared';
 
 export class ApiError extends Error {
   constructor(
@@ -39,7 +39,7 @@ export interface Api {
   logout(): Promise<void>;
   me(): Promise<Me>;
   changePassword(input: PasswordChange): Promise<void>;
-  changeCharacter(characterId: CharacterId): Promise<Me>;
+  changeAppearance(appearance: Appearance): Promise<Me>;
   listRooms(): Promise<RoomSummary[]>;
 }
 
@@ -72,8 +72,8 @@ export function createApi(fetchFn: FetchFn = (input, init) => fetch(input, init)
     async changePassword(input) {
       await call('PATCH', '/api/me/password', input);
     },
-    async changeCharacter(characterId) {
-      const res = await call('PATCH', '/api/me/character', { characterId });
+    async changeAppearance(appearance) {
+      const res = await call('PATCH', '/api/me/appearance', { appearance });
       return ((await res.json()) as { user: Me }).user;
     },
     async listRooms() {

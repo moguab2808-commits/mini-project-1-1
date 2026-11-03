@@ -1,12 +1,12 @@
 // 명령·이벤트·뷰의 Zod 스키마. docs/design/API.md의 필드를 옮긴 것이다.
 import { z } from 'zod';
+import { AppearanceSchema } from './avatar.ts';
 import { BOARD_IDS, HAZARD_KINDS, THEME_IDS } from './constants.ts';
 
 export const SeatSchema = z.union([z.literal(0), z.literal(1)]);
 export const HazardKindSchema = z.enum(HAZARD_KINDS);
 export const BoardIdSchema = z.enum(BOARD_IDS);
 export const ThemeIdSchema = z.enum(THEME_IDS);
-export const CharacterIdSchema = z.enum(['bear', 'cat', 'fox', 'rabbit', 'owl', 'frog']);
 
 export const ERROR_CODES = [
   'INVALID_INPUT',
@@ -263,8 +263,8 @@ export const GameStartSchema = z.object({
   gameId: z.string(),
   seat: SeatSchema,
   players: z.tuple([
-    z.object({ seat: SeatSchema, nickname: z.string(), characterId: CharacterIdSchema }),
-    z.object({ seat: SeatSchema, nickname: z.string(), characterId: CharacterIdSchema }),
+    z.object({ seat: SeatSchema, nickname: z.string(), appearance: AppearanceSchema }),
+    z.object({ seat: SeatSchema, nickname: z.string(), appearance: AppearanceSchema }),
   ]),
   board: BoardIdSchema,
   theme: ThemeIdSchema,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ApiErrorBodySchema,
-  CharacterChangeSchema,
+  AppearanceChangeSchema,
   LoginSchema,
   NicknameSchema,
   PasswordChangeSchema,
@@ -9,6 +9,7 @@ import {
   SignupSchema,
   normalizeNickname,
 } from './auth.ts';
+import { DEFAULT_APPEARANCE } from './avatar.ts';
 
 describe('NicknameSchema', () => {
   it('2~12자의 한글·영문·숫자를 받는다', () => {
@@ -83,12 +84,22 @@ describe('PasswordChangeSchema', () => {
   });
 });
 
-describe('CharacterChangeSchema', () => {
-  it('캐릭터 6종만 받는다', () => {
-    for (const id of ['bear', 'cat', 'fox', 'rabbit', 'owl', 'frog']) {
-      expect(CharacterChangeSchema.safeParse({ characterId: id }).success, id).toBe(true);
-    }
-    expect(CharacterChangeSchema.safeParse({ characterId: 'dog' }).success).toBe(false);
+describe('AppearanceChangeSchema', () => {
+  it('7항목 정수 0~4만 받고 범위 밖·없는 항목·여분 필드는 거부한다', () => {
+    const a = { ...DEFAULT_APPEARANCE, hair: 4, skinTone: 2 };
+    expect(AppearanceChangeSchema.safeParse({ appearance: a }).success).toBe(true);
+    expect(AppearanceChangeSchema.safeParse({ appearance: { ...a, hair: 5 } }).success).toBe(false);
+    expect(AppearanceChangeSchema.safeParse({ appearance: { ...a, eyes: -1 } }).success).toBe(
+      false,
+    );
+    expect(AppearanceChangeSchema.safeParse({ appearance: { ...a, nose: 1.5 } }).success).toBe(
+      false,
+    );
+    const missing: Partial<typeof a> = { ...a };
+    delete missing.lips;
+    expect(AppearanceChangeSchema.safeParse({ appearance: missing }).success).toBe(false);
+    expect(AppearanceChangeSchema.safeParse({ appearance: { ...a, hat: 1 } }).success).toBe(false);
+    expect(AppearanceChangeSchema.safeParse({ appearance: a, extra: 1 }).success).toBe(false);
   });
 });
 

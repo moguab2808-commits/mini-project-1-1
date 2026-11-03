@@ -1,3 +1,4 @@
+import { DEFAULT_APPEARANCE } from '@alkkagi/shared';
 import { EventEmitter } from 'node:events';
 import type { Socket } from 'socket.io-client';
 import { describe, expect, it, vi } from 'vitest';
@@ -40,7 +41,7 @@ class FakeSocket {
 }
 const member = {
   nickname: '사람',
-  characterId: 'bear' as const,
+  appearance: DEFAULT_APPEARANCE,
   record: { totalGames: 0, wins: 0, losses: 0, draws: 0 },
 };
 const room: RoomState = {
@@ -67,8 +68,8 @@ function start(gameId = 'g1'): GameStart {
     finalRound: 10,
     turnSeconds: 30,
     players: [
-      { seat: 0, nickname: '가', characterId: 'bear' },
-      { seat: 1, nickname: '나', characterId: 'cat' },
+      { seat: 0, nickname: '가', appearance: DEFAULT_APPEARANCE },
+      { seat: 1, nickname: '나', appearance: DEFAULT_APPEARANCE },
     ],
     view: game.getViewFor(0),
   };

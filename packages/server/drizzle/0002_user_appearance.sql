@@ -1,0 +1,2 @@
+ALTER TABLE "users" ADD COLUMN "appearance" jsonb DEFAULT '{"headShape":0,"hair":0,"eyebrows":0,"eyes":0,"nose":0,"lips":0,"skinTone":0}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "users" DROP COLUMN "character_id";

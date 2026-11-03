@@ -2,7 +2,9 @@ import { MessageChannel } from 'node:worker_threads';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RuntimeClock } from '@alkkagi/game-runtime';
 import {
+  AppearanceSchema,
   BOARDS,
+  DEFAULT_APPEARANCE,
   type GameOver,
   type GameStart,
   type GameView,
@@ -14,6 +16,8 @@ import type { SessionPort } from '../local/local-game-session.ts';
 import { AiAuthority } from './ai-authority.ts';
 import { AiController, planShot } from './ai-controller.ts';
 import { AiGameSession } from './ai-game-session.ts';
+
+const TESTER_LOOK = { ...DEFAULT_APPEARANCE, hair: 2, eyes: 3 };
 
 class FakeClock implements RuntimeClock {
   nowMs = 1_000_000;
@@ -78,7 +82,7 @@ function setup(
   authority.attach(ch.port1 as unknown as PortLike);
   const session = new AiGameSession(ch.port2 as unknown as SessionPort, {
     ...settings,
-    profile: { nickname: '테스터', characterId: 'fox' },
+    profile: { nickname: '테스터', appearance: TESTER_LOOK },
   });
   sessions.push(session);
   const log: { type: string; payload: unknown }[] = [];
@@ -178,7 +182,8 @@ describe('AiAuthority + AiGameSession', () => {
       expect(start.seat).toBe(0);
       expect(start.board).toBe(board);
       expect(start.pieceCount).toBe(pieceCount);
-      expect(start.players[0]).toMatchObject({ nickname: '테스터', characterId: 'fox' });
+      expect(start.players[0]).toEqual({ seat: 0, nickname: '테스터', appearance: TESTER_LOOK });
+      expect(AppearanceSchema.safeParse(start.players[1].appearance).success).toBe(true);
       expect(start.players[1]).toMatchObject({ nickname: 'AI' });
 
       // 10라운드(턴 30초 상한) 안에 끝난다
@@ -263,6 +268,8 @@ describe('AiAuthority + AiGameSession', () => {
     expect(starts).toHaveLength(2);
     expect(starts[1]!.gameId).not.toBe(first.gameId);
     expect(starts[1]).toMatchObject({ board: 'standard', pieceCount: 9 });
+    // AI 외형은 재도전에서 같다(DEC-059)
+    expect(starts[1]!.players[1].appearance).toEqual(first.players[1].appearance);
   });
 
   it('재도전 시간이 지나면 무산되고, 지난 경기의 재도전 요청은 거부된다', async () => {

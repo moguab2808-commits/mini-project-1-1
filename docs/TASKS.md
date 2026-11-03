@@ -68,7 +68,7 @@
 | [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 진행 중 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81) |
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
-| [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 예정 | 미정 | 미생성 |
+| [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 예정 | 미정 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -1001,23 +1001,31 @@ Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 ## IMPL-018 사람 아바타 구현
 
 우선순위: P1
-상태: 예정
-담당: 미정
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
 의존성: CHAR-001, IMPL-012(캐릭터 변경 창·API)
 범위: [DEC-048](DECISIONS.md#결정-색인)·[DEC-054](DECISIONS.md#결정-색인)·[DEC-059](DECISIONS.md#결정-색인)의 사람 아바타를 `shared` 외형 타입·부품 데이터, DB 마이그레이션, API, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI 외형에 구현하고 동물 6종을 없앤다. UI 꾸밈은 바꾸지 않는다([DEC-060](DECISIONS.md#결정-색인)).
 관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE users](design/DATABASE.md#users) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
-Issue·PR: 미생성
+Issue·PR: [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82)(중간 PR)
 
 수용 기준:
-- [ ] (정상, 첫 단계) 시험용 머리(이목구비 한 세트·머리카락 2종)를 개발용 화면에 띄운 스크린샷으로 화풍을 사용자에게 확인받은 뒤 나머지 선택지를 만든다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
-- [ ] (정상) `shared`에 `Appearance`(7항목, 0~4)·기본 외형·부품 데이터가 있고, `users.appearance` 마이그레이션이 기존 행을 고정 기본 외형으로 채우고 `character_id`를 지운다(실제 DB 테스트). 신규 가입도 기본 외형이다.
-- [ ] (정상) 로비 프로필에서 연 꾸미기 창(왼쪽 3D 미리보기 + 오른쪽 항목 탭)에서 바꾼 값은 저장을 눌러야 `PATCH /api/me/appearance`로 한 번 저장되고, 닫으면 취소된다.
-- [ ] (예외) 범위 밖 값·없는 항목·여분 필드는 `INVALID_INPUT`이고 저장되지 않는다.
+- [x] (정상, 첫 단계) 시험용 머리(이목구비 한 세트·머리카락 2종)를 개발용 화면에 띄운 스크린샷으로 화풍을 사용자에게 확인받은 뒤 나머지 선택지를 만든다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
+- [ ] (정상) `shared`에 `Appearance`(7항목, 0~4)·기본 외형·부품 데이터가 있고, `users.appearance` 마이그레이션이 기존 행을 고정 기본 외형으로 채우고 `character_id`를 지운다(실제 DB 테스트). 신규 가입도 기본 외형이다. (구현·DB 테스트 작성 완료, `test:db` 실행 전)
+- [x] (정상) 로비 프로필에서 연 꾸미기 창(왼쪽 3D 미리보기 + 오른쪽 항목 탭)에서 바꾼 값은 저장을 눌러야 `PATCH /api/me/appearance`로 한 번 저장되고, 닫으면 취소된다.
+- [ ] (예외) 범위 밖 값·없는 항목·여분 필드는 `INVALID_INPUT`이고 저장되지 않는다. (스키마 단위 테스트 통과, 서버 DB 테스트는 실행 전)
 - [ ] (정상) 프로필바·방 카드·대기실·결과 화면의 2D 얼굴과 게임 장면의 3D 상반신이 같은 외형으로 보이고, 상대에게도 방 목록·`room:state`·`game:start`로 같은 외형이 보인다(온라인 두 계정). AI는 경기마다 무작위이고 재도전에서 같다.
 - [ ] (경계) 3D 아바타 두 명이 있는 게임 화면의 프레임 시간을 동물 캐릭터 때와 같은 조건으로 기록해 비교했다([검증 계획](ENGINEERING-VALIDATION.md)).
 - [ ] 동물 6종 코드·`CharacterId`를 지우고 API·DATABASE·TECH_STACK의 "미구현" 표시를 고치며, 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+진행: 화풍을 시험용 머리로 사용자에게 확인받고(머리 1.1배) 7항목 × 5개 부품, DB 마이그레이션, `PATCH /api/me/appearance`, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI·로컬 외형을 구현했고 동물 6종 코드를 지웠다. 전체 선택지는 스크린샷으로 사용자 확인을 받았다. 사용자 요청("남은 확인은 그냥 문서에 적어두고 병합하자")으로 중간 PR #82를 남은 확인 전에 병합했다.
+
+남은 확인(병합 뒤):
+- `npm run test:db`: `appearance-migration.db.test.ts`(기존 동물 값 행 → 기본 외형, `character_id` 삭제)와 `auth.db.test.ts`(외형 저장·잘못된 값 거부). 개발 DB에 `npm run db:migrate -w @alkkagi/server` 적용도 아직 안 했다.
+- 온라인 두 계정: 방 목록·`room:state`·`game:start`로 상대에게 같은 외형이 보이는지, 실제 로비 꾸미기 창 저장.
+- GPU 브라우저에서 동물 캐릭터(`main` 477803e)와 같은 조건의 프레임 시간 비교(SwiftShader 참고값은 6~17% 느림, 흔들림 큼).
+- 위 확인 뒤 수용 기준 체크·완료 처리.
+
+검증 근거: [2026-11-03 worklog IMPL-018 절](worklogs/2026-11-03.md#impl-018-사람-아바타-구현)
 
 ## IMPL-017 감정표현 구현
 

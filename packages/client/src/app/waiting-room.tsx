@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { THEME_LABEL, type RoomState } from '@alkkagi/shared';
 import { BOARD_LABEL } from '../ai/ai-page.tsx';
-import { CharacterFace } from '../game/hud/CharacterFace.tsx';
+import { AvatarFace } from '../avatar/AvatarFace.tsx';
 import { formatRecord, formatWinRate } from './logic.ts';
 import { CopyCodeButton } from './modals.tsx';
 
@@ -40,7 +40,7 @@ export function WaitingRoom({
           </div>
         </dl>
         <div className="waiting-host">
-          <CharacterFace characterId={room.host.characterId} size={80} />
+          <AvatarFace appearance={room.host.appearance} size={80} />
           <strong>{room.host.nickname}</strong>
           <span className="room-host-record">
             {formatRecord(room.host.record)} · 승률 {formatWinRate(room.host.record)}

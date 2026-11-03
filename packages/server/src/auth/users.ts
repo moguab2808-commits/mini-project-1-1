@@ -1,6 +1,5 @@
-import { randomInt } from 'node:crypto';
 import { sql } from 'drizzle-orm';
-import { CharacterIdSchema, type CharacterId, type Me } from '@alkkagi/shared';
+import { DEFAULT_APPEARANCE, normalizeAppearance, type Appearance, type Me } from '@alkkagi/shared';
 import type { Db, DbOrTx } from '../db/pool.ts';
 import { users } from '../db/schema.ts';
 
@@ -25,19 +24,15 @@ export async function findUserById(db: Db, id: number): Promise<User | undefined
   return user;
 }
 
-export function randomCharacterId(): CharacterId {
-  const ids = CharacterIdSchema.options;
-  return ids[randomInt(ids.length)]!;
-}
-
 export async function insertUser(
   db: Db,
-  values: { nickname: string; passwordHash: string; characterId: CharacterId },
+  values: { nickname: string; passwordHash: string },
 ): Promise<void> {
+  // 가입 시 외형은 고정 기본 외형이다(DEC-059)
   await db.insert(users).values({
     nickname: values.nickname,
     password: values.passwordHash,
-    characterId: values.characterId,
+    appearance: { ...DEFAULT_APPEARANCE },
   });
 }
 
@@ -52,14 +47,14 @@ export async function updateUserPassword(
     .where(sql`${users.id} = ${id}`);
 }
 
-export async function updateUserCharacter(
+export async function updateUserAppearance(
   db: Db,
   id: number,
-  characterId: CharacterId,
+  appearance: Appearance,
 ): Promise<User> {
   const [user] = await db
     .update(users)
-    .set({ characterId })
+    .set({ appearance })
     .where(sql`${users.id} = ${id}`)
     .returning();
   return user!;
@@ -69,7 +64,7 @@ export async function updateUserCharacter(
 export function toMe(user: User): Me {
   return {
     nickname: user.nickname,
-    characterId: user.characterId as CharacterId,
+    appearance: normalizeAppearance(user.appearance),
     record: {
       totalGames: user.totalGames,
       wins: user.wins,

@@ -17,8 +17,8 @@ export type ClientMessage =
       /** 방 테마. 없거나 잘못된 값이면 기본 테마 */
       theme?: ThemeId;
       pieceCount?: number;
-      /** AI 대전: 화면 표시용 내 닉네임·캐릭터. 서버로 보내지 않는다. 로컬 2인은 쓰지 않는다 */
-      profile?: { nickname?: string; characterId?: string };
+      /** AI 대전: 화면 표시용 내 닉네임·외형. 서버로 보내지 않는다. 로컬 2인은 쓰지 않는다 */
+      profile?: { nickname?: string; appearance?: unknown };
     }
   | ({ t: 'cmd'; id: number } & LocalCommand)
   /** 발동 중인 후레쉬·물총 조준점(`hazard:aim`). 응답 없음 */

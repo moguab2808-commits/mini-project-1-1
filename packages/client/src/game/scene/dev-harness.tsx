@@ -1,6 +1,6 @@
 // 개발용 장면 하네스. `npm run dev -w @alkkagi/client` 후 /scene-harness.html 로 연다(운영 빌드의 입력이 아니다).
 // 쿼리:
-//   seat=0|1 board=standard|circle theme=bar|rooftop|classroom|beach chars=bear,cat cam=default|first shake=0~1
+//   seat=0|1 board=standard|circle theme=bar|rooftop|classroom|beach looks=0000000,0101010(두상·머리카락·눈썹·눈·코·입술·피부색 번호 7자리) cam=default|first shake=0~1
 //   walls=1 sticky=1 place=wall|sticky invalid=1 lift=1 spin=1 fall=1 desk=1
 //   aim=<내 알 번호 0~6> charge=<세기> unreach=1 strain=0~1   (내 조준: aim 상태 + 내 포즈)
 //   opp=aim|charge|rotate|hold oppstone=<상대 알 번호> hold=flashlight|water_gun   (상대 포즈, 20Hz로 흔들며 보냄)
@@ -12,7 +12,11 @@
 //   interactive=1                                            (왼쪽 드래그로 조준)
 // 하네스는 합성 GameStart/GameView만 쓰며 `window.__harness`로 상태·포인터 이벤트·조작 함수를 노출한다.
 import {
+  APPEARANCE_KEYS,
   BOARDS,
+  DEFAULT_APPEARANCE,
+  normalizeAppearance,
+  type Appearance,
   PHYSICS,
   THEME_IDS,
   type ThemeId,
@@ -42,7 +46,15 @@ const oppSeat: Seat = mySeat === 0 ? 1 : 0;
 const boardId = q.get('board') === 'circle' ? 'circle' : 'standard';
 const themeParam = q.get('theme');
 const themeId: ThemeId = THEME_IDS.find((t) => t === themeParam) ?? 'bar';
-const [c0, c1] = (q.get('chars') ?? 'bear,fox').split(',');
+const [look0, look1] = (q.get('looks') ?? '').split(',');
+
+/** 'looks' 쿼리의 7자리 숫자(두상·머리카락·눈썹·눈·코·입술·피부색 순)를 외형으로 읽는다 */
+function lookFrom(digits: string | undefined, fallback: Appearance): Appearance {
+  if (!digits || !/^[0-4]{7}$/.test(digits)) return fallback;
+  return normalizeAppearance(
+    Object.fromEntries(APPEARANCE_KEYS.map((k, i) => [k, Number(digits[i])])),
+  );
+}
 const PIECES = 7;
 const T0 = Date.now();
 
@@ -186,12 +198,12 @@ function initial(): { start: GameStart; view: GameView } {
       {
         seat: 0,
         nickname: 'A',
-        characterId: (c0 ?? 'bear') as GameStart['players'][0]['characterId'],
+        appearance: lookFrom(look0, DEFAULT_APPEARANCE),
       },
       {
         seat: 1,
         nickname: 'B',
-        characterId: (c1 ?? 'fox') as GameStart['players'][0]['characterId'],
+        appearance: lookFrom(look1, { ...DEFAULT_APPEARANCE, hair: 1, skinTone: 1, eyes: 1 }),
       },
     ],
     board: boardId,

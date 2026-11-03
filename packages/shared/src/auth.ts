@@ -1,6 +1,6 @@
 // 인증 API의 요청·응답 스키마. docs/design/API.md의 REST API와 docs/PRD.md의 회원등록 규칙을 옮긴 것이다.
 import { z } from 'zod';
-import { CharacterIdSchema } from './protocol.ts';
+import { AppearanceSchema } from './avatar.ts';
 
 /**
  * REST API가 쓰는 오류 코드. 경기 오류 코드(`protocol.ts`의 ERROR_CODES)와 도메인별로 나눠 두며
@@ -39,8 +39,6 @@ export const NicknameSchema = z
       .regex(/^[가-힣A-Za-z0-9]+$/, '한글·영문·숫자만 쓸 수 있다'),
   );
 
-export type CharacterId = z.infer<typeof CharacterIdSchema>;
-
 export const PasswordSchema = z.string().min(PASSWORD_MIN).max(PASSWORD_MAX);
 
 /** 로그인·현재 비밀번호는 정책을 알려 주지 않도록 길이 하한만 완화하고, 해시 비용 남용을 막으려 상한은 둔다. */
@@ -58,8 +56,9 @@ export const PasswordChangeSchema = z.object({
 });
 export type PasswordChange = z.infer<typeof PasswordChangeSchema>;
 
-export const CharacterChangeSchema = z.object({ characterId: CharacterIdSchema });
-export type CharacterChange = z.infer<typeof CharacterChangeSchema>;
+/** PATCH /api/me/appearance 본문. 여분 필드는 거부한다 */
+export const AppearanceChangeSchema = z.strictObject({ appearance: AppearanceSchema });
+export type AppearanceChange = z.infer<typeof AppearanceChangeSchema>;
 
 /** API 문서의 `Record`. 내장 유틸리티 타입 Record와 겹치지 않게 이름을 바꿨다. draws = totalGames - wins - losses. 서버가 계산해 보낸다. */
 export const PlayerRecordSchema = z.object({
@@ -73,7 +72,7 @@ export type PlayerRecord = z.infer<typeof PlayerRecordSchema>;
 /** GET /api/me·로그인 응답의 사용자. 사용자 번호는 넣지 않는다. */
 export const MeSchema = z.object({
   nickname: z.string(),
-  characterId: CharacterIdSchema,
+  appearance: AppearanceSchema,
   record: PlayerRecordSchema,
 });
 export type Me = z.infer<typeof MeSchema>;

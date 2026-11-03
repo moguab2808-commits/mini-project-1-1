@@ -1,13 +1,12 @@
-// 동물 캐릭터 6종과 몸짓 애니메이션. 모델은 단순한 코드 도형이고, 표정(눈·눈썹·입·눈물·깜빡임)과
+// 사람 아바타 상반신과 몸짓 애니메이션. 몸은 단순한 코드 도형, 머리는 AvatarHead(코드 도형 + 이목구비 캔버스 텍스처)이고, 표정(눈·눈썹·입·눈물·깜빡임)과
 // 몸짓(숙이기·일어서기, 양팔 2관절 IK, 머리 바라보기, 튕기기, 판 잡기, 방해요소 들기)이 핵심이다(시안 makeCharacter).
 //
 // 좌석 로컬 좌표(rig-math.ts): 루트 원점은 좌석 기준점 아래 판 윗면 높이, +Z가 판 쪽, 캐릭터 오른쪽은 −X.
 // 팔·손·다리는 루트에 직접 붙여 좌석 로컬 좌표로 매 프레임 배치하고, 몸통·머리는 hips → torso → neck → head 계층이다.
-import { SEAT_GEOMETRY, type HazardKind, type Seat } from '@alkkagi/shared';
+import { SEAT_GEOMETRY, type Appearance, type HazardKind, type Seat } from '@alkkagi/shared';
 import {
   BoxGeometry,
   CircleGeometry,
-  ConeGeometry,
   CylinderGeometry,
   DoubleSide,
   Group,
@@ -19,7 +18,6 @@ import {
   Shape,
   ShapeGeometry,
   SphereGeometry,
-  TorusGeometry,
   Vector3,
   type BufferGeometry,
   type Material,
@@ -48,57 +46,17 @@ import {
   type ReachResult,
   type V3,
 } from './rig-math.ts';
+import { AvatarHead } from '../../avatar/avatar-head.ts';
+import type { FaceEyes, FaceMouth } from '../../avatar/face-paint.ts';
 import { TABLE_Y } from './stage.ts';
 
-export type CharacterId = 'bear' | 'cat' | 'fox' | 'rabbit' | 'owl' | 'frog';
+type Eyes = FaceEyes;
+type Mouth = FaceMouth;
 
-type Eyes = 'open' | 'happy' | 'shut';
-type Mouth = 'smile' | 'frown' | 'flat' | 'open' | 'laugh' | 'tongue';
-
-interface Palette {
-  fur: number;
-  belly: number;
-  shirt: number;
-  inner: number;
-}
-
-const PALETTES: Record<CharacterId, Palette> = {
-  bear: { fur: 0x8a5a3a, belly: 0xe0c09a, shirt: 0x3f6fb5, inner: 0xc08a64 },
-  cat: { fur: 0x9aa0a8, belly: 0xeeeae4, shirt: 0xc7506a, inner: 0xf0a3b0 },
-  fox: { fur: 0xd9702a, belly: 0xf6efe4, shirt: 0x2f7f6a, inner: 0x2a1a12 },
-  rabbit: { fur: 0xf2eeee, belly: 0xffffff, shirt: 0x8a62c4, inner: 0xf6b5c4 },
-  owl: { fur: 0x8b6b4a, belly: 0xd9c19a, shirt: 0xd09a2f, inner: 0xe9a53a },
-  frog: { fur: 0x6fbf4a, belly: 0xd8efb0, shirt: 0xd8503a, inner: 0xe27a86 },
-};
-
-/** 얼굴 부품 배치(머리 좌표계 cm). z를 생략하면 머리 구 표면에 붙인다 */
-interface FaceLayout {
-  eyeX: number;
-  eyeY: number;
-  eyeZ?: number;
-  browY: number;
-  browZ?: number;
-  mouthY: number;
-  mouthZ?: number;
-  mouthScaleX: number;
-}
-
-const FACE: Record<CharacterId, FaceLayout> = {
-  bear: { eyeX: 3, eyeY: 1.6, browY: 4.2, mouthY: -4.1, mouthZ: 9.6, mouthScaleX: 0.8 },
-  cat: { eyeX: 3, eyeY: 1.4, browY: 4.1, mouthY: -2.9, mouthScaleX: 0.9 },
-  fox: { eyeX: 3, eyeY: 1.8, browY: 4.4, mouthY: -4.6, mouthZ: 7.6, mouthScaleX: 0.9 },
-  rabbit: { eyeX: 3, eyeY: 1.4, browY: 4.1, mouthY: -2.9, mouthScaleX: 0.9 },
-  owl: { eyeX: 3.1, eyeY: 1.4, eyeZ: 9.1, browY: 4.8, mouthY: -4.4, mouthScaleX: 0.8 },
-  frog: {
-    eyeX: 3.9,
-    eyeY: 6.6,
-    eyeZ: 6.6,
-    browY: 9.6,
-    browZ: 4.9,
-    mouthY: -2.2,
-    mouthScaleX: 1.7,
-  },
-};
+/** 좌석별 옷 색(외형 항목이 아니다. 두 사람을 구분하기 쉽게 좌석으로 정한다) */
+const SHIRT: Record<Seat, number> = { 0: 0x3f6fb5, 1: 0xc7506a };
+/** 얼굴 좌표(머리 반지름 50) → 머리 좌표(cm) */
+const FACE_UNIT = RIG.headRadius / 50;
 
 // ───────── 몸짓 정의 ─────────
 
@@ -296,8 +254,8 @@ export interface CharacterFrame {
 }
 
 const UP = new Vector3(0, 1, 0);
-/** 머리 크기 배율(부품은 반지름 RIG.headRadius 기준) */
-const HEAD_SCALE = 0.82;
+/** 머리 크기 배율(부품은 반지름 RIG.headRadius 기준). 큰 머리 화풍(IMPL-018 화풍 확인) */
+const HEAD_SCALE = 1.1;
 const _a = new Vector3();
 const _b = new Vector3();
 const _m = new Matrix4();
@@ -315,23 +273,16 @@ export class CharacterRig {
   readonly seat: Seat;
   private readonly geos: BufferGeometry[] = [];
   private readonly mats: Material[] = [];
-  /** 투명도 조절 대상(몸통·머리·다리) */
+  /** 투명도 조절 대상(몸통·머리) */
   private readonly fadeMats: MeshStandardMaterial[] = [];
   private readonly fadeBasic: MeshBasicMaterial[] = [];
   private readonly hips = new Group();
   private readonly torso = new Group();
   private readonly neck = new Group();
   private readonly head = new Group();
-  private readonly legs = new Group();
-  private readonly thighs: { m: Mesh; x: number }[] = [];
-  private readonly eyes: Record<Eyes, Group> = {
-    open: new Group(),
-    happy: new Group(),
-    shut: new Group(),
-  };
-  private readonly brows: { m: Mesh; s: number }[] = [];
-  private readonly mouths = {} as Record<Mouth, Mesh>;
-  private readonly tongue: Mesh;
+  private readonly avatar: AvatarHead;
+  private faceEyes: Eyes = 'open';
+  private faceMouth: Mouth = 'smile';
   private readonly tear: Mesh;
   private readonly hands: [HandState, HandState];
   private readonly flashlight = new Group();
@@ -341,7 +292,6 @@ export class CharacterRig {
   private readonly stunStarMeshes: Mesh[] = [];
   /** 빛·물이 나오는 곳 */
   readonly muzzle = new Object3D();
-  private readonly layout: FaceLayout;
 
   // 몸 상태(현재값 st, 목표값 tg)
   private readonly st = {
@@ -387,10 +337,8 @@ export class CharacterRig {
   private readonly aimFace: Face = { eyes: 'open', mouth: 'flat', brow: 0.22, browUp: 0 };
   private lastAimId: number | null = null;
 
-  constructor(id: CharacterId, seat: Seat) {
+  constructor(appearance: Appearance, seat: Seat) {
     this.seat = seat;
-    this.layout = FACE[id];
-    const pal = PALETTES[id];
     // 루트: 좌석 0은 +Z에서 −Z를 보고, 좌석 1은 −Z에서 +Z를 본다
     this.root.position.set(
       0,
@@ -399,20 +347,16 @@ export class CharacterRig {
     );
     this.root.rotation.y = seat === 0 ? Math.PI : 0;
 
-    const fur = this.fadeStd(pal.fur);
-    const belly = this.fadeStd(pal.belly);
-    const shirt = this.fadeStd(pal.shirt, 0.9);
-    const inner = this.fadeStd(pal.inner);
+    this.avatar = new AvatarHead(appearance, RIG.headRadius);
+    const skinColor = this.avatar.parts.skinTone.base;
+    const skin = this.fadeStd(skinColor, 0.7);
+    const shirt = this.fadeStd(SHIRT[seat], 0.9);
     const pants = this.fadeStd(0x2b2f3a, 0.85);
-    const shoe = this.fadeStd(0x1d1410, 0.5);
-    const line = this.fadeBasicMat(0x1d120b);
-    const white = this.fadeBasicMat(0xffffff);
-    const armShirt = this.fadeStd(pal.shirt, 0.9);
-    const armFur = this.std(pal.fur);
-    // 손(발바닥)은 밝은 색으로 팔꿈치·팔과 구분한다
-    const paw = this.std(pal.belly, 0.6);
+    const armShirt = this.fadeStd(SHIRT[seat], 0.9);
+    // 팔뚝·손은 투명도와 무관하게 늘 보인다(1인칭에서 내 손)
+    const armSkin = this.std(skinColor, 0.7);
 
-    // 몸통 계층
+    // 몸통 계층(상반신, DEC-059)
     this.root.add(this.hips);
     this.hips.add(this.torso);
     this.torso.rotation.order = 'YXZ';
@@ -431,67 +375,46 @@ export class CharacterRig {
     const seatBall = this.mesh(new SphereGeometry(9.5, 16, 8), pants, this.torso);
     seatBall.position.set(0, 1, 0);
     seatBall.scale.set(1, 0.5, 0.82);
-    const tummy = this.mesh(new SphereGeometry(6.5, 14, 10), belly, this.torso);
-    tummy.position.set(0, 18, 7.4);
-    tummy.scale.set(1, 1.15, 0.45);
+    // 옷깃
+    const collar = this.mesh(new CylinderGeometry(3.6, 4.4, 1.6, 14), shirt, this.torso);
+    collar.position.set(RIG.neck.x, RIG.neck.y - 1.2, RIG.neck.z);
 
     this.neck.position.set(RIG.neck.x, RIG.neck.y, RIG.neck.z);
     this.neck.rotation.order = 'YXZ';
     this.torso.add(this.neck);
-    this.mesh(new CylinderGeometry(2.6, 3, 4, 10), fur, this.neck).position.y = 1.5;
+    this.mesh(new CylinderGeometry(2.6, 3, 5, 12), skin, this.neck).position.y = 1.5;
     this.head.position.y = RIG.headUp;
-    // 머리 부품은 반지름 RIG.headRadius 기준으로 만들고 전체를 줄여 판을 덜 가리게 한다
     this.head.scale.setScalar(HEAD_SCALE);
     this.neck.add(this.head);
-    this.mesh(new SphereGeometry(RIG.headRadius, 28, 20), fur, this.head);
-    this.buildSpecies(id, fur, belly, inner, line, white);
-    this.buildFace(line, white);
+    this.head.add(this.avatar.group);
+    for (const m of this.avatar.materials)
+      if (m !== this.avatar.faceMaterial) this.fadeMats.push(m);
 
-    // 눈물·볼터치
+    // 눈물
     const tearMat = this.fadeBasicMat(0x8fd0ff);
     this.tear = this.mesh(new SphereGeometry(0.7, 10, 8), tearMat, this.head);
     this.tear.scale.y = 1.35;
     this.tear.visible = false;
-    const blush = this.fadeBasicMat(0xf08a8a, 0.45);
-    for (const sx of [-1, 1]) {
-      const b = this.mesh(new CircleGeometry(1.3, 16), blush, this.head);
-      const x = sx * 4.8;
-      const y = this.layout.mouthY + 1.2;
-      b.position.set(x, y, this.surfZ(x, y) + 0.05);
-      b.rotation.y = Math.atan2(x, b.position.z);
-    }
-
-    // 다리(루트 좌표): 허벅지는 엉덩이와 무릎을 매 프레임 잇는다
-    this.root.add(this.legs);
-    for (const x of [-4.6, 4.6]) {
-      const th = this.mesh(new CylinderGeometry(3.4, 3.2, 1, 10), pants, this.legs);
-      this.thighs.push({ m: th, x });
-      this.mesh(new SphereGeometry(3.3, 10, 8), pants, this.legs).position.set(x, -35, 13);
-      const shin = this.mesh(new CylinderGeometry(3, 2.6, 44, 10), pants, this.legs);
-      shin.position.set(x, -57, 14);
-      const foot = this.mesh(new BoxGeometry(5, 3, 8), shoe, this.legs);
-      foot.position.set(x, -81.5, 16);
-    }
 
     // 팔과 손
     const mk = (side: -1 | 1, rest: HandSpec): HandState => {
       const shoulderBall = this.mesh(new SphereGeometry(3.1, 12, 10), shirt, this.torso);
       shoulderBall.position.set(RIG.shoulder.x * -side, RIG.shoulder.y, RIG.shoulder.z);
       const upper = this.mesh(new CylinderGeometry(2.6, 2.2, 1, 10), armShirt, this.root);
-      const fore = this.mesh(new CylinderGeometry(2.2, 1.9, 1, 10), armFur, this.root);
-      const elbow = this.mesh(new SphereGeometry(2.05, 10, 8), armFur, this.root);
+      const fore = this.mesh(new CylinderGeometry(2.0, 1.7, 1, 10), armSkin, this.root);
+      const elbow = this.mesh(new SphereGeometry(1.95, 10, 8), armSkin, this.root);
       const hand = new Group();
       this.root.add(hand);
-      const palm = this.mesh(new SphereGeometry(2.4, 14, 10), paw, hand);
-      palm.scale.set(1, 0.72, 1.15);
-      this.mesh(new SphereGeometry(0.95, 8, 6), armFur, hand).position.set(-side * 1.9, 0.3, 1.1);
+      const palm = this.mesh(new SphereGeometry(2.3, 14, 10), armSkin, hand);
+      palm.scale.set(1, 0.62, 1.15);
+      this.mesh(new SphereGeometry(0.85, 8, 6), armSkin, hand).position.set(-side * 1.9, 0.3, 1.1);
       const finger = new Group();
       finger.position.set(0, 0.35, 2);
       hand.add(finger);
-      const f = this.mesh(new CylinderGeometry(0.7, 0.62, 3, 8), armFur, finger);
+      const f = this.mesh(new CylinderGeometry(0.62, 0.56, 3, 8), armSkin, finger);
       f.rotation.x = Math.PI / 2;
       f.position.z = 1.5;
-      this.mesh(new SphereGeometry(0.66, 8, 6), armFur, finger).position.z = 3;
+      this.mesh(new SphereGeometry(0.58, 8, 6), armSkin, finger).position.z = 3;
       const p = v3(...rest.p);
       const fw = v3(...rest.f);
       return {
@@ -515,8 +438,6 @@ export class CharacterRig {
     this.hands = [mk(-1, REST_R), mk(1, REST_L)];
     this.buildDevices(this.hands[0].hand);
 
-    this.tongue = this.mouths.tongue;
-    this.setFace('open', 'smile');
     this.buildStunStars();
   }
 
@@ -559,13 +480,13 @@ export class CharacterRig {
 
   // ───── 생성 도우미 ─────
 
-  private std(color: number, rough = 0.75): MeshStandardMaterial {
+  private std(color: number | string, rough = 0.75): MeshStandardMaterial {
     const m = new MeshStandardMaterial({ color, roughness: rough });
     this.mats.push(m);
     return m;
   }
 
-  private fadeStd(color: number, rough = 0.75): MeshStandardMaterial {
+  private fadeStd(color: number | string, rough = 0.75): MeshStandardMaterial {
     const m = new MeshStandardMaterial({ color, roughness: rough, transparent: true });
     this.mats.push(m);
     this.fadeMats.push(m);
@@ -587,163 +508,6 @@ export class CharacterRig {
     m.receiveShadow = !(mat instanceof MeshBasicMaterial);
     parent.add(m);
     return m;
-  }
-
-  /** 머리 구 표면의 z */
-  private surfZ(x: number, y: number): number {
-    const r = RIG.headRadius + 0.2;
-    return Math.sqrt(Math.max(0.5, r * r - x * x - y * y));
-  }
-
-  /** 얼굴 부품을 표면 방향으로 살짝 돌려 붙인다 */
-  private onFace(o: Object3D, x: number, y: number, z?: number) {
-    const zz = z ?? this.surfZ(x, y);
-    o.position.set(x, y, zz);
-    o.rotation.set(-Math.atan2(y, zz) * 0.6, Math.atan2(x, zz) * 0.8, o.rotation.z);
-    this.head.add(o);
-  }
-
-  private buildFace(line: Material, white: Material) {
-    const L = this.layout;
-    for (const sx of [-1, 1]) {
-      const x = sx * L.eyeX;
-      // 뜬 눈 + 하이라이트
-      const eye = new Group();
-      const e = this.mesh(new SphereGeometry(1.05, 14, 10), line, eye);
-      e.scale.set(1, 1.3, 0.55);
-      this.mesh(new SphereGeometry(0.34, 8, 6), white, eye).position.set(0.35, 0.45, 0.5);
-      this.onFace(eye, x, L.eyeY, L.eyeZ);
-      this.head.remove(eye);
-      this.eyes.open.add(eye);
-      // 웃는 눈(∩)
-      const hp = this.mesh(new TorusGeometry(0.95, 0.28, 6, 14, Math.PI), line, this.eyes.happy);
-      this.onFace(hp, x, L.eyeY - 0.4, L.eyeZ);
-      this.head.remove(hp);
-      this.eyes.happy.add(hp);
-      // 감은 눈(찡그림)
-      const sh = this.mesh(new BoxGeometry(2.1, 0.4, 0.3), line, this.eyes.shut);
-      sh.rotation.z = sx < 0 ? 0.25 : -0.25;
-      this.onFace(sh, x, L.eyeY, L.eyeZ);
-      this.head.remove(sh);
-      this.eyes.shut.add(sh);
-      // 눈썹
-      const b = this.mesh(new BoxGeometry(2.4, 0.5, 0.45), line, this.head);
-      this.onFace(b, x, L.browY, L.browZ);
-      this.brows.push({ m: b, s: sx });
-    }
-    this.head.add(this.eyes.open, this.eyes.happy, this.eyes.shut);
-
-    const mouthMat = this.fadeBasicMat(0x3a1510);
-    const my = L.mouthY;
-    const mz = L.mouthZ;
-    const smile = this.mesh(new TorusGeometry(1.5, 0.32, 6, 16, Math.PI), mouthMat, this.head);
-    smile.rotation.z = Math.PI;
-    this.onFace(smile, 0, my + 0.6, mz);
-    const frown = this.mesh(new TorusGeometry(1.5, 0.32, 6, 16, Math.PI), mouthMat, this.head);
-    this.onFace(frown, 0, my - 1.1, mz);
-    const flat = this.mesh(new BoxGeometry(2.2, 0.38, 0.3), mouthMat, this.head);
-    this.onFace(flat, 0, my - 0.4, mz);
-    const open = this.mesh(new CircleGeometry(1.15, 18), mouthMat, this.head);
-    open.scale.y = 1.35;
-    this.onFace(open, 0, my - 0.6, mz === undefined ? undefined : mz + 0.1);
-    const laugh = this.mesh(new CircleGeometry(2.1, 20, Math.PI, Math.PI), mouthMat, this.head);
-    this.onFace(laugh, 0, my + 0.6, mz === undefined ? undefined : mz + 0.1);
-    const tongueMat = this.fadeBasicMat(0xe0607a);
-    const tongue = this.mesh(new SphereGeometry(0.95, 12, 8), tongueMat, this.head);
-    tongue.scale.set(1.2, 0.6, 0.9);
-    this.onFace(tongue, 0, my - 1.5, mz === undefined ? undefined : mz - 0.2);
-    for (const m of [smile, frown, flat, open, laugh, tongue]) m.scale.x *= L.mouthScaleX;
-    Object.assign(this.mouths, { smile, frown, flat, open, laugh, tongue });
-  }
-
-  private buildSpecies(
-    id: CharacterId,
-    fur: Material,
-    belly: Material,
-    inner: Material,
-    line: Material,
-    white: Material,
-  ) {
-    const h = this.head;
-    const sphere = (r: number, m: Material, x: number, y: number, z: number) => {
-      const o = this.mesh(new SphereGeometry(r, 12, 10), m, h);
-      o.position.set(x, y, z);
-      return o;
-    };
-    const cone = (r: number, len: number, m: Material, x: number, y: number, z: number, rz = 0) => {
-      const c = this.mesh(new ConeGeometry(r, len, 10), m, h);
-      c.position.set(x, y, z);
-      c.rotation.z = rz;
-      return c;
-    };
-    const nose = (m: Material, x: number, y: number, z: number, r = 0.85) => sphere(r, m, x, y, z);
-    switch (id) {
-      case 'bear': {
-        for (const sx of [-1, 1]) {
-          sphere(2.9, fur, sx * 6, 6.3, -1.4);
-          sphere(1.7, inner, sx * 6, 6.3, 0.2).scale.z = 0.5;
-        }
-        sphere(3.4, belly, 0, -2.6, 6.6).scale.set(1.1, 0.85, 0.8);
-        nose(line, 0, -1.3, 9.3, 1);
-        break;
-      }
-      case 'cat': {
-        for (const sx of [-1, 1]) {
-          cone(2.9, 5.6, fur, sx * 5.2, 7.6, -0.6, -sx * 0.3);
-          cone(1.7, 3.6, inner, sx * 5.2, 7.4, 0.5, -sx * 0.3);
-          for (const dy of [-0.7, 0.7]) {
-            const w = this.mesh(new BoxGeometry(5.5, 0.16, 0.16), line, h);
-            w.position.set(sx * 7.6, -2 + dy, 6.2);
-            w.rotation.z = sx * dy * 0.15;
-          }
-        }
-        nose(inner, 0, -1.3, 8.55, 0.8);
-        break;
-      }
-      case 'fox': {
-        for (const sx of [-1, 1]) {
-          cone(3, 7.5, fur, sx * 5, 8.5, -1, -sx * 0.22);
-          cone(1.7, 4.6, line, sx * 5, 8.3, 0, -sx * 0.22);
-          sphere(2.6, belly, sx * 3.8, -2.6, 6.4).scale.z = 0.6;
-        }
-        const snout = this.mesh(new ConeGeometry(3, 6, 10), belly, h);
-        snout.rotation.x = Math.PI / 2;
-        snout.position.set(0, -2.2, 9.6);
-        nose(line, 0, -2.2, 12.6, 0.9);
-        break;
-      }
-      case 'rabbit': {
-        for (const sx of [-1, 1]) {
-          const ear = this.mesh(new CylinderGeometry(1.9, 2.3, 13, 10), fur, h);
-          ear.position.set(sx * 3.4, 13.5, -1);
-          ear.rotation.z = -sx * 0.12;
-          const ein = this.mesh(new CylinderGeometry(1, 1.3, 10, 8), inner, h);
-          ein.position.set(sx * 3.5, 13.5, 0.4);
-          ein.rotation.z = -sx * 0.12;
-        }
-        nose(inner, 0, -1, 8.6, 0.8);
-        const teeth = this.mesh(new BoxGeometry(1.6, 1.4, 0.4), white, h);
-        teeth.position.set(0, -4.8, 7.4);
-        break;
-      }
-      case 'owl': {
-        for (const sx of [-1, 1]) {
-          cone(1.8, 4.6, fur, sx * 5.4, 8, -1, -sx * 0.35);
-          const disc = sphere(3, belly, sx * 3.1, 1.4, 7.4);
-          disc.scale.z = 0.4;
-        }
-        const beak = this.mesh(new ConeGeometry(1.3, 3.4, 6), inner, h);
-        beak.rotation.x = Math.PI / 2;
-        beak.position.set(0, -1.4, 9.4);
-        break;
-      }
-      case 'frog': {
-        for (const sx of [-1, 1]) sphere(3.1, fur, sx * 3.9, 6, 3.6);
-        sphere(1.2, inner, -5.6, -0.6, 6.2).scale.z = 0.4;
-        sphere(1.2, inner, 5.6, -0.6, 6.2).scale.z = 0.4;
-        break;
-      }
-    }
   }
 
   private buildDevices(hand: Group) {
@@ -791,13 +555,8 @@ export class CharacterRig {
   // ───── 상태 ─────
 
   private setFace(eyes: Eyes, mouth: Mouth) {
-    this.eyes.open.visible = eyes === 'open';
-    this.eyes.happy.visible = eyes === 'happy';
-    this.eyes.shut.visible = eyes === 'shut';
-    for (const k of Object.keys(this.mouths) as Mouth[]) {
-      const m = this.mouths[k];
-      m.visible = k === mouth || (mouth === 'tongue' && k === 'laugh');
-    }
+    this.faceEyes = eyes;
+    this.faceMouth = mouth;
   }
 
   private setHand(h: HandState, p: V3, f: V3, curl: number, k: number, fk = 10) {
@@ -990,10 +749,6 @@ export class CharacterRig {
     st.hy += (yawL - st.hy) * k;
     st.hp += (pitchL - st.hp) * k;
     this.neck.rotation.set(st.hp, st.hy, st.roll + Math.sin(t * 11) * st.wobble, 'YXZ');
-    for (const b of this.brows) {
-      b.m.rotation.z = b.s > 0 ? st.brow : -st.brow;
-      b.m.position.y = this.layout.browY + st.browUp;
-    }
 
     // ── 깜빡임·눈물
     this.blinkIn -= dt;
@@ -1002,21 +757,22 @@ export class CharacterRig {
       this.blinkIn = 2.5 + Math.random() * 3;
     }
     if (this.blinkT > 0) this.blinkT -= dt;
-    this.eyes.open.scale.y = this.blinkT > 0 ? 0.12 : 1;
-    this.eyes.open.position.y = this.blinkT > 0 ? this.layout.eyeY * 0.88 : 0;
+    // 얼굴 표정은 캔버스 텍스처로 그린다(같은 표정이면 다시 그리지 않는다). browUp은 cm → 얼굴 좌표
+    this.avatar.setExpression({
+      eyes: this.faceEyes,
+      mouth: this.faceMouth,
+      blink: this.blinkT > 0,
+      brow: st.brow,
+      browUp: st.browUp / FACE_UNIT,
+    });
     this.tear.visible = tear;
     if (tear) {
       this.tearT = (this.tearT + dt) % 0.9;
-      const x = this.layout.eyeX + 0.4;
-      const y = this.layout.eyeY - 1.2 - this.tearT * 6;
-      this.tear.position.set(x, y, this.surfZ(x, y) + 0.3);
-    }
-
-    // ── 다리(허벅지는 엉덩이 → 무릎)
-    for (const th of this.thighs) {
-      setV(this.tS, th.x, this.hipV.y + 0.5, this.hipV.z + 2);
-      setV(this.tW, th.x, -35, 13);
-      placeLimb(th.m, this.tS, this.tW);
+      const E = this.avatar.parts.eyes;
+      const x = (E.x + E.rx * 0.4) * FACE_UNIT;
+      const y = -(E.y + E.ry) * FACE_UNIT - this.tearT * 6;
+      const r = RIG.headRadius + 0.5;
+      this.tear.position.set(x, y, Math.sqrt(Math.max(0.5, r * r - x * x - y * y)));
     }
 
     // ── 방해요소 장비
@@ -1032,7 +788,6 @@ export class CharacterRig {
     // ── 1인칭·투명도
     const hide = f.firstPerson;
     this.hips.visible = !hide;
-    this.legs.visible = !hide;
     for (const h of this.hands) {
       h.upper.visible = !hide;
       h.elbow.visible = !hide;
@@ -1046,6 +801,7 @@ export class CharacterRig {
       m.depthWrite = op > 0.99;
     }
     // 얼굴 부품은 반투명일 때 머리 뒤로 비쳐 보이지 않게 함께 숨긴다
+    this.avatar.faceMaterial.visible = op > 0.95;
     for (const m of this.fadeBasic) {
       m.opacity = op > 0.95 ? (m.userData.base as number) : 0;
       m.visible = op > 0.95;
@@ -1118,6 +874,7 @@ export class CharacterRig {
   }
 
   dispose() {
+    this.avatar.dispose();
     for (const g of this.geos) g.dispose();
     for (const m of this.mats) m.dispose();
   }
