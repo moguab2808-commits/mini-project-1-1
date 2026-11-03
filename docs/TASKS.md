@@ -905,7 +905,7 @@ Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/7
 의존성: THEME-001, IMPL-004(로컬 2인), IMPL-005(AI 대전), IMPL-008(방 서버), IMPL-012(방 생성 창·방 카드·대기실)
 범위: [DEC-049](DECISIONS.md#결정-색인)·[DEC-050](DECISIONS.md#결정-색인)·[DEC-052](DECISIONS.md#결정-색인)·[DEC-053](DECISIONS.md#결정-색인)의 방 테마 4종(바·밤 옥상·교실·해변)을 저장·전송·선택·표시·장면에 구현한다. 판·알·의자·캐릭터 모양과 게임 규칙은 바꾸지 않는다.
 관련 문서: [PRD 방 생성](PRD.md#방-생성)·[로비](PRD.md#로비)·[대기실](PRD.md#대기실) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE rooms](design/DATABASE.md#rooms) / [LOCAL](design/LOCAL.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
-Issue·PR: 없음
+Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
 - [ ] (정상) `shared`에 `ThemeId`(`bar`·`rooftop`·`classroom`·`beach`)와 스키마가 있고, `rooms.theme` 마이그레이션(기본 `bar`)이 기존 행이 있는 DB에 적용된다. `room:create`에 `theme`을 주면 저장되고 생략하면 `bar`다. 방 목록·`room:state`·`game:start`에 같은 값이 담긴다(서버 테스트).
@@ -969,7 +969,7 @@ Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: HAZ-001
 범위: [DEC-055](DECISIONS.md#결정-색인)를 `shared`·`game-core`·서버·클라이언트·AI에 구현한다. 발사 턴마다 두 사람 교체와 직전 종류 제외, 추가 10종의 물리·배치·연출, 속임수형의 상대 뷰 숨김을 포함한다.
 관련 문서: [PRD 추가 방해요소 10종](PRD.md#추가-방해요소-10종-dec-055) / [GAME](design/GAME.md) / [API](design/API.md)
-Issue·PR: [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81)(중간 PR)
+Issue·PR: [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81)(중간 PR)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
 - [x] (정상, `HAZARD-GRANT`) 턴이 바뀔 때마다(교체 시점은 [DEC-067](DECISIONS.md#결정-색인)로 라운드마다로 변경, 아래 후속 절) 두 사람이 새 방해요소를 받고 효과·게이지·쿨타임·설치물이 사라진다. 직전 종류는 나오지 않는다(`game-core` 테스트, 시드 고정).
@@ -1021,7 +1021,7 @@ Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: CHAR-001, IMPL-012(캐릭터 변경 창·API)
 범위: [DEC-048](DECISIONS.md#결정-색인)·[DEC-054](DECISIONS.md#결정-색인)·[DEC-059](DECISIONS.md#결정-색인)의 사람 아바타를 `shared` 외형 타입·부품 데이터, DB 마이그레이션, API, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI 외형에 구현하고 동물 6종을 없앤다. UI 꾸밈은 바꾸지 않는다([DEC-060](DECISIONS.md#결정-색인)).
 관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE users](design/DATABASE.md#users) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
-Issue·PR: [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82)(중간 PR)
+Issue·PR: [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82)(중간 PR)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
 - [x] (정상, 첫 단계) 시험용 머리(이목구비 한 세트·머리카락 2종)를 개발용 화면에 띄운 스크린샷으로 화풍을 사용자에게 확인받은 뒤 나머지 선택지를 만든다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
@@ -1052,7 +1052,7 @@ Issue·PR: [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: EMOTE-001, [IMPL-018](#impl-018-사람-아바타-구현)(동물 캐릭터에 먼저 만들지 않는다, [DEC-056](DECISIONS.md#결정-색인))
 범위: 감정표현 6종의 입력(숫자키·버튼 메뉴), 서버 중계·빈도 제한, 아바타 몸짓·말풍선·효과음, AI 사용을 구현한다.
 관련 문서: [PRD 감정표현](PRD.md#감정표현-dec-056) / [API](design/API.md)
-Issue·PR: 미생성
+Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
 - [x] (정상, 로컬) 숫자키·메뉴 감정표현이 실제 로컬 두 창에 전달되고 6종 몸짓·말풍선·합성 효과음을 구현했다. 6종 장면과 조준 중 손 유지·말풍선 잘림 회귀를 확인했다.
@@ -1077,7 +1077,7 @@ Issue·PR: 미생성
 의존성: PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013)
 범위: 실행 구성이 생긴 뒤 README에 준비 조건·설치·로컬 실행·테스트·배포 접속 절차를 실제 검증 결과와 함께 추가한다.
 관련 문서: [README](../README.md) / [LOCAL](design/LOCAL.md)·[OPERATIONS](design/OPERATIONS.md)
-Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13)
+Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
 - [ ] README의 명령을 새 환경에서 그대로 따라 실행해 확인한 결과가 worklog에 있다.
