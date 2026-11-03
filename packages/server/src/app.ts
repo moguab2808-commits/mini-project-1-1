@@ -22,6 +22,7 @@ import { KeyedMutex } from './rooms/keyed-mutex.ts';
 import { registerRoomHandlers } from './rooms/room-handlers.ts';
 import { RoomService, type RoomHooks } from './rooms/room-service.ts';
 import { createRoomsRouter } from './rooms/router.ts';
+import { createStaticHandlers, hasClientBuild } from './static.ts';
 
 const PgStoreType = connectPgSimple(session);
 
@@ -34,6 +35,8 @@ export type AppOptions = {
   isProduction: boolean;
   /** 경기 서버 훅(IMPL-009)보다 먼저 불린다. 테스트가 시작·이탈을 관찰하거나 지연·실패시키는 자리다. */
   roomHooks?: RoomHooks;
+  /** 빌드된 클라이언트 디렉터리. 없거나 `index.html`이 없으면 정적 파일을 제공하지 않는다. */
+  staticDir?: string;
   /** 서버 로그 출력처. 기본은 stdout이다. */
   gameLogSink?: GameLogSink;
   /** 재도전 대기 시간(ms). 기본 15초다. */
@@ -67,6 +70,10 @@ export function createAppServer(options: AppOptions): AppServer {
   // Render 프록시 1단. secure 쿠키와 IP당 빈도 제한이 이에 의존한다(AUTH).
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
+  // 외부 헬스체크용이다. DB를 조회하지 않고 세션·본문 처리 앞에 둔다(OPERATIONS 헬스체크).
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
 
   const PgStore = PgStoreType;
   // 만료는 쿠키 maxAge가 없으면 마지막 사용 후 1일이고 만료 행은 기본 15분 주기로 정리된다.
@@ -147,6 +154,10 @@ export function createAppServer(options: AppOptions): AppServer {
   app.use('/api/auth', auth);
   app.use('/api/me', me);
   app.use('/api/rooms', createRoomsRouter(createRequireAuth(db), roomService));
+
+  if (options.staticDir && hasClientBuild(options.staticDir)) {
+    app.use(...createStaticHandlers(options.staticDir));
+  }
 
   app.use(errorHandler);
 

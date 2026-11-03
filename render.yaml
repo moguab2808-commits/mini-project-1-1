@@ -1,0 +1,19 @@
+# Render 웹 서비스 1개(OPERATIONS 배포 구성). 값은 대시보드에서 넣고 이 파일에는 적지 않는다.
+services:
+  - type: web
+    name: alkkagi-bar
+    runtime: node
+    plan: free
+    region: singapore
+    # 자동 배포는 끄고 대시보드에서 수동 배포한다(DEC-029).
+    autoDeployTrigger: "off"
+    buildCommand: npm ci && npm run build
+    startCommand: node packages/server/dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
