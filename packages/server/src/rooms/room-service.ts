@@ -1,4 +1,5 @@
 // 방 생성·입장(입장하면 바로 시작)·퇴장과 `room:state`·`room:closed` 전송. 소켓 이벤트 연결은 room-handlers.ts가 맡는다.
+import type { LeaveReason } from '@alkkagi/game-runtime';
 import type { RoomClosed, RoomCreate, RoomJoin, RoomState, RoomSummary } from '@alkkagi/shared';
 import { findUserById, toMe } from '../auth/users.ts';
 import type { Db } from '../db/pool.ts';
@@ -8,6 +9,7 @@ import {
   claimGuestSeat,
   claimRandomPublicRoom,
   clearGuestOf,
+  deleteRoomById,
   deleteRoomOfHost,
   findRoomByCode,
   findRoomById,
@@ -20,8 +22,25 @@ import {
 } from './room-store.ts';
 
 export type RoomHooks = {
-  /** 상대가 입장해 `status`가 `playing`이 된 직후(시작 커밋)에 불린다. 경기 서버(IMPL-009)가 경기를 여는 자리다. */
+  /**
+   * 상대가 입장해 `status`가 `playing`이 된 직후(시작 커밋)에 불린다. 경기 서버(IMPL-009)가 경기를 여는 자리다.
+   * 던지면 입장을 되돌린다(`#undoJoin`).
+   */
   onStarted?: (view: RoomView) => Promise<void> | void;
+  /**
+   * 사용자가 방을 나갈 때 불린다(연결 끊김·접속 대체 포함). `playing`인 방은 DB 정리 **앞**에 불려
+   * 경기 서버가 기권패 처리와 전적 저장을 끝내게 하고(DATABASE 방 생명주기), `waiting`인 방은 DB 정리 뒤에 불린다.
+   */
+  onLeave?: (info: { room: RoomRow; userId: number; reason: LeaveReason }) => Promise<void> | void;
+};
+
+export type LeaveOptions = {
+  /** 이탈 사유(서버 로그 `leave`). 기본은 나가기 버튼이다. 재도전 15초 만료도 나가기와 같게 처리한다 */
+  reason?: LeaveReason;
+  /** 나가는 본인에게도 `room:closed`로 알릴 사유(재도전 15초 만료의 `rematch_timeout`, DEC-041) */
+  notifySelf?: RoomClosed['reason'];
+  /** 방장이 나가 방이 닫힐 때 참여자에게 보낼 사유. 기본은 `host_left` */
+  guestReason?: RoomClosed['reason'];
 };
 
 export class RoomService {
@@ -75,19 +94,48 @@ export class RoomService {
   /**
    * 나가기(연결 끊김 포함). 방에 없으면 아무것도 하지 않는다.
    * 방장이면 방을 지우고 참여자에게 `room:closed`를, 참여자면 `guest_id`만 비우고 방장에게 `room:state`를 보낸다.
-   * 경기 중 이탈의 기권패 저장은 경기 서버(IMPL-009)가 이 호출 앞에 끼워 넣는다.
+   * 경기 중(`playing`)이면 `onLeave`가 기권패 처리·전적 저장을 끝낸 뒤에 방을 정리한다. 대기 중인 방장의 방을
+   * 지우려는 사이에 상대가 입장했다면 지우기가 0행이 되고, 시작 커밋 뒤 이탈로 다시 처리한다.
    */
-  async leave(userId: number): Promise<void> {
-    const closed = await deleteRoomOfHost(this.db, userId);
-    if (closed) {
-      if (closed.guestId !== null) {
-        const payload: RoomClosed = { roomId: closed.id, reason: 'host_left' };
-        this.registry.get(closed.guestId)?.emit('room:closed', payload);
+  async leave(userId: number, options: LeaveOptions = {}): Promise<void> {
+    const reason = options.reason ?? 'leave_button';
+    for (;;) {
+      const room = await findRoomOf(this.db, userId);
+      if (!room) return;
+      const isHost = room.hostId === userId;
+      if (room.status === 'playing') {
+        await this.hooks.onLeave?.({ room, userId, reason });
+      }
+      const removed = isHost
+        ? await deleteRoomOfHost(this.db, userId, room.status as 'waiting' | 'playing')
+        : await clearGuestOf(this.db, userId);
+      if (!removed) {
+        if (room.status === 'playing') return; // 방이 이미 사라졌다
+        continue; // 대기 중이던 방에 상대가 입장했다: 시작 커밋 뒤 이탈로 다시 본다
+      }
+      if (room.status !== 'playing') {
+        await this.hooks.onLeave?.({ room: removed, userId, reason });
+      }
+      if (isHost) this.#announceClosed(removed, userId, options);
+      else {
+        if (options.notifySelf) this.#emitClosed(userId, removed.id, options.notifySelf);
+        await this.#publishState(removed.id);
       }
       return;
     }
-    const left = await clearGuestOf(this.db, userId);
-    if (left) await this.#publishState(left.id);
+  }
+
+  /** 방장이 나가 방이 닫혔다. 참여자에게(그리고 요청이 있으면 본인에게) `room:closed`를 보낸다. */
+  #announceClosed(closed: RoomRow, hostId: number, options: LeaveOptions): void {
+    if (closed.guestId !== null) {
+      this.#emitClosed(closed.guestId, closed.id, options.guestReason ?? 'host_left');
+    }
+    if (options.notifySelf) this.#emitClosed(hostId, closed.id, options.notifySelf);
+  }
+
+  #emitClosed(userId: number, roomId: number, reason: RoomClosed['reason']): void {
+    const payload: RoomClosed = { roomId, reason };
+    this.registry.get(userId)?.emit('room:closed', payload);
   }
 
   /** 한 사람 한 방. 이미 방장이거나 참여자면 새 방을 만들거나 입장할 수 없다. */
@@ -136,7 +184,30 @@ export class RoomService {
     if (!host || !guest) return; // 사용자 행은 지워지지 않는다(FK restrict)
     const view: RoomView = { room: joined, host, guest };
     this.#emitState(view);
-    await this.hooks.onStarted?.(view);
+    try {
+      await this.hooks.onStarted?.(view);
+    } catch (error) {
+      await this.#undoJoin(joined);
+      throw error;
+    }
+  }
+
+  /**
+   * 경기를 열지 못했다(`onStarted` 실패): 입장을 되돌려 방을 대기 상태로 돌리고 방장에게 알린다.
+   * 입장자는 ack의 `INTERNAL_ERROR`로 실패를 안다. 되돌리기도 실패하면 경기 없는 방이 남지 않게 방을 닫는다.
+   */
+  async #undoJoin(joined: RoomRow): Promise<void> {
+    try {
+      const reverted = await clearGuestOf(this.db, joined.guestId!);
+      if (reverted) await this.#publishState(reverted.id);
+    } catch {
+      try {
+        const closed = await deleteRoomById(this.db, joined.id);
+        if (closed) this.#emitClosed(closed.hostId, closed.id, 'host_left');
+      } catch {
+        // 두 번째 실패는 원래 오류를 그대로 올려 로그로 남긴다.
+      }
+    }
   }
 
   async #publishState(roomId: number): Promise<void> {

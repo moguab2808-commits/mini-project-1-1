@@ -159,9 +159,23 @@ export async function claimRandomPublicRoom(db: Db, userId: number): Promise<Roo
   return row;
 }
 
-/** 방장이 나가 방을 지운다. 지운 방을 돌려준다(없으면 `undefined`). */
-export async function deleteRoomOfHost(db: Db, userId: number): Promise<RoomRow | undefined> {
-  const [row] = await db.delete(rooms).where(eq(rooms.hostId, userId)).returning();
+/**
+ * 방장이 나가 방을 지운다. 지운 방을 돌려준다(없으면 `undefined`).
+ * `status`를 주면 그 상태일 때만 지운다: 대기 중인 방을 지우려는 사이에 상대가 입장해 시작 커밋이 났으면 0행이다.
+ */
+export async function deleteRoomOfHost(
+  db: Db,
+  userId: number,
+  status?: 'waiting' | 'playing',
+): Promise<RoomRow | undefined> {
+  const [row] = await db
+    .delete(rooms)
+    .where(
+      status === undefined
+        ? eq(rooms.hostId, userId)
+        : and(eq(rooms.hostId, userId), eq(rooms.status, status)),
+    )
+    .returning();
   return row;
 }
 
@@ -178,4 +192,10 @@ export async function clearGuestOf(db: Db, userId: number): Promise<RoomRow | un
 /** 서버 시작 때 모든 방을 지운다. 재시작으로 연결·경기가 사라졌는데 방만 남으면 유령 방이 보인다. */
 export async function clearRooms(db: Db): Promise<void> {
   await db.delete(rooms);
+}
+
+/** 방을 id로 지운다. 입장을 되돌리지 못했을 때 방을 닫는 데 쓴다. 지운 방을 돌려준다. */
+export async function deleteRoomById(db: Db, roomId: number): Promise<RoomRow | undefined> {
+  const [row] = await db.delete(rooms).where(eq(rooms.id, roomId)).returning();
+  return row;
 }

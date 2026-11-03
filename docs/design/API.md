@@ -50,7 +50,7 @@
 ### 오류 형식과 코드
 
 - REST 오류는 `{ error: { code, message } }`로 응답한다. HTTP 상태는 위 표를 따른다.
-- 처리하지 못한 서버 오류는 `500 { error: { code: "INTERNAL_ERROR", message } }`로 응답한다. 원인은 응답에 싣지 않고 서버 로그에만 남긴다. 아래 코드 표의 클라이언트 분기 대상이 아니라 일반 오류 안내로 처리한다. 코드 표의 기준은 이 문서다. `shared`는 게임(`protocol.ts`의 `ERROR_CODES`)과 REST(`auth.ts`의 `AUTH_ERROR_CODES`, `INTERNAL_ERROR` 포함)로 나눠 구현하며 `INVALID_INPUT`은 양쪽에 있다.
+- 처리하지 못한 서버 오류는 `500 { error: { code: "INTERNAL_ERROR", message } }`로 응답한다. 원인은 응답에 싣지 않고 서버 로그에만 남긴다. 아래 코드 표의 클라이언트 분기 대상이 아니라 일반 오류 안내로 처리한다. 코드 표의 기준은 이 문서다. `shared`는 게임(`protocol.ts`의 `ERROR_CODES`)과 REST(`auth.ts`의 `AUTH_ERROR_CODES`)로 나눠 구현하며 `INVALID_INPUT`과 `INTERNAL_ERROR`는 양쪽에 있다. 경기 명령 ack도 처리 중 예외가 나면 `INTERNAL_ERROR`인 `CommandResult`로 응답한다([DEC-043](../DECISIONS.md#결정-색인)).
 - Socket.IO 명령은 ack 콜백으로 `{ ok: true, … }` 또는 `{ ok: false, error: { code, message } }`를 돌려준다.
 - 거부된 명령은 경기 상태와 난수를 바꾸지 않는다.
 - `RATE_LIMITED`(REST 429)에는 `Retry-After` 헤더(초)가 붙는다. `room:join` ack의 `RATE_LIMITED`에는 없다.
@@ -244,6 +244,10 @@ sequenceDiagram
 5. `game:state`는 `revision`이 커지는 순서로만 적용한다. volatile 스냅샷이 유실돼도 마지막 신뢰 전송 스냅샷이 서버 상태로 수렴시킨다. 연결이 끊기면 재접속 복구는 없다.
 6. `game:over` 뒤에는 `game:state`·`hazard:triggered`·`turn:change`를 보내지 않으며 이후 `shot:submit`·`hazard:use`·`game:forfeit`은 `GAME_NOT_ACTIVE`로 거부한다. 재도전으로 새 경기가 시작된 뒤 이전 경기의 명령은 `STALE_TURN`·`STALE_HAZARD`(`game:forfeit`은 `GAME_NOT_ACTIVE`)다.
 7. 재도전이 성립해도 `rooms.status`는 `playing`으로 유지한다. 15초 만료로 재도전하기를 누르지 않은 쪽은 서버가 `room:leave`와 같게 처리하고 그 사람 본인에게 `room:closed`(`rematch_timeout`)를 보낸다: 상대가 누르지 않았으면 방장에게 `guest`가 빈 `room:state`(`waiting`)를, 방장이 누르지 않았으면 방이 닫히며 상대에게 `room:closed`를 보낸다(상대도 누르지 않았으면 `rematch_timeout`, 눌렀으면 `host_left`)([DEC-041](../DECISIONS.md#결정-색인), [DATABASE](DATABASE.md#방-생명주기)).
+
+8. 입장 직후 경기 생성(`onStarted`)이 실패하면 서버는 입장을 되돌린다: `guest_id`를 비우고 `waiting`으로 돌리며 방장에게 `room:state`(`waiting`, `guest: null`)를 보낸다. 입장자의 ack는 `INTERNAL_ERROR`다. 입장자는 이미 `room:state`(`playing`)를 받았을 수 있으므로 클라이언트는 입장 ack 실패를 방에서 나간 것으로 처리한다. 되돌리기도 실패하면 방을 지우고 방장에게 `room:closed`(`host_left`)를 보낸다([DEC-043](../DECISIONS.md#결정-색인)).
+9. 경기 중 이탈(`room:leave`·연결 끊김·`session:replaced`)은 그 좌석의 기권패이며 `game:over`(`forfeit`)를 남은 사람에게 보낸 뒤 방을 정리한다. 입장 직후라 경기가 아직 열리지 않았다면 경기가 열린 뒤 기권패로 처리한다. 결과 화면(재도전 대기)에서 나가면 남은 사람에게 `rematch:state`(`expired`)를 보내고 이후 `rematch:request`는 `REMATCH_NOT_AVAILABLE`이다.
+10. **확인 필요(개발자 A)**: 이탈 기권으로 끝난 경기의 `game:over`에도 `game-runtime`이 `rematchDeadlineMs`를 채워 보낸다(`room-runtime.test.ts`가 그 동작을 고정한다). `game:over` 표의 "상대가 나가 재도전할 수 없으면 `null`"과 다르다. 서버는 그 경기의 재도전을 열지 않고 곧바로 `room:state`·`room:closed`로 정리하므로 클라이언트는 이탈 기권의 `game:over` 뒤 재도전 버튼을 보이지 않아야 한다. 런타임을 `null`로 바꿀지는 A와 정한다.
 
 ### 상대 비공개 필드 점검
 

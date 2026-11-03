@@ -84,13 +84,16 @@ export function registerRoomHandlers(socket: Socket, userId: number, deps: RoomH
   });
 
   on('room:leave', async () => {
-    await service.leave(userId);
+    await service.leave(userId, { reason: 'leave_button' });
   });
 
   socket.on('disconnect', () => {
     if (!touchedRoom) return;
+    // 접속 대체로 끊겼으면 서버 로그에 `session_replaced`로 남긴다(ConnectionRegistry가 표시한다).
+    const reason =
+      socket.data.leaveReason === 'session_replaced' ? 'session_replaced' : 'disconnect';
     mutex
-      .run(userId, () => service.leave(userId))
+      .run(userId, () => service.leave(userId, { reason }))
       .catch((error: unknown) => {
         deps.onError?.(error);
       });
