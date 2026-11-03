@@ -30,6 +30,7 @@ function view(patch: Partial<GameView> & { counts?: [number, number] } = {}): Ga
     stones,
     effects: [],
     result: null,
+    stoneCounts: [counts[0], counts[1]],
     private: {
       held: null,
       fatigueGauge: null,

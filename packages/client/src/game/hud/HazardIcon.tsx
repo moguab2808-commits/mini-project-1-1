@@ -1,4 +1,4 @@
-// 방해요소 아이콘 9종과 에어컨 아이콘. 직접 작성한 SVG이며 한 스타일(굵은 갈색 외곽선, 둥근 끝, 따뜻한 면 색)을 쓴다.
+// 방해요소 아이콘 19종과 에어컨 아이콘. 직접 작성한 SVG이며 한 스타일(굵은 갈색 외곽선, 둥근 끝, 따뜻한 면 색)을 쓴다.
 import type { ReactElement } from 'react';
 import type { HazardKind } from '@alkkagi/shared';
 
@@ -91,6 +91,103 @@ const SHAPES: Record<HazardKind | 'aircon', ReactElement> = {
       <path d="M6 18h22a5 5 0 1 0-5-5" fill="none" {...line} />
       <path d="M6 26h32a5 5 0 1 1-5 5" fill="none" {...line} />
       <path d="M6 34h14a4 4 0 1 1-4 4" fill="none" {...line} />
+    </>
+  ),
+  magnet: (
+    <>
+      <path d="M12 8h8v16a4 4 0 0 0 8 0V8h8v16a12 12 0 0 1-24 0z" fill={RED} {...line} />
+      <path d="M12 8h8v6h-8zM28 8h8v6h-8z" fill={CREAM} {...line} />
+      <path d="M6 36l-3 3M42 36l3 3M24 42v4" fill="none" {...line} />
+    </>
+  ),
+  gravity_zone: (
+    <>
+      <rect x="8" y="8" width="32" height="32" rx="3" fill={CREAM} {...line} />
+      <path d="M16 20l8 8 8-8M16 12l8 8 8-8M16 28l8 8 8-8" fill="none" {...line} />
+    </>
+  ),
+  ice_floor: (
+    <>
+      <path d="M6 30l18-10 18 10-18 10z" fill={BLUE} {...line} />
+      <path
+        d="M14 30l6-3M28 26l4 2"
+        fill="none"
+        stroke={CREAM}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path d="M24 4v12M18 7l12 6M30 7l-12 6" fill="none" {...line} />
+    </>
+  ),
+  decoy: (
+    <>
+      <circle
+        cx="14"
+        cy="28"
+        r="8"
+        fill={CREAM}
+        stroke={INK}
+        strokeWidth="2.5"
+        strokeDasharray="3 3"
+      />
+      <circle
+        cx="34"
+        cy="28"
+        r="8"
+        fill={CREAM}
+        stroke={INK}
+        strokeWidth="2.5"
+        strokeDasharray="3 3"
+      />
+      <circle cx="24" cy="18" r="8" fill={AMBER} {...line} />
+    </>
+  ),
+  fake_wall: (
+    <>
+      <rect x="4" y="12" width="10" height="24" rx="2" fill={RED} {...line} />
+      <rect x="19" y="12" width="10" height="24" rx="2" fill={RED} {...line} />
+      <rect x="34" y="12" width="10" height="24" rx="2" fill={RED} {...line} />
+      <path d="M22 6q2-3 4 0t-2 4v1" fill="none" {...line} />
+    </>
+  ),
+  heavy_stones: (
+    <>
+      <path d="M10 40l5-22h18l5 22z" fill={INK} {...line} />
+      <circle cx="24" cy="12" r="5" fill="none" {...line} />
+      <path d="M18 32h12" fill="none" stroke={CREAM} strokeWidth="2.5" strokeLinecap="round" />
+    </>
+  ),
+  reverse_zone: (
+    <>
+      <circle cx="24" cy="24" r="17" fill={CREAM} {...line} />
+      <path d="M14 20h18l-5-5M34 28H16l5 5" fill="none" {...line} />
+    </>
+  ),
+  mine: (
+    <>
+      <circle cx="24" cy="28" r="12" fill={INK} {...line} />
+      <path d="M24 16V10q0-4 5-4h3" fill="none" {...line} />
+      <path
+        d="M36 4l2-2M38 8h3M35 9l2 3"
+        fill="none"
+        stroke={RED}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <circle cx="19" cy="24" r="2.5" fill={CREAM} />
+    </>
+  ),
+  pit: (
+    <>
+      <ellipse cx="24" cy="28" rx="18" ry="10" fill={AMBER} {...line} />
+      <ellipse cx="24" cy="28" rx="11" ry="5.5" fill={INK} {...line} />
+      <path d="M24 6v12M19 13l5 5 5-5" fill="none" {...line} />
+    </>
+  ),
+  moving_wall: (
+    <>
+      <rect x="18" y="8" width="12" height="32" rx="2" fill={RED} {...line} />
+      <path d="M12 24H3M7 20l-4 4 4 4M36 24h9M41 20l4 4-4 4" fill="none" {...line} />
     </>
   ),
   aircon: (

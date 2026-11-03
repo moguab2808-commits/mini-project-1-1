@@ -20,6 +20,16 @@ export const HAZARD_NAMES: Record<HazardKind, string> = {
   stun: '기절',
   bar_speed: '세기 막대 속도 조절',
   wind: '바람',
+  magnet: '자석',
+  gravity_zone: '중력 구역',
+  ice_floor: '미끄럼 장판',
+  decoy: '분신술',
+  fake_wall: '가짜벽',
+  heavy_stones: '알 무게 변화',
+  reverse_zone: '방향 반전 구역',
+  mine: '폭탄',
+  pit: '바닥 없어지기',
+  moving_wall: '이동 장애물',
 };
 
 /** 방해요소 효과 설명(칸 툴팁용) */
@@ -33,6 +43,16 @@ export const HAZARD_HINTS: Record<HazardKind, string> = {
   stun: '상대가 잠시 조작할 수 없어요',
   bar_speed: '자동으로 발동해요',
   wind: '자동으로 발동해요',
+  magnet: '판 위에 놓으면 지나가는 알이 끌려가요',
+  gravity_zone: '구역을 지나는 알이 정한 방향으로 미끄러져요 (R로 방향 바꾸기)',
+  ice_floor: '판 전체가 미끄러워져요 (턴당 1회)',
+  decoy: '내 알 하나를 골라 허상 2개와 섞어요 (턴당 1회)',
+  fake_wall: '벽 3개를 세우지만 진짜는 1개뿐이에요',
+  heavy_stones: '내 알이 무거워져 덜 밀려요 (턴당 1회)',
+  reverse_zone: '들어온 알이 왔던 쪽으로 되돌아가요',
+  mine: '움직이는 알이 닿으면 터져요 (턴당 1회)',
+  pit: '판에 구멍을 뚫어요',
+  moving_wall: '왕복하는 벽을 세워요 (R로 방향 바꾸기)',
 };
 
 export function isRandomKind(kind: HazardKind): boolean {
@@ -218,7 +238,8 @@ export function windArrowRotationDeg(directionRad: number, mySeat: Seat): number
 
 /** 보유한 알 점: 처음 알 개수 중 남은 알은 채운 점 */
 export function stoneDots(view: GameView, seat: Seat, pieceCount: number): boolean[] {
-  const alive = view.stones.filter((s) => s.ownerId === seat).length;
+  // 상대 뷰의 stones에는 분신술 허상이 섞이므로 진짜 남은 알 수(stoneCounts)를 쓴다(DEC-058)
+  const alive = view.stoneCounts[seat];
   return Array.from({ length: pieceCount }, (_, i) => i < alive);
 }
 

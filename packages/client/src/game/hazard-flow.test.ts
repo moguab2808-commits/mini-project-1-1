@@ -45,7 +45,7 @@ async function flush(): Promise<void> {
 }
 
 /** 좌석 0이 후레쉬, 좌석 1이 벽을 받는 시드(game-core `Game`으로 찾은 값) */
-const SEED = 58;
+const SEED = 640;
 
 const channels: MessageChannel[] = [];
 const sessions: LocalGameSession[] = [];

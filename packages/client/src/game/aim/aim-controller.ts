@@ -22,10 +22,13 @@ import {
   type ShotSubmit,
 } from '@alkkagi/shared';
 import {
+  hasOrientation,
+  isInstallKind,
   isPlacementValid,
+  placementWorldFromView,
   snapToWallGrid,
-  wallFromParams,
-  type PlacementWorld,
+  snapsToWallGrid,
+  type InstallKind,
 } from '@alkkagi/game-core';
 import type {
   AimRenderState,
@@ -130,14 +133,20 @@ export class AimController {
   private submitting = false;
   private turnKey = '';
 
-  // 배치 상태
+  // 배치 상태(판 위 위치형 9종과 분신술의 내 알 고르기)
   private placement: {
-    kind: 'wall' | 'sticky';
+    kind: InstallKind | 'decoy';
     instanceId: string;
     x: number;
     y: number;
     orientation: 'horizontal' | 'vertical';
+    /** 중력 구역 방향(판 좌표계 라디안, 45° 단위) */
+    directionRad: number;
+    /** 분신술: 포인터 아래의 내 알 */
+    stoneId: number | null;
   } | null = null;
+  /** 포인터 아래 알(분신술 고르기용) */
+  private hoverStone: number | null = null;
   private placementSending = false;
 
   // 후레쉬·물총 들기
@@ -250,6 +259,7 @@ export class AimController {
     if (!view) return;
     if (event.point) this.pointer = event.point;
     if (event.aimPoint) this.aimPoint = event.aimPoint;
+    this.hoverStone = event.stoneId;
 
     switch (event.type) {
       case 'move':
@@ -268,7 +278,7 @@ export class AimController {
     this.refresh();
   };
 
-  /** 키 입력. `e` 방해요소 사용, `r` 벽 방향 전환, `escape` 취소 */
+  /** 키 입력. `e` 방해요소 사용, `r` 벽 방향·중력 방향 전환, `escape` 취소 */
   onKey(key: ControllerKey): void {
     this.advance();
     if (key === 'e') {
@@ -355,8 +365,10 @@ export class AimController {
   private onDown(event: BoardPointerEvent): void {
     if (this.placement) {
       // 배치 모드 중 클릭은 알 선택·충전으로 전달하지 않는다
-      if (event.button === 0) this.confirmPlacement();
-      else if (event.button === 2) this.cancelCurrent();
+      if (event.button === 0) {
+        this.movePlacement(); // 움직이지 않고 누른 경우에도 포인터 아래 알·위치를 반영한다
+        this.confirmPlacement();
+      } else if (event.button === 2) this.cancelCurrent();
       return;
     }
     if (this.hold) {
@@ -485,13 +497,17 @@ export class AimController {
       };
       return;
     }
-    const kind = held.kind as 'wall' | 'sticky';
+    const kind = held.kind;
+    if (!isInstallKind(kind) && kind !== 'decoy') return;
     this.placement = {
       kind,
       instanceId: held.hazardInstanceId,
       x: 0,
       y: 0,
       orientation: 'horizontal',
+      // 중력 구역은 처음에 상대 쪽(내 화면 위쪽)을 향한다
+      directionRad: this.mySeat === 0 ? Math.PI / 2 : -Math.PI / 2,
+      stoneId: null,
     };
     this.movePlacement();
   }
@@ -609,7 +625,14 @@ export class AimController {
     const p = this.placement;
     if (!p) return;
     const pt = this.pointer ?? { x: 0, y: 0 };
-    if (p.kind === 'wall') {
+    if (p.kind === 'decoy') {
+      const own = this.view?.stones.find(
+        (st) => st.id === this.hoverStone && st.ownerId === this.mySeat,
+      );
+      p.stoneId = own ? own.id : null;
+      p.x = own ? own.x : pt.x;
+      p.y = own ? own.y : pt.y;
+    } else if (snapsToWallGrid(p.kind)) {
       p.x = snapToWallGrid(pt.x);
       p.y = snapToWallGrid(pt.y);
     } else {
@@ -620,8 +643,20 @@ export class AimController {
 
   private rotatePlacement(): void {
     const p = this.placement;
-    if (!p || p.kind !== 'wall') return;
-    p.orientation = p.orientation === 'horizontal' ? 'vertical' : 'horizontal';
+    if (!p || p.kind === 'decoy') return;
+    if (hasOrientation(p.kind)) {
+      p.orientation = p.orientation === 'horizontal' ? 'vertical' : 'horizontal';
+    } else if (p.kind === 'gravity_zone') {
+      p.directionRad = normalizeAngle(p.directionRad - Math.PI / 4);
+    }
+  }
+
+  /** 종류별 `hazard:use.target`(API "추가 방해요소 10종 필드") */
+  private placementTarget(p: NonNullable<typeof this.placement>): HazardUse['target'] {
+    if (p.kind === 'decoy') return { stoneId: p.stoneId! };
+    if (hasOrientation(p.kind)) return { x: p.x, y: p.y, orientation: p.orientation };
+    if (p.kind === 'gravity_zone') return { x: p.x, y: p.y, directionRad: p.directionRad };
+    return { x: p.x, y: p.y };
   }
 
   private confirmPlacement(): void {
@@ -634,11 +669,7 @@ export class AimController {
       .useHazard({
         gameId: view.gameId,
         hazardInstanceId: p.instanceId,
-        target: {
-          x: p.x,
-          y: p.y,
-          ...(p.kind === 'wall' ? { orientation: p.orientation } : {}),
-        },
+        target: this.placementTarget(p),
       })
       .then(
         (result) => this.onHazardResult(result),
@@ -649,33 +680,21 @@ export class AimController {
   private placementValid(p: NonNullable<typeof this.placement>): boolean {
     const view = this.view;
     if (!view) return false;
-    return isPlacementValid(p.kind, p.x, p.y, p.orientation, this.placementWorld(view));
-  }
-
-  /** 서버 검증과 같은 입력: 지면 알, 활성 벽·끈끈이(공개 효과 params) */
-  private placementWorld(view: GameView): PlacementWorld {
-    const now = this.now();
-    const walls: PlacementWorld['walls'][number][] = [];
-    const stickies: PlacementWorld['stickies'][number][] = [];
-    for (const e of view.effects) {
-      if (e.expiresAtMs <= now || !e.params) continue;
-      if (e.kind === 'wall') {
-        const w = wallFromParams(e.params);
-        if (w) walls.push(w);
-      } else if (e.kind === 'sticky' && e.params.x !== undefined && e.params.y !== undefined) {
-        stickies.push({
-          cx: e.params.x,
-          cy: e.params.y,
-          radius: HAZARD_TUNING.stickyDiameter / 2,
-        });
-      }
+    if (p.kind === 'decoy') {
+      // 내 멈춘 지면 알만 고를 수 있다(권한 측이 다시 검증한다)
+      return (
+        p.stoneId !== null &&
+        view.stones.some((s) => s.id === p.stoneId && s.ownerId === this.mySeat && s.h <= 0) &&
+        view.phase === 'aiming'
+      );
     }
-    return {
-      board: this.board,
-      stones: view.stones.filter((s) => s.h <= 0),
-      walls,
-      stickies,
-    };
+    return isPlacementValid(
+      p.kind,
+      p.x,
+      p.y,
+      p.orientation,
+      placementWorldFromView(this.board, view, this.now()),
+    );
   }
 
   /** 보유 방해요소가 바뀌었거나 경기가 끝나면 배치 모드를 접는다 */
@@ -923,6 +942,8 @@ export class AimController {
           x: p.x,
           y: p.y,
           orientation: p.orientation,
+          directionRad: p.directionRad,
+          stoneId: p.stoneId,
           valid: this.placementValid(p) && !this.placementSending,
         }
       : null;
@@ -1032,6 +1053,8 @@ function sameSnapshot(a: AimSnapshot, b: AimSnapshot): boolean {
       pa.x === pb.x &&
       pa.y === pb.y &&
       pa.orientation === pb.orientation &&
+      pa.directionRad === pb.directionRad &&
+      pa.stoneId === pb.stoneId &&
       pa.valid === pb.valid);
   const ha = a.holding;
   const hb = b.holding;

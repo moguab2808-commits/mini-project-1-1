@@ -15,7 +15,7 @@ const TEXT: Partial<Record<GameErrorCode, string>> = {
   HAZARD_COOLDOWN: '아직 쿨타임이에요',
   HAZARD_OVERHEATED: '과열 중이라 쓸 수 없어요',
   HAZARD_INVALID_TARGET: '여기에는 놓을 수 없어요',
-  HAZARD_NOT_USABLE: '직접 쓸 수 없는 방해요소예요',
+  HAZARD_NOT_USABLE: '지금은 쓸 수 없는 방해요소예요',
   INVALID_INPUT: '입력이 올바르지 않아요',
   OUT_OF_REACH: '손이 안 닿아요 — 판을 돌려 보세요',
   BOARD_ROTATE_NOT_ALLOWED: '지금은 판을 돌릴 수 없어요',

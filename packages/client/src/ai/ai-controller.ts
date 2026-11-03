@@ -3,13 +3,17 @@
 // `board:rotate`·`hazard:aim`)을 같은 검증 경로로 보낸다. 조준 오차·방해요소 사용 시점은 시드 난수로 정한다.
 import {
   facePoint,
+  hasOrientation,
+  isInstallKind,
   isPlacementValid,
+  placementWorldFromView,
   previewShot,
   Prng,
   reachOf,
   rotate,
   snapToWallGrid,
   wallFromParams,
+  type InstallKind,
   type Obb,
   type PreviewStone,
 } from '@alkkagi/game-core';
@@ -335,6 +339,15 @@ export class AiController {
       const target = placementTarget(view, this.boardDef(), this.seat, kind, this.rng);
       if (!target) return;
       cmd = { ...base, target };
+    } else if (isInstallKind(kind)) {
+      // 추가 위치형은 배치 가능한 후보 중 무작위 위치에 둔다(DEC-055)
+      const target = randomPlacement(view, this.boardDef(), kind, this.rng);
+      if (!target) return;
+      cmd = { ...base, target };
+    } else if (kind === 'decoy') {
+      const mine = view.stones.filter((st) => st.ownerId === this.seat && st.h <= 0);
+      if (mine.length === 0) return;
+      cmd = { ...base, target: { stoneId: mine[this.rng.int(mine.length)]!.id } };
     }
     void this.actions.useHazard(cmd).catch(this.onError);
   }
@@ -648,16 +661,7 @@ export function placementTarget(
   rng: Prng,
 ): HazardTarget | null {
   const field = fieldOf(view);
-  const world = {
-    board,
-    stones: field.stones,
-    walls: field.walls,
-    stickies: field.stickies.map((s) => ({
-      cx: s.x,
-      cy: s.y,
-      radius: HAZARD_TUNING.stickyDiameter / 2,
-    })),
-  };
+  const world = placementWorldFromView(board, view, view.serverNowMs);
   const mine = field.stones.filter((s) => s.ownerId === seat);
   const theirs = field.stones.filter((s) => s.ownerId !== seat);
   const candidates: HazardTarget[] = [];
@@ -681,6 +685,43 @@ export function placementTarget(
       }
     } else if (isPlacementValid('sticky', x, y, 'horizontal', world)) {
       candidates.push({ x, y });
+    }
+  }
+  if (candidates.length === 0) return null;
+  return candidates[rng.int(candidates.length)]!;
+}
+
+/**
+ * 추가 위치형의 무작위 자리: 판 위 격자(벽 격자 간격) 후보 중 배치 가능한 곳을 고른다.
+ * 방향(가로·세로·중력 8방향)도 무작위다. 놓을 곳이 없으면 null이다.
+ */
+export function randomPlacement(
+  view: GameView,
+  board: BoardDefinition,
+  kind: InstallKind,
+  rng: Prng,
+): HazardTarget | null {
+  const world = placementWorldFromView(board, view, view.serverNowMs);
+  const half = board.shape === 'square' ? board.size / 2 : board.diameter / 2;
+  const step = HAZARD_TUNING.gridStep;
+  const n = Math.floor(half / step);
+  const candidates: HazardTarget[] = [];
+  for (let i = -n; i <= n; i++) {
+    for (let j = -n; j <= n; j++) {
+      const x = snapToWallGrid(i * step);
+      const y = snapToWallGrid(j * step);
+      if (hasOrientation(kind)) {
+        for (const orientation of ['horizontal', 'vertical'] as const) {
+          if (isPlacementValid(kind, x, y, orientation, world))
+            candidates.push({ x, y, orientation });
+        }
+      } else if (isPlacementValid(kind, x, y, 'horizontal', world)) {
+        candidates.push(
+          kind === 'gravity_zone'
+            ? { x, y, directionRad: wrapAngle((rng.int(8) * Math.PI) / 4) }
+            : { x, y },
+        );
+      }
     }
   }
   if (candidates.length === 0) return null;

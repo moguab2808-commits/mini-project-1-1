@@ -23,11 +23,28 @@ export interface AimRenderState {
 }
 
 export interface PlacementRenderState {
-  kind: Extract<HazardKind, 'wall' | 'sticky'>;
+  /** 판 위 위치형 9종(벽·끈끈이·추가 7종)과 분신술(내 알 고르기) */
+  kind: Extract<
+    HazardKind,
+    | 'wall'
+    | 'sticky'
+    | 'magnet'
+    | 'gravity_zone'
+    | 'fake_wall'
+    | 'reverse_zone'
+    | 'mine'
+    | 'pit'
+    | 'moving_wall'
+    | 'decoy'
+  >;
   x: number;
   y: number;
-  /** 벽만 쓴다. 판 좌표계 기준 */
+  /** 벽·가짜벽·이동 장애물(왕복 축)만 쓴다. 판 좌표계 기준 */
   orientation: 'horizontal' | 'vertical';
+  /** 중력 구역 방향(판 좌표계 라디안) */
+  directionRad?: number;
+  /** 분신술: 고른 내 알 */
+  stoneId?: number | null;
   /** 초록(true)·빨강(false) */
   valid: boolean;
 }

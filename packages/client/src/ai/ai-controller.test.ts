@@ -8,7 +8,14 @@ import {
   type GameView,
   type Seat,
 } from '@alkkagi/shared';
-import { AiController, placementTarget, planShot, planShotSteps } from './ai-controller.ts';
+import {
+  AiController,
+  placementTarget,
+  planShot,
+  planShotSteps,
+  randomPlacement,
+} from './ai-controller.ts';
+import { INSTALL_KINDS, placementWorldFromView } from '@alkkagi/game-core';
 
 function makeView(stones: GameView['stones'], extra: Partial<GameView> = {}): GameView {
   return {
@@ -25,6 +32,10 @@ function makeView(stones: GameView['stones'], extra: Partial<GameView> = {}): Ga
     stones,
     effects: [],
     result: null,
+    stoneCounts: [
+      stones.filter((s) => s.ownerId === 0).length,
+      stones.filter((s) => s.ownerId === 1).length,
+    ],
     private: {
       held: null,
       fatigueGauge: 0,
@@ -423,4 +434,23 @@ describe('AiController 계획 시간 나누기', () => {
     // 나누지 않으면 1초 가까이 밀린다. 조각은 4ms이므로 여유를 크게 둔 상한
     expect(Math.max(...gaps)).toBeLessThan(60);
   }, 30000);
+});
+
+describe('추가 위치형 무작위 배치 (DEC-055)', () => {
+  it('7종 모두 배치 가능한 자리를 고르고, 같은 시드면 같은 자리다', () => {
+    const view = makeView([
+      { id: 0, ownerId: 0, x: 0, y: -11.5, h: 0 },
+      { id: 1, ownerId: 1, x: 0, y: 11.5, h: 0 },
+    ]);
+    for (const kind of INSTALL_KINDS) {
+      if (kind === 'wall' || kind === 'sticky') continue;
+      const t = randomPlacement(view, board, kind, new Prng(7));
+      expect(t, kind).not.toBeNull();
+      const world = placementWorldFromView(board, view, view.serverNowMs);
+      expect(isPlacementValid(kind, t!.x, t!.y, t!.orientation ?? 'horizontal', world), kind).toBe(
+        true,
+      );
+      expect(randomPlacement(view, board, kind, new Prng(7))).toEqual(t);
+    }
+  });
 });

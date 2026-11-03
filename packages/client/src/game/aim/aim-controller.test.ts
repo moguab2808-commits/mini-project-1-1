@@ -52,6 +52,7 @@ function makeView(patch: Partial<GameView> & { held?: HazardKind } = {}): GameVi
     ],
     effects: [],
     result: null,
+    stoneCounts: [2, 1],
     private: {
       held: held ? { hazardInstanceId: `h-${held}`, kind: held, round: 1 } : null,
       fatigueGauge:
@@ -487,7 +488,7 @@ describe('방해요소 입력', () => {
         hazardInstanceId: 'h-wall',
         target: { orientation: 'vertical' },
       });
-      expect(env.hazards[0]!.target!.x).toBeCloseTo(4.4);
+      expect((env.hazards[0]!.target as { x: number }).x).toBeCloseTo(4.4);
       await flush();
       expect(env.controller.getSnapshot().placement).toBeNull();
     });
@@ -996,5 +997,101 @@ describe('시선 중계', () => {
     env.controller.onLook(0.4, -0.3);
     run(env, 100);
     expect(env.poses).toHaveLength(count);
+  });
+});
+
+describe('추가 방해요소 입력 (IMPL-016)', () => {
+  it('중력 구역: R마다 방향이 45°씩 돌고 x·y·directionRad만 보낸다', async () => {
+    const env = setup(makeView({ held: 'gravity_zone' }));
+    env.controller.onPointer(ptr('move', { x: 1, y: 2 }));
+    env.controller.onKey('e');
+    const p0 = env.controller.getSnapshot().placement!;
+    expect(p0).toMatchObject({ kind: 'gravity_zone', valid: true });
+    expect(p0.directionRad).toBeCloseTo(Math.PI / 2);
+    env.controller.onKey('r');
+    expect(env.controller.getSnapshot().placement!.directionRad).toBeCloseTo(Math.PI / 4);
+    env.controller.onPointer(ptr('down', { x: 1, y: 2 }));
+    expect(env.hazards[0]!.target).toEqual({ x: 1, y: 2, directionRad: Math.PI / 4 });
+    await flush();
+    expect(env.controller.getSnapshot().placement).toBeNull();
+  });
+
+  it('위치형은 ESC로 취소하면 아무것도 보내지 않는다', () => {
+    const env = setup(makeView({ held: 'magnet' }));
+    env.controller.onKey('e');
+    expect(env.controller.getSnapshot().placement?.kind).toBe('magnet');
+    env.controller.onKey('escape');
+    expect(env.controller.getSnapshot().placement).toBeNull();
+    expect(env.hazards).toHaveLength(0);
+  });
+
+  it('폭탄·구멍은 알 위가 빨간 후보, 자석은 알과 겹쳐도 초록이다', () => {
+    const at = (kind: 'mine' | 'pit' | 'magnet') => {
+      const env = setup(makeView({ held: kind }));
+      env.controller.onKey('e');
+      env.controller.onPointer(ptr('move', { x: 0, y: -11 }));
+      return env.controller.getSnapshot().placement!.valid;
+    };
+    expect(at('mine')).toBe(false);
+    expect(at('pit')).toBe(false);
+    expect(at('magnet')).toBe(true);
+  });
+
+  it('가짜벽은 세 벽 중 하나라도 알과 겹치면 빨간 후보다', () => {
+    const env = setup(makeView({ held: 'fake_wall' }));
+    env.controller.onKey('e');
+    // 가운데 벽은 y=-4.4, 아래 벽이 y=-11의 알과 겹친다
+    env.controller.onPointer(ptr('move', { x: 0, y: -4.4 }));
+    expect(env.controller.getSnapshot().placement!.valid).toBe(false);
+    env.controller.onPointer(ptr('move', { x: 0, y: 2.2 }));
+    expect(env.controller.getSnapshot().placement!.valid).toBe(true);
+  });
+
+  it('다른 설치물과 겹치는 자리는 빨간 후보다(DEC-057)', () => {
+    const env = setup(
+      makeView({
+        held: 'pit',
+        effects: [
+          {
+            kind: 'magnet',
+            targetSeat: 1,
+            startsAtMs: 900,
+            expiresAtMs: 9000,
+            params: { x: 0, y: 0 },
+          },
+        ],
+      }),
+    );
+    env.controller.onKey('e');
+    env.controller.onPointer(ptr('move', { x: 5, y: 0 }));
+    expect(env.controller.getSnapshot().placement!.valid).toBe(false);
+    env.controller.onPointer(ptr('move', { x: 14, y: 0 }));
+    expect(env.controller.getSnapshot().placement!.valid).toBe(true);
+  });
+
+  it('분신술: 내 알을 클릭하면 stoneId만 보내고, 상대 알·빈 곳은 보내지 않는다', () => {
+    const env = setup(makeView({ held: 'decoy' }));
+    env.controller.onKey('e');
+    env.controller.onPointer(ptr('down', { x: 0, y: 11.5 }, 2)); // 상대 알
+    env.controller.onPointer(ptr('down', { x: 5, y: 5 })); // 빈 곳
+    expect(env.hazards).toHaveLength(0);
+    env.controller.onPointer(ptr('down', { x: 0, y: -11.5 }, 1));
+    expect(env.hazards[0]!.target).toEqual({ stoneId: 1 });
+  });
+
+  it('미끄럼 장판·알 무게 변화는 E 한 번에 target 없이 보낸다', () => {
+    for (const kind of ['ice_floor', 'heavy_stones'] as const) {
+      const env = setup(makeView({ held: kind }));
+      env.controller.onKey('e');
+      expect(env.hazards).toHaveLength(1);
+      expect(env.hazards[0]!.target).toBeUndefined();
+    }
+  });
+
+  it('턴당 1회형을 쓴 뒤(usable=false)에는 E를 눌러도 보내지 않는다', () => {
+    const v = makeView({ held: 'ice_floor' });
+    const env = setup({ ...v, private: { ...v.private, usable: false } });
+    env.controller.onKey('e');
+    expect(env.hazards).toHaveLength(0);
   });
 });

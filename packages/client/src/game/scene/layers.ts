@@ -353,8 +353,15 @@ export class AimLayer {
   private readonly bar = new Group();
   private readonly barBg: Mesh;
   private readonly barFill: Mesh;
-  private readonly previewWall: Mesh;
-  private readonly previewSticky: Mesh;
+  /** 벽 미리보기 3개(벽·이동 장애물은 1개, 가짜벽은 3개) */
+  private readonly previewWalls: Mesh[] = [];
+  /** 반지름 1 원. 종류별 크기로 늘려 쓴다(끈끈이·자석·반전·폭탄·구멍·분신술 고르기) */
+  private readonly previewCircle: Mesh;
+  /** 중력 구역 정사각형과 방향 화살표 */
+  private readonly previewSquare: Mesh;
+  private readonly previewArrow: Mesh;
+  /** 이동 장애물 왕복 경로 */
+  private readonly previewTrack: Mesh;
   private readonly previewMat = new MeshBasicMaterial({
     color: 0x35d06a,
     transparent: true,
@@ -402,16 +409,44 @@ export class AimLayer {
     this.barFill.renderOrder = 8;
     this.bar.add(this.barBg, this.barFill);
 
-    this.previewWall = new Mesh(
-      g(new BoxGeometry(HAZARD_TUNING.wallLength, WALL_H, HAZARD_TUNING.wallThickness)),
-      this.previewMat,
+    const wallGeo = g(
+      new BoxGeometry(HAZARD_TUNING.wallLength, WALL_H, HAZARD_TUNING.wallThickness),
     );
-    const stickyGeo = g(new CircleGeometry(HAZARD_TUNING.stickyDiameter / 2, 40));
-    stickyGeo.rotateX(-Math.PI / 2);
-    this.previewSticky = new Mesh(stickyGeo, this.previewMat);
-    this.previewWall.renderOrder = 4;
-    this.previewSticky.renderOrder = 4;
-    this.group.add(this.line, this.tip, this.bar, this.previewWall, this.previewSticky);
+    for (let i = 0; i < 3; i++) {
+      const w = new Mesh(wallGeo, this.previewMat);
+      w.renderOrder = 4;
+      this.previewWalls.push(w);
+    }
+    const circleGeo = g(new CircleGeometry(1, 48));
+    circleGeo.rotateX(-Math.PI / 2);
+    this.previewCircle = new Mesh(circleGeo, this.previewMat);
+    const squareGeo = g(
+      new PlaneGeometry(HAZARD_TUNING.gravityZoneSize, HAZARD_TUNING.gravityZoneSize),
+    );
+    squareGeo.rotateX(-Math.PI / 2);
+    this.previewSquare = new Mesh(squareGeo, this.previewMat);
+    this.previewArrow = new Mesh(g(new ConeGeometry(1.8, 4, 3)), this.lineMat);
+    this.previewArrow.rotation.z = -Math.PI / 2;
+    const trackGeo = g(
+      new PlaneGeometry(
+        2 * HAZARD_TUNING.movingWallAmplitude + HAZARD_TUNING.wallThickness,
+        HAZARD_TUNING.wallLength,
+      ),
+    );
+    trackGeo.rotateX(-Math.PI / 2);
+    this.previewTrack = new Mesh(trackGeo, this.previewMat);
+    for (const m of [this.previewCircle, this.previewSquare, this.previewArrow, this.previewTrack])
+      m.renderOrder = 4;
+    this.group.add(
+      this.line,
+      this.tip,
+      this.bar,
+      ...this.previewWalls,
+      this.previewCircle,
+      this.previewSquare,
+      this.previewArrow,
+      this.previewTrack,
+    );
     this.hideAll();
   }
 
@@ -419,8 +454,25 @@ export class AimLayer {
     this.line.visible = false;
     this.tip.visible = false;
     this.bar.visible = false;
-    this.previewWall.visible = false;
-    this.previewSticky.visible = false;
+    for (const w of this.previewWalls) w.visible = false;
+    this.previewCircle.visible = false;
+    this.previewSquare.visible = false;
+    this.previewArrow.visible = false;
+    this.previewTrack.visible = false;
+  }
+
+  private showWall(i: number, x: number, y: number, angle: number) {
+    const w = this.previewWalls[i];
+    if (!w) return;
+    w.visible = true;
+    w.position.set(x, WALL_H / 2, -y);
+    w.rotation.y = angle;
+  }
+
+  private showCircle(x: number, y: number, radius: number) {
+    this.previewCircle.visible = true;
+    this.previewCircle.position.set(x, 0.08, -y);
+    this.previewCircle.scale.set(radius, 1, radius);
   }
 
   /**
@@ -468,13 +520,62 @@ export class AimLayer {
     }
     if (placement) {
       this.previewMat.color.setHex(placement.valid ? 0x35d06a : 0xe0463c);
-      if (placement.kind === 'wall') {
-        this.previewWall.visible = true;
-        this.previewWall.position.set(placement.x, WALL_H / 2, -placement.y);
-        this.previewWall.rotation.y = placement.orientation === 'horizontal' ? 0 : Math.PI / 2;
-      } else {
-        this.previewSticky.visible = true;
-        this.previewSticky.position.set(placement.x, 0.08, -placement.y);
+      const { x, y } = placement;
+      const horizontal = placement.orientation === 'horizontal';
+      const T = HAZARD_TUNING;
+      switch (placement.kind) {
+        case 'wall':
+          this.showWall(0, x, y, horizontal ? 0 : Math.PI / 2);
+          break;
+        case 'fake_wall': {
+          // 세 벽이 벽에 수직 방향으로 나란히 선다(game-core fakeWallTriple과 같은 배치)
+          const d = T.fakeWallSpacing;
+          for (let k = -1; k <= 1; k++) {
+            this.showWall(
+              k + 1,
+              x + (horizontal ? 0 : k * d),
+              y + (horizontal ? k * d : 0),
+              horizontal ? 0 : Math.PI / 2,
+            );
+          }
+          break;
+        }
+        case 'moving_wall': {
+          // 왕복 축이 orientation이고 벽은 축에 수직이다
+          const wallAngle = horizontal ? Math.PI / 2 : 0;
+          this.showWall(0, x, y, wallAngle);
+          this.previewTrack.visible = true;
+          this.previewTrack.position.set(x, 0.07, -y);
+          this.previewTrack.rotation.y = wallAngle + Math.PI / 2;
+          break;
+        }
+        case 'gravity_zone': {
+          this.previewSquare.visible = true;
+          this.previewSquare.position.set(x, 0.08, -y);
+          const dir = placement.directionRad ?? 0;
+          this.previewArrow.visible = true;
+          this.previewArrow.position.set(x, 0.6, -y);
+          this.previewArrow.rotation.set(0, dir, -Math.PI / 2);
+          break;
+        }
+        case 'decoy':
+          this.showCircle(x, y, R * 1.8);
+          break;
+        case 'sticky':
+          this.showCircle(x, y, T.stickyDiameter / 2);
+          break;
+        case 'magnet':
+          this.showCircle(x, y, T.magnetRadius);
+          break;
+        case 'reverse_zone':
+          this.showCircle(x, y, T.reverseZoneDiameter / 2);
+          break;
+        case 'mine':
+          this.showCircle(x, y, T.mineRadius);
+          break;
+        case 'pit':
+          this.showCircle(x, y, T.pitDiameter / 2);
+          break;
       }
     }
   }

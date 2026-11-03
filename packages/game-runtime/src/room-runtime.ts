@@ -467,7 +467,10 @@ export class RoomRuntime {
         return;
       case 'hazard:triggered':
         this.log({ event: 'hazard_trigger', gameId, result: e.payload.kind });
-        this.broadcast('hazard:triggered', e.payload);
+        // 분신술·알 무게 변화는 시전자에게만 보낸다(DEC-055)
+        if (e.toSeat !== undefined)
+          this.send(e.toSeat, 'hazard:triggered', e.payload, { volatile: false });
+        else this.broadcast('hazard:triggered', e.payload);
         return;
       case 'turn:change':
         this.log({

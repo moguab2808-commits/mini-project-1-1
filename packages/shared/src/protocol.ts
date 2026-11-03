@@ -54,13 +54,17 @@ export const HazardTargetSchema = z.object({
   /** 후레쉬·물총: 조준점 높이. 손 위치→조준점 방향으로 발동 영역을 쏜다 */
   h: finite.optional(),
   orientation: z.enum(['horizontal', 'vertical']).optional(),
+  /** 중력 구역: 미끄러지는 방향(판 좌표계 라디안). 권한 측이 45° 단위로 반올림한다 */
+  directionRad: finite.optional(),
 });
+/** 분신술: 고른 내 알. 위치형이 아니라 따로 둔다 */
+const DecoyTargetSchema = z.object({ stoneId: z.number().int().nonnegative() });
 export type HazardTarget = z.infer<typeof HazardTargetSchema>;
 
 export const HazardUseSchema = z.object({
   gameId: z.string().min(1),
   hazardInstanceId: z.string().min(1),
-  target: HazardTargetSchema.optional(),
+  target: z.union([HazardTargetSchema, DecoyTargetSchema]).optional(),
   direction: z.union([z.literal(-1), z.literal(1)]).optional(),
 });
 export type HazardUse = z.infer<typeof HazardUseSchema>;
@@ -145,6 +149,8 @@ export const HazardGrantedSchema = z.object({
   hazardInstanceId: z.string(),
   kind: HazardKindSchema,
   round: z.number().int(),
+  /** 지급 뒤의 턴(교체 지급은 새 턴). 경기 시작 지급은 첫 턴 id다 */
+  turnId: z.number().int(),
   replaced: z.boolean(),
 });
 export type HazardGranted = z.infer<typeof HazardGrantedSchema>;
@@ -161,6 +167,10 @@ export const HazardParamsSchema = z.object({
   aimY: z.number().optional(),
   aimH: z.number().optional(),
   coverage: z.number().optional(),
+  /** 폭탄 `end`: 터져서 끝났는가(교체로 사라지면 false) */
+  exploded: z.boolean().optional(),
+  /** 분신술: 고른 알(시전자에게만) */
+  stoneId: z.number().int().optional(),
 });
 export type HazardParams = z.infer<typeof HazardParamsSchema>;
 
@@ -241,6 +251,10 @@ export const GameViewSchema = z.object({
   stones: z.array(StoneViewSchema),
   effects: z.array(EffectViewSchema),
   result: GameResultSchema.nullable(),
+  /** 좌석별 진짜 남은 알 수. 상대 뷰의 `stones`에는 분신술 허상이 섞이므로 HUD는 이 값을 쓴다 */
+  stoneCounts: z.tuple([z.number().int(), z.number().int()]),
+  /** 시전자 뷰에만: 내 분신술 허상(상대 뷰에서는 `stones`에 일반 알로 들어간다) */
+  decoys: z.array(z.object({ decoyId: z.number().int(), x: z.number(), y: z.number() })).optional(),
   private: PrivateViewSchema,
 });
 export type GameView = z.infer<typeof GameViewSchema>;
