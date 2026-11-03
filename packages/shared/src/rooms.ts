@@ -33,7 +33,7 @@ export const RoomCreateSchema = z
     isPublic: z.boolean(),
     pieceCount: z.union([z.literal(5), z.literal(7), z.literal(9)]),
     board: BoardIdSchema,
-    /** 방 테마(DEC-051). 생략하면 기본 테마 */
+    /** 방 테마(DEC-052). 생략하면 기본 테마 */
     theme: ThemeIdSchema.default(DEFAULT_THEME),
     code: RoomCodeSchema.optional(),
   })
@@ -77,7 +77,7 @@ export type RoomStatus = z.infer<typeof RoomStatusSchema>;
 export const MemberSchema = MeSchema;
 export type Member = z.infer<typeof MemberSchema>;
 
-/** `GET /api/rooms`의 항목. 코드·알 개수·판·참여 인원은 공개·비공개 방 모두 넣지 않는다(PRD 로비). 방 테마는 넣는다(DEC-051). */
+/** `GET /api/rooms`의 항목. 코드·알 개수·판·참여 인원은 공개·비공개 방 모두 넣지 않는다(PRD 로비). 방 테마는 넣는다(DEC-052). */
 export const RoomSummarySchema = z.object({
   roomId: z.number().int(),
   title: z.string(),

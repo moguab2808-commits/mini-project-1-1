@@ -17,7 +17,7 @@ export type HazardKind = (typeof HAZARD_KINDS)[number];
 export const BOARD_IDS = ['standard', 'circle'] as const;
 export type BoardId = (typeof BOARD_IDS)[number];
 
-/** 방 테마(DEC-050·051·052). 장면 표시에만 쓰며 게임 규칙·물리에 넘기지 않는다. 첫 값이 기본 테마다 */
+/** 방 테마(DEC-050·052·053). 장면 표시에만 쓰며 게임 규칙·물리에 넘기지 않는다. 첫 값이 기본 테마다 */
 export const THEME_IDS = ['bar', 'rooftop', 'classroom', 'beach'] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 export const DEFAULT_THEME: ThemeId = 'bar';

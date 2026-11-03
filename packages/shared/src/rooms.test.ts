@@ -45,7 +45,7 @@ test('방 생성: 제목 1~20자, 알 개수 5·7·9, 알 수 없는 판은 거�
   assert.equal(RoomCreateSchema.safeParse({ ...publicRoom, board: 'hexagon' }).success, false);
 });
 
-test('방 생성: 방 테마는 생략하면 bar이고 알 수 없는 테마는 거부한다(DEC-051)', () => {
+test('방 생성: 방 테마는 생략하면 bar이고 알 수 없는 테마는 거부한다(DEC-052)', () => {
   assert.equal(RoomCreateSchema.parse(publicRoom).theme, 'bar');
   for (const theme of ['bar', 'rooftop', 'classroom', 'beach'] as const) {
     assert.equal(RoomCreateSchema.parse({ ...publicRoom, theme }).theme, theme);

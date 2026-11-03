@@ -28,7 +28,7 @@ export interface ThemeChoiceProps {
   chips?: boolean;
 }
 
-/** 방 테마 선택(DEC-050·051). 사람 방과 AI 대전이 같은 칩을 쓴다 */
+/** 방 테마 선택(DEC-050·052). 사람 방과 AI 대전이 같은 칩을 쓴다 */
 export function ThemeChoice({ theme, onChange, chips = true }: ThemeChoiceProps) {
   return (
     <fieldset className={chips ? 'choice' : undefined}>

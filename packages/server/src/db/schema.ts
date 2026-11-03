@@ -64,7 +64,7 @@ export const rooms = pgTable(
     pieceCount: integer('piece_count').notNull().default(5),
     // 판 값은 앱(Zod)만 검사한다.
     board: varchar('board', { length: 16 }).notNull(),
-    // 방 테마(DEC-051). 판처럼 값은 앱(Zod)만 검사한다. 기본값이 있어 기존 행과 충돌하지 않는다.
+    // 방 테마(DEC-052). 판처럼 값은 앱(Zod)만 검사한다. 기본값이 있어 기존 행과 충돌하지 않는다.
     theme: varchar('theme', { length: 16 }).notNull().default('bar'),
     status: varchar('status', { length: 16 }).notNull().default('waiting'),
   },

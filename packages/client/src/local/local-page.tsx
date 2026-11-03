@@ -1,5 +1,5 @@
 // 개발용 `/local?seat=0|1[&theme=bar|rooftop|classroom|beach]` 화면. 창 2개를 띄워 각자 한 좌석을 맡는다(DEC-020).
-// 방 테마는 먼저 연결한 창의 `theme` 값을 쓰고, 없거나 잘못되면 권한 측이 기본 테마로 바꾼다(DEC-051).
+// 방 테마는 먼저 연결한 창의 `theme` 값을 쓰고, 없거나 잘못되면 권한 측이 기본 테마로 바꾼다(DEC-052).
 import type { ThemeId } from '@alkkagi/shared';
 import { useEffect, useState } from 'react';
 import { GameScreen } from '../game/GameScreen.tsx';

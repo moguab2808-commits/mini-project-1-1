@@ -131,7 +131,7 @@ describe('RoomRuntime', () => {
       assert.notEqual(s0!.view.private.held, null);
     });
 
-    test('방 테마는 game:start에 담기고 생략하면 bar다(DEC-051)', () => {
+    test('방 테마는 game:start에 담기고 생략하면 bar다(DEC-052)', () => {
       const themeOf = (config?: StartGameConfig) =>
         setup({ config })
           .transport.of('game:start')

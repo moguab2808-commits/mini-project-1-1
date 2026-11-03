@@ -44,7 +44,7 @@
 | `code` | varchar(6) unique null | 비공개 방 입장 코드. 공개 방은 null. 방장이 복사해 전달하므로 해시하지 않고 그대로 저장한다(사용자 비밀번호가 아닌 입장 코드) |
 | `piece_count` | integer not null default 5 | `CHECK (piece_count IN (5, 7, 9))`. 5·7·9는 PRD 고정값이며 개수를 늘리면 마이그레이션이 필요하다 |
 | `board` | varchar(16) not null | 방 생성 때 고른 판([API `BoardId`](API.md#공통-타입)). 판이 늘 수 있어 값은 앱(Zod)만 검사한다 |
-| `theme` | varchar(16) not null default 'bar' | 방 생성 때 고른 방 테마([API `ThemeId`](API.md#공통-타입), [DEC-051](../DECISIONS.md#결정-색인)). `board`처럼 값은 앱(Zod)만 검사한다. 기본값이 있어 기존 행·서버 시작 정리와 충돌하지 않는다. 마이그레이션 `0001_room_theme`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
+| `theme` | varchar(16) not null default 'bar' | 방 생성 때 고른 방 테마([API `ThemeId`](API.md#공통-타입), [DEC-052](../DECISIONS.md#결정-색인)). `board`처럼 값은 앱(Zod)만 검사한다. 기본값이 있어 기존 행·서버 시작 정리와 충돌하지 않는다. 마이그레이션 `0001_room_theme`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
 | `status` | varchar(16) not null default 'waiting' | `waiting`(대기 중) / `playing`(게임 중). `CHECK (status IN ('waiting', 'playing'))` |
 
 - 공개/비공개 제약: `CHECK ((is_public AND code IS NULL) OR (NOT is_public AND code IS NOT NULL))`. 비공개 방은 코드가 반드시 있고 공개 방은 없다. `code` 유니크로 같은 코드의 방이 둘 생기지 않는다(null은 여러 개 허용). 코드 중복 시 `CODE_TAKEN`을 돌려주어 다시 만들게 한다([API](API.md#오류-형식과-코드)).
@@ -108,6 +108,6 @@ Drizzle 마이그레이션 파일을 저장소에 커밋하고 배포 시작 단
 - 백업·복구 절차는 [운영](OPERATIONS.md)
 - (해소: 재도전 15초 만료는 누르지 않은 사람을 나가기와 같게 처리한다. [DEC-041](../DECISIONS.md#결정-색인). 두 사람 모두 누르지 않은 경우는 방장 기준으로 방이 닫히는 해석이며 개발자 A의 확인이 필요하다)
 - 사람 아바타 외형 저장 형식([DEC-048](../DECISIONS.md#결정-색인)): 지금 `character_id` 한 컬럼을 외형 객체로 넓히는 방식(JSON 한 컬럼 또는 항목별 컬럼)과 기존 동물 값 처리는 [CHAR-001](../TASKS.md#char-001-사람-아바타-전환과-꾸미기-설계)에서 정한다
-- (해소: 방 테마는 `rooms.theme` 컬럼에 저장한다. [DEC-051](../DECISIONS.md#결정-색인))
+- (해소: 방 테마는 `rooms.theme` 컬럼에 저장한다. [DEC-052](../DECISIONS.md#결정-색인))
 
 제품 정책이 바뀌면 스키마 편의로 정하지 말고 PRD와 결정 기록을 먼저 갱신한다.

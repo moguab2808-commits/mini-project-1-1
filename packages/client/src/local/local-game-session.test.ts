@@ -116,7 +116,7 @@ describe('LocalAuthority + LocalGameSession', () => {
     expect(sa[0]?.pieceCount).toBe(7);
   });
 
-  it('방 테마는 먼저 연결한 창의 값을 쓰고 없거나 잘못된 값이면 bar다(DEC-051)', async () => {
+  it('방 테마는 먼저 연결한 창의 값을 쓰고 없거나 잘못된 값이면 bar다(DEC-052)', async () => {
     const themes = async (first?: string, second?: string) => {
       const { connect } = setup({
         clock: new FakeClock(),

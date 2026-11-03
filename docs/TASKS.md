@@ -882,7 +882,7 @@ Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/7
 - [x] (예외) 테마를 `rooms`·`room:create`·`room:state`·`game:start`에 어떻게 싣는지와, 테마가 게임 규칙·물리·판정에 영향을 주지 않는지를 정했다. AI 대전·로컬 2인 적용 여부를 포함한다.
 - [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: [DEC-050](DECISIONS.md#결정-색인)에 이어 [DEC-051](DECISIONS.md#결정-색인)로 두 번째 테마(밤 옥상)·글자 라벨 표시·로컬 2인 URL 값·판과 같은 저장·전송 형식을 정했다. 구현은 [IMPL-015](#impl-015-방-테마-구현)로 등록했다. 이후 [DEC-052](DECISIONS.md#결정-색인)로 테마를 4개(교실·해변 추가)로 늘렸다. 남은 기준은 리뷰 후 병합이다.
+진행: [DEC-050](DECISIONS.md#결정-색인)에 이어 [DEC-052](DECISIONS.md#결정-색인)로 두 번째 테마(밤 옥상)·글자 라벨 표시·로컬 2인 URL 값·판과 같은 저장·전송 형식을 정했다. 구현은 [IMPL-015](#impl-015-방-테마-구현)로 등록했다. 이후 [DEC-053](DECISIONS.md#결정-색인)로 테마를 4개(교실·해변 추가)로 늘렸다. 남은 기준은 리뷰 후 병합이다.
 
 검증 근거: [2026-11-03 worklog THEME-001 절](worklogs/2026-11-03.md#theme-001-방-테마-선택-설계)
 
@@ -892,7 +892,7 @@ Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/7
 상태: 진행 중
 담당: Claude — 사용자 요청 수행
 의존성: THEME-001, IMPL-004(로컬 2인), IMPL-005(AI 대전), IMPL-008(방 서버), IMPL-012(방 생성 창·방 카드·대기실)
-범위: [DEC-049](DECISIONS.md#결정-색인)·[DEC-050](DECISIONS.md#결정-색인)·[DEC-051](DECISIONS.md#결정-색인)·[DEC-052](DECISIONS.md#결정-색인)의 방 테마 4종(바·밤 옥상·교실·해변)을 저장·전송·선택·표시·장면에 구현한다. 판·알·의자·캐릭터 모양과 게임 규칙은 바꾸지 않는다.
+범위: [DEC-049](DECISIONS.md#결정-색인)·[DEC-050](DECISIONS.md#결정-색인)·[DEC-052](DECISIONS.md#결정-색인)·[DEC-053](DECISIONS.md#결정-색인)의 방 테마 4종(바·밤 옥상·교실·해변)을 저장·전송·선택·표시·장면에 구현한다. 판·알·의자·캐릭터 모양과 게임 규칙은 바꾸지 않는다.
 관련 문서: [PRD 방 생성](PRD.md#방-생성)·[로비](PRD.md#로비)·[대기실](PRD.md#대기실) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE rooms](design/DATABASE.md#rooms) / [LOCAL](design/LOCAL.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
 Issue·PR: 없음
 
