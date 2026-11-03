@@ -61,6 +61,7 @@
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 예정 | 미정 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
+| [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 예정 | 미정 | 없음 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -863,6 +864,24 @@ Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/6
 - [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-11-03 worklog CHAR-001 절](worklogs/2026-11-03.md#char-001-사람-아바타-전환과-꾸미기-설계)
+
+## THEME-001 방 테마 선택 설계
+
+우선순위: P2
+상태: 예정
+담당: 미정
+의존성: IMPL-012(지금의 방 생성 창)
+범위: [DEC-049](DECISIONS.md#결정-색인)에 따라 방을 만들 때 방 테마를 고르는 기능의 미정 사항을 정하고 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
+관련 문서: [PRD 방 생성](PRD.md#방-생성)·[화면 미정 사항](PRD.md#화면-미정-사항) / [DATABASE](design/DATABASE.md#미정-사항) / [API 방 명령](design/API.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
+Issue·PR: 없음
+
+수용 기준:
+- [ ] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 테마 종류·바뀌는 범위·판 선택과의 관계·고르는 사람과 시점·표시 위치·기본 테마가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
+- [ ] (정상) 테마별 에셋 제작 방식과 용량이 [에셋 한도](design/TECH_STACK.md#에셋-조달-계획)(DEC-033) 안에 드는지 확인해 기록했다.
+- [ ] (예외) 테마를 `rooms`·`room:create`·`room:state`·`game:start`에 어떻게 싣는지와, 테마가 게임 규칙·물리·판정에 영향을 주지 않는지를 정했다. AI 대전·로컬 2인 적용 여부를 포함한다.
+- [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: [2026-11-03 worklog THEME-001 절](worklogs/2026-11-03.md#theme-001-방-테마-선택-설계)
 
 ## DOC-011 README 설치·실행 절차
 

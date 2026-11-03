@@ -124,7 +124,7 @@
 
 | 이벤트 | 요청 | 응답(ack) 또는 오류 |
 | --- | --- | --- |
-| `room:create` | `{ title, isPublic, pieceCount, board, code? }`. 제목 1~20자, 알 개수 5·7·9, `board`는 `BoardId`. 비공개면 `code` 필수(6자리, 영문 대문자·숫자에서 0/O·1/I 제외), 공개면 `code`를 보내지 않는다 | 방장에게 `room:state`가 먼저 가고 ack `{ ok: true, roomId }`가 뒤따른다. `INVALID_INPUT`, `CODE_TAKEN`(코드 중복), `ALREADY_IN_ROOM` |
+| `room:create` | `{ title, isPublic, pieceCount, board, code? }`. 방 테마 필드 추가 여부는 [THEME-001](../TASKS.md#theme-001-방-테마-선택-설계)에서 정한다([DEC-049](../DECISIONS.md#결정-색인)). 제목 1~20자, 알 개수 5·7·9, `board`는 `BoardId`. 비공개면 `code` 필수(6자리, 영문 대문자·숫자에서 0/O·1/I 제외), 공개면 `code`를 보내지 않는다 | 방장에게 `room:state`가 먼저 가고 ack `{ ok: true, roomId }`가 뒤따른다. `INVALID_INPUT`, `CODE_TAKEN`(코드 중복), `ALREADY_IN_ROOM` |
 | `room:join` | `{ roomId?, code? }`. 공개 방은 `roomId`, 비공개 방은 `code`(`roomId`는 선택, 함께 보내면 같은 방이어야 한다). 둘 다 없으면 `INVALID_INPUT` | 양쪽에 `room:state`(`status: "playing"`)가 먼저 가고 곧바로 경기가 시작되며, ack `{ ok: true, roomId }`는 그 뒤에 간다. `INVALID_INPUT`, `ROOM_NOT_FOUND`, `ROOM_PLAYING`, `INVALID_CODE`, `ALREADY_IN_ROOM`, `RATE_LIMITED` |
 | `room:quickJoin` | 없음 | 양쪽에 `room:state`가 먼저 가고 곧바로 경기가 시작되며, ack `{ ok: true, roomId }`는 그 뒤에 간다. `ROOM_NOT_FOUND`, `ALREADY_IN_ROOM` |
 | `room:leave` | 없음 | `{ ok: true }` (방에 없어도 성공). 경기 중이면 서버가 기권패로 처리한다 |
