@@ -1,4 +1,6 @@
-// 개발용 `/local?seat=0|1` 화면. 창 2개를 띄워 각자 한 좌석을 맡는다(DEC-020).
+// 개발용 `/local?seat=0|1[&theme=bar|rooftop|classroom|beach]` 화면. 창 2개를 띄워 각자 한 좌석을 맡는다(DEC-020).
+// 방 테마는 먼저 연결한 창의 `theme` 값을 쓰고, 없거나 잘못되면 권한 측이 기본 테마로 바꾼다(DEC-051).
+import type { ThemeId } from '@alkkagi/shared';
 import { useEffect, useState } from 'react';
 import { GameScreen } from '../game/GameScreen.tsx';
 import { GameStore } from '../game/game-store.ts';
@@ -42,7 +44,9 @@ export function LocalPage() {
       type: 'module',
       name: 'alkkagi-local',
     });
-    const session = new LocalGameSession(worker.port as unknown as SessionPort, { seat });
+    const theme = (new URLSearchParams(window.location.search).get('theme') ?? undefined) as
+      ThemeId | undefined;
+    const session = new LocalGameSession(worker.port as unknown as SessionPort, { seat, theme });
     const store = new GameStore(session);
     let cancelled = false;
     // 새로고침·창 닫기·이동: 권한 측이 이 좌석을 기권패 처리하게 알린다

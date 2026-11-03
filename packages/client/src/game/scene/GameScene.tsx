@@ -221,8 +221,8 @@ function SceneWorld(props: SceneProps) {
     latest.current = props;
   });
 
-  const { board, pieceCount, players } = props.start;
-  const stage = useMemo(() => buildStage(board), [board]);
+  const { board, theme, pieceCount, players } = props.start;
+  const stage = useMemo(() => buildStage(board, theme), [board, theme]);
   useEffect(() => () => stage.dispose(), [stage]);
   const stoneKit = useMemo(() => createStoneKit(PHYSICS.stoneRadius), []);
   useEffect(() => () => stoneKit.dispose(), [stoneKit]);
@@ -823,24 +823,8 @@ function SceneWorld(props: SceneProps) {
 
   return (
     <>
-      <color attach="background" args={['#3a2a1f']} />
-      <ambientLight color={0xfff0dc} intensity={0.35} />
-      <hemisphereLight args={[0xffe8c8, 0x4a3324, 1.0]} />
-      <spotLight
-        position={[0, 78, 0]}
-        target-position={[0, 0, 0]}
-        intensity={1500}
-        decay={1.2}
-        angle={0.95}
-        penumbra={0.6}
-        color={0xffd59a}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0006}
-        shadow-camera-near={20}
-        shadow-camera-far={160}
-      />
-      <directionalLight position={[-60, 50, 30]} intensity={0.9} color={0xc8d2ff} />
+      <color attach="background" args={[stage.background]} />
+      <primitive object={stage.lights} />
       <primitive object={stage.room} />
       <group ref={tableRef}>
         <primitive object={stage.table} />

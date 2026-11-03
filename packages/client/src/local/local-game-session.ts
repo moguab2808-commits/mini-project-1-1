@@ -9,6 +9,7 @@ import type {
   Seat,
   ShotSubmit,
   BoardId,
+  ThemeId,
 } from '@alkkagi/shared';
 import type { GameEventMap, GameMode, GameSession } from '../session/game-session.ts';
 import type { ClientMessage, LocalCommand, RejectReason, WorkerMessage } from './messages.ts';
@@ -24,6 +25,8 @@ export interface SessionPort {
 export interface LocalGameSessionOptions {
   seat: Seat;
   board?: BoardId;
+  /** 방 테마. 먼저 연결한 창의 값을 쓴다 */
+  theme?: ThemeId;
   pieceCount?: number;
   /** 하트비트 ping 주기(ms). 0이면 보내지 않는다. 기본 2000. */
   heartbeatMs?: number;
@@ -72,6 +75,7 @@ export class LocalGameSession implements GameSession {
       t: 'hello',
       seat: options.seat,
       board: options.board,
+      theme: options.theme,
       pieceCount: options.pieceCount,
       profile: options.profile,
     });

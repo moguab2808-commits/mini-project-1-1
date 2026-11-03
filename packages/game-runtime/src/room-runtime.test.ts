@@ -81,7 +81,7 @@ const CONFIG: StartGameConfig = {
   ],
 };
 
-function setup(opts: { rematchWindowMs?: number } = {}) {
+function setup(opts: { rematchWindowMs?: number; config?: StartGameConfig } = {}) {
   const clock = new FakeClock();
   const transport = new FakeTransport();
   const logs: RuntimeLogEntry[] = [];
@@ -93,7 +93,7 @@ function setup(opts: { rematchWindowMs?: number } = {}) {
     onFinished: (r) => finished.push(r),
     rematchWindowMs: opts.rematchWindowMs,
   });
-  rt.startGame(CONFIG);
+  rt.startGame(opts.config ?? CONFIG);
   return { clock, transport, logs, finished, rt };
 }
 
@@ -129,6 +129,32 @@ describe('RoomRuntime', () => {
       assert.equal(transport.of('turn:change').length, 2);
       // 상대 보유 방해요소는 뷰에 없다
       assert.notEqual(s0!.view.private.held, null);
+    });
+
+    test('방 테마는 game:start에 담기고 생략하면 bar다(DEC-051)', () => {
+      const themeOf = (config?: StartGameConfig) =>
+        setup({ config })
+          .transport.of('game:start')
+          .map((s) => (s.payload as RuntimeEventMap['game:start']).theme);
+      assert.deepEqual(themeOf(), ['bar', 'bar']);
+      assert.deepEqual(themeOf({ ...CONFIG, theme: 'beach' }), ['beach', 'beach']);
+    });
+
+    test('방 테마는 경기 진행에 영향을 주지 않는다: 같은 시드·명령이면 뷰가 같다(DEC-050)', async () => {
+      const play = async (theme: StartGameConfig['theme']) => {
+        const { clock, transport, rt } = setup({ config: { ...CONFIG, theme } });
+        const r = rt.submitShot(0, shotCmd(transport, 0, 60, 0.3));
+        clock.advance(10);
+        assert.equal((await r).ok, true);
+        clock.advance(4000);
+        return transport.sent
+          .filter((s) => s.type !== 'game:start')
+          .map((s) => ({ seat: s.seat, type: s.type, payload: s.payload }));
+      };
+      const bar = await play('bar');
+      for (const theme of ['rooftop', 'classroom', 'beach'] as const) {
+        assert.deepEqual(await play(theme), bar, theme);
+      }
     });
 
     test('같은 틱에 들어온 명령은 ingressSeq 순서로 처리된다', async () => {

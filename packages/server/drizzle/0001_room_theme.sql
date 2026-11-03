@@ -1,0 +1,1 @@
+ALTER TABLE "rooms" ADD COLUMN "theme" varchar(16) DEFAULT 'bar' NOT NULL;

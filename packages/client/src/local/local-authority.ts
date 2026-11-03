@@ -3,6 +3,8 @@
 import { RoomRuntime, type RuntimeClock } from '@alkkagi/game-runtime';
 import {
   BOARD_IDS,
+  DEFAULT_THEME,
+  THEME_IDS,
   RematchRequestSchema,
   SeatSchema,
   type BoardId,
@@ -10,6 +12,7 @@ import {
   type GameOver,
   type RematchState,
   type Seat,
+  type ThemeId,
 } from '@alkkagi/shared';
 import type { GameEventMap } from '../session/game-session.ts';
 import type { ClientMessage, RejectReason, WorkerMessage } from './messages.ts';
@@ -67,7 +70,7 @@ export class LocalAuthority {
   private readonly seats: [Connection | null, Connection | null] = [null, null];
   /** 이탈한 좌석. 방이 비워질 때까지 다시 쓰지 않는다(기권패 뒤 재접속으로 경기를 덮지 않는다). */
   private readonly departed: [boolean, boolean] = [false, false];
-  private config: { board: BoardId; pieceCount: number } | null = null;
+  private config: { board: BoardId; theme: ThemeId; pieceCount: number } | null = null;
   private gameCount = 0;
   private rematch: Rematch | null = null;
   private lastResult: GameOver | null = null;
@@ -108,6 +111,7 @@ export class LocalAuthority {
     if (!this.config) {
       this.config = {
         board: BOARD_IDS.includes(msg.board as BoardId) ? (msg.board as BoardId) : DEFAULT_BOARD,
+        theme: THEME_IDS.includes(msg.theme as ThemeId) ? (msg.theme as ThemeId) : DEFAULT_THEME,
         pieceCount: [5, 7, 9].includes(msg.pieceCount as number)
           ? (msg.pieceCount as number)
           : DEFAULT_PIECE_COUNT,
@@ -218,7 +222,11 @@ export class LocalAuthority {
   // ───────── 경기 ─────────
 
   private startGame(): void {
-    const config = this.config ?? { board: DEFAULT_BOARD, pieceCount: DEFAULT_PIECE_COUNT };
+    const config = this.config ?? {
+      board: DEFAULT_BOARD,
+      theme: DEFAULT_THEME,
+      pieceCount: DEFAULT_PIECE_COUNT,
+    };
     this.runtime ??= new RoomRuntime({
       clock: this.opts.clock,
       transport: {
@@ -238,6 +246,7 @@ export class LocalAuthority {
     this.runtime.startGame({
       gameId: `local-${String(this.gameCount)}`,
       board: config.board,
+      theme: config.theme,
       pieceCount: config.pieceCount,
       seed: Math.floor(this.random() * 0x1_0000_0000),
       players: [

@@ -2,6 +2,7 @@ import { Game, type CoreEvent, type Envelope } from '@alkkagi/game-core';
 import {
   AimUpdateSchema,
   BoardRotateSchema,
+  DEFAULT_THEME,
   GameForfeitSchema,
   HazardAimSchema,
   HazardUseSchema,
@@ -19,6 +20,7 @@ import {
   type HazardUse,
   type Seat,
   type ShotSubmit,
+  type ThemeId,
 } from '@alkkagi/shared';
 import type {
   ForfeitReason,
@@ -55,6 +57,8 @@ export interface PlayerSeed {
 export interface StartGameConfig {
   gameId: string;
   board: BoardId;
+  /** 방 테마(DEC-050). 표시용으로 `game:start`에 담기만 하고 `Game`에는 넘기지 않는다. 기본 `bar` */
+  theme?: ThemeId;
   pieceCount: number;
   /** 경기 난수 시드. 클라이언트에 보내지 않는다 */
   seed: number;
@@ -173,6 +177,7 @@ export class RoomRuntime {
             { seat: 1, ...config.players[1] },
           ],
           board: config.board,
+          theme: config.theme ?? DEFAULT_THEME,
           pieceCount: config.pieceCount,
           finalRound: RULES.finalRound,
           turnSeconds: RULES.turnSeconds,

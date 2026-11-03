@@ -1,7 +1,8 @@
 // 방 이벤트·REST의 스키마. docs/design/API.md의 "방 이벤트 필드"와 REST `GET /api/rooms`를 옮긴 것이다.
 import { z } from 'zod';
 import { MeSchema } from './auth.ts';
-import { BoardIdSchema } from './protocol.ts';
+import { DEFAULT_THEME } from './constants.ts';
+import { BoardIdSchema, ThemeIdSchema } from './protocol.ts';
 
 /**
  * 방 Socket.IO 명령의 ack 오류 코드. 코드 표의 기준은 docs/design/API.md다.
@@ -32,6 +33,8 @@ export const RoomCreateSchema = z
     isPublic: z.boolean(),
     pieceCount: z.union([z.literal(5), z.literal(7), z.literal(9)]),
     board: BoardIdSchema,
+    /** 방 테마(DEC-051). 생략하면 기본 테마 */
+    theme: ThemeIdSchema.default(DEFAULT_THEME),
     code: RoomCodeSchema.optional(),
   })
   .superRefine((value, ctx) => {
@@ -74,12 +77,13 @@ export type RoomStatus = z.infer<typeof RoomStatusSchema>;
 export const MemberSchema = MeSchema;
 export type Member = z.infer<typeof MemberSchema>;
 
-/** `GET /api/rooms`의 항목. 코드·알 개수·판·참여 인원은 공개·비공개 방 모두 넣지 않는다(PRD 로비). */
+/** `GET /api/rooms`의 항목. 코드·알 개수·판·참여 인원은 공개·비공개 방 모두 넣지 않는다(PRD 로비). 방 테마는 넣는다(DEC-051). */
 export const RoomSummarySchema = z.object({
   roomId: z.number().int(),
   title: z.string(),
   isPublic: z.boolean(),
   status: RoomStatusSchema,
+  theme: ThemeIdSchema,
   host: MemberSchema,
 });
 export type RoomSummary = z.infer<typeof RoomSummarySchema>;
@@ -91,6 +95,7 @@ export const RoomStateSchema = z.object({
   isPublic: z.boolean(),
   pieceCount: z.number().int(),
   board: BoardIdSchema,
+  theme: ThemeIdSchema,
   status: RoomStatusSchema,
   host: MemberSchema,
   guest: MemberSchema.nullable(),

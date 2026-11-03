@@ -7,6 +7,7 @@ import { rematchUi } from '../game/hud/hud-model.ts';
 import { LocalAuthority, type PortLike } from './local-authority.ts';
 import {
   LocalGameSession,
+  type LocalGameSessionOptions,
   LocalSessionRejectedError,
   type SessionPort,
 } from './local-game-session.ts';
@@ -53,13 +54,14 @@ const sessions: LocalGameSession[] = [];
 
 function setup(options: ConstructorParameters<typeof LocalAuthority>[0]) {
   const authority = new LocalAuthority(options);
-  const connect = (seat: 0 | 1) => {
+  const connect = (seat: 0 | 1, theme?: string) => {
     const ch = new MessageChannel();
     channels.push(ch);
     authority.attach(ch.port1 as unknown as PortLike);
     const session = new LocalGameSession(ch.port2 as unknown as SessionPort, {
       seat,
       heartbeatMs: 0,
+      theme: theme as LocalGameSessionOptions['theme'],
     });
     sessions.push(session);
     const log: { type: string; payload: unknown }[] = [];
@@ -112,6 +114,25 @@ describe('LocalAuthority + LocalGameSession', () => {
     expect(sb[0]?.seat).toBe(1);
     expect(sa[0]?.gameId).toBe(sb[0]?.gameId);
     expect(sa[0]?.pieceCount).toBe(7);
+  });
+
+  it('방 테마는 먼저 연결한 창의 값을 쓰고 없거나 잘못된 값이면 bar다(DEC-051)', async () => {
+    const themes = async (first?: string, second?: string) => {
+      const { connect } = setup({
+        clock: new FakeClock(),
+        random: () => 0.5,
+        heartbeatTimeoutMs: 0,
+      });
+      const a = connect(0, first);
+      await a.session.connect();
+      const b = connect(1, second);
+      await b.session.connect();
+      await flush();
+      return [a, b].map((w) => of<GameStart>(w.log, 'game:start')[0]?.theme);
+    };
+    expect(await themes('beach', 'classroom')).toEqual(['beach', 'beach']);
+    expect(await themes(undefined, 'beach')).toEqual(['bar', 'bar']);
+    expect(await themes('space', undefined)).toEqual(['bar', 'bar']);
   });
 
   it('같은 좌석의 두 번째 연결은 거부된다', async () => {

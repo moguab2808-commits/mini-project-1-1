@@ -1,7 +1,14 @@
 // 개발용 `/ai` 화면: AI 대전 설정(판·알 개수) 후 시작. 로비의 방 생성 창(IMPL-012)은
 // `AiSetupForm`과 `startAiGame`을 그대로 쓴다. 서버 요청이 없다(DEC-021).
 import { useEffect, useState } from 'react';
-import { BOARD_IDS, type BoardId } from '@alkkagi/shared';
+import {
+  BOARD_IDS,
+  DEFAULT_THEME,
+  THEME_IDS,
+  THEME_LABEL,
+  type BoardId,
+  type ThemeId,
+} from '@alkkagi/shared';
 import { GameScreen } from '../game/GameScreen.tsx';
 import { GameStore } from '../game/game-store.ts';
 import { startAiGame, type AiGameSession, type AiMatchSettings } from './ai-game-session.ts';
@@ -14,9 +21,40 @@ export interface AiSetupFormProps {
   onStart: (settings: AiMatchSettings) => void;
 }
 
-/** 판·알 개수(5·7·9, 기본 5)를 고르고 "AI와 시작"을 누른다(DEC-024·032) */
+export interface ThemeChoiceProps {
+  theme: ThemeId;
+  onChange: (theme: ThemeId) => void;
+  /** 방 생성 창의 칩 모양(`chip`)을 쓴다. AI 설정 폼은 `.ai-setup` 스타일을 쓰므로 끈다 */
+  chips?: boolean;
+}
+
+/** 방 테마 선택(DEC-050·051). 사람 방과 AI 대전이 같은 칩을 쓴다 */
+export function ThemeChoice({ theme, onChange, chips = true }: ThemeChoiceProps) {
+  return (
+    <fieldset className={chips ? 'choice' : undefined}>
+      <legend>방 테마</legend>
+      {THEME_IDS.map((id) => (
+        <label key={id} className={chips ? (theme === id ? 'chip chip-on' : 'chip') : undefined}>
+          <input
+            type="radio"
+            name="theme"
+            value={id}
+            checked={theme === id}
+            onChange={() => {
+              onChange(id);
+            }}
+          />
+          {THEME_LABEL[id]}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+/** 판·알 개수(5·7·9, 기본 5)·방 테마를 고르고 "AI와 시작"을 누른다(DEC-024·032·050) */
 export function AiSetupForm({ initial, onStart }: AiSetupFormProps) {
   const [board, setBoard] = useState<BoardId>(initial?.board ?? 'standard');
+  const [theme, setTheme] = useState<ThemeId>(initial?.theme ?? DEFAULT_THEME);
   const [pieceCount, setPieceCount] = useState<AiMatchSettings['pieceCount']>(
     initial?.pieceCount ?? 5,
   );
@@ -25,7 +63,7 @@ export function AiSetupForm({ initial, onStart }: AiSetupFormProps) {
       aria-label="AI 대전 설정"
       onSubmit={(e) => {
         e.preventDefault();
-        onStart({ board, pieceCount });
+        onStart({ board, theme, pieceCount });
       }}
     >
       <fieldset>
@@ -62,6 +100,7 @@ export function AiSetupForm({ initial, onStart }: AiSetupFormProps) {
           </label>
         ))}
       </fieldset>
+      <ThemeChoice theme={theme} onChange={setTheme} chips={false} />
       <p>방 목록에 올리지 않고 바로 시작해요. 결과는 전적에 반영되지 않아요.</p>
       <button type="submit">AI와 시작</button>
     </form>

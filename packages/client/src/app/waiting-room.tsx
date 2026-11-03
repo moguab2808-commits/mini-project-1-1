@@ -1,6 +1,6 @@
 // 대기실: 방 정보와 "플레이어 입장을 기다리는 중". 시작 버튼은 없고 상대가 입장하면 곧바로 경기가 시작된다(DEC-040).
 import { useState } from 'react';
-import type { RoomState } from '@alkkagi/shared';
+import { THEME_LABEL, type RoomState } from '@alkkagi/shared';
 import { BOARD_LABEL } from '../ai/ai-page.tsx';
 import { CharacterFace } from '../game/hud/CharacterFace.tsx';
 import { formatRecord, formatWinRate } from './logic.ts';
@@ -33,6 +33,10 @@ export function WaitingRoom({
           <div>
             <dt>알 개수</dt>
             <dd>{room.pieceCount}개</dd>
+          </div>
+          <div>
+            <dt>방 테마</dt>
+            <dd>{THEME_LABEL[room.theme]}</dd>
           </div>
         </dl>
         <div className="waiting-host">
