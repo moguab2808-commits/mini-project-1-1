@@ -59,7 +59,7 @@
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
-| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -826,7 +826,7 @@ Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-013 배포
 
 우선순위: P1
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: OPS-001, IMPL-009, IMPL-011
 범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
@@ -836,11 +836,13 @@ Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 수용 기준:
 - [ ] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다. 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다.
 - [ ] (오류) `/api`·`/socket.io`·`/health` 밖 확장자 없는 GET은 `index.html`, 없는 정적 자산은 404를 돌려준다. 롤백 절차로 직전 배포를 복원해 확인했다.
-- [ ] (예외) 서버 시작 때 `rooms` 정리가 실패하면 서버가 시작하지 않는다. 절전 방지 요청 사용 여부와 Render 로그 보관 기간을 구현 단계에서 정해 기록했다.
+- [x] (예외) 서버 시작 때 `rooms` 정리가 실패하면 서버가 시작하지 않는다. 절전 방지 요청 사용 여부와 Render 로그 보관 기간을 구현 단계에서 정해 기록했다.
 - [ ] (예외) argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남기고 목표(약 100~300ms)에 맞게 [AUTH](design/AUTH.md#해시프록시) 파라미터를 조정했다. (IMPL-007에서 옮겨 옴)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. Render·Neon 서비스 생성, 수동 배포·롤백, UptimeRobot, argon2id 실측은 사용자 승인과 계정 작업이 필요해 남았다. 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
+
+검증 근거: [2026-11-03 worklog IMPL-013 절](worklogs/2026-11-03.md#impl-013-배포)
 
 ## DOC-011 README 설치·실행 절차
 
