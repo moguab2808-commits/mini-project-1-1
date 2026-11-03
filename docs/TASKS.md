@@ -39,7 +39,7 @@
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)·[PR #25](https://github.com/moguab2808-commits/mini-project-1-1/pull/25) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 완료 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 완료 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)·[PR #30](https://github.com/moguab2808-commits/mini-project-1-1/pull/30) |
-| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 리뷰 중 | 개발자 A | [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34)·[PR #65](https://github.com/moguab2808-commits/mini-project-1-1/pull/65) |
+| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 완료 | 개발자 A | [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34)·[PR #65](https://github.com/moguab2808-commits/mini-project-1-1/pull/65) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 완료 | 개발자 A | [PR #33](https://github.com/moguab2808-commits/mini-project-1-1/pull/33) |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
@@ -61,9 +61,13 @@
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 예정 | 미정 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
-| [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 리뷰 중 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
-| [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | 없음 |
+| [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
+| [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
 | [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 예정 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
+| [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 예정 | 미정 | 미생성 |
+| [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, CHAR-001 뒤 등록하는 사람 아바타 구현 작업 | 예정 | 미정 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -420,7 +424,7 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 ## VAL-002 개발용 프레임 시간 기록
 
 우선순위: P2
-상태: 리뷰 중
+상태: 완료
 담당: 개발자 A
 의존성: IMPL-004 (게임 화면 구현. 기록 모듈은 화면 없이 먼저 만들었고, 화면 연결은 IMPL-004 이후)
 범위: [fps 측정 절차](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001)가 요구하는 판 전체의 프레임 간격(ms) 원자료를 개발 중에만 기록·내보내는 코드를 만든다. VAL-001 완료 때 남긴 후속이다. 기록 모듈(`packages/client/src/dev/frame-recorder.ts`)은 화면 없이 만들 수 있어 먼저 만들었고, 실제 화면에 붙이는 일과 운영 빌드 제외 확인은 게임 화면(IMPL-004)이 있어야 한다.
@@ -430,7 +434,7 @@ Issue·PR: [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 수용 기준:
 - [x] 개발 환경에서만 켜지고 운영 빌드에는 영향이 없다. (게임 화면의 `use-frame-recording.ts`가 `import.meta.env.DEV`일 때만 동적 import한다. 운영 빌드 `dist/`에 기록 코드·전역 함수가 없음을 확인했다)
 - [x] 판 시작부터 결과 화면 직전까지 프레임 간격을 기록해 평균 fps·프레임 시간 95백분위·100ms 이상 멈춤 횟수를 계산할 수 있다. (실제 브라우저의 `/local` 경기에서 시작부터 기권 결과까지 기록하고 요약·원자료 JSON을 내려받았다. 결과 뒤에는 프레임이 늘지 않는다. 마지막 프레임부터 결과까지의 간격도 원자료에 넣는다)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (worklog는 기록했고 PR #65 리뷰 중이다)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #65, 2026-11-03 병합)
 
 검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#val-002-개발용-프레임-시간-기록-모듈)·[2026-11-03 worklog](worklogs/2026-11-03.md#val-002-게임-화면-연결-확인과-운영-빌드-제외)
 
@@ -872,20 +876,20 @@ Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/6
 ## THEME-001 방 테마 선택 설계
 
 우선순위: P2
-상태: 리뷰 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: IMPL-012(지금의 방 생성 창)
 범위: [DEC-049](DECISIONS.md#결정-색인)에 따라 방을 만들 때 방 테마를 고르는 기능의 미정 사항을 정하고 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
 관련 문서: [PRD 방 생성](PRD.md#방-생성)·[화면 미정 사항](PRD.md#화면-미정-사항) / [DATABASE](design/DATABASE.md#미정-사항) / [API 방 명령](design/API.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
-Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72)
+Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72)·[PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)
 
 수용 기준:
 - [x] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 테마 종류·바뀌는 범위·판 선택과의 관계·고르는 사람과 시점·표시 위치·기본 테마가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
 - [x] (정상) 테마별 에셋 제작 방식과 용량이 [에셋 한도](design/TECH_STACK.md#에셋-조달-계획)(DEC-033) 안에 드는지 확인해 기록했다.
 - [x] (예외) 테마를 `rooms`·`room:create`·`room:state`·`game:start`에 어떻게 싣는지와, 테마가 게임 규칙·물리·판정에 영향을 주지 않는지를 정했다. AI 대전·로컬 2인 적용 여부를 포함한다.
-- [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다. (PR #74, 2026-11-03 병합)
 
-진행: [DEC-050](DECISIONS.md#결정-색인)에 이어 [DEC-052](DECISIONS.md#결정-색인)로 두 번째 테마(밤 옥상)·글자 라벨 표시·로컬 2인 URL 값·판과 같은 저장·전송 형식을 정했다. 구현은 [IMPL-015](#impl-015-방-테마-구현)로 등록했다. 이후 [DEC-053](DECISIONS.md#결정-색인)로 테마를 4개(교실·해변 추가)로 늘렸다. 남은 기준은 리뷰 후 병합이다.
+진행: [DEC-050](DECISIONS.md#결정-색인)에 이어 [DEC-052](DECISIONS.md#결정-색인)로 두 번째 테마(밤 옥상)·글자 라벨 표시·로컬 2인 URL 값·판과 같은 저장·전송 형식을 정했다. 구현은 [IMPL-015](#impl-015-방-테마-구현)로 등록했다. 이후 [DEC-053](DECISIONS.md#결정-색인)로 테마를 4개(교실·해변 추가)로 늘렸다. PR #74로 병합해 완료했다.
 
 검증 근거: [2026-11-03 worklog THEME-001 절](worklogs/2026-11-03.md#theme-001-방-테마-선택-설계)
 
@@ -928,6 +932,86 @@ Issue·PR: [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/7
 - [ ] 시안으로 사용자 확인을 받은 뒤 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
 검증 근거: [2026-11-03 worklog UI-003 절](worklogs/2026-11-03.md#ui-003-사람-아바타-화풍-ui-적용-설계)
+
+## HAZ-001 방해요소 10종 추가와 턴 교체 설계
+
+우선순위: P1
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
+의존성: IMPL-004(방해요소 입력·연출), IMPL-005(AI 방해요소 사용), IMPL-009(서버 경기 진행)
+범위: [DEC-055](DECISIONS.md#결정-색인)의 발사 턴마다 교체·직전 종류 제외·추가 10종을 제품 규칙으로 기록하고, 구현 전에 GAME·API 상세 계약(효과 상태 위치, 플레이어별 뷰에서 숨길 필드, 새 명령 대상 형식, 수치 제안값)을 정한다. 구현은 [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체)에서 한다.
+관련 문서: [PRD 지급과 보유](PRD.md#지급과-보유)·[추가 방해요소 10종](PRD.md#추가-방해요소-10종-dec-055)·[방해요소 미정 사항](PRD.md#방해요소-미정-사항) / [GAME 방해요소](design/GAME.md#방해요소별-처리) / [API 경기 이벤트](design/API.md#경기-이벤트-필드) / [DEC-014](DECISIONS.md#결정-색인)·[DEC-031](DECISIONS.md#결정-색인)·[DEC-055](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [x] (정상) 교체 시점·대상·초기화, 후보 18종과 직전 종류 제외, 추가 10종의 효과·발동 방식·분류·지속, AI·로컬 적용, 속임수형 3종의 공개 범위가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
+- [ ] (정상) GAME에 10종의 적용 훅·상태 위치와 수치 제안값(범위·힘·무게 배율·허상 배치 거리 등)을, API에 `HazardKind` 추가 값과 `hazard:use` 대상 형식(위치·방향·알 id)을 정했다.
+- [ ] (예외) 가짜벽의 진짜 여부·분신술의 진짜 알·알 무게 효과가 상대 뷰·상대에게 가는 `hazard:triggered`에 담기지 않는 필드 경계를 [상대 비공개 필드 점검](design/API.md#상대-비공개-필드-점검)에 추가했다.
+- [x] (예외) 분신술 허상에 내 알이 닿을 때·설치물 겹침 허용을 사용자 승인으로 정했다. ([DEC-057](DECISIONS.md#결정-색인): 내 알도 통과·소멸, 설치물 겹침 불가)
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+진행: 제품 규칙을 [DEC-055](DECISIONS.md#결정-색인)·[DEC-057](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다(PR 1차). GAME·API 상세 계약과 수치 제안값이 남았다.
+
+검증 근거: [2026-11-03 worklog HAZ-001·EMOTE-001 절](worklogs/2026-11-03.md#haz-001emote-001-방해요소-10종감정표현-결정-기록)
+
+## IMPL-016 방해요소 10종 추가와 턴 교체
+
+우선순위: P1
+상태: 예정
+담당: 미정
+의존성: HAZ-001
+범위: [DEC-055](DECISIONS.md#결정-색인)를 `shared`·`game-core`·서버·클라이언트·AI에 구현한다. 발사 턴마다 두 사람 교체와 직전 종류 제외, 추가 10종의 물리·배치·연출, 속임수형의 상대 뷰 숨김을 포함한다.
+관련 문서: [PRD 추가 방해요소 10종](PRD.md#추가-방해요소-10종-dec-055) / [GAME](design/GAME.md) / [API](design/API.md)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상, `HAZARD-GRANT`) 턴이 바뀔 때마다 두 사람이 새 방해요소를 받고 효과·게이지·쿨타임·설치물이 사라진다. 직전 종류는 나오지 않는다(`game-core` 테스트, 시드 고정).
+- [ ] (정상) 추가 10종이 각각 PRD 효과대로 동작하고 같은 시드·같은 명령이면 결과가 같다(테스트). 위치형은 미리보기·ESC 취소·불가 후보 빨간색이 동작한다.
+- [ ] (예외) 상대 뷰·이벤트에 가짜벽의 진짜 여부, 분신술의 진짜 알, 알 무게 효과가 없다(뷰 테스트). 분신술·알 무게는 상대에게 발동 안내가 없고 가짜벽은 "벽"으로 안내된다.
+- [ ] (예외) 사용 제한(쿨타임 20초·턴당 1회)을 넘는 요청과 다른 설치물과 겹치는 배치는 거부되고 상태와 난수를 바꾸지 않는다. 분신술 허상은 어느 알이 닿아도 사라진다.
+- [ ] (정상) AI 대전·로컬 2인에서 18종이 지급·사용되고 AI가 위치형을 배치 가능한 무작위 위치에 둔다.
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+
+## EMOTE-001 감정표현 설계
+
+우선순위: P2
+상태: 진행 중
+담당: Claude — 사용자 요청 수행
+의존성: 없음(구현은 사람 아바타 이후)
+범위: [DEC-056](DECISIONS.md#결정-색인)의 감정표현 6종을 제품 규칙으로 기록하고, 구현 전에 API 이벤트(보내기·중계·빈도 제한 오류)와 몸짓·말풍선·효과음 목록을 정한다. 구현은 [IMPL-017](#impl-017-감정표현-구현)에서 한다.
+관련 문서: [PRD 감정표현](PRD.md#감정표현-dec-056)·[환경설정 효과음 목록](PRD.md#환경설정) / [API Socket.IO 이벤트](design/API.md#socketio-이벤트) / [DEC-048](DECISIONS.md#결정-색인)·[DEC-056](DECISIONS.md#결정-색인)
+Issue·PR: 미생성
+
+수용 기준:
+- [x] (정상) 종류 6개·사용 방법(숫자키 1~6·버튼 메뉴)·사용 시점(경기 중)·쿨타임 3초·표시(몸짓·말풍선·효과음)·끄기 설정 없음·AI 사용이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
+- [ ] (정상) API에 감정표현 보내기·받기 이벤트와 필드, 서버 빈도 제한과 거부 오류를 정했다. 로컬 2인·AI 경로를 포함한다.
+- [ ] (예외) 사람 아바타 구조가 정해진 뒤 6종의 몸짓을 아바타 몸짓으로 정의했다([CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) 이후).
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+진행: 제품 규칙을 [DEC-056](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다. API 계약과 아바타 몸짓 정의가 남았다.
+
+검증 근거: [2026-11-03 worklog HAZ-001·EMOTE-001 절](worklogs/2026-11-03.md#haz-001emote-001-방해요소-10종감정표현-결정-기록)
+
+## IMPL-017 감정표현 구현
+
+우선순위: P2
+상태: 예정
+담당: 미정
+의존성: EMOTE-001, CHAR-001 뒤 등록하는 사람 아바타 구현 작업(동물 캐릭터에 먼저 만들지 않는다, [DEC-056](DECISIONS.md#결정-색인))
+범위: 감정표현 6종의 입력(숫자키·버튼 메뉴), 서버 중계·빈도 제한, 아바타 몸짓·말풍선·효과음, AI 사용을 구현한다.
+관련 문서: [PRD 감정표현](PRD.md#감정표현-dec-056) / [API](design/API.md)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 경기 중 숫자키 1~6 또는 버튼 메뉴로 쓴 감정표현이 양쪽 화면에 몸짓·말풍선·효과음으로 보인다(온라인 두 계정·로컬 2인).
+- [ ] (예외) 3초 안에 다시 쓰면 클라이언트가 막고, 조작된 요청도 서버가 거부한다. 대기실·결과 화면에서는 쓸 수 없다.
+- [ ] (정상) AI가 정한 상황에서 확률적으로 감정표현을 쓰고 3초 쿨타임을 지킨다.
+- [ ] (경계) 감정표현이 게임 상태·판정·전적을 바꾸지 않는다(테스트).
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
 
 ## DOC-011 README 설치·실행 절차
 
