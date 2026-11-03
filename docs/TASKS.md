@@ -1017,7 +1017,13 @@ Issue·PR: [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 - [ ] (경계) 3D 아바타 두 명이 있는 게임 화면의 프레임 시간을 동물 캐릭터 때와 같은 조건으로 기록해 비교했다([검증 계획](ENGINEERING-VALIDATION.md)).
 - [ ] 동물 6종 코드·`CharacterId`를 지우고 API·DATABASE·TECH_STACK의 "미구현" 표시를 고치며, 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: 화풍을 시험용 머리로 사용자에게 확인받고(머리 1.1배) 7항목 × 5개 부품, DB 마이그레이션, `PATCH /api/me/appearance`, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI·로컬 외형을 구현했고 동물 6종 코드를 지웠다. 전체 선택지는 스크린샷으로 사용자 확인을 받았다. 남은 것은 `test:db`, 온라인 두 계정·실제 로비 확인, GPU 프레임 시간 비교, 리뷰·병합이다.
+진행: 화풍을 시험용 머리로 사용자에게 확인받고(머리 1.1배) 7항목 × 5개 부품, DB 마이그레이션, `PATCH /api/me/appearance`, 꾸미기 창, 2D SVG 얼굴, 3D 상반신, AI·로컬 외형을 구현했고 동물 6종 코드를 지웠다. 전체 선택지는 스크린샷으로 사용자 확인을 받았다. 사용자 요청("남은 확인은 그냥 문서에 적어두고 병합하자")으로 중간 PR #82를 남은 확인 전에 병합했다.
+
+남은 확인(병합 뒤):
+- `npm run test:db`: `appearance-migration.db.test.ts`(기존 동물 값 행 → 기본 외형, `character_id` 삭제)와 `auth.db.test.ts`(외형 저장·잘못된 값 거부). 개발 DB에 `npm run db:migrate -w @alkkagi/server` 적용도 아직 안 했다.
+- 온라인 두 계정: 방 목록·`room:state`·`game:start`로 상대에게 같은 외형이 보이는지, 실제 로비 꾸미기 창 저장.
+- GPU 브라우저에서 동물 캐릭터(`main` 477803e)와 같은 조건의 프레임 시간 비교(SwiftShader 참고값은 6~17% 느림, 흔들림 큼).
+- 위 확인 뒤 수용 기준 체크·완료 처리.
 
 검증 근거: [2026-11-03 worklog IMPL-018 절](worklogs/2026-11-03.md#impl-018-사람-아바타-구현)
 
