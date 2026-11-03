@@ -1,12 +1,23 @@
 // 내 방해요소 칸의 표시·입력 가능 여부를 `view.private`와 권한 측 시각으로 계산한다.
 // 상대 방해요소는 뷰에 없으므로 여기서도 다루지 않는다(비공개). 권한 측이 사용 때 다시 검증한다.
-import { HAZARDS, HAZARD_TUNING, type GameView, type HazardKind } from '@alkkagi/shared';
+import {
+  HAZARDS,
+  HAZARD_TUNING,
+  type GameView,
+  type HazardCategory,
+  type HazardKind,
+} from '@alkkagi/shared';
+import { isInstallKind } from '@alkkagi/game-core';
 
-export type HazardInputKind = 'immediate' | 'placement' | 'hold' | 'random';
+export type HazardInputKind = 'immediate' | 'placement' | 'pick_stone' | 'hold' | 'random';
 
-/** 사용 입력 방식: 즉시형·배치형(벽·끈끈이)·손에 들고 조준(후레쉬·물총)·랜덤형(직접 사용 불가) */
+/**
+ * 사용 입력 방식: 즉시형·배치형(판 위 위치)·내 알 고르기(분신술)·손에 들고 조준(후레쉬·물총)·
+ * 랜덤형(직접 사용 불가)
+ */
 export function inputKindOf(kind: HazardKind): HazardInputKind {
-  if (kind === 'wall' || kind === 'sticky') return 'placement';
+  if (isInstallKind(kind)) return 'placement';
+  if (kind === 'decoy') return 'pick_stone';
   if (kind === 'flashlight' || kind === 'water_gun') return 'hold';
   return HAZARDS[kind].category === 'random' ? 'random' : 'immediate';
 }
@@ -14,7 +25,7 @@ export function inputKindOf(kind: HazardKind): HazardInputKind {
 export interface HeldHazardState {
   hazardInstanceId: string;
   kind: HazardKind;
-  category: 'fatigue' | 'cooldown' | 'random';
+  category: HazardCategory;
   /** 피로도 게이지형이면 지금 시각의 추정 게이지(0~100), 아니면 null */
   gauge: number | null;
   overheated: boolean;
@@ -50,6 +61,12 @@ export function heldHazardState(view: GameView, nowServerMs: number): HeldHazard
     gauge,
     overheated,
     cooldownRemainingSec: cooling ? Math.ceil(cooldownRemainingMs / 1000) : null,
-    usable: inPlay && category !== 'random' && !overheated && !cooling,
+    usable:
+      inPlay &&
+      category !== 'random' &&
+      !overheated &&
+      !cooling &&
+      // 턴당 1회형은 권한 측의 사용 기록을 따른다
+      (category !== 'per_turn' || view.private.usable),
   };
 }

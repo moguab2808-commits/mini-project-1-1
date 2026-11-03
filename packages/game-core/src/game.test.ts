@@ -64,31 +64,59 @@ function events(g: Game, type: CoreEvent['type']) {
 }
 
 describe('HAZARD-GRANT: 지급과 교체', () => {
-  test('시작과 3·5·7·9라운드 시작에만 교체 지급되고 누적되지 않는다', () => {
+  test('발사 턴이 바뀔 때마다 두 좌석 모두 교체되고 직전 종류는 다시 나오지 않는다(DEC-055)', () => {
     const g = mk();
     const all: CoreEvent[] = [...g.drainEvents()];
     const ids = new Set<string>();
-    const holds = (): string[] =>
-      [0, 1].map((s) => g.getViewFor(s as Seat).private.held!.hazardInstanceId);
-    holds().forEach((i) => ids.add(i));
+    const kinds: [string[], string[]] = [[], []];
+    const holds = (): void => {
+      for (const s of [0, 1] as const) {
+        const h = g.getViewFor(s).private.held!;
+        ids.add(h.hazardInstanceId);
+        kinds[s].push(h.kind);
+      }
+    };
+    holds();
     let t = T0;
-    const rounds: number[] = [];
     while (!g.isFinished) {
+      const before = g.getViewFor(0).turnId;
       t = passTurn(g, t);
       for (const e of g.drainEvents()) {
         all.push(e);
-        if (e.type === 'hazard:granted' && e.toSeat === 0) rounds.push(e.payload.round);
+        if (e.type === 'hazard:granted') {
+          assert.equal(e.payload.turnId, before + 1, '교체 지급은 새 턴 id를 담는다');
+        }
       }
-      if (!g.isFinished) holds().forEach((i) => ids.add(i));
+      if (!g.isFinished) holds();
     }
     const grants = all.filter((e) => e.type === 'hazard:granted');
-    assert.deepEqual(rounds, [3, 5, 7, 9]);
-    assert.equal(grants.length, 10, '시작 2개 + 교체 8개');
-    assert.equal(grants.filter((e) => e.type === 'hazard:granted' && e.payload.replaced).length, 8);
-    assert.equal(ids.size, 10, '교체마다 새 인스턴스 id');
+    assert.equal(grants.length, 40, '시작 2개 + 턴 교체 19번 × 2좌석(종료 턴은 교체 없음)');
+    assert.equal(
+      grants.filter((e) => e.type === 'hazard:granted' && e.payload.replaced).length,
+      38,
+    );
+    assert.equal(ids.size, 40, '교체마다 새 인스턴스 id');
+    for (const ks of kinds) {
+      for (let i = 1; i < ks.length; i++) assert.notEqual(ks[i], ks[i - 1], '직전 종류 제외');
+      assert.equal(ks.includes('desk_shake'), false);
+    }
     const over = all.find((e) => e.type === 'game:over');
     assert.ok(over && over.type === 'game:over' && over.payload.reason === 'final_round');
     assert.equal(over.payload.winnerId, null, '남은 알 수가 같으면 무승부');
+  });
+
+  test('같은 시드면 두 좌석의 지급 순서가 같다', () => {
+    const run = () => {
+      const g = mk({ seed: 7 });
+      const out: string[] = [];
+      let t = T0;
+      for (let i = 0; i < 6; i++) {
+        t = passTurn(g, t);
+        out.push(...[0, 1].map((s) => g.getViewFor(s as Seat).private.held!.kind));
+      }
+      return out;
+    };
+    assert.deepEqual(run(), run());
   });
 
   test('보유는 항상 1개이며 교체 때 게이지·쿨타임·이전 효과가 지워진다', () => {
@@ -99,8 +127,7 @@ describe('HAZARD-GRANT: 지급과 교체', () => {
     g.debugGrant(1, 'board_spin');
     use(g, 1, T0 + 10);
     assert.equal(g.debugState().players[1]!.gauge > 0, true);
-    let t = T0;
-    for (let i = 0; i < 4; i++) t = passTurn(g, t); // 3라운드 시작 교체
+    passTurn(g, T0); // 턴이 바뀌면 교체
     const st = g.debugState();
     assert.equal(st.players[0]!.cooldownEndsAtMs, null);
     assert.equal(st.players[1]!.gauge, 0);
@@ -483,6 +510,7 @@ describe('getViewFor: 상대 비공개', () => {
     'stones',
     'effects',
     'result',
+    'stoneCounts',
     'private',
   ].sort();
   const PRIVATE = [

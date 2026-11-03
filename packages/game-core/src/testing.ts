@@ -8,7 +8,8 @@ export class TestGame extends Game {
   /** 테스트용: 난수 스트림 상태(거부된 명령이 난수를 바꾸지 않는지 확인) */
   debugPrngStates(): number[] {
     return [
-      this.grantRng.state,
+      this.grantRngs[0].state,
+      this.grantRngs[1].state,
       this.shakeRng.state,
       this.visualRng.state,
       ...this.players.map((p) => p.random?.rng.state ?? -1),

@@ -35,10 +35,10 @@ describe('배치 판정', () => {
     expect(isPlacementValid('wall', 0, 0, 'vertical', world({ walls }))).toBe(false);
   });
 
-  it('끈끈이: 반지름 4.4 원이 판 안이고 알·벽과 겹치지 않아야 한다', () => {
+  it('끈끈이: 원이 판 안이고 벽·다른 설치물과 겹치지 않아야 한다(알과는 겹쳐도 된다, DEC-057)', () => {
     expect(isPlacementValid('sticky', 0, 0, 'horizontal', world())).toBe(true);
     expect(isPlacementValid('sticky', 20, 0, 'horizontal', world())).toBe(false);
-    expect(isPlacementValid('sticky', 0, -8, 'horizontal', world())).toBe(false);
+    expect(isPlacementValid('sticky', 0, -8, 'horizontal', world())).toBe(true);
     expect(
       isPlacementValid(
         'sticky',

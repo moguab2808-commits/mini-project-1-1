@@ -52,6 +52,7 @@ function view(over: Partial<GameView> = {}, priv: Partial<GameView['private']> =
     ],
     effects: [],
     result: null,
+    stoneCounts: [2, 1],
     private: {
       held: null,
       fatigueGauge: null,

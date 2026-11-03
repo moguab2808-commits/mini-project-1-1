@@ -12,6 +12,8 @@ export type ReactionSeed = Omit<Reaction, 'id'>;
 export const MAX_REACTIONS = 8;
 
 export function stoneCounts(view: GameView): [number, number] {
+  // 진짜 남은 알 수. 상대 뷰의 stones에는 분신술 허상이 섞인다(DEC-058)
+  if (view.stoneCounts) return [view.stoneCounts[0], view.stoneCounts[1]];
   let a = 0;
   let b = 0;
   for (const s of view.stones) {

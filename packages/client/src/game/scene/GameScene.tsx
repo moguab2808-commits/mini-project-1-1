@@ -32,6 +32,8 @@ import {
 } from './camera-math.ts';
 import { stepFall, startFall, type FallState } from './fall.ts';
 import { AimLayer, HazardLayer, StoneLayer, STONE_REST_Y, type HazardDraw } from './layers.ts';
+import { ZoneLayer, type ZoneDraw } from './zones.ts';
+import { movingWallAt } from '@alkkagi/game-core';
 import {
   FLICK_ONSET_SPEED,
   clamp,
@@ -123,6 +125,7 @@ interface Runtime {
   viewPerfMs: number;
   lastView: SceneProps['view'] | null;
   hazards: HazardDraw[];
+  zones: ZoneDraw[];
   candidates: PickCandidate[];
   deltaDeg: number;
   t: number;
@@ -230,6 +233,8 @@ function SceneWorld(props: SceneProps) {
   useEffect(() => () => stones.dispose(), [stones]);
   const hazards = useMemo(() => new HazardLayer(), []);
   useEffect(() => () => hazards.dispose(), [hazards]);
+  const zoneLayer = useMemo(() => new ZoneLayer(), []);
+  useEffect(() => () => zoneLayer.dispose(), [zoneLayer]);
   const aimLayer = useMemo(() => new AimLayer(), []);
   useEffect(() => () => aimLayer.dispose(), [aimLayer]);
   const blindFx = useMemo(() => new BlindFxLayer(), []);
@@ -263,6 +268,7 @@ function SceneWorld(props: SceneProps) {
       viewPerfMs: performance.now(),
       lastView: null,
       hazards: [],
+      zones: [],
       candidates: [],
       deltaDeg: 0,
       t: 0,
@@ -457,6 +463,32 @@ function SceneWorld(props: SceneProps) {
     let sz = 0;
     let deskShake = 0;
     let n = 0;
+    let zn = 0;
+    let ice = false;
+    const wallItem = (): HazardDraw => {
+      let h = rt.hazards[n];
+      if (!h) {
+        h = { kind: 'wall', x: 0, y: 0, angle: 0, age: 0, seed: 0 };
+        rt.hazards[n] = h;
+      }
+      n++;
+      return h;
+    };
+    const zoneItem = (kind: ZoneDraw['kind'], x: number, y: number, age: number): ZoneDraw => {
+      let z = rt.zones[zn];
+      if (!z) {
+        z = { kind, x: 0, y: 0, angle: 0, dir: 0, age: 0 };
+        rt.zones[zn] = z;
+      }
+      zn++;
+      z.kind = kind;
+      z.x = x;
+      z.y = y;
+      z.angle = 0;
+      z.dir = 0;
+      z.age = age;
+      return z;
+    };
     rt.blinds[0] = null;
     rt.blinds[1] = null;
     rt.coverage[0] = 0;
@@ -474,15 +506,42 @@ function SceneWorld(props: SceneProps) {
         const progress = (nowServer - e.startsAtMs) / span;
         [sx, sz] = deskShakeOffset(progress, nowServer / 1000, HAZARD_TUNING.deskShakeMaxDistance);
         if (progress >= 0 && progress < 1) deskShake = Math.max(deskShake, (1 - progress) * 0.8);
+      } else if (e.kind === 'ice_floor') {
+        ice = nowServer >= e.startsAtMs && nowServer < e.expiresAtMs;
+      } else if (
+        e.kind === 'magnet' ||
+        e.kind === 'gravity_zone' ||
+        e.kind === 'reverse_zone' ||
+        e.kind === 'mine' ||
+        e.kind === 'pit' ||
+        e.kind === 'moving_wall'
+      ) {
+        const x = e.params?.x;
+        const y = e.params?.y;
+        if (x === undefined || y === undefined) continue;
+        const age = Math.max(0, (nowServer - e.startsAtMs) / 1000);
+        const angle = (e.params?.angleDeg ?? 0) * DEG;
+        if (e.kind === 'moving_wall') {
+          // 왕복 위치는 startsAtMs와 수치로 권한 측과 같게 계산한다
+          const at = movingWallAt(x, y, angle, e.startsAtMs, nowServer);
+          zoneItem('moving_track', x, y, age).angle = angle;
+          const h = wallItem();
+          h.kind = 'wall';
+          h.x = at.wall.cx;
+          h.y = at.wall.cy;
+          h.angle = angle;
+          h.age = age;
+          h.seed = (e.startsAtMs % 997) / 50;
+        } else {
+          const z = zoneItem(e.kind, x, y, age);
+          z.angle = angle;
+          z.dir = e.params?.directionRad ?? 0;
+        }
       } else if (e.kind === 'wall' || e.kind === 'sticky') {
         const x = e.params?.x;
         const y = e.params?.y;
         if (x === undefined || y === undefined) continue;
-        let h = rt.hazards[n];
-        if (!h) {
-          h = { kind: 'wall', x: 0, y: 0, angle: 0, age: 0, seed: 0 };
-          rt.hazards[n] = h;
-        }
+        const h = wallItem();
         h.kind = e.kind;
         h.x = x;
         h.y = y;
@@ -490,7 +549,6 @@ function SceneWorld(props: SceneProps) {
         h.angle = deg * DEG;
         h.age = Math.max(0, (nowServer - e.startsAtMs) / 1000);
         h.seed = (e.startsAtMs % 997) / 50;
-        n++;
       } else if (e.kind === 'flashlight' || e.kind === 'water_gun') {
         const caster: Seat = e.targetSeat === 0 ? 1 : 0;
         const ax = e.params?.aimX;
@@ -519,6 +577,9 @@ function SceneWorld(props: SceneProps) {
     }
     if (tableRef.current) tableRef.current.position.set(sx, 0, sz);
     hazards.update(rt.hazards, n, t);
+    // 내 분신술 허상(시전자 화면에서만 반투명으로). 상대 화면에서는 일반 알이다
+    for (const d of p.view.decoys ?? []) zoneItem('decoy', d.x, d.y, 1);
+    zoneLayer.update(rt.zones, zn, ice ? BOARDS[p.start.board] : null, t);
 
     // 알: 선택 판정용 월드 좌표, 속도(발사 감지·바라보기)
     const r = rt.deltaDeg * DEG;
@@ -830,6 +891,7 @@ function SceneWorld(props: SceneProps) {
         <primitive object={stage.table} />
         <group ref={worldGroup}>
           <primitive object={stones.group} />
+          <primitive object={zoneLayer.group} />
           <primitive object={hazards.group} />
           <primitive object={aimLayer.group} />
         </group>

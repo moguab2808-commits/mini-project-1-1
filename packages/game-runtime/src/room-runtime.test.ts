@@ -131,6 +131,23 @@ describe('RoomRuntime', () => {
       assert.notEqual(s0!.view.private.held, null);
     });
 
+    test('시전자 전용 발동 안내(알 무게 변화)는 시전자에게만 보낸다(DEC-055)', async () => {
+      // 시드 10: 좌석 0이 처음에 알 무게 변화를 받는다
+      const { clock, transport, rt } = setup({ config: { ...CONFIG, seed: 10 } });
+      const v0 = transport.of('game:start', 0)[0]!.payload as RuntimeEventMap['game:start'];
+      assert.equal(v0.view.private.held?.kind, 'heavy_stones');
+      const pending = rt.useHazard(0, {
+        gameId: 'g1',
+        hazardInstanceId: v0.view.private.held!.hazardInstanceId,
+      });
+      clock.advance(20);
+      assert.equal((await pending).ok, true);
+      const trig = transport.of('hazard:triggered');
+      assert.equal(trig.length, 1);
+      assert.equal(trig[0]!.seat, 0);
+      assert.equal(trig[0]!.opts.volatile, false);
+    });
+
     test('방 테마는 game:start에 담기고 생략하면 bar다(DEC-052)', () => {
       const themeOf = (config?: StartGameConfig) =>
         setup({ config })

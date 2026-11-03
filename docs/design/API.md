@@ -22,7 +22,7 @@
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-052](../DECISIONS.md#결정-색인)·[DEC-053](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
-| `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소 9종](../PRD.md#방해요소-규칙). 이름은 제안. 승인·미구현([DEC-055](../DECISIONS.md#결정-색인), [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)): `magnet`(자석)·`gravity_zone`(중력 구역)·`ice_floor`(미끄럼 장판)·`decoy`(분신술)·`fake_wall`(가짜벽)·`heavy_stones`(알 무게 변화)·`reverse_zone`(방향 반전 구역)·`mine`(폭탄)·`pit`(바닥 없어지기)·`moving_wall`(이동 장애물)을 더한다. `desk_shake`는 지급하지 않지만 기존 이벤트 파싱을 위해 값은 남긴다 |
+| `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소](../PRD.md#방해요소-규칙). [DEC-055](../DECISIONS.md#결정-색인)([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체))로 `magnet`(자석)·`gravity_zone`(중력 구역)·`ice_floor`(미끄럼 장판)·`decoy`(분신술)·`fake_wall`(가짜벽)·`heavy_stones`(알 무게 변화)·`reverse_zone`(방향 반전 구역)·`mine`(폭탄)·`pit`(바닥 없어지기)·`moving_wall`(이동 장애물)을 더한다. `desk_shake`는 지급하지 않지만 기존 이벤트 파싱을 위해 값은 남긴다 |
 | `Record` | `{ totalGames, wins, losses, draws }` | `draws = totalGames - wins - losses`로 서버가 계산한다. `shared`의 타입 이름은 내장 `Record`와 겹치지 않게 `PlayerRecord`다. 승률은 클라이언트가 계산한다 |
 | `Member` | `{ nickname, characterId, record: Record }` | 사용자 번호는 넣지 않는다 |
 | `Me` | `{ nickname, characterId, record: Record }` | `GET /api/me`·로그인 응답 |
@@ -81,7 +81,7 @@
 | `HAZARD_COOLDOWN` | 쿨타임 중인 쿨타임형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | `HAZARD_OVERHEATED` | 과열 중에 피로도 게이지형 방해요소를 사용함 ([DEC-031](../DECISIONS.md#결정-색인)) |
 | `HAZARD_INVALID_TARGET` | 벽·끈끈이의 위치·방향이 없거나 판 밖이거나 알·기존 벽·끈끈이와 겹침 ([GAME 방해요소별 처리](GAME.md#방해요소별-처리)). 추가 10종의 거부 조건은 [추가 방해요소 10종 필드](#추가-방해요소-10종-필드-haz-001) |
-| `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 턴당 1회형을 같은 턴에 다시 사용함(미구현, [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
+| `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 턴당 1회형을 같은 턴에 다시 사용함([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
 | `OUT_OF_REACH` | 손이 닿는 거리 밖의 알로 발사함 ([GAME 방해요소 수치](GAME.md#방해요소-수치)의 손이 닿는 거리, [DEC-036](../DECISIONS.md#결정-색인)). [DEC-063](../DECISIONS.md#결정-색인) 확정 |
 | `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` (미구현, [IMPL-017](../TASKS.md#impl-017-감정표현-구현)) |
@@ -246,7 +246,7 @@ sequenceDiagram
 
 1. 한 연결 안에서 신뢰 전송 이벤트는 보낸 순서대로 도착한다(Socket.IO). 클라이언트는 `gameId`가 현재 경기와 다른 이벤트를 버린다.
 2. 상대 입장은 시작 커밋 → `room:state` → `game:start` 전송 → 입장자의 ack 순서다. `room:create`도 `room:state` 뒤에 ack가 간다. `room:state`에 `roomId`가 있으므로 클라이언트는 ack를 기다리지 말고 `room:state`로 방을 정한다. 입장 UPDATE와 방장 이탈이 겹치면 `room:closed`(`host_left`) 뒤에 `room:state`(`playing`)·`game:start`·성공 ack가 올 수 있고, 나간 방장도 자기가 나간 방의 `room:state`를 늦게 받을 수 있다. 그래서 클라이언트는 `room:closed`를 받았거나 직접 나간 `roomId`의 이후 `room:state`·`game:start`·ack를 버린다(규칙 1의 `gameId` 처리와 같은 방식). `onStarted`(경기 생성)가 오래 걸리면 ack도 늦어지므로 ack 시간 초과를 실패로 판단하지 않는다. 시작 커밋보다 먼저 관찰된 이탈은 대기실 처리, 뒤의 이탈은 기권패다([GAME](GAME.md#상태-전이와-순서)).
-3. 경기 시작 때의 `hazard:granted`는 `game:start` 뒤, 첫 `turn:change` 앞에 온다. 라운드 교체 지급은 [GAME](GAME.md#상태-전이와-순서)의 종료 판정 → 교체 → 다음 턴 주인 변경 → 뷰·`turn:change` 순에 따라 그 턴의 최종 `game:state`보다 먼저 보낸다. 최종 스냅샷의 `private.held`가 교체 뒤의 값이 되며, 교체가 없는 턴은 최종 `game:state` → `turn:change` 순이다.
+3. 경기 시작 때의 `hazard:granted`는 `game:start` 뒤, 첫 `turn:change` 앞에 온다. 턴 교체 지급은 [GAME](GAME.md#상태-전이와-순서)의 종료 판정 → 교체 → 다음 턴 주인 변경 → 뷰·`turn:change` 순에 따라 그 턴의 최종 `game:state`보다 먼저 보낸다. 최종 스냅샷의 `private.held`가 교체 뒤의 값이 되며, 교체가 없는 턴은 최종 `game:state` → `turn:change` 순이다.
 4. 발사 ack는 명령 수락·거부만 뜻한다. 결과는 이후 `game:state`·`hazard:triggered`로 받는다.
 5. `game:state`는 `revision`이 커지는 순서로만 적용한다. volatile 스냅샷이 유실돼도 마지막 신뢰 전송 스냅샷이 서버 상태로 수렴시킨다. 연결이 끊기면 재접속 복구는 없다.
 6. `game:over` 뒤에는 `game:state`·`hazard:triggered`·`turn:change`를 보내지 않으며 이후 `shot:submit`·`hazard:use`·`game:forfeit`은 `GAME_NOT_ACTIVE`로 거부한다. 재도전으로 새 경기가 시작된 뒤 이전 경기의 명령은 `STALE_TURN`·`STALE_HAZARD`(`game:forfeit`은 `GAME_NOT_ACTIVE`)다.
@@ -258,7 +258,7 @@ sequenceDiagram
 
 ### 추가 방해요소 10종 필드 (HAZ-001)
 
-계약 확정([DEC-063](../DECISIONS.md#결정-색인))·미구현([DEC-055](../DECISIONS.md#결정-색인)·[DEC-057](../DECISIONS.md#결정-색인), 구현 [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 효과 처리와 수치는 [GAME 추가 방해요소 10종](GAME.md#추가-방해요소-10종과-턴-교체-haz-001)을 따른다. IMPL-016 병합 전까지 위 표가 현재 구현이다.
+계약 확정([DEC-063](../DECISIONS.md#결정-색인))·구현([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체), [DEC-055](../DECISIONS.md#결정-색인)·[DEC-057](../DECISIONS.md#결정-색인)). 효과 처리와 수치는 [GAME 추가 방해요소 10종](GAME.md#추가-방해요소-10종과-턴-교체-haz-001)을 따른다. 위 표와 다르면 이 절이 우선한다.
 
 | 항목 | 변경 |
 | --- | --- |
@@ -270,7 +270,7 @@ sequenceDiagram
 | `decoy` | `{ stoneId }`. 내 멈춘 지면 알의 id |
 | `ice_floor`·`heavy_stones` | `target` 없음 |
 | 거부 | 판 밖·다른 설치물과 겹침·알과 겹침(벽·가짜벽·폭탄·구멍)·내 알이 아니거나 움직이는 알(분신술)·허상 자리 부족은 `HAZARD_INVALID_TARGET`. 턴당 1회형의 두 번째 사용은 `HAZARD_NOT_USABLE`. 거부는 상태·난수를 바꾸지 않는다 |
-| `hazard:triggered.params` | `magnet`·`reverse_zone`·`mine`·`pit`은 `{ x, y }`, `gravity_zone`은 `{ x, y, directionRad }`, `moving_wall`은 `{ x, y, orientation, angleDeg }`(왕복 위치는 `startsAtMs`와 `shared` 수치로 클라이언트가 계산), `fake_wall`·`wall`은 벽마다 기존 벽과 같은 `{ x, y, orientation, angleDeg }`, `mine`의 `end`에는 터졌는지 `exploded`를 더한다 |
+| `hazard:triggered.params` | `magnet`·`reverse_zone`·`mine`·`pit`은 `{ x, y }`, `gravity_zone`은 `{ x, y, directionRad, angleDeg }`(`angleDeg`는 판 돌리기로 돈 정사각 구역의 각, 구현 해석·확인 필요), `moving_wall`은 `{ x, y, orientation, angleDeg }`(왕복 위치는 `startsAtMs`와 `shared` 수치로 클라이언트가 계산), `fake_wall`·`wall`은 벽마다 기존 벽과 같은 `{ x, y, orientation, angleDeg }`, `mine`의 `end`에는 터졌는지 `exploded`를 더한다 |
 | 속임수형 발동 안내 | `fake_wall`: 시전자·상대 모두 같은 `kind: wall` 안내 3개(`real` 없음, 좌표순, [DEC-058](../DECISIONS.md#결정-색인)). `decoy`·`heavy_stones`: 시전자에게만 보내고 상대에게는 보내지 않는다. 나머지 7종은 양쪽에 같게 보낸다 |
 | `GameView` | 공개 필드 `stoneCounts: [n0, n1]`(진짜 남은 알 수)를 더한다([DEC-058](../DECISIONS.md#결정-색인)). 분신술 중 진짜 알은 원래 id를 유지하고 허상은 새 id를 받는다. 상대 뷰의 `stones`에는 진짜 알과 허상 2개가 함께 들어가고, 시전자 뷰에는 허상을 `decoys: [{ decoyId, x, y }]`로 따로 담는다. 가짜벽은 양쪽 모두 `wall` 효과 3개(`real` 없음)다. `heavy_stones`·`decoy` 효과는 시전자 뷰에만 넣는다 |
 | `private` | 변화 없음. 턴당 1회형은 `fatigueGauge: null`·`cooldownEndsAtMs: null`이고 사용 뒤 `usable: false`다 |
@@ -303,9 +303,9 @@ sequenceDiagram
 | `game:start` | `gameId`, `seat`, `players`(좌석·닉네임·캐릭터), 판·알·라운드·시간, 내 `view` | 없음. `view.private`는 받는 사람 본인 것 | 통과 |
 | `hazard:granted` | **받은 플레이어에게만** 전송. 상대에게는 이벤트를 보내지 않음 | 해당 없음 (전송 안 함) | 통과 |
 | `game:state` | 공개 필드(`stones`·`effects`·`turn*`·`result`)와 내 `private`. 상대의 `held`·게이지·쿨타임·`timeoutStreak`·`blind`는 만들지 않음 | 없음. 보유 개수도 보내지 않음 | 통과 |
-| `game:state` (속임수형, 미구현) | 상대 뷰: 가짜벽은 `wall` 3개(`real` 없음, 좌표순, 시전자와 같음), 분신술은 진짜·허상 모두 일반 알(진짜는 원래 id), `stoneCounts`(진짜 수). 알 무게·분신술 효과 항목 없음. 시전자의 `decoys`·질량 배율 없음 | 어느 벽이 진짜인지·알 무게 효과 여부 없음. 분신술 진짜 알은 id로 추정 가능(감수, [DEC-058](../DECISIONS.md#결정-색인)) | 통과(구현 후 `getViewFor` 테스트) |
+| `game:state` (속임수형) | 상대 뷰: 가짜벽은 `wall` 3개(`real` 없음, 좌표순, 시전자와 같음), 분신술은 진짜·허상 모두 일반 알(진짜는 원래 id), `stoneCounts`(진짜 수). 알 무게·분신술 효과 항목 없음. 시전자의 `decoys`·질량 배율 없음 | 어느 벽이 진짜인지·알 무게 효과 여부 없음. 분신술 진짜 알은 id로 추정 가능(감수, [DEC-058](../DECISIONS.md#결정-색인)) | 통과(구현 후 `getViewFor` 테스트) |
 | `hazard:triggered` | `kind`, `phase`, 두 좌석, 시각, 효과 `params`. 지급된 `hazardInstanceId`·게이지·쿨타임·시야 가림 모양 없음 | 사용·발동된 효과의 이름·효과만(양쪽 공개 규칙, [PRD](../PRD.md#방해요소-규칙)) | 통과 |
-| `hazard:triggered` (속임수형, 미구현) | 가짜벽은 양쪽 모두 `kind: wall` 3개(`real` 없음). 분신술·알 무게 변화는 상대에게 보내지 않음 | 속임수형 이름·진짜 여부 없음([DEC-055](../DECISIONS.md#결정-색인)) | 통과 |
+| `hazard:triggered` (속임수형) | 가짜벽은 양쪽 모두 `kind: wall` 3개(`real` 없음). 분신술·알 무게 변화는 상대에게 보내지 않음 | 속임수형 이름·진짜 여부 없음([DEC-055](../DECISIONS.md#결정-색인)) | 통과 |
 | `turn:change` | `turnId`, `round`, `activePlayerId`, 마감 시각, `reason` | 없음 | 통과 |
 | `game:over` | `winnerId`, `reason`, `remainingStones`, `rematchDeadlineMs` | 없음. 남은 보유 방해요소를 공개하지 않음 | 통과 |
 | `rematch:state` | 요청 여부, 마감 시각, 결과 | 없음 | 통과 |

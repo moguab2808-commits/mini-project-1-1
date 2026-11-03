@@ -76,6 +76,19 @@ function makeView(stones: StoneRow[], rot: number, effects: GameView['effects'] 
     stones,
     effects,
     result: null,
+    stoneCounts: [
+      stones.filter((s) => s.ownerId === 0).length,
+      stones.filter((s) => s.ownerId === 1).length,
+    ],
+    // ?decoys=1: 내 분신술 허상 2개(시전자 화면)
+    ...(q.get('decoys')
+      ? {
+          decoys: [
+            { decoyId: 100, x: -4, y: -6 },
+            { decoyId: 101, x: 7, y: -9 },
+          ],
+        }
+      : {}),
     private: {
       held: null,
       fatigueGauge: null,
@@ -116,6 +129,20 @@ function staticEffects(): GameView['effects'] {
       expiresAtMs: now + 600000,
       params: { x: 4, y: 8 },
     });
+  }
+  // 추가 방해요소 표시 확인(IMPL-016): ?zones=1 은 6종 설치물, ?ice=1 은 미끄럼 장판
+  if (q.get('zones')) {
+    const add = (kind: GameView['effects'][number]['kind'], params: object) =>
+      fx.push({ kind, targetSeat: 1, startsAtMs: now + 300, expiresAtMs: now + 600000, params });
+    add('magnet', { x: -11, y: 4 });
+    add('gravity_zone', { x: 10, y: 6, directionRad: Math.PI / 4, angleDeg: 0 });
+    add('reverse_zone', { x: -12, y: -5 });
+    add('mine', { x: 4, y: -4 });
+    add('pit', { x: 12, y: -7 });
+    add('moving_wall', { x: 0, y: 2, orientation: 'horizontal', angleDeg: 90 });
+  }
+  if (q.get('ice')) {
+    fx.push({ kind: 'ice_floor', targetSeat: 1, startsAtMs: now, expiresAtMs: now + 600000 });
   }
   const beam = q.get('beam');
   if (beam === 'flashlight' || beam === 'water_gun') {
@@ -247,10 +274,11 @@ function Harness() {
   const [placement, setPlacement] = useState<PlacementRenderState | null>(
     q.get('place')
       ? {
-          kind: q.get('place') === 'sticky' ? 'sticky' : 'wall',
+          kind: (q.get('place') ?? 'wall') as PlacementRenderState['kind'],
           x: 0,
           y: 0,
-          orientation: 'horizontal',
+          orientation: q.get('vertical') ? 'vertical' : 'horizontal',
+          directionRad: Math.PI / 4,
           valid: q.get('invalid') ? false : true,
         }
       : null,
