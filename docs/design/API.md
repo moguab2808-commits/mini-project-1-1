@@ -17,7 +17,7 @@
 
 | 타입 | 값·필드 | 비고 |
 | --- | --- | --- |
-| `CharacterId` | `bear`·`cat`·`fox`·`rabbit`·`owl`·`frog` | [캐릭터 6종](../PRD.md#캐릭터-변경). 이름은 제안 |
+| `CharacterId` | `bear`·`cat`·`fox`·`rabbit`·`owl`·`frog` | [캐릭터 6종](../PRD.md#캐릭터-변경). 이름은 제안. 사람 아바타 외형 타입으로 바뀔 예정이며 형식은 [CHAR-001](../TASKS.md#char-001-사람-아바타-전환과-꾸미기-설계)에서 정한다([DEC-048](../DECISIONS.md#결정-색인)) |
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
 | `HazardKind` | `board_spin`(판 돌리기)·`flashlight`(후레쉬)·`water_gun`(물총)·`desk_shake`(책상 흔들기)·`wall`(벽)·`sticky`(끈끈이)·`stun`(기절)·`bar_speed`(세기 막대 속도 조절)·`wind`(바람) | [방해요소 9종](../PRD.md#방해요소-규칙). 이름은 제안 |
