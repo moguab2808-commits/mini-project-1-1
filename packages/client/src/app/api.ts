@@ -7,8 +7,6 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     message: string,
-    /** 429의 `Retry-After`(초). 없으면 null */
-    readonly retryAfterSec: number | null = null,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -22,11 +20,6 @@ export function describeApiError(error: unknown): string {
 
 type FetchFn = (input: string, init?: RequestInit) => Promise<Response>;
 
-function retryAfter(res: Response): number | null {
-  const value = Number(res.headers.get('Retry-After'));
-  return Number.isFinite(value) && value > 0 ? value : null;
-}
-
 async function parseError(res: Response): Promise<ApiError> {
   let code = 'INTERNAL_ERROR';
   let message = '';
@@ -37,7 +30,7 @@ async function parseError(res: Response): Promise<ApiError> {
   } catch {
     // 본문이 JSON이 아니면(프록시 오류 등) 일반 오류로 다룬다.
   }
-  return new ApiError(res.status, code, message, retryAfter(res));
+  return new ApiError(res.status, code, message);
 }
 
 export interface Api {

@@ -100,18 +100,25 @@ function MainShell({
 }) {
   const notify = useToast();
   const [client, setClient] = useState<RoomClient | null>(null);
+  // 소켓이 연결되기 전에는 방 명령이 모두 실패하므로 연결된 뒤에 로비를 연다.
+  const [connected, setConnected] = useState(false);
   const endRef = useRef(onSessionEnd);
   endRef.current = onSessionEnd;
+  // 로그아웃 요청 중이면 서버가 연결을 끊어도 끊김 안내를 보이지 않는다.
+  const loggingOutRef = useRef(false);
   const notifyRef = useRef(notify);
   notifyRef.current = notify;
 
   useEffect(() => {
     const connection = createRoomClient({
       onLoginRequired: (reason) => {
-        endRef.current(sessionEndMessage(reason));
+        endRef.current(loggingOutRef.current ? undefined : sessionEndMessage(reason));
       },
       onRoomClosed: (event) => {
         notifyRef.current(roomClosedMessage(event.reason));
+      },
+      onConnected: () => {
+        setConnected(true);
       },
     });
     setClient(connection);
@@ -120,20 +127,27 @@ function MainShell({
     const unload = () => {
       connection.dispose();
     };
+    // 뒤로가기로 페이지가 복원되면(bfcache) 연결이 이미 끝나 있으므로 처음부터 다시 불러온다.
+    const restore = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
     window.addEventListener('pagehide', unload);
+    window.addEventListener('pageshow', restore);
     return () => {
       window.removeEventListener('pagehide', unload);
+      window.removeEventListener('pageshow', restore);
       connection.dispose();
     };
   }, []);
 
-  if (!client) return <p className="boot-page">연결 중…</p>;
+  if (!client || !connected) return <p className="boot-page">연결 중…</p>;
   return (
     <Connected
       api={api}
       client={client}
       initialMe={initialMe}
       firstVisit={firstVisit}
+      loggingOutRef={loggingOutRef}
       onSessionEnd={onSessionEnd}
     />
   );
@@ -144,18 +158,21 @@ function Connected({
   client,
   initialMe,
   firstVisit,
+  loggingOutRef,
   onSessionEnd,
 }: {
   api: Api;
   client: RoomClient;
   initialMe: Me;
   firstVisit: boolean;
+  loggingOutRef: { current: boolean };
   onSessionEnd: (notice?: string) => void;
 }) {
   const notify = useToast();
   const { room, match } = useSyncExternalStore(client.subscribe, client.getState);
   const [me, setMe] = useState(initialMe);
   const [ai, setAi] = useState<AiMatch | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
   // 규칙 카드는 로그인 뒤 처음 로비가 뜰 때 한 번만 보인다. 경기를 마치고 로비가 다시 그려져도 열지 않는다.
   const [rulesPending, setRulesPending] = useState(firstVisit);
 
@@ -178,17 +195,22 @@ function Connected({
   }, [onSessionEnd]);
 
   const logout = useCallback(() => {
-    // 연결을 먼저 끊고(진행 중인 방이 없을 때만 로비에서 부른다) 세션을 끝낸다.
-    client.dispose();
+    if (loggingOutRef.current) return;
+    // 요청이 끝날 때까지 로비를 잠그고, 성공한 뒤에 연결을 끊는다. 실패하면 세션이 살아 있으니 그대로 둔다.
+    loggingOutRef.current = true;
+    setLoggingOut(true);
     api.logout().then(
       () => {
+        client.dispose();
         onSessionEnd();
       },
-      () => {
-        onSessionEnd();
+      (error: unknown) => {
+        loggingOutRef.current = false;
+        setLoggingOut(false);
+        notify(describeApiError(error));
       },
     );
-  }, [api, client, onSessionEnd]);
+  }, [api, client, loggingOutRef, notify, onSessionEnd]);
 
   const startAi = useCallback(
     (settings: AiMatchSettings) => {
@@ -234,6 +256,7 @@ function Connected({
       me={me}
       onMeChange={setMe}
       onLogout={logout}
+      locked={loggingOut}
       onStartAi={startAi}
       onAuthLost={authLost}
       showRulesFirst={rulesPending}

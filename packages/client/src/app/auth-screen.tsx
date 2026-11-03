@@ -1,7 +1,7 @@
 // 로그인·회원등록 화면. 같은 화면의 탭으로 전환하고, 가입하면 로그인 탭으로 이동한다(PRD 로그인·회원등록).
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Me } from '@alkkagi/shared';
+import { NICKNAME_MAX, NICKNAME_MIN, PASSWORD_MAX, PASSWORD_MIN, type Me } from '@alkkagi/shared';
 import { describeApiError, type Api } from './api.ts';
 import { validateLogin, validateSignup } from './logic.ts';
 import { WAKING_SERVER_MESSAGE } from './messages.ts';
@@ -39,9 +39,10 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
     if (busy) return;
     setError(null);
     setInfo(null);
+    const loginNickname = nickname.trim();
     const invalid =
       tab === 'login'
-        ? validateLogin(nickname, password)
+        ? validateLogin(loginNickname, password)
         : validateSignup({ nickname, password, passwordConfirm });
     if (invalid) {
       setError(invalid);
@@ -50,7 +51,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
     setBusy(true);
     try {
       if (tab === 'login') {
-        onLoggedIn(await api.login({ nickname, password }));
+        onLoggedIn(await api.login({ nickname: loginNickname, password }));
         return;
       }
       await api.signup({ nickname, password });
@@ -103,7 +104,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
             <span>닉네임</span>
             <input
               value={nickname}
-              maxLength={12}
+              maxLength={NICKNAME_MAX}
               autoComplete="username"
               autoFocus
               onChange={(e) => {
@@ -116,7 +117,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
             <input
               type="password"
               value={password}
-              maxLength={64}
+              maxLength={PASSWORD_MAX}
               autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -129,7 +130,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
               <input
                 type="password"
                 value={passwordConfirm}
-                maxLength={64}
+                maxLength={PASSWORD_MAX}
                 autoComplete="new-password"
                 onChange={(e) => {
                   setPasswordConfirm(e.target.value);
@@ -138,7 +139,10 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
             </label>
           )}
           {tab === 'signup' && (
-            <p className="hint">닉네임은 한글·영문·숫자 2~12자, 비밀번호는 8~64자예요.</p>
+            <p className="hint">
+              닉네임은 한글·영문·숫자 {NICKNAME_MIN}~{NICKNAME_MAX}자, 비밀번호는 {PASSWORD_MIN}~
+              {PASSWORD_MAX}자예요.
+            </p>
           )}
           {error && (
             <p className="msg msg-error" role="alert">

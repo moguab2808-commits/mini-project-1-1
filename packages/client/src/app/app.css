@@ -397,6 +397,62 @@ input {
   outline: 3px solid var(--cream);
   outline-offset: 2px;
 }
+/* 방 생성 창의 AI 설정은 `/ai`의 `AiSetupForm`을 그대로 쓴다(DEC-042). 그 마크업에 칩 모양을 입힌다. */
+.ai-setup form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ai-setup fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ai-setup legend {
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+.ai-setup label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 2px solid var(--wood-light);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.ai-setup input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.ai-setup label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.ai-setup label:has(input:focus-visible) {
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+}
+.ai-setup p {
+  color: var(--sub);
+  font-size: 14px;
+}
+.ai-setup button[type='submit'] {
+  min-height: 40px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
 .board-preview {
   width: 24px;
   height: 24px;

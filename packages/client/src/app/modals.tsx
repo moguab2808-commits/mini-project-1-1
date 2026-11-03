@@ -4,6 +4,7 @@ import type { FormEvent } from 'react';
 import {
   BOARD_IDS,
   CharacterIdSchema,
+  PASSWORD_MAX,
   ROOM_CODE_LENGTH,
   ROOM_TITLE_MAX,
   type BoardId,
@@ -12,9 +13,11 @@ import {
 } from '@alkkagi/shared';
 import { CharacterFace } from '../game/hud/CharacterFace.tsx';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
+import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS } from '../ai/ai-page.tsx';
 import { ApiError, describeApiError, type Api } from './api.ts';
 import { FloatingWindow } from './floating-window.tsx';
 import {
+  applyCodeCellInput,
   defaultRoomTitle,
   generateRoomCode,
   isCompleteCode,
@@ -32,8 +35,6 @@ export const CHARACTER_LABEL: Record<CharacterId, string> = {
   owl: '부엉이',
   frog: '개구리',
 };
-export const BOARD_LABEL: Record<BoardId, string> = { standard: '기본판', circle: '원형판' };
-const PIECE_COUNTS = [5, 7, 9] as const;
 
 /** 클립보드 복사. 막힌 환경이면 false를 돌려준다. */
 export async function copyText(text: string): Promise<boolean> {
@@ -136,14 +137,10 @@ export function CodeModal({ roomTitle, onSubmit, onClose }: CodeModalProps) {
               autoFocus={i === 0}
               autoComplete="off"
               onChange={(e) => {
-                const typed = normalizeCodeInput(e.target.value);
-                const next =
-                  typed === ''
-                    ? code.slice(0, i) + code.slice(i + 1)
-                    : normalizeCodeInput(code.slice(0, i) + typed + code.slice(i + 1));
-                setCode(next);
+                const result = applyCodeCellInput(code, i, e.target.value);
+                setCode(result.code);
                 setError(null);
-                if (typed !== '') focusCell(i + typed.length);
+                focusCell(result.focus);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Backspace' && !code[i]) focusCell(i - 1);
@@ -166,10 +163,13 @@ export function CodeModal({ roomTitle, onSubmit, onClose }: CodeModalProps) {
 
 /* ───────── 방 생성 ───────── */
 
+/** 방 만들기 결과. 오류면 안내 문구를 담고, 코드가 겹쳤으면 `codeTaken`이다. */
+export type CreateResult = null | { message: string; codeTaken: boolean };
+
 export interface CreateRoomModalProps {
   nickname: string;
-  /** 사람(PvP) 방을 만든다. 오류 문구를 돌려주면 창을 유지한다. */
-  onCreate: (input: RoomCreate) => Promise<string | null>;
+  /** 사람(PvP) 방을 만든다. 오류 결과를 돌려주면 창을 유지한다. */
+  onCreate: (input: RoomCreate) => Promise<CreateResult>;
   /** AI 대전은 서버 요청 없이 이 브라우저에서 바로 시작한다(DEC-021). */
   onStartAi: (settings: AiMatchSettings) => void;
   onClose: () => void;
@@ -181,17 +181,13 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
   const [pieceCount, setPieceCount] = useState<AiMatchSettings['pieceCount']>(5);
   const [board, setBoard] = useState<BoardId>('standard');
   const [isPublic, setIsPublic] = useState(true);
-  const [code] = useState(() => generateRoomCode());
+  const [code, setCode] = useState(() => generateRoomCode());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
-    if (opponent === 'ai') {
-      onStartAi({ board, pieceCount });
-      return;
-    }
     const trimmed = title.trim();
     if (trimmed === '' || trimmed.length > ROOM_TITLE_MAX) {
       setError(`방 제목은 1~${String(ROOM_TITLE_MAX)}자로 적어 주세요.`);
@@ -199,7 +195,7 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
     }
     setBusy(true);
     setError(null);
-    const message = await onCreate({
+    const result = await onCreate({
       title: trimmed,
       isPublic,
       pieceCount,
@@ -207,17 +203,19 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
       ...(isPublic ? {} : { code }),
     });
     setBusy(false);
-    if (message) setError(message);
+    if (!result) return;
+    if (result.codeTaken) {
+      // 보여 준 코드와 만든 방의 코드가 달라지지 않도록, 새 코드로 바꿔 보여 주고 다시 누르게 한다.
+      setCode(generateRoomCode());
+      setError('방 코드가 겹쳐 새 코드로 바꿨어요. 코드를 확인하고 다시 눌러 주세요.');
+      return;
+    }
+    setError(result.message);
   };
 
   return (
     <FloatingWindow title="방 생성" onClose={onClose} wide>
-      <form
-        className="form"
-        onSubmit={(e) => {
-          void submit(e);
-        }}
-      >
+      <div className="form">
         <fieldset className="choice">
           <legend>대전 상대</legend>
           {(['pvp', 'ai'] as const).map((value) => (
@@ -236,97 +234,103 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
           ))}
         </fieldset>
 
-        {opponent === 'pvp' && (
-          <label className="field">
-            <span>방 제목</span>
-            <input
-              value={title}
-              maxLength={ROOM_TITLE_MAX}
-              onChange={(e) => {
-                setTitle(e.target.value);
-              }}
-            />
-          </label>
-        )}
-
-        <fieldset className="choice">
-          <legend>알 개수</legend>
-          {PIECE_COUNTS.map((n) => (
-            <label key={n} className={pieceCount === n ? 'chip chip-on' : 'chip'}>
-              <input
-                type="radio"
-                name="pieceCount"
-                checked={pieceCount === n}
-                onChange={() => {
-                  setPieceCount(n);
-                }}
-              />
-              {n}개
-            </label>
-          ))}
-        </fieldset>
-
-        <fieldset className="choice">
-          <legend>판</legend>
-          {BOARD_IDS.map((id) => (
-            <label
-              key={id}
-              className={board === id ? 'chip chip-on chip-board' : 'chip chip-board'}
-            >
-              <input
-                type="radio"
-                name="board"
-                checked={board === id}
-                onChange={() => {
-                  setBoard(id);
-                }}
-              />
-              <BoardPreview board={id} />
-              {BOARD_LABEL[id]}
-            </label>
-          ))}
-        </fieldset>
-
-        {opponent === 'pvp' ? (
-          <fieldset className="choice">
-            <legend>공개 여부</legend>
-            {([true, false] as const).map((value) => (
-              <label key={String(value)} className={isPublic === value ? 'chip chip-on' : 'chip'}>
-                <input
-                  type="radio"
-                  name="isPublic"
-                  checked={isPublic === value}
-                  onChange={() => {
-                    setIsPublic(value);
-                  }}
-                />
-                {value ? '공개' : '비공개'}
-              </label>
-            ))}
-          </fieldset>
-        ) : (
-          <p className="hint">
-            방 목록에 올리지 않고 바로 시작해요. 결과는 전적에 반영되지 않아요.
-          </p>
-        )}
-
-        {opponent === 'pvp' && !isPublic && (
-          <div className="code-box">
-            <span className="hint">방 코드 (자동 생성)</span>
-            <strong className="code-text">{code}</strong>
-            <CopyCodeButton code={code} />
+        {opponent === 'ai' ? (
+          // DEC-042 ②: AI 대전은 `/ai`의 설정 폼과 시작 함수를 그대로 쓴다.
+          <div className="ai-setup">
+            <AiSetupForm onStart={onStartAi} />
           </div>
-        )}
+        ) : (
+          <form
+            className="form"
+            onSubmit={(e) => {
+              void submit(e);
+            }}
+          >
+            <label className="field">
+              <span>방 제목</span>
+              <input
+                value={title}
+                maxLength={ROOM_TITLE_MAX}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                }}
+              />
+            </label>
 
-        {error && (
-          <p className="msg msg-error" role="alert">
-            {error}
-          </p>
+            <fieldset className="choice">
+              <legend>알 개수</legend>
+              {PIECE_COUNTS.map((n) => (
+                <label key={n} className={pieceCount === n ? 'chip chip-on' : 'chip'}>
+                  <input
+                    type="radio"
+                    name="pieceCount"
+                    checked={pieceCount === n}
+                    onChange={() => {
+                      setPieceCount(n);
+                    }}
+                  />
+                  {n}개
+                </label>
+              ))}
+            </fieldset>
+
+            <fieldset className="choice">
+              <legend>판</legend>
+              {BOARD_IDS.map((id) => (
+                <label
+                  key={id}
+                  className={board === id ? 'chip chip-on chip-board' : 'chip chip-board'}
+                >
+                  <input
+                    type="radio"
+                    name="board"
+                    checked={board === id}
+                    onChange={() => {
+                      setBoard(id);
+                    }}
+                  />
+                  <BoardPreview board={id} />
+                  {BOARD_LABEL[id]}
+                </label>
+              ))}
+            </fieldset>
+
+            <fieldset className="choice">
+              <legend>공개 여부</legend>
+              {([true, false] as const).map((value) => (
+                <label key={String(value)} className={isPublic === value ? 'chip chip-on' : 'chip'}>
+                  <input
+                    type="radio"
+                    name="isPublic"
+                    checked={isPublic === value}
+                    onChange={() => {
+                      setIsPublic(value);
+                    }}
+                  />
+                  {value ? '공개' : '비공개'}
+                </label>
+              ))}
+            </fieldset>
+
+            {!isPublic && (
+              <div className="code-box">
+                <span className="hint">방 코드 (자동 생성)</span>
+                <strong className="code-text">{code}</strong>
+                <CopyCodeButton code={code} />
+              </div>
+            )}
+
+            {error && (
+              <p className="msg msg-error" role="alert">
+                {error}
+              </p>
+            )}
+            <button type="submit" className="btn btn-primary" disabled={busy}>
+              {busy ? '만드는 중…' : '방 만들기'}
+            </button>
+          </form>
         )}
-        <button type="submit" className="btn btn-primary" disabled={busy}>
-          {opponent === 'ai' ? 'AI와 시작' : busy ? '만드는 중…' : '방 만들기'}
-        </button>
-      </form>
+      </div>
     </FloatingWindow>
   );
 }
@@ -469,7 +473,7 @@ export function SettingsModal({
             <input
               type="password"
               value={current}
-              maxLength={64}
+              maxLength={PASSWORD_MAX}
               autoComplete="current-password"
               onChange={(e) => {
                 setCurrent(e.target.value);
@@ -481,7 +485,7 @@ export function SettingsModal({
             <input
               type="password"
               value={next}
-              maxLength={64}
+              maxLength={PASSWORD_MAX}
               autoComplete="new-password"
               onChange={(e) => {
                 setNext(e.target.value);
@@ -493,7 +497,7 @@ export function SettingsModal({
             <input
               type="password"
               value={confirm}
-              maxLength={64}
+              maxLength={PASSWORD_MAX}
               autoComplete="new-password"
               onChange={(e) => {
                 setConfirm(e.target.value);

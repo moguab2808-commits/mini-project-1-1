@@ -4,6 +4,7 @@ import { test } from 'vitest';
 import { ROOM_CODE_ALPHABET, RoomCodeSchema } from '@alkkagi/shared';
 import { ApiError, createApi } from './api.ts';
 import {
+  applyCodeCellInput,
   canEnter,
   defaultRoomTitle,
   formatRecord,
@@ -88,6 +89,18 @@ test('코드 입력: 영문은 대문자로, 기호·공백은 버리고, 6자�
   assert.equal(normalizeCodeInput('abcdefghij'), 'ABCDEF');
   assert.equal(normalizeCodeInput(' k7m2\n'), 'K7M2');
   assert.equal(isCompleteCode('AB3DEF'), true);
+
+  // 코드 칸 입력: 글자가 있는 칸에 입력하면 그 자리만 바꾼다(앞뒤로 입력돼도 같다)
+  assert.deepEqual(applyCodeCellInput('ABCDEF', 2, 'CX'), { code: 'ABXDEF', focus: 3 });
+  assert.deepEqual(applyCodeCellInput('ABCDEF', 2, 'XC'), { code: 'ABXDEF', focus: 3 });
+  assert.deepEqual(applyCodeCellInput('ABCDEF', 2, 'CC'), { code: 'ABCDEF', focus: 3 });
+  assert.deepEqual(applyCodeCellInput('ABCDEF', 5, 'FZ'), { code: 'ABCDEZ', focus: 5 });
+  // 빈 칸에 입력하면 이어 붙이고 다음 빈 칸으로, 지우면 그 칸만 빠진다
+  assert.deepEqual(applyCodeCellInput('AB', 2, 'c'), { code: 'ABC', focus: 3 });
+  assert.deepEqual(applyCodeCellInput('AB', 4, 'z'), { code: 'ABZ', focus: 3 });
+  assert.deepEqual(applyCodeCellInput('ABCDEF', 2, ''), { code: 'ABDEF', focus: 2 });
+  // 허용하지 않는 글자는 무시한다
+  assert.deepEqual(applyCodeCellInput('AB', 2, '-'), { code: 'AB', focus: 2 });
   assert.equal(isCompleteCode('AB3DE'), false);
 });
 
@@ -196,7 +209,7 @@ test('REST 클라이언트: 경로·메서드·본문과 성공 응답 해석', 
   assert.equal(calls[2]?.body, undefined);
 });
 
-test('REST 클라이언트: 오류 본문의 코드와 Retry-After를 ApiError로 올린다', async () => {
+test('REST 클라이언트: 오류 본문의 상태와 코드를 ApiError로 올린다', async () => {
   const api = createApi(() =>
     Promise.resolve(
       jsonResponse(429, { error: { code: 'RATE_LIMITED', message: 'x' } }, { 'Retry-After': '12' }),
@@ -205,18 +218,14 @@ test('REST 클라이언트: 오류 본문의 코드와 Retry-After를 ApiError�
   await assert.rejects(
     () => api.login({ nickname: '곰돌이', password: 'p' }),
     (error: unknown) =>
-      error instanceof ApiError &&
-      error.status === 429 &&
-      error.code === 'RATE_LIMITED' &&
-      error.retryAfterSec === 12,
+      error instanceof ApiError && error.status === 429 && error.code === 'RATE_LIMITED',
   );
   const conflict = createApi(() =>
     Promise.resolve(jsonResponse(409, { error: { code: 'NICKNAME_TAKEN', message: 'x' } })),
   );
   await assert.rejects(
     () => conflict.signup({ nickname: '곰돌이', password: 'password1' }),
-    (error: unknown) =>
-      error instanceof ApiError && error.code === 'NICKNAME_TAKEN' && error.retryAfterSec === null,
+    (error: unknown) => error instanceof ApiError && error.code === 'NICKNAME_TAKEN',
   );
 });
 

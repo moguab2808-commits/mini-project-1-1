@@ -1,9 +1,10 @@
 // 대기실: 방 정보와 "플레이어 입장을 기다리는 중". 시작 버튼은 없고 상대가 입장하면 곧바로 경기가 시작된다(DEC-040).
 import { useState } from 'react';
 import type { RoomState } from '@alkkagi/shared';
+import { BOARD_LABEL } from '../ai/ai-page.tsx';
 import { CharacterFace } from '../game/hud/CharacterFace.tsx';
 import { formatRecord, formatWinRate } from './logic.ts';
-import { BOARD_LABEL, CopyCodeButton } from './modals.tsx';
+import { CopyCodeButton } from './modals.tsx';
 
 export function WaitingRoom({
   room,

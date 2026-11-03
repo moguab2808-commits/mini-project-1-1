@@ -22,6 +22,8 @@ export interface RoomClientState {
 export interface RoomClientOptions {
   onLoginRequired: (reason: 'disconnect' | 'connect_error' | SessionReplaced['reason']) => void;
   onRoomClosed?: (event: RoomClosed) => void;
+  /** 소켓 연결이 완료됐다. 화면은 이 뒤부터 방 명령을 보낼 수 있다(IMPL-012). */
+  onConnected?: () => void;
 }
 const UNAVAILABLE: RoomAck<{ roomId: number }> = {
   ok: false,
@@ -69,6 +71,9 @@ export class RoomClient {
       }
     });
     on<SessionReplaced>('session:replaced', (event) => this.end(event.reason));
+    on('connect', () => {
+      options.onConnected?.();
+    });
     on('disconnect', () => this.end('disconnect'));
     on('connect_error', () => this.end('connect_error'));
   }

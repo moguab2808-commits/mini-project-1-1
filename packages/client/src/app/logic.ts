@@ -75,6 +75,28 @@ export function normalizeCodeInput(raw: string): string {
     .slice(0, ROOM_CODE_LENGTH);
 }
 
+/**
+ * 코드 칸 하나(`index`)에 입력이 들어왔을 때의 새 코드와 다음에 포커스할 칸을 구한다. 이미 글자가 있는 칸에
+ * 입력하면 칸 값에 옛 글자와 새 글자가 함께 들어오므로 옛 글자를 빼고 새 글자로 그 자리를 바꾼다.
+ */
+export function applyCodeCellInput(
+  code: string,
+  index: number,
+  rawValue: string,
+): { code: string; focus: number } {
+  const old = code[index] ?? '';
+  let typed = normalizeCodeInput(rawValue);
+  if (typed === '') {
+    return { code: code.slice(0, index) + code.slice(index + 1), focus: index };
+  }
+  if (old !== '' && typed.length > 1) {
+    const at = typed.indexOf(old);
+    if (at >= 0) typed = typed.slice(0, at) + typed.slice(at + 1);
+  }
+  const next = normalizeCodeInput(code.slice(0, index) + typed + code.slice(index + old.length));
+  return { code: next, focus: Math.min(index + typed.length, next.length, ROOM_CODE_LENGTH - 1) };
+}
+
 export function isCompleteCode(code: string): boolean {
   return code.length === ROOM_CODE_LENGTH;
 }

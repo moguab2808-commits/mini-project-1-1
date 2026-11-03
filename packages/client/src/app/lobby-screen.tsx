@@ -5,12 +5,13 @@ import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { CharacterFace } from '../game/hud/CharacterFace.tsx';
 import type { RoomClient } from '../online/room-client.ts';
 import { ApiError, describeApiError, type Api } from './api.ts';
-import { canEnter, formatRecord, formatWinRate, generateRoomCode } from './logic.ts';
+import { canEnter, formatRecord, formatWinRate } from './logic.ts';
 import { roomErrorMessage } from './messages.ts';
 import {
   CharacterModal,
   CodeModal,
   CreateRoomModal,
+  type CreateResult,
   RulesModal,
   SettingsModal,
 } from './modals.tsx';
@@ -30,6 +31,8 @@ export interface LobbyScreenProps {
   me: Me;
   onMeChange: (me: Me) => void;
   onLogout: () => void;
+  /** 로그아웃 요청이 진행 중이다. 그동안 방 입장·생성을 막는다. */
+  locked: boolean;
   onStartAi: (settings: AiMatchSettings) => void;
   /** 세션이 사라졌다(401). 로그인 화면으로 돌아간다. */
   onAuthLost: () => void;
@@ -38,14 +41,13 @@ export interface LobbyScreenProps {
   onRulesShown: () => void;
 }
 
-const CODE_RETRIES = 3;
-
 export function LobbyScreen({
   api,
   client,
   me,
   onMeChange,
   onLogout,
+  locked,
   onStartAi,
   onAuthLost,
   showRulesFirst,
@@ -57,6 +59,9 @@ export function LobbyScreen({
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [modal, setModal] = useState<Modal>(showRulesFirst ? { t: 'rules' } : null);
   const [busy, setBusy] = useState(false);
+  /** 첫 갱신이 실패해 목록이 아직 없는 상태 */
+  const [listFailed, setListFailed] = useState(false);
+  const blocked = busy || locked;
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -79,20 +84,23 @@ export function LobbyScreen({
     [notify, onAuthLost],
   );
 
-  /** 목록과 내 전적을 함께 갱신한다. 로비에 들어올 때와 새로고침 때만 부른다(자동 갱신 없음). */
+  /** 목록과 내 전적을 갱신한다. 둘은 따로 처리해 한쪽이 실패해도 다른 쪽은 반영한다. */
   const refresh = useCallback(async () => {
     setLoading(true);
-    try {
-      const [list, mine] = await Promise.all([api.listRooms(), api.me()]);
-      if (!mounted.current) return;
-      setRooms(list);
-      onMeChange(mine);
-      setSelectedId((id) => (list.some((r) => r.roomId === id) ? id : null));
-    } catch (error) {
-      if (mounted.current) handleApiError(error);
-    } finally {
-      if (mounted.current) setLoading(false);
+    const [list, mine] = await Promise.allSettled([api.listRooms(), api.me()]);
+    if (!mounted.current) return;
+    if (list.status === 'fulfilled') {
+      setRooms(list.value);
+      setListFailed(false);
+      setSelectedId((id) => (list.value.some((r) => r.roomId === id) ? id : null));
+    } else {
+      setListFailed(true);
+      handleApiError(list.reason);
     }
+    if (mine.status === 'fulfilled') onMeChange(mine.value);
+    // 안내가 겹치지 않게 목록이 성공했을 때만 전적 실패를 알린다(세션 만료는 어느 쪽이든 로그인 화면으로 간다).
+    else if (list.status === 'fulfilled') handleApiError(mine.reason);
+    setLoading(false);
   }, [api, handleApiError, onMeChange]);
 
   useEffect(() => {
@@ -117,7 +125,7 @@ export function LobbyScreen({
   };
 
   const enterFromList = async (room: RoomSummary) => {
-    if (busy) return;
+    if (blocked) return;
     if (!canEnter(room)) {
       notify(roomErrorMessage('ROOM_PLAYING'));
       return;
@@ -131,7 +139,7 @@ export function LobbyScreen({
   };
 
   const quickJoin = async () => {
-    if (busy) return;
+    if (blocked) return;
     const result = await enter({}, true);
     if (!result.ok) notify(roomErrorMessage(result.error.code, true));
   };
@@ -149,20 +157,16 @@ export function LobbyScreen({
     return null;
   };
 
-  const createRoom = async (input: RoomCreate): Promise<string | null> => {
+  const createRoom = async (input: RoomCreate): Promise<CreateResult> => {
+    if (locked) return null;
     setBusy(true);
     try {
-      let attempt = input;
-      for (let i = 0; i < CODE_RETRIES; i += 1) {
-        const result = await client.create(attempt);
-        if (result.ok) return null;
-        // 코드가 다른 방과 겹치면 새 코드로 다시 요청한다
-        if (result.error.code !== 'CODE_TAKEN' || i === CODE_RETRIES - 1) {
-          return roomErrorMessage(result.error.code);
-        }
-        attempt = { ...attempt, code: generateRoomCode() };
-      }
-      return roomErrorMessage('CODE_TAKEN');
+      const result = await client.create(input);
+      if (result.ok) return null;
+      return {
+        message: roomErrorMessage(result.error.code),
+        codeTaken: result.error.code === 'CODE_TAKEN',
+      };
     } finally {
       if (mounted.current) setBusy(false);
     }
@@ -192,6 +196,7 @@ export function LobbyScreen({
           type="button"
           className="profile-card"
           aria-label="캐릭터 변경"
+          disabled={locked}
           onClick={() => {
             setModal({ t: 'character' });
           }}
@@ -213,14 +218,15 @@ export function LobbyScreen({
           <button
             type="button"
             className="btn"
+            disabled={locked}
             onClick={() => {
               setModal({ t: 'settings' });
             }}
           >
             환경설정
           </button>
-          <button type="button" className="btn" onClick={onLogout}>
-            로그아웃
+          <button type="button" className="btn" disabled={locked} onClick={onLogout}>
+            {locked ? '로그아웃 중…' : '로그아웃'}
           </button>
         </div>
       </aside>
@@ -230,7 +236,7 @@ export function LobbyScreen({
           <button
             type="button"
             className="btn btn-primary"
-            disabled={busy}
+            disabled={blocked}
             onClick={() => {
               setModal({ t: 'create' });
             }}
@@ -240,7 +246,7 @@ export function LobbyScreen({
           <button
             type="button"
             className="btn"
-            disabled={busy}
+            disabled={blocked}
             onClick={() => {
               void quickJoin();
             }}
@@ -250,7 +256,7 @@ export function LobbyScreen({
           <button
             type="button"
             className="btn"
-            disabled={busy}
+            disabled={blocked}
             onClick={() => {
               setModal({ t: 'code' });
             }}
@@ -260,7 +266,7 @@ export function LobbyScreen({
           <button
             type="button"
             className="btn"
-            disabled={loading}
+            disabled={loading || locked}
             onClick={() => {
               void refresh();
             }}
@@ -270,7 +276,11 @@ export function LobbyScreen({
         </div>
 
         {rooms === null ? (
-          <p className="empty">방 목록을 불러오는 중이에요</p>
+          <p className="empty">
+            {listFailed
+              ? '방 목록을 불러오지 못했어요. 새로고침을 눌러 주세요.'
+              : '방 목록을 불러오는 중이에요'}
+          </p>
         ) : rooms.length === 0 ? (
           <p className="empty">대기 중인 방이 없어요</p>
         ) : (
@@ -322,7 +332,7 @@ export function LobbyScreen({
                       <button
                         type="button"
                         className="btn btn-primary btn-small"
-                        disabled={busy || playing}
+                        disabled={blocked || playing}
                         onClick={(e) => {
                           e.stopPropagation();
                           void enterFromList(room);
