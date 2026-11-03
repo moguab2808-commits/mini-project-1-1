@@ -47,7 +47,7 @@
 | [OPS-001](#ops-001-운영-설계-확정) | 운영 설계 확정 | P1 | DOC-010 | 완료 | 개발자 B | [#11](https://github.com/moguab2808-commits/mini-project-1-1/issues/11)·[PR #26](https://github.com/moguab2808-commits/mini-project-1-1/pull/26) |
 | [PLAN-001](#plan-001-구현-작업-등록) | 구현 작업 등록 | P0 | GAME-001, LOCAL-001, API-001, DB-001, AUTH-001 | 완료 | 개발자 B | [#12](https://github.com/moguab2808-commits/mini-project-1-1/issues/12)·[PR #32](https://github.com/moguab2808-commits/mini-project-1-1/pull/32) |
 | [IMPL-001](#impl-001-프로젝트-골격) | 프로젝트 골격 | P0 | DOC-010 | 완료 | 개발자 A | [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/35)·[PR #51](https://github.com/moguab2808-commits/mini-project-1-1/pull/51) |
-| [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 예정 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
+| [IMPL-014](#impl-014-패키지-의존-경계-린트와-envexample) | 패키지 의존 경계 린트와 `.env.example` | P1 | IMPL-001 | 완료 | 개발자 B | [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49) |
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 완료 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)·[PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 완료 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
@@ -58,7 +58,7 @@
 | [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 완료 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
-| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 리뷰 중 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
+| [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
@@ -588,7 +588,7 @@ Issue·PR: [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 ## IMPL-014 패키지 의존 경계 린트와 `.env.example`
 
 우선순위: P1
-상태: 예정
+상태: 완료
 담당: 개발자 B
 의존성: IMPL-001
 범위: IMPL-001에서 분리한 작업이다. 패키지 의존 경계 린트(`client`↔`server` 상호 의존 금지, `game-core`의 네트워크·DB·DOM 참조 금지)와 `.env.example`을 만든다.
@@ -596,12 +596,12 @@ Issue·PR: [#35](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 Issue·PR: [#49](https://github.com/moguab2808-commits/mini-project-1-1/issues/49)
 
 수용 기준:
-- [ ] (오류) 패키지 의존 경계 린트가 `client`↔`server` 상호 의존과 `game-core`의 네트워크·DB·DOM 참조를 실패로 잡는다. 위반 예시로 실패를 확인한다.
-- [ ] (정상) 경계를 지킨 현재 코드는 린트를 통과한다.
-- [ ] (예외) `.env.example`에는 변수 이름(`DATABASE_URL`·`SESSION_SECRET`·`PORT`·`NODE_ENV`)만 있고 값·비밀정보가 없다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] (오류) 패키지 의존 경계 린트가 `client`↔`server` 상호 의존과 `game-core`의 네트워크·DB·DOM 참조를 실패로 잡는다. 위반 예시로 실패를 확인한다.
+- [x] (정상) 경계를 지킨 현재 코드는 린트를 통과한다.
+- [x] (예외) `.env.example`에는 변수 이름(`DATABASE_URL`·`SESSION_SECRET`·`PORT`·`NODE_ENV`)만 있고 값·비밀정보가 없다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-11-03 worklog IMPL-014 절](worklogs/2026-11-03.md#impl-014-패키지-의존-경계-린트와-envexample)
 
 ## IMPL-002 `game-core`
 
@@ -808,7 +808,7 @@ Issue·PR: [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-012 계정·로비·대기실·결과 화면
 
 우선순위: P0
-상태: 리뷰 중
+상태: 완료
 담당: 개발자 B (2026-10-31 [DEC-035](DECISIONS.md#결정-색인)로 A에서 변경)
 의존성: UI-002, API-001, IMPL-007, IMPL-008
 범위: 로그인·가입·로비(방 목록·새로고침·방 생성·즉시 참가·코드 입력)·캐릭터 변경·환경설정·대기실·결과(재도전하기·나가기) 화면을 PRD 화면 요구사항대로 구현한다. IMPL-010의 개발용 `/online` 연결 확인 화면은 정식 화면으로 대체해 삭제한다(개발자 A 요청, PR #66 리뷰).
@@ -819,7 +819,7 @@ Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 - [x] (정상, `ROOM-JOIN`) 로그인 → 로비 → 방 생성 또는 참여 → 대기실 → 인게임 → 결과(재도전하기·나가기) 흐름이 두 계정으로 이어진다. 비공개 방은 자물쇠 표시와 코드 입력 뒤 입장한다. (headless Chrome 두 계정으로 확인했다. 공개·비공개 방, 기권 결과, 양쪽 전적 반영까지다. WebGL은 SwiftShader라 화면 성능은 판정하지 않는다)
 - [x] (오류) API 오류 코드마다 PRD 안내 문구가 표시된다(닉네임 중복, 로그인 실패, 방이 가득 참, 이미 게임 중, 코드 오류 시 창 유지, 요청 제한 안내). (닉네임 중복·로그인 실패·코드 오류(창 유지)·요청 제한·게임 중인 방 입장은 브라우저에서, 모든 코드의 문구 대응은 단위 테스트로 확인했다. 방이 가득 찬 경우는 API에 별도 코드가 없어 `ROOM_PLAYING`("이미 게임이 시작된 방")으로 안내한다. 서버가 `ROOM_PLAYING`·`ALREADY_IN_ROOM`을 돌려주는 경로는 브라우저로 만들지 않았다)
 - [x] (예외) 목록이 오래된 채 입장해도 서버 오류를 안내하고, 방장이 나가 방이 닫히면 로비로 이동한다. 재도전 15초가 지나면 누르지 않은 쪽은 나가기와 같게 처리돼, 방장이 누르지 않았으면 두 사람 모두 방 목록으로, 방장만 눌렀으면 상대만 방 목록으로 이동하고 방장은 "상대를 기다리는 중"이 된다([DEC-041](DECISIONS.md#결정-색인)). (오래된 목록·방장 이탈·상대 이탈·아무도 안 누른 15초·방장만 누른 15초를 브라우저에서 확인했다. 상대만 누르고 방장은 누르지 않은 경우는 브라우저로 돌리지 않았고 서버 쪽은 IMPL-009 DB 테스트가 확인한다)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #66, `main` 5a537ad)
 
 검증 근거: [2026-11-03 worklog IMPL-012 절](worklogs/2026-11-03.md#impl-012-계정로비대기실결과-화면)
 
