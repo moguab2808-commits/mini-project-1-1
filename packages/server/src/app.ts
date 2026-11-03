@@ -141,6 +141,12 @@ export function createAppServer(options: AppOptions): AppServer {
     registerGameHandlers(socket, userId, { game: gameService, onError: onGameError });
   });
 
+  // 정적 파일은 세션 조회(Neon) 앞에 둔다. 자산 요청마다 DB를 쓰지 않고 DB가 느려도 화면 자산은 나간다.
+  // 예약 경로(/api·/socket.io·/health)는 아래 라우터로 넘어간다.
+  if (options.staticDir && hasClientBuild(options.staticDir)) {
+    app.use(...createStaticHandlers(options.staticDir));
+  }
+
   // 빈도 제한은 본문 파싱보다 앞에 둬서 형식이 잘못된 요청도 센다.
   app.use('/api/auth', createAuthRateLimiter());
   app.use(express.json({ limit: '10kb' }));
@@ -154,10 +160,6 @@ export function createAppServer(options: AppOptions): AppServer {
   app.use('/api/auth', auth);
   app.use('/api/me', me);
   app.use('/api/rooms', createRoomsRouter(createRequireAuth(db), roomService));
-
-  if (options.staticDir && hasClientBuild(options.staticDir)) {
-    app.use(...createStaticHandlers(options.staticDir));
-  }
 
   app.use(errorHandler);
 

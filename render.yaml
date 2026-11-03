@@ -7,7 +7,8 @@ services:
     region: singapore
     # 자동 배포는 끄고 대시보드에서 수동 배포한다(DEC-029).
     autoDeployTrigger: "off"
-    buildCommand: npm ci && npm run build
+    # NODE_ENV=production은 빌드에도 적용돼 devDependencies(tsup·vite 등)가 빠지므로 명시한다.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: node packages/server/dist/index.js
     healthCheckPath: /health
     envVars:

@@ -46,13 +46,19 @@ describe('헬스체크·정적 파일·SPA fallback', () => {
     }
   });
 
+  it('세션 쿠키가 있어도 정적 요청은 DB(세션 저장소)를 거치지 않는다', async () => {
+    // 풀이 연결 불가라 세션 조회가 일어나면 200이 될 수 없다.
+    await get('/lobby').set('Cookie', 'connect.sid=s%3Aabc.def').expect(200);
+    await get('/assets/app.js').set('Cookie', 'connect.sid=s%3Aabc.def').expect(200);
+  });
+
   it('있는 정적 자산은 그대로, 없는 정적 자산은 404다', async () => {
     await get('/assets/app.js').expect(200);
     const missing = await get('/assets/missing.js').expect(404);
     expect(missing.text).not.toContain('<title>app</title>');
   });
 
-  it('/api 밖 예약 경로는 index.html로 대체하지 않는다', async () => {
+  it('/api 아래 없는 경로는 index.html로 대체하지 않고 404다', async () => {
     const res = await get('/api/unknown').expect(404);
     expect(res.text).not.toContain('<title>app</title>');
   });
