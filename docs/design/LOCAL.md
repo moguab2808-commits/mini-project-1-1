@@ -65,7 +65,7 @@ interface GameSession {
   rotateBoard(cmd: BoardRotate): Promise<CommandResult>; // board:rotate (DEC-036)
   aimHazard(cmd: HazardAim): void;        // hazard:aim, 응답 없음
   sendAim(update: AimUpdate): void;       // aim:update, 응답 없음
-  // 미구현 제안(EMOTE-001): sendEmote(cmd: EmoteSend): Promise<CommandResult>; // emote:send, 'emote:shown' 구독 추가
+  // 미구현(IMPL-017, DEC-063 확정): sendEmote(cmd: EmoteSend): Promise<CommandResult>; // emote:send, 'emote:shown' 구독 추가
   on<K extends keyof GameEventMap>(type: K, handler: (e: GameEventMap[K]) => void): () => void;
   dispose(): void;                        // 창 닫기·이동. 진행 중이면 이탈로 처리
 }
@@ -145,7 +145,7 @@ interface GameEventMap {
 - 배치 모드에서는 왼쪽 클릭이 알 선택·세기 충전으로 전달되지 않는다. 세기 막대를 누르고 있는 중에는 벽·끈끈이 배치 모드로 들어가지 않고, 즉시형은 충전을 끊지 않고 사용한다.
 - 사용 불가 상태(쿨타임·피로도 과열)는 칸을 흐리게 표시하고 입력을 보내지 않는다. 표시와 별개로 권한 측이 다시 검증한다.
 
-추가 방해요소 10종의 입력(HAZ-001 제안, 미구현 [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 대상 형식은 [API 추가 방해요소 10종 필드](API.md#추가-방해요소-10종-필드-haz-001-제안), 크기는 [GAME](GAME.md#추가-방해요소-10종과-턴-교체-haz-001-제안)을 따른다.
+추가 방해요소 10종의 입력([DEC-063](../DECISIONS.md#결정-색인) 확정, 미구현 [IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 대상 형식은 [API 추가 방해요소 10종 필드](API.md#추가-방해요소-10종-필드-haz-001), 크기는 [GAME](GAME.md#추가-방해요소-10종과-턴-교체-haz-001)을 따른다.
 
 | 종류 | 입력 |
 | --- | --- |

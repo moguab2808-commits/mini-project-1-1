@@ -61,13 +61,13 @@
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
-| [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
+| [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)·[PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
 | [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 취소 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
-| [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 예정 | 미정 | 미생성 |
-| [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 예정 | 미정 | 미생성 |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 예정 | 미정 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
@@ -857,21 +857,21 @@ Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## CHAR-001 사람 아바타 전환과 꾸미기 설계
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: IMPL-012(지금의 캐릭터 변경 창·API)
 범위: [DEC-048](DECISIONS.md#결정-색인)에 따라 동물 6종을 사람 아바타로 바꾸고 꾸미기(캐릭터·헤어스타일·이목구비·악세사리 등)를 추가하기 위한 미정 사항을 정하고, 시험용 머리로 화풍을 확인한 뒤 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
 관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경)·[화면 미정 사항](PRD.md#화면-미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획) / [DATABASE](design/DATABASE.md#미정-사항) / [API 공통 타입](design/API.md#공통-타입) / [DEC-033](DECISIONS.md#결정-색인)·[DEC-048](DECISIONS.md#결정-색인)
-Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)
+Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)·[PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79)
 
 수용 기준:
 - [x] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 꾸미기 항목·선택지 수·꾸미기 시점·저장 시점·기본 외형·AI 상대 외형이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다. ([DEC-054](DECISIONS.md#결정-색인)·[DEC-059](DECISIONS.md#결정-색인))
 - [x] (정상) 3D·2D 제작 방식(코드 도형 유지 여부, 이목구비 표현, 프로필·카드 2D 얼굴 방식)을 정해 TECH_STACK에 기록했고, DEC-033과 다르면 대체 관계를 남겼다. (DEC-033 안이라 대체 없음)
 - [x] (정상) ~~시험용 머리를 개발용 화면에서 띄워 화풍을 확인받는다~~ → 사용자 요청("구현 전에 필요한 결정 전부 물어봐 바로 구현할 수 있게", 2026-11-03)에 따라 [IMPL-018](#impl-018-사람-아바타-구현)의 첫 수용 기준으로 옮겼다.
 - [x] (예외) 외형 저장 형식(DATABASE)·API 타입과 기존 계정의 동물 캐릭터 값 처리 방식을 정했다. ([DATABASE users](design/DATABASE.md#users)·[API 공통 타입](design/API.md#공통-타입)) 외형은 상대에게도 보여야 하므로 방 목록·대기실·`game:start`로 전달되는 경로를 포함한다.
-- [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다. (PR #79, 2026-11-03 병합)
 
-진행: 꾸미기 항목 7개와 선택지 5개([DEC-054](DECISIONS.md#결정-색인)), 나머지 사항([DEC-059](DECISIONS.md#결정-색인))을 정해 PRD·API·DATABASE·TECH_STACK에 반영하고 구현을 [IMPL-018](#impl-018-사람-아바타-구현)으로 등록했다. 리뷰·병합이 남았다.
+진행: 꾸미기 항목 7개와 선택지 5개([DEC-054](DECISIONS.md#결정-색인)), 나머지 사항([DEC-059](DECISIONS.md#결정-색인))을 정해 PRD·API·DATABASE·TECH_STACK에 반영하고 구현을 [IMPL-018](#impl-018-사람-아바타-구현)으로 등록했다. PR #79로 병합해 완료했다. API 계약은 [DEC-063](DECISIONS.md#결정-색인)으로 확정했다.
 
 검증 근거: [2026-11-03 worklog CHAR-001 절](worklogs/2026-11-03.md#char-001-사람-아바타-전환과-꾸미기-설계)
 
@@ -938,21 +938,21 @@ Issue·PR: [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/7
 ## HAZ-001 방해요소 10종 추가와 턴 교체 설계
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: IMPL-004(방해요소 입력·연출), IMPL-005(AI 방해요소 사용), IMPL-009(서버 경기 진행)
 범위: [DEC-055](DECISIONS.md#결정-색인)의 발사 턴마다 교체·직전 종류 제외·추가 10종을 제품 규칙으로 기록하고, 구현 전에 GAME·API 상세 계약(효과 상태 위치, 플레이어별 뷰에서 숨길 필드, 새 명령 대상 형식, 수치 제안값)을 정한다. 구현은 [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체)에서 한다.
 관련 문서: [PRD 지급과 보유](PRD.md#지급과-보유)·[추가 방해요소 10종](PRD.md#추가-방해요소-10종-dec-055)·[방해요소 미정 사항](PRD.md#방해요소-미정-사항) / [GAME 방해요소](design/GAME.md#방해요소별-처리) / [API 경기 이벤트](design/API.md#경기-이벤트-필드) / [DEC-014](DECISIONS.md#결정-색인)·[DEC-031](DECISIONS.md#결정-색인)·[DEC-055](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79)
 
 수용 기준:
 - [x] (정상) 교체 시점·대상·초기화, 후보 18종과 직전 종류 제외, 추가 10종의 효과·발동 방식·분류·지속, AI·로컬 적용, 속임수형 3종의 공개 범위가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
-- [x] (정상) GAME에 10종의 적용 훅·상태 위치와 수치 제안값(범위·힘·무게 배율·허상 배치 거리 등)을, API에 `HazardKind` 추가 값과 `hazard:use` 대상 형식(위치·방향·알 id)을 정했다. ([GAME](design/GAME.md#추가-방해요소-10종과-턴-교체-haz-001-제안)·[API](design/API.md#추가-방해요소-10종-필드-haz-001-제안))
+- [x] (정상) GAME에 10종의 적용 훅·상태 위치와 수치 제안값(범위·힘·무게 배율·허상 배치 거리 등)을, API에 `HazardKind` 추가 값과 `hazard:use` 대상 형식(위치·방향·알 id)을 정했다. ([GAME](design/GAME.md#추가-방해요소-10종과-턴-교체-haz-001)·[API](design/API.md#추가-방해요소-10종-필드-haz-001))
 - [x] (예외) 가짜벽의 진짜 여부·분신술의 진짜 알·알 무게 효과가 상대 뷰·상대에게 가는 `hazard:triggered`에 담기지 않는 필드 경계를 [상대 비공개 필드 점검](design/API.md#상대-비공개-필드-점검)에 추가했다.
 - [x] (예외) 분신술 허상에 내 알이 닿을 때·설치물 겹침 허용을 사용자 승인으로 정했다. ([DEC-057](DECISIONS.md#결정-색인): 내 알도 통과·소멸, 설치물 겹침 불가)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #79, 2026-11-03 병합)
 
-진행: 제품 규칙을 [DEC-055](DECISIONS.md#결정-색인)·[DEC-057](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다(PR 1차). GAME·API 상세 계약·수치 제안값·속임수형 뷰 경계를 제안했고, 사용자 검토로 가짜벽 양쪽 같은 데이터·분신술 원래 id 유지·공개 `stoneCounts`·중력 8방향을 [DEC-058](DECISIONS.md#결정-색인)로 정했다. 리뷰·병합이 남았다.
+진행: 제품 규칙을 [DEC-055](DECISIONS.md#결정-색인)·[DEC-057](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다(PR 1차). GAME·API 상세 계약·수치 제안값·속임수형 뷰 경계를 제안했고, 사용자 검토로 가짜벽 양쪽 같은 데이터·분신술 원래 id 유지·공개 `stoneCounts`·중력 8방향을 [DEC-058](DECISIONS.md#결정-색인)로 정했다. PR #79로 병합해 완료했다. API 계약은 [DEC-063](DECISIONS.md#결정-색인)으로 확정했다.
 
 검증 근거: [2026-11-03 worklog HAZ-001·EMOTE-001 절](worklogs/2026-11-03.md#haz-001emote-001-방해요소-10종감정표현-결정-기록)
 
@@ -979,20 +979,20 @@ Issue·PR: 미생성
 ## EMOTE-001 감정표현 설계
 
 우선순위: P2
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: 없음(구현은 사람 아바타 이후)
 범위: [DEC-056](DECISIONS.md#결정-색인)의 감정표현 6종을 제품 규칙으로 기록하고, 구현 전에 API 이벤트(보내기·중계·빈도 제한 오류)와 몸짓·말풍선·효과음 목록을 정한다. 구현은 [IMPL-017](#impl-017-감정표현-구현)에서 한다.
 관련 문서: [PRD 감정표현](PRD.md#감정표현-dec-056)·[환경설정 효과음 목록](PRD.md#환경설정) / [API Socket.IO 이벤트](design/API.md#socketio-이벤트) / [DEC-048](DECISIONS.md#결정-색인)·[DEC-056](DECISIONS.md#결정-색인)
-Issue·PR: 미생성
+Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79)
 
 수용 기준:
 - [x] (정상) 종류 6개·사용 방법(숫자키 1~6·버튼 메뉴)·사용 시점(경기 중)·쿨타임 3초·표시(몸짓·말풍선·효과음)·끄기 설정 없음·AI 사용이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
-- [x] (정상) API에 감정표현 보내기·받기 이벤트와 필드, 서버 빈도 제한과 거부 오류를 정했다. 로컬 2인·AI 경로를 포함한다. ([API 감정표현 필드](design/API.md#감정표현-필드-emote-001-제안))
+- [x] (정상) API에 감정표현 보내기·받기 이벤트와 필드, 서버 빈도 제한과 거부 오류를 정했다. 로컬 2인·AI 경로를 포함한다. ([API 감정표현 필드](design/API.md#감정표현-필드-emote-001))
 - [x] (예외) 사람 아바타 구조가 정해진 뒤 6종의 몸짓을 아바타 몸짓으로 정의했다([CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) 이후). (상반신 [DEC-059](DECISIONS.md#결정-색인), 몸짓 [DEC-062](DECISIONS.md#결정-색인))
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #79, 2026-11-03 병합)
 
-진행: 제품 규칙을 [DEC-056](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다. API 계약(`emote:send`·`emote:shown`, `game-runtime` 쿨타임 2.8초 검사, `EMOTE_COOLDOWN`)을 제안했다. 상반신 몸짓 6종을 [DEC-062](DECISIONS.md#결정-색인)로 정했다. 리뷰·병합이 남았다.
+진행: 제품 규칙을 [DEC-056](DECISIONS.md#결정-색인)으로 정해 PRD에 반영했다. API 계약(`emote:send`·`emote:shown`, `game-runtime` 쿨타임 2.8초 검사, `EMOTE_COOLDOWN`)을 제안했다. 상반신 몸짓 6종을 [DEC-062](DECISIONS.md#결정-색인)로 정했다. PR #79로 병합해 완료했다. API 계약은 [DEC-063](DECISIONS.md#결정-색인)으로 확정했다.
 
 검증 근거: [2026-11-03 worklog HAZ-001·EMOTE-001 절](worklogs/2026-11-03.md#haz-001emote-001-방해요소-10종감정표현-결정-기록)
 
