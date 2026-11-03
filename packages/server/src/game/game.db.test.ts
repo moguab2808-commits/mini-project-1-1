@@ -21,6 +21,25 @@ import type { GameLogLine } from './game-log.ts';
 import type { FinishedGame } from './game-service.ts';
 import { recordResult } from './stats.ts';
 
+// 시작 커밋 뒤 사용자 조회(DB) 실패를 만든다. 켜지 않으면 실제 조회를 그대로 쓴다.
+const lookup = vi.hoisted(() => ({
+  fail: false,
+  gate: null as Promise<void> | null,
+  reached: false,
+}));
+vi.mock('../auth/users.ts', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../auth/users.ts')>();
+  return {
+    ...actual,
+    findUserById: async (...args: Parameters<typeof actual.findUserById>) => {
+      if (!lookup.fail) return actual.findUserById(...args);
+      lookup.reached = true;
+      if (lookup.gate) await lookup.gate;
+      throw new Error('사용자 조회 실패(테스트)');
+    },
+  };
+});
+
 // 실제 PostgreSQL(임시 DB)이 필요하다. `npm run test:db`로만 실행한다.
 const baseUrl = process.env.DATABASE_URL;
 
@@ -254,6 +273,9 @@ describe.skipIf(!baseUrl)('온라인 대전 서버 (IMPL-009)', () => {
     hook.failStart = false;
     hook.gate = null;
     hook.reached = false;
+    lookup.fail = false;
+    lookup.gate = null;
+    lookup.reached = false;
     await sleep(300); // 끊김 처리(기권·종료 콜백)가 끝난 뒤 남은 방과 기록을 비운다
     await tempDb.pool.query('DELETE FROM rooms');
     finished.length = 0;
@@ -416,6 +438,45 @@ describe.skipIf(!baseUrl)('온라인 대전 서버 (IMPL-009)', () => {
       hook.failStart = false;
       expect(await emit(guest.socket, 'room:join', { roomId })).toMatchObject({ ok: true });
       await waitFor(guest, 'game:start');
+    });
+    it('시작 커밋 뒤 사용자 조회가 실패하면 입장을 되돌리고 그 뒤 이탈은 대기하지 않는다', async () => {
+      const host = await player();
+      const guest = await player();
+      const { roomId } = await emit(host.socket, 'room:create', publicRoom);
+      lookup.fail = true;
+      const failed = await emit(guest.socket, 'room:join', { roomId });
+      lookup.fail = false;
+      expect(failed).toMatchObject({ ok: false, error: { code: 'INTERNAL_ERROR' } });
+      expect((await roomRows()).rows).toEqual([{ id: roomId, guest_id: null, status: 'waiting' }]);
+
+      // 방장이 나가면 경기 시작을 기다리지 않고 방이 닫힌다.
+      expect(await emit(host.socket, 'room:leave')).toEqual({ ok: true });
+      expect((await roomRows()).rows).toHaveLength(0);
+    });
+
+    it('사용자 조회 중에 들어온 방장 이탈은 조회 실패 뒤 대기 없이 끝난다', async () => {
+      const host = await player();
+      const guest = await player();
+      const { roomId } = await emit(host.socket, 'room:create', publicRoom);
+      let release!: () => void;
+      lookup.gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      lookup.fail = true;
+      // 입장 UPDATE(시작 커밋)는 끝났고 사용자 조회가 `gate`에서 멈춘다.
+      const joining = emit(guest.socket, 'room:join', { roomId });
+      await waitUntil(() => lookup.reached, '입장 UPDATE 이후 사용자 조회 도달');
+      expect((await roomRows()).rows[0]?.status).toBe('playing');
+      const leaving = emit(host.socket, 'room:leave');
+      await sleep(150); // 이탈이 경기 시작 완료를 기다리는 상태로 들어갈 시간
+      release();
+      expect(await joining).toMatchObject({ ok: false, error: { code: 'INTERNAL_ERROR' } });
+      lookup.fail = false;
+      expect(
+        await Promise.race([leaving, sleep(3_000).then(() => 'leave가 대기에서 풀리지 않았다')]),
+      ).toEqual({ ok: true });
+      await waitUntil(async () => (await roomRows()).rows.length === 0, '방 정리');
+      expect(gameLogs(roomId!).some((l) => l.event === 'forfeit')).toBe(false);
     });
   });
 

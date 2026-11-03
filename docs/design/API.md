@@ -245,9 +245,9 @@ sequenceDiagram
 6. `game:over` 뒤에는 `game:state`·`hazard:triggered`·`turn:change`를 보내지 않으며 이후 `shot:submit`·`hazard:use`·`game:forfeit`은 `GAME_NOT_ACTIVE`로 거부한다. 재도전으로 새 경기가 시작된 뒤 이전 경기의 명령은 `STALE_TURN`·`STALE_HAZARD`(`game:forfeit`은 `GAME_NOT_ACTIVE`)다.
 7. 재도전이 성립해도 `rooms.status`는 `playing`으로 유지한다. 15초 만료로 재도전하기를 누르지 않은 쪽은 서버가 `room:leave`와 같게 처리하고 그 사람 본인에게 `room:closed`(`rematch_timeout`)를 보낸다: 상대가 누르지 않았으면 방장에게 `guest`가 빈 `room:state`(`waiting`)를, 방장이 누르지 않았으면 방이 닫히며 상대에게 `room:closed`를 보낸다(상대도 누르지 않았으면 `rematch_timeout`, 눌렀으면 `host_left`)([DEC-041](../DECISIONS.md#결정-색인), [DATABASE](DATABASE.md#방-생명주기)).
 
-8. 입장 직후 경기 생성(`onStarted`)이 실패하면 서버는 입장을 되돌린다: `guest_id`를 비우고 `waiting`으로 돌리며 방장에게 `room:state`(`waiting`, `guest: null`)를 보낸다. 입장자의 ack는 `INTERNAL_ERROR`다. 입장자는 이미 `room:state`(`playing`)를 받았을 수 있으므로 클라이언트는 입장 ack 실패를 방에서 나간 것으로 처리한다. 되돌리기도 실패하면 방을 지우고 방장에게 `room:closed`(`host_left`)를 보낸다([DEC-043](../DECISIONS.md#결정-색인)).
+8. 입장 직후 경기 생성(`onStarted`)이나 그 전의 시작 처리(사용자 조회 등)가 실패하면 서버는 입장을 되돌린다: `guest_id`를 비우고 `waiting`으로 돌리며 방장에게 `room:state`(`waiting`, `guest: null`)를 보낸다. 입장자의 ack는 `INTERNAL_ERROR`다. 입장자는 이미 `room:state`(`playing`)를 받았을 수 있으므로 클라이언트는 입장 ack 실패를 방에서 나간 것으로 처리한다. 되돌리기도 실패하면 방을 지우고 방장에게 `room:closed`(`host_left`)를 보낸다([DEC-043](../DECISIONS.md#결정-색인)).
 9. 경기 중 이탈(`room:leave`·연결 끊김·`session:replaced`)은 그 좌석의 기권패이며 `game:over`(`forfeit`)를 남은 사람에게 보낸 뒤 방을 정리한다. 입장 직후라 경기가 아직 열리지 않았다면 경기가 열린 뒤 기권패로 처리한다. 결과 화면(재도전 대기)에서 나가면 남은 사람에게 `rematch:state`(`expired`)를 보내고 이후 `rematch:request`는 `REMATCH_NOT_AVAILABLE`이다.
-10. **확인 필요(개발자 A)**: 이탈 기권으로 끝난 경기의 `game:over`에도 `game-runtime`이 `rematchDeadlineMs`를 채워 보낸다(`room-runtime.test.ts`가 그 동작을 고정한다). `game:over` 표의 "상대가 나가 재도전할 수 없으면 `null`"과 다르다. 서버는 그 경기의 재도전을 열지 않고 곧바로 `room:state`·`room:closed`로 정리하므로 클라이언트는 이탈 기권의 `game:over` 뒤 재도전 버튼을 보이지 않아야 한다. 런타임을 `null`로 바꿀지는 A와 정한다.
+10. 이탈 명령으로 종료된 경기는 `game:over`와 최종 `GameView.result`의 `rematchDeadlineMs`가 `null`이다. 나가지 않고 `game:forfeit`만 누른 경우에는 두 사람이 남아 있으므로 재도전 마감을 제공한다. 최종 신뢰 전송 뷰는 `game:over`보다 먼저 보낸다.
 
 ### 상대 비공개 필드 점검
 

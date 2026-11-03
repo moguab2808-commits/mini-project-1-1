@@ -116,6 +116,7 @@ export class RoomRuntime {
   private finished = false;
   private closed = false;
   private rematchDeadlineMs: number | null = null;
+  private rematchUnavailable = false;
 
   constructor(options: RuntimeOptions) {
     this.opts = options;
@@ -135,6 +136,7 @@ export class RoomRuntime {
     for (const q of this.queue) q.resolve(NOT_ACTIVE);
     this.queue = [];
     this.rematchDeadlineMs = null;
+    this.rematchUnavailable = false;
     this.finished = false;
     this.sent = [freshSent(), freshSent()];
     this.skippedMs = 0;
@@ -372,6 +374,7 @@ export class RoomRuntime {
       }
       const observed = Math.min(Math.max(q.observedAtMs, this.lastGameMs), now);
       const result = q.rejected ?? q.run({ seat: q.seat, observedAtMs: observed });
+      if (result.ok && q.forfeitReason === 'leave') this.rematchUnavailable = true;
       this.lastGameMs = observed;
       const event = logEventOf(q.kind);
       if (event) {
@@ -396,7 +399,7 @@ export class RoomRuntime {
     this.flushEvents();
     this.checkFinished(game);
 
-    this.publishViews(game);
+    if (!this.finished) this.publishViews(game);
   }
 
   private settle(q: Queued, result: CommandResult): void {
@@ -472,6 +475,8 @@ export class RoomRuntime {
         return;
       case 'game:over': {
         const payload = this.withRematch(e.payload);
+        // 최종 뷰가 결과 이벤트보다 먼저 도착해야 종료 뒤 상태가 다시 적용되지 않는다.
+        this.publishViews(game);
         if (payload.reason === 'timeout_forfeit') {
           this.log({ event: 'forfeit', gameId, reason: 'timeout' });
         }
@@ -494,6 +499,7 @@ export class RoomRuntime {
   }
 
   private withRematch(result: GameOver): GameOver {
+    if (this.rematchUnavailable) return { ...result, rematchDeadlineMs: null };
     const w = this.opts.rematchWindowMs;
     if (w === undefined || result.rematchDeadlineMs !== null) return result;
     this.rematchDeadlineMs ??= this.gameNow() + w;

@@ -95,6 +95,7 @@ export function createAppServer(options: AppOptions): AppServer {
   };
   const gameService = new GameService({
     registry,
+    beforeStart: options.roomHooks?.onStarted,
     // 재도전 만료 처리도 사용자의 다른 방 명령과 같은 줄에 세운다.
     leaveRoom: (userId, leaveOptions) =>
       mutex.run(userId, () => roomService.leave(userId, leaveOptions)),
@@ -110,8 +111,10 @@ export function createAppServer(options: AppOptions): AppServer {
   });
   const roomService = new RoomService(db, registry, {
     onStarted: async (view) => {
-      await options.roomHooks?.onStarted?.(view);
       await gameService.hooks.onStarted?.(view);
+    },
+    onStartAborted: async (room) => {
+      await gameService.hooks.onStartAborted?.(room);
     },
     onLeave: async (info) => {
       await options.roomHooks?.onLeave?.(info);

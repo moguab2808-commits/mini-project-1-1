@@ -51,13 +51,13 @@
 | [IMPL-002](#impl-002-game-core) | `game-core` | P0 | GAME-001, GAME-002, IMPL-001 | 완료 | 개발자 A | [#36](https://github.com/moguab2808-commits/mini-project-1-1/issues/36)·[PR #53](https://github.com/moguab2808-commits/mini-project-1-1/pull/53) |
 | [IMPL-003](#impl-003-game-runtime) | `game-runtime` | P0 | GAME-001, LOCAL-001, IMPL-001, IMPL-002 | 완료 | 개발자 A | [#37](https://github.com/moguab2808-commits/mini-project-1-1/issues/37)·[PR #57](https://github.com/moguab2808-commits/mini-project-1-1/pull/57) |
 | [IMPL-004](#impl-004-로컬-2인-모드) | 로컬 2인 모드 | P0 | LOCAL-001, UI-002, IMPL-002, IMPL-003, ASSET-001 | 완료 | 개발자 A | [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/38) |
-| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 진행 중 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39) |
+| [IMPL-005](#impl-005-ai-대전) | AI 대전 | P1 | LOCAL-001, IMPL-004 | 완료 | 개발자 A | [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39)·[PR #62](https://github.com/moguab2808-commits/mini-project-1-1/pull/62) |
 | [IMPL-006](#impl-006-db마이그레이션) | DB·마이그레이션 | P0 | DB-001, IMPL-001 | 완료 | 개발자 B | [#40](https://github.com/moguab2808-commits/mini-project-1-1/issues/40)·[PR #54](https://github.com/moguab2808-commits/mini-project-1-1/pull/54) |
 | [IMPL-007](#impl-007-인증) | 인증 | P0 | AUTH-001, API-001, IMPL-006 | 완료 | 개발자 B | [#41](https://github.com/moguab2808-commits/mini-project-1-1/issues/41)·[PR #59](https://github.com/moguab2808-commits/mini-project-1-1/pull/59) |
 | [IMPL-008](#impl-008-로비방-서버) | 로비·방 (서버) | P0 | API-001, DB-001, IMPL-007 | 완료 | 개발자 B | [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/42)·[PR #61](https://github.com/moguab2808-commits/mini-project-1-1/pull/61) |
-| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 진행 중 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
-| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 예정 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44) |
-| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 진행 중 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
+| [IMPL-009](#impl-009-온라인-대전-서버) | 온라인 대전 (서버) | P0 | API-001, IMPL-003, IMPL-008 | 완료 | 개발자 B | [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/43)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
+| [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
+| [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 예정 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 예정 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
@@ -676,18 +676,18 @@ Issue·PR: [#38](https://github.com/moguab2808-commits/mini-project-1-1/issues/3
 ## IMPL-005 AI 대전
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 A
 의존성: LOCAL-001, IMPL-004
 범위: `AiGameSession`(mode `ai`)과 전용 Web Worker, AI 컨트롤러를 구현한다. 서버 연결·저장은 없다. 로비 방 생성 창은 IMPL-012 범위이므로 이 작업은 개발용 `/ai` 설정 폼과 방 생성 창이 그대로 쓸 `AiSetupForm`·`startAiGame`까지 만든다([DEC-042](DECISIONS.md#결정-색인)).
 관련 문서: [LOCAL AI 대전](design/LOCAL.md#ai-대전) / [AI 대전](PRD.md#ai-대전) / [GAME AI](design/GAME.md#ai-대전) / [DEC-021·040](DECISIONS.md#결정-색인)
-Issue·PR: [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39)
+Issue·PR: [#39](https://github.com/moguab2808-commits/mini-project-1-1/issues/39)·[PR #62](https://github.com/moguab2808-commits/mini-project-1-1/pull/62)
 
 수용 기준:
 - [x] (정상) 방 생성 창에서 AI·판·알 개수(5·7·9)를 고르면 서버 요청 없이 경기가 시작되고 끝까지 진행된다. (개발용 `/ai` 설정 폼으로 확인. 로비 방 생성 창 연결은 IMPL-012에서 같은 `AiSetupForm`·`startAiGame`을 쓴다)
 - [x] (오류) AI 컨트롤러가 자기 `GameView`만 읽고 사람과 같은 명령 검증을 거친다. 검증에 걸린 명령은 상태를 바꾸지 않는다.
 - [x] (예외) AI 대전 결과가 서버로 전송되지 않고 전적이 바뀌지 않으며 방 목록에 나타나지 않는다. 네트워크 요청이 없음을 확인한다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (PR #62)
 
 검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-005-ai-대전)
 
@@ -750,7 +750,7 @@ Issue·PR: [#42](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-009 온라인 대전 (서버)
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: API-001, IMPL-003, IMPL-008
 범위: 서버가 `game-runtime`에 Socket.IO 전송·서버 시계·사용자↔좌석 맵을 주입해 경기를 진행한다. 이탈·중복 접속의 기권 명령 변환, 재도전 15초 처리, 서버 로그를 구현한다. IMPL-008이 남긴 두 자리를 이어받는다: 상대 입장 직후 경기를 여는 `RoomHooks.onStarted`와, 경기 중 이탈의 기권패 저장을 끼워 넣을 `RoomService.leave` 앞. 재도전 15초 만료는 재도전하기를 누르지 않은 쪽을 나가기와 같게 처리한다([DEC-041](DECISIONS.md#결정-색인)): 방장이 누르지 않았으면 방을 닫고(`room:closed`) 방장만 눌렀으면 상대만 내보내 방장에게 `room:state`(`waiting`)를 보낸다. 서버가 처리하며 누르지 않은 본인에게는 `room:closed`(`rematch_timeout`)를 보낸다. 방장이 누르지 않아 방이 닫힐 때 상대도 누르지 않았으면 상대에게도 `rematch_timeout`, 눌렀으면 `host_left`를 보낸다. `RoomService.leave`가 처리하되 본인에게 알리는 사유를 넘기도록 확장한다. 그 밖에 PR #61 리뷰에서 넘어온 것은 [DEC-043](DECISIONS.md#결정-색인)으로 정했다: ① 시작 커밋과 이탈의 순서는 방별 `RoomRuntime`이 `ingressSeq`를 대기실부터 이어 매겨 보장하고, 입장 직후 이탈은 경기 생성을 기다려 시작 뒤 이탈(기권패)로 처리한다. ② `onStarted` 실패는 입장을 되돌린다. ③ 소켓 ack의 `INTERNAL_ERROR`를 경기 명령 `CommandResult`(`ERROR_CODES`)에도 넣는다. 전적 저장(`finishOnce`·전적 갱신 트랜잭션)은 원래 [IMPL-011](#impl-011-경기-종료-전적) 범위였으나 이 PR에 포함하도록 조정했다([DEC-044](DECISIONS.md#결정-색인)). 이탈로 끝난 경기는 전적 저장을 끝낸 뒤 방을 정리한다. 경기 종료 뒤 `rooms`는 재도전이 `playing`을 유지하므로 따로 갱신하지 않는다.
@@ -765,32 +765,32 @@ Issue·PR: [#43](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 - [x] (예외, 재도전 15초) 재도전하기를 누르지 않은 쪽은 나가기와 같게 처리된다. 방장만 눌렀으면 상대만 나가고 방장은 대기 상태가 되며, 방장이 누르지 않았으면(상대가 눌렀든 아니든) 방이 닫혀 상대에게 `room:closed`가 간다. 두 사람이 남은 채 `waiting`이 되는 일이 없다. 누르지 않은 본인은 `room:closed`(`rematch_timeout`)를 받는다.
 - [x] (정상, 전적) 경기가 끝나면(정상 종료·기권·시간초과) 두 사용자의 전체 경기수·승·패가 경기마다 한 번씩 저장되고(무승부는 두 사람의 전체 경기수만), 프로필(`GET /api/me`)과 방 목록(`GET /api/rooms`)의 방장 정보에 전체·승·패·무가 보인다. 저장이 실패하면 오류 로그만 남기고 반영을 포기하며 방 정리는 계속된다.
 - [x] (예외, 시작 직후 이탈) 입장 UPDATE 직후 방장이 나가도 시작 처리가 건너뛰어지지 않고 그 이탈이 기권패로 기록되며, `start_commit`·`leave` 로그의 `ingressSeq`로 순서를 판정할 수 있다. `onStarted` 실패 때의 입장 처리 정책이 정해져 있다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-009-온라인-대전-서버)
+검증 근거: [2026-11-02 worklog](worklogs/2026-11-02.md#impl-009-온라인-대전-서버). PR #63 리뷰 보정과 시작 중단 신호(PR #64 리뷰)는 [2026-11-03 worklog](worklogs/2026-11-03.md)에 있다. PR #63이 `main`에 병합돼(34a8d06) 완료했다.
 
 ## IMPL-010 온라인 대전 (클라이언트)
 
 우선순위: P0
-상태: 예정
+상태: 완료
 담당: 개발자 A
 의존성: API-001, IMPL-003, IMPL-004
 범위: `RemoteGameSession`(이벤트 변환 없이 전달)과 `RoomClient`(`room:*`·`session:replaced`)를 구현해 `LocalGameSession`을 바꿔 끼울 수 있게 한다.
 관련 문서: [LOCAL GameSession](design/LOCAL.md#gamesession-시그니처) / [API](design/API.md#socketio-이벤트) / [DEC-030](DECISIONS.md#결정-색인)
-Issue·PR: [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)
+Issue·PR: [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64)
 
 수용 기준:
-- [ ] (정상) 화면 코드를 바꾸지 않고 `LocalGameSession` 대신 `RemoteGameSession`으로 경기가 진행된다. 재도전 경기를 같은 세션이 이어 간다.
-- [ ] (오류) ack 오류 코드를 `CommandResult`로 그대로 전달하고 `gameId`가 현재 경기와 다른 이벤트·`revision`이 오래된 `game:state`를 버린다.
-- [ ] (예외) `session:replaced`를 받으면 로그인 화면으로 이동하고, 연결이 끊기면 재접속을 시도하지 않고 로그인 화면으로 간다. `dispose()`는 `room:leave`를 보낸다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] (정상) 화면 코드를 바꾸지 않고 `LocalGameSession` 대신 `RemoteGameSession`으로 경기가 진행된다. 재도전 경기를 같은 세션이 이어 간다.
+- [x] (오류) ack 오류 코드를 `CommandResult`로 그대로 전달하고 `gameId`가 현재 경기와 다른 이벤트·`revision`이 오래된 `game:state`를 버린다.
+- [x] (예외) `session:replaced`를 받으면 로그인 화면으로 이동하고, 연결이 끊기면 재접속을 시도하지 않고 로그인 화면으로 간다. `dispose()`는 `room:leave`를 보낸다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 작업 시 날짜별 worklog의 해당 작업 절
+검증 근거: [2026-11-03 worklog](worklogs/2026-11-03.md#impl-010-온라인-대전-클라이언트). 로그인 전환 콜백·경로는 검증했으며 실제 로그인 화면은 IMPL-012 범위다. PR #64 리뷰 승인 후 merge commit으로 `main`에 병합해 완료했다.
 
 ## IMPL-011 경기 종료 전적
 
 우선순위: P0
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: DB-001, IMPL-009
 범위: `finishOnce`와 전적 갱신 트랜잭션, 경기 종료 뒤 `rooms` 상태 갱신을 구현한다. 구현과 검증은 [IMPL-009](#impl-009-온라인-대전-서버) PR에서 했다([DEC-044](DECISIONS.md#결정-색인)). 경기 종료 뒤 `rooms`는 재도전이 `playing`을 유지하므로 갱신할 것이 없다. 병합 기준은 IMPL-009 병합으로 충족한다.
@@ -801,9 +801,9 @@ Issue·PR: [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 - [x] (정상, `LEAVE-FORFEIT`) 정상 종료·기권 종료 뒤 양쪽 전적이 갱신된다. 승자는 `total_games`·`wins`, 패자는 `total_games`·`losses`가 오르고 무승부는 `total_games`만 오른다.
 - [x] (오류) 트랜잭션이 실패하면 오류를 로그에 남기고 전적 반영을 포기하며 같은 경기가 두 번 반영되지 않는다. 방 정리는 계속된다.
 - [x] (예외) 이탈·시간초과·정상 종료가 겹쳐도 `finishOnce`가 한 번만 실행된다. 두 `users` 행을 `id` 오름차순으로 잠가 동시 종료에서 교착이 나지 않는다. AI 대전과 시작 커밋 전 이탈은 전적을 바꾸지 않는다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [2026-11-02 worklog IMPL-009 절](worklogs/2026-11-02.md#impl-009-온라인-대전-서버)
+검증 근거: [2026-11-02 worklog IMPL-009 절](worklogs/2026-11-02.md#impl-009-온라인-대전-서버). IMPL-009와 함께 PR #63으로 `main`에 병합돼(34a8d06) 완료했다.
 
 ## IMPL-012 계정·로비·대기실·결과 화면
 
