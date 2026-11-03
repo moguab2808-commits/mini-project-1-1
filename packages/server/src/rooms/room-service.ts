@@ -103,7 +103,8 @@ export class RoomService {
    * 나가기(연결 끊김 포함). 방에 없으면 아무것도 하지 않는다.
    * 방장이면 방을 지우고 참여자에게 `room:closed`를, 참여자면 `guest_id`만 비우고 방장에게 `room:state`를 보낸다.
    * 경기 중(`playing`)이면 `onLeave`가 기권패 처리·전적 저장을 끝낸 뒤에 방을 정리한다. 대기 중인 방장의 방을
-   * 지우려는 사이에 상대가 입장했다면 지우기가 0행이 되고, 시작 커밋 뒤 이탈로 다시 처리한다.
+   * 지우려는 사이에 상대가 입장했다면 지우기가 0행이 되고, 시작 커밋 뒤 이탈로 다시 처리한다. 반대로 `playing`으로
+   * 읽은 방이 시작 실패의 입장 되돌리기로 `waiting`이 됐어도 0행이며, 다시 읽어 대기실 이탈로 처리한다.
    */
   async leave(userId: number, options: LeaveOptions = {}): Promise<void> {
     const room = await findRoomOf(this.db, userId);
@@ -124,8 +125,9 @@ export class RoomService {
         ? await deleteRoomOfHost(this.db, userId, room.status as 'waiting' | 'playing')
         : await clearGuestOf(this.db, userId);
       if (!removed) {
-        if (room.status === 'playing') return; // 방이 이미 사라졌다
-        continue; // 대기 중이던 방에 상대가 입장했다: 시작 커밋 뒤 이탈로 다시 본다
+        // 읽은 뒤 방이 바뀌었다. 다시 읽어 판단한다: 방이 사라졌으면 끝, 대기 중이던 방에 상대가 입장했으면
+        // 시작 커밋 뒤 이탈로, 시작 실패로 입장이 되돌려져 `waiting`이 됐으면 대기실 이탈로 다시 처리한다.
+        continue;
       }
       if (room.status !== 'playing') {
         await this.hooks.onLeave?.({ room: removed, userId, reason });
