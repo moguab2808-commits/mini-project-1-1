@@ -83,7 +83,7 @@
 | `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 턴당 1회형을 같은 턴에 다시 사용함([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
 | `OUT_OF_REACH` | 손이 닿는 거리 밖의 알로 발사함 ([GAME 방해요소 수치](GAME.md#방해요소-수치)의 손이 닿는 거리, [DEC-036](../DECISIONS.md#결정-색인)). [DEC-063](../DECISIONS.md#결정-색인) 확정 |
-| `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` (미구현, [IMPL-017](../TASKS.md#impl-017-감정표현-구현)) |
+| `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` (로컬·AI 구현, 온라인 후속, [IMPL-017](../TASKS.md#impl-017-감정표현-구현)) |
 | `BOARD_ROTATE_NOT_ALLOWED` | 조준 단계가 아니거나(알 이동 중 등) 기절 중의 `board:rotate` ([DEC-036](../DECISIONS.md#결정-색인)). 상대 턴은 `NOT_YOUR_TURN`. [DEC-063](../DECISIONS.md#결정-색인) 확정 |
 
 방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A가 GAME·LOCAL·OPERATIONS와 대조해 확인했다([API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)). 목록은 이 절 한 곳에서 관리한다.
@@ -106,7 +106,7 @@
 | S → C | `room:state` | 방 상태(대기 중·상대 입장으로 시작됨) |
 | S → C | `room:closed` | 방장 이탈·재도전 시간 초과로 방에서 나가짐 |
 | S → C | `game:start` | 게임 시작 (판, 알 배치, 선공) |
-| S → C | `hazard:granted` | 방해요소 지급·교체 (게임 시작과 3·5·7·9라운드 시작. 받은 플레이어에게만 전송). DEC-055 구현 뒤에는 발사 턴마다 교체([추가 방해요소 10종 필드](#추가-방해요소-10종-필드-haz-001)) |
+| S → C | `hazard:granted` | 방해요소 지급·교체 (게임 시작과 3·5·7·9라운드 시작. 받은 플레이어에게만 전송). [DEC-067](../DECISIONS.md#결정-색인)부터 라운드마다(두 좌석이 한 번씩 쏜 뒤) 교체([추가 방해요소 10종 필드](#추가-방해요소-10종-필드-haz-001)) |
 | C → S | `hazard:use` | 방해요소 사용 |
 | S → C | `hazard:triggered` | 방해요소 발동·종료 알림 (양쪽 공개) |
 | S → C | `game:state` | 플레이어별 현재 게임 상태 (플레이어별 뷰) |
@@ -121,8 +121,8 @@
 | C → S | `aim:update` | 내 조준·몸짓 상태 `{ gameId, mode, stoneId?, angle?, power?, kind?, target? }`. ack 없음, volatile, 초당 20회 이하 (제안, DEC-036) |
 | S → C | `aim:state` | 상대의 `aim:update`에 `seat`를 붙여 상대에게만 중계 (제안, DEC-036) |
 | S → C | `session:replaced` | 다른 접속으로 대체되어 로그아웃됨 |
-| C → S | `emote:send` | 감정표현 보내기 (미구현, [감정표현 필드](#감정표현-필드-emote-001)) |
-| S → C | `emote:shown` | 감정표현 표시 (양쪽, 미구현) |
+| C → S | `emote:send` | 감정표현 보내기 (로컬·AI 구현, 온라인 후속, [감정표현 필드](#감정표현-필드-emote-001)) |
+| S → C | `emote:shown` | 감정표현 표시 (양쪽, 로컬·AI 구현, 온라인 후속) |
 
 `sim:result`(일괄 기록 이벤트)는 두지 않는다. 실시간 진행은 `game:state`로, 방해요소 발동은 `hazard:triggered`로 전달한다 ([ADR-0004](../adr/0004-realtime-hazards.md), [DEC-016](../DECISIONS.md#결정-색인)).
 
@@ -261,15 +261,15 @@ sequenceDiagram
 
 | 항목 | 변경 |
 | --- | --- |
-| 교체 지급 | 발사 턴이 바뀔 때마다 두 좌석에 `hazard:granted`를 보낸다. `{ gameId, hazardInstanceId, kind, round, turnId, replaced }`로 `turnId`(교체 뒤 새 턴)를 더한다. 순서는 [이벤트 순서](#이벤트-순서) 규칙 3의 라운드 교체 지급과 같으며 이제 매 턴 적용한다(경기 종료 턴 제외) |
+| 교체 지급 | 라운드가 바뀔 때마다(두 좌석이 한 번씩 쏜 뒤, [DEC-067](../DECISIONS.md#결정-색인)) 두 좌석에 `hazard:granted`를 보낸다. `{ gameId, hazardInstanceId, kind, round, turnId, replaced }`로 `turnId`(교체 뒤 새 턴)를 더한다. 순서는 [이벤트 순서](#이벤트-순서) 규칙 3의 라운드 교체 지급과 같다(경기 종료 턴 제외) |
 | `hazard:use.target` | 종류별로 아래 형식만 받고 그 밖의 필드·누락은 `INVALID_INPUT`이다. 좌표는 판 좌표계 cm |
 | `magnet`·`reverse_zone`·`mine`·`pit` | `{ x, y }` |
 | `gravity_zone` | `{ x, y, directionRad }`. `directionRad`는 판 좌표계 라디안이며 서버가 45° 단위로 반올림한다([DEC-058](../DECISIONS.md#결정-색인)) |
-| `fake_wall`·`moving_wall` | `{ x, y, orientation }`. 벽 격자에 스냅한다. `fake_wall`의 `orientation`은 세 벽의 방향, `moving_wall`은 왕복 축이다 |
+| `fake_wall`·`moving_wall` | `{ x, y, orientation }`. 벽 격자에 스냅한다. `fake_wall`은 지정 위치에 진짜 벽, 무작위 위치에 가짜 두 벽을 같은 시각으로 생성하며 `orientation`은 세 벽의 방향([DEC-066](../DECISIONS.md#결정-색인)), `moving_wall`은 왕복 축이다 |
 | `decoy` | `{ stoneId }`. 내 멈춘 지면 알의 id |
 | `ice_floor`·`heavy_stones` | `target` 없음 |
 | 거부 | 판 밖·다른 설치물과 겹침·알과 겹침(벽·가짜벽·폭탄·구멍)·내 알이 아니거나 움직이는 알(분신술)·허상 자리 부족은 `HAZARD_INVALID_TARGET`. 턴당 1회형의 두 번째 사용은 `HAZARD_NOT_USABLE`. 거부는 상태·난수를 바꾸지 않는다 |
-| `hazard:triggered.params` | `magnet`·`reverse_zone`·`mine`·`pit`은 `{ x, y }`, `gravity_zone`은 `{ x, y, directionRad, angleDeg }`(`angleDeg`는 판 돌리기로 돈 정사각 구역의 각, 구현 해석·확인 필요), `moving_wall`은 `{ x, y, orientation, angleDeg }`(왕복 위치는 `startsAtMs`와 `shared` 수치로 클라이언트가 계산), `fake_wall`·`wall`은 벽마다 기존 벽과 같은 `{ x, y, orientation, angleDeg }`, `mine`의 `end`에는 터졌는지 `exploded`를 더한다 |
+| `hazard:triggered.params` | `magnet`·`reverse_zone`·`mine`·`pit`은 `{ x, y }`, `gravity_zone`은 `{ x, y, directionRad, angleDeg }`(`angleDeg`는 판 돌리기로 돈 정사각 구역의 각, DEC-066 확정), `moving_wall`은 `{ x, y, orientation, angleDeg }`(왕복 위치는 `startsAtMs`와 `shared` 수치로 클라이언트가 계산), `fake_wall`·`wall`은 벽마다 기존 벽과 같은 `{ x, y, orientation, angleDeg }`, `mine`의 `end`에는 터졌는지 `exploded`를 더한다 |
 | 속임수형 발동 안내 | `fake_wall`: 시전자·상대 모두 같은 `kind: wall` 안내 3개(`real` 없음, 좌표순, [DEC-058](../DECISIONS.md#결정-색인)). `decoy`·`heavy_stones`: 시전자에게만 보내고 상대에게는 보내지 않는다. 나머지 7종은 양쪽에 같게 보낸다 |
 | `GameView` | 공개 필드 `stoneCounts: [n0, n1]`(진짜 남은 알 수)를 더한다([DEC-058](../DECISIONS.md#결정-색인)). 분신술 중 진짜 알은 원래 id를 유지하고 허상은 새 id를 받는다. 상대 뷰의 `stones`에는 진짜 알과 허상 2개가 함께 들어가고, 시전자 뷰에는 허상을 `decoys: [{ decoyId, x, y }]`로 따로 담는다. 가짜벽은 양쪽 모두 `wall` 효과 3개(`real` 없음)다. `heavy_stones`·`decoy` 효과는 시전자 뷰에만 넣는다 |
 | `private` | 변화 없음. 턴당 1회형은 `fatigueGauge: null`·`cooldownEndsAtMs: null`이고 사용 뒤 `usable: false`다 |
@@ -277,7 +277,7 @@ sequenceDiagram
 
 ### 감정표현 필드 (EMOTE-001)
 
-계약 확정([DEC-063](../DECISIONS.md#결정-색인))·미구현([DEC-056](../DECISIONS.md#결정-색인), 구현 [IMPL-017](../TASKS.md#impl-017-감정표현-구현)). 제품 규칙은 [PRD 감정표현](../PRD.md#감정표현-dec-056)을 따른다. 감정표현은 경기 상태(`Game`)를 바꾸지 않으므로 `game-core`에 넣지 않고 `game-runtime`이 쿨타임 검사와 중계를 맡는다. 그래서 온라인 서버·로컬 2인 SharedWorker·AI Worker가 같은 규칙을 쓴다.
+계약 확정([DEC-063](../DECISIONS.md#결정-색인)). 로컬·AI는 구현했고 서버 Socket.IO 연결·온라인 확인은 후속이다([DEC-065](../DECISIONS.md#결정-색인), [IMPL-017](../TASKS.md#impl-017-감정표현-구현)). 제품 규칙은 [PRD 감정표현](../PRD.md#감정표현-dec-056)을 따른다. 감정표현은 경기 상태(`Game`)를 바꾸지 않으므로 `game-core`에 넣지 않고 `game-runtime`이 쿨타임 검사와 중계를 맡는다. 그래서 온라인 서버·로컬 2인 SharedWorker·AI Worker가 같은 규칙을 쓴다.
 
 | 항목 | 내용 |
 | --- | --- |
@@ -288,7 +288,7 @@ sequenceDiagram
 | 저장·로그 | 저장하지 않고 `revision`·`game:state`에 넣지 않는다. 재도전으로 새 경기가 시작되면 쿨타임 기록은 새로 시작한다 |
 | 로컬 2인·AI | `GameSession`에 `sendEmote(cmd): Promise<CommandResult>`와 `emote:shown` 구독을 더한다([LOCAL](LOCAL.md#gamesession-시그니처)). AI 컨트롤러는 좌석 1 명령으로 같은 `emote:send`를 보내 같은 쿨타임 검사를 받는다 |
 | 비공개 점검 | 보유 방해요소·사용자 번호가 들어갈 필드가 없다. 좌석·종류·시각만 담는다 |
-| 몸짓 | 아바타 몸짓 정의는 사람 아바타 구조가 정해진 뒤 정한다([CHAR-001](../TASKS.md#char-001-사람-아바타-전환과-꾸미기-설계)). 이벤트 필드는 몸짓과 관계없다 |
+| 몸짓 | 아바타 몸짓은 [DEC-062](../DECISIONS.md#결정-색인)와 [PRD](../PRD.md#감정표현-dec-056)를 따른다. 이벤트 필드는 몸짓과 관계없다 |
 
 ### 상대 비공개 필드 점검
 
@@ -309,7 +309,7 @@ sequenceDiagram
 | `game:over` | `winnerId`, `reason`, `remainingStones`, `rematchDeadlineMs` | 없음. 남은 보유 방해요소를 공개하지 않음 | 통과 |
 | `rematch:state` | 요청 여부, 마감 시각, 결과 | 없음 | 통과 |
 | `session:replaced` | `reason` (본인 연결에만) | 해당 없음 | 통과 |
-| `emote:shown` (미구현) | `seat`, `emote`, `atMs` | 없음 | 통과 |
+| `emote:shown` (로컬·AI 구현, 온라인 후속) | `seat`, `emote`, `atMs` | 없음 | 통과 |
 
 - 랜덤형 방해요소(`bar_speed`·`wind`)의 자동 발동 시각은 지급 때 시드로 정해지지만 발동 전에는 어떤 이벤트에도 담지 않는다. 발동한 뒤 `hazard:triggered`로만 양쪽에 알린다.
 - 사용자 번호(`users.id`)는 어떤 이벤트·응답에도 담지 않고 좌석 값과 닉네임만 쓴다([DEC-030](../DECISIONS.md#결정-색인)).

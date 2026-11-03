@@ -114,6 +114,94 @@ function shotCmd(t: FakeTransport, seat: Seat, power = 1, angle = 0) {
 }
 
 describe('RoomRuntime', () => {
+  describe('감정표현(IMPL-017)', () => {
+    test('두 좌석에 신뢰 중계하고 경기 상태·revision·로그·종료를 바꾸지 않는다', async () => {
+      const { rt, transport, logs, finished } = setup();
+      const beforeLogs = logs.length;
+      const beforeStateCount = transport.of('game:state').length;
+      assert.deepEqual(await rt.sendEmote(0, { gameId: 'g1', emote: 'gg' }), { ok: true });
+      const shown = transport.of('emote:shown');
+      assert.deepEqual(
+        shown.map((e) => e.seat),
+        [0, 1],
+      );
+      assert.deepEqual(shown[0]!.payload, { gameId: 'g1', seat: 0, emote: 'gg', atMs: 1_000_000 });
+      assert.equal(
+        shown.every((e) => !e.opts.volatile),
+        true,
+      );
+      assert.equal(transport.of('game:state').length, beforeStateCount);
+      assert.equal(logs.length, beforeLogs);
+      assert.equal(finished.length, 0);
+      rt.dispose();
+    });
+
+    test('표현 유무와 관계없이 같은 시드·발사는 동일한 전체 뷰·결과를 만든다', async () => {
+      const plain = setup();
+      const expressive = setup();
+      await expressive.rt.sendEmote(0, { gameId: 'g1', emote: 'gg' });
+      await expressive.rt.sendEmote(1, { gameId: 'g1', emote: 'taunt' });
+      for (const env of [plain, expressive]) {
+        const pending = env.rt.submitShot(0, shotCmd(env.transport, 0, 50, Math.PI / 2));
+        env.clock.advance(20);
+        assert.equal((await pending).ok, true);
+      }
+      // 이동 중에도 감정표현이 동작하며 상대 쪽 결과·종료 콜백도 바뀌지 않는다.
+      expressive.clock.advance(3000);
+      plain.clock.advance(3000);
+      await expressive.rt.sendEmote(0, { gameId: 'g1', emote: 'surprise' });
+      expressive.clock.advance(5000);
+      plain.clock.advance(5000);
+      const gameEvents = (transport: FakeTransport) =>
+        transport.sent.filter((e) => e.type !== 'emote:shown');
+      assert.deepEqual(gameEvents(expressive.transport), gameEvents(plain.transport));
+      assert.deepEqual(expressive.logs, plain.logs);
+      assert.deepEqual(expressive.finished, plain.finished);
+      plain.rt.dispose();
+      expressive.rt.dispose();
+    });
+
+    test('좌석별 공통 쿨타임, 거부 시각 불변, 정확히 2.8초 수락, 재도전 초기화', async () => {
+      const { rt, clock } = setup();
+      assert.equal((await rt.sendEmote(0, { gameId: 'g1', emote: 'yawn' })).ok, true);
+      assert.equal((await rt.sendEmote(1, { gameId: 'g1', emote: 'laugh' })).ok, true);
+      clock.advance(2799);
+      assert.deepEqual(await rt.sendEmote(0, { gameId: 'g1', emote: 'taunt' }), {
+        ok: false,
+        error: { code: 'EMOTE_COOLDOWN', message: '감정표현을 잠시 뒤에 다시 사용해 주세요' },
+      });
+      clock.advance(1);
+      assert.equal((await rt.sendEmote(0, { gameId: 'g1', emote: 'doze' })).ok, true);
+      const end = rt.forfeit(0, { gameId: 'g1' });
+      clock.advance(20);
+      await end;
+      assert.equal((await rt.sendEmote(0, { gameId: 'g1', emote: 'gg' })).ok, false);
+      rt.startGame({ ...CONFIG, gameId: 'g2' });
+      assert.equal((await rt.sendEmote(0, { gameId: 'g2', emote: 'gg' })).ok, true);
+      rt.dispose();
+    });
+
+    test('미시작·종료·다른 경기·잘못된 종류와 여분 필드를 거부한다', async () => {
+      const clock = new FakeClock();
+      const transport = new FakeTransport();
+      const rt = new RoomRuntime({ clock, transport });
+      assert.equal((await rt.sendEmote(0, { gameId: 'g1', emote: 'gg' })).ok, false);
+      rt.startGame(CONFIG);
+      for (const cmd of [
+        { gameId: 'g1', emote: 'unknown' },
+        { gameId: 'g1', emote: 'gg', seat: 1 },
+      ]) {
+        const result = await rt.sendEmote(0, cmd as never);
+        assert.equal(!result.ok && result.error.code, 'INVALID_INPUT');
+      }
+      const stale = await rt.sendEmote(0, { gameId: 'other', emote: 'gg' });
+      assert.equal(!stale.ok && stale.error.code, 'GAME_NOT_ACTIVE');
+      assert.equal(transport.of('emote:shown').length, 0);
+      rt.dispose();
+      assert.equal((await rt.sendEmote(0, { gameId: 'g1', emote: 'gg' })).ok, false);
+    });
+  });
+
   describe('정상', () => {
     test('시작하면 좌석별 game:start와 본인 방해요소만 보낸다', () => {
       const { transport } = setup();

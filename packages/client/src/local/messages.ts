@@ -3,6 +3,7 @@ import type { BoardId, CommandResult, Seat, ThemeId } from '@alkkagi/shared';
 import type { GameEventMap } from '../session/game-session.ts';
 
 export type LocalCommand =
+  | { kind: 'emote'; payload: unknown }
   | { kind: 'shot'; payload: unknown }
   | { kind: 'hazard'; payload: unknown }
   | { kind: 'forfeit'; payload: unknown }

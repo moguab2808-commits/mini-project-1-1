@@ -4,6 +4,7 @@
 // 좌표: 판 중심 원점, 단위 cm, 서버(game-core) 기준 좌표계다(선공 기준 x 오른쪽·y 상대 방향).
 // 후공 화면은 장면이 카메라를 180도 돌려 "내 알이 아래쪽"으로 보이게 하고, 포인터 좌표는
 // 항상 서버 기준 좌표로 역변환해 넘긴다(GAME "물리와 입력 경계").
+import type { DisplayEmote } from '../emotes.ts';
 import type { AimUpdate, GameStart, GameView, HazardKind, Seat } from '@alkkagi/shared';
 
 export interface AimRenderState {
@@ -104,6 +105,7 @@ export interface SceneProps {
   poses: [CharacterPose | null, CharacterPose | null];
   /** 새로 생긴 반응(배열 끝이 최신). 장면은 처음 보는 id만 재생한다 */
   reactions: readonly Reaction[];
+  emotes?: readonly [DisplayEmote | null, DisplayEmote | null];
   /**
    * 평소 시점(생략하면 `default`: 내 캐릭터 눈높이보다 조금 높은 곳에서 내려다본다).
    * 알을 조준·발사하는 동안(`aim`이 있을 때)은 장면이 1인칭으로 바꾸고 끝나면 이 시점으로 돌아온다.

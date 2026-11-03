@@ -138,15 +138,41 @@ export function movingWallAt(
   };
 }
 
-/** 가짜벽 세 벽: 클릭한 격자 위치를 가운데로 벽에 수직 방향으로 간격을 두고 나란히 둔다 */
-export function fakeWallTriple(
+/**
+ * 클릭한 진짜 벽과 무작위 허상 두 곳을 함께 계획한다. 경기 상태·보관 난수는 바꾸지 않는다.
+ * 후보를 섞은 뒤 가능한 쌍을 찾아, 한 후보가 남은 공간을 막아도 다른 쌍을 확인한다.
+ */
+export function planFakeWalls(
   x: number,
   y: number,
   orientation: 'horizontal' | 'vertical',
-): Obb[] {
-  const d = HAZARD_TUNING.fakeWallSpacing;
-  const [ox, oy] = orientation === 'horizontal' ? [0, d] : [d, 0];
-  return [-1, 0, 1].map((k) => makeWall(x + k * ox, y + k * oy, orientation));
+  world: PlacementWorld,
+  random: () => number,
+): Obb[] | null {
+  if (!isPlacementValid('fake_wall', x, y, orientation, world)) return null;
+  const real = makeWall(x, y, orientation);
+  const withReal = { ...world, walls: [...world.walls, real] };
+  const half = (world.board.shape === 'square' ? world.board.size : world.board.diameter) / 2;
+  const edge = Math.floor(half / HAZARD_TUNING.gridStep);
+  const candidates: Obb[] = [];
+  for (let ix = -edge; ix <= edge; ix++) {
+    for (let iy = -edge; iy <= edge; iy++) {
+      const wall = makeWall(ix * HAZARD_TUNING.gridStep, iy * HAZARD_TUNING.gridStep, orientation);
+      if (isWallPlaceable(wall, withReal)) candidates.push(wall);
+    }
+  }
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j]!, candidates[i]!];
+  }
+  for (let i = 0; i < candidates.length - 1; i++) {
+    const first = candidates[i]!;
+    const withFirst = { ...withReal, walls: [...withReal.walls, first] };
+    for (let j = i + 1; j < candidates.length; j++) {
+      if (isWallPlaceable(candidates[j]!, withFirst)) return [real, first, candidates[j]!];
+    }
+  }
+  return null;
 }
 
 const circle = (cx: number, cy: number, radius: number): Footprint => ({
@@ -156,7 +182,7 @@ const circle = (cx: number, cy: number, radius: number): Footprint => ({
   radius,
 });
 
-/** 새 설치 후보의 차지 영역(가짜벽은 3개). 격자 스냅은 호출 쪽이 한다 */
+/** 새 설치 후보의 차지 영역. 가짜벽은 선택한 진짜 벽만 미리 보인다. 격자 스냅은 호출 쪽이 한다 */
 export function installFootprints(
   kind: InstallKind,
   x: number,
@@ -166,9 +192,8 @@ export function installFootprints(
   const T = HAZARD_TUNING;
   switch (kind) {
     case 'wall':
-      return [{ type: 'obb', obb: makeWall(x, y, orientation) }];
     case 'fake_wall':
-      return fakeWallTriple(x, y, orientation).map((obb) => ({ type: 'obb', obb }));
+      return [{ type: 'obb', obb: makeWall(x, y, orientation) }];
     case 'sticky':
       return [circle(x, y, T.stickyDiameter / 2)];
     case 'magnet':
@@ -271,7 +296,7 @@ export function isStickyPlaceable(area: PlacementCircle, world: PlacementWorld):
 
 /**
  * 설치 후보 하나의 배치 가능 여부. 벽 계열은 격자 위인지도 본다.
- * 가짜벽은 진짜가 정해지기 전에 판정하므로 세 벽 모두 알과 겹치지 않아야 한다(진짜를 거부로 추정하지 못하게).
+ * 가짜벽은 클릭한 진짜 벽을 판정하고, 추가 두 벽은 권한 측이 전체 배치를 계획한다.
  */
 export function isPlacementValid(
   kind: InstallKind,

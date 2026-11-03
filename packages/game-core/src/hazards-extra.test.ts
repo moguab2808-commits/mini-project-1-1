@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'vitest';
 import { HAZARD_TUNING, type HazardKind, type HazardUse, type Seat } from '@alkkagi/shared';
-import { movingWallAt } from './placement.ts';
+import { movingWallAt, isWallPlaceable } from './placement.ts';
+import { rotate, makeWall, circleVsObb } from './geometry.ts';
+import { BOARDS } from '@alkkagi/shared';
 import { TestGame as Game } from './testing.ts';
 
 const T0 = 1_000_000;
@@ -274,6 +276,123 @@ describe('속임수형 뷰 경계 (DEC-058)', () => {
     const json = JSON.stringify([a, b, ev]);
     for (const word of ['real', 'fake', 'fake_wall']) assert.equal(json.includes(word), false);
     assert.equal(g.debugState().walls.length, 1, '진짜 1개만 물리 벽');
+  });
+
+  test('가짜벽의 진짜는 클릭한 위치이며 세 벽은 동시에 생기고 순서로 진짜를 누설하지 않는다', () => {
+    const g = mk(77);
+    assert.equal(code(use(g, 0, T0, 'fake_wall', { x: 0, y: 0, orientation: 'horizontal' })), 'OK');
+    assert.deepEqual(g.debugState().walls, [makeWall(0, 0, 'horizontal')]);
+    const effects = g.debugState().effects.filter((e) => e.kind === 'wall');
+    assert.equal(effects.length, 3);
+    assert.equal(effects.filter((e) => !e.fake).length, 1);
+    assert.equal(new Set(effects.map((e) => e.startsAtMs)).size, 1);
+    assert.equal(new Set(effects.map((e) => e.expiresAtMs)).size, 1);
+    const walls = effects.map((e) => e.wall!);
+    const stones = g.debugState().stones.filter((stone) => stone.alive);
+    walls.forEach((wall, i) =>
+      assert.equal(
+        isWallPlaceable(wall, {
+          board: BOARDS.standard,
+          stones,
+          walls: walls.filter((_, j) => j !== i),
+          stickies: [],
+        }),
+        true,
+      ),
+    );
+    const publicWalls = g
+      .getViewFor(1)
+      .effects.filter((e) => e.kind === 'wall')
+      .map((e) => [e.params!.x!, e.params!.y!]);
+    assert.deepEqual(
+      publicWalls,
+      [...publicWalls].sort((a, b) => a[0]! - b[0]! || a[1]! - b[1]!),
+    );
+    assert.notDeepEqual(
+      walls.slice(1).map((w) => [w.cx, w.cy]),
+      [
+        [0, -6.6],
+        [0, 6.6],
+      ],
+    );
+  });
+
+  test('진짜 벽이 잘못된 위치면 부분 설치·쿨타임·상태·난수 소비 없이 실패한다', () => {
+    const g = mk();
+    g.debugGrant(0, 'fake_wall');
+    g.drainEvents();
+    const state = JSON.stringify([
+      g.getViewFor(0),
+      g.getViewFor(1),
+      g.debugState(),
+      g.debugPrngStates(),
+    ]);
+    for (const target of [
+      { x: 22, y: 0, orientation: 'horizontal' as const },
+      { x: 0, y: -11, orientation: 'horizontal' as const },
+    ]) {
+      assert.equal(code(again(g, 0, T0, target)), 'HAZARD_INVALID_TARGET');
+      assert.equal(
+        JSON.stringify([g.getViewFor(0), g.getViewFor(1), g.debugState(), g.debugPrngStates()]),
+        state,
+      );
+      assert.deepEqual(g.drainEvents(), []);
+    }
+  });
+
+  test('분신과 옮긴 진짜 알은 벽·구멍과 겹치지 않게 배치된다', () => {
+    let placed = 0;
+    for (let seed = 0; seed < 12; seed++) {
+      const g = mk(seed);
+      clearLane(g);
+      assert.equal(code(use(g, 1, T0, 'pit', { x: 8, y: -11 })), 'OK');
+      assert.equal(code(use(g, 1, T0, 'wall', { x: 0, y: -4.4, orientation: 'horizontal' })), 'OK');
+      const result = use(g, 0, T0, 'decoy', { stoneId: 2 });
+      if (!result.ok) continue;
+      placed++;
+      const view = g.getViewFor(0);
+      const real = view.stones.find((s) => s.id === 2)!;
+      const spots = [real, ...view.decoys!];
+      assert.equal(spots.length, 3);
+      for (const spot of spots) {
+        assert.equal(circleVsObb(spot.x, spot.y, 1.1, makeWall(0, -4.4, 'horizontal')), null);
+        assert.ok(Math.hypot(spot.x - 8, spot.y + 11) >= HAZARD_TUNING.pitDiameter / 2 + 1.1);
+      }
+    }
+    assert.ok(placed > 0);
+  });
+
+  test('분신·실제 알·가짜벽 세 곳은 판 돌리기 때 같은 각도로 회전한다', () => {
+    const g = mk(99);
+    clearLane(g);
+    assert.equal(code(use(g, 0, T0, 'decoy', { stoneId: 2 })), 'OK');
+    assert.equal(
+      code(use(g, 1, T0, 'fake_wall', { x: 0, y: 4.4, orientation: 'horizontal' })),
+      'OK',
+    );
+    const before = g.getViewFor(0);
+    assert.equal(
+      g.rotateBoard(env(0, T0), { gameId: 'g1', turnId: before.turnId, deltaDeg: 45 }).ok,
+      true,
+    );
+    const after = g.getViewFor(0);
+    const realBefore = before.stones.find((s) => s.id === 2)!;
+    const realAfter = after.stones.find((s) => s.id === 2)!;
+    const [realX, realY] = rotate(realBefore.x, realBefore.y, Math.PI / 4);
+    assert.ok(Math.abs(realAfter.x - realX) < 1e-9 && Math.abs(realAfter.y - realY) < 1e-9);
+    for (const original of before.decoys!) {
+      const moved = after.decoys!.find((d) => d.decoyId === original.decoyId)!;
+      const [x, y] = rotate(original.x, original.y, Math.PI / 4);
+      assert.ok(Math.abs(moved.x - x) < 1e-9 && Math.abs(moved.y - y) < 1e-9);
+    }
+    before.effects
+      .filter((e) => e.kind === 'wall')
+      .forEach((e, i) => {
+        const moved = after.effects.filter((next) => next.kind === 'wall')[i]!;
+        const [x, y] = rotate(e.params!.x!, e.params!.y!, Math.PI / 4);
+        assert.ok(Math.abs(moved.params!.x! - x) < 1e-9 && Math.abs(moved.params!.y! - y) < 1e-9);
+        assert.equal(moved.params!.angleDeg, e.params!.angleDeg! + 45);
+      });
   });
 
   test('분신술: 시전자는 decoys로, 상대는 일반 알로 받고 상대에게는 안내가 없다', () => {

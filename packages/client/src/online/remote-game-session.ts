@@ -3,6 +3,7 @@ import type {
   AimUpdate,
   BoardRotate,
   CommandResult,
+  EmoteSend,
   GameForfeit,
   HazardAim,
   HazardUse,
@@ -60,6 +61,14 @@ export class RemoteGameSession implements GameSession {
   }
   useHazard(cmd: HazardUse): Promise<CommandResult> {
     return this.command('hazard:use', cmd);
+  }
+  /** DEC-065: 온라인 감정표현 중계는 후속 작업. 공통 화면은 mode로 메뉴를 숨긴다. */
+  sendEmote(cmd: EmoteSend): Promise<CommandResult> {
+    void cmd;
+    return Promise.resolve({
+      ok: false,
+      error: { code: 'GAME_NOT_ACTIVE', message: '온라인 감정표현은 아직 지원하지 않는다' },
+    });
   }
   forfeit(cmd: GameForfeit): Promise<CommandResult> {
     return this.command('game:forfeit', cmd);

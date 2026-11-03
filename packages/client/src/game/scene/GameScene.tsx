@@ -84,6 +84,7 @@ import {
   type RemovedStone,
   type SampledStone,
 } from './snapshot-buffer.ts';
+import { emoteAgeMs, EMOTE_DURATION_MS } from '../emotes.ts';
 import { buildStage, createStoneKit } from './stage.ts';
 
 export function GameScene(props: SceneProps) {
@@ -144,7 +145,11 @@ interface Runtime {
   prevSeen: Int32Array;
   frameNo: number;
   cam: ReturnType<typeof createCameraState>;
-  preset: { name: NonNullable<SceneProps['cameraPreset']>; nonce: number; seat: Seat };
+  preset: {
+    name: NonNullable<SceneProps['cameraPreset']>;
+    nonce: number;
+    seat: Seat;
+  };
   drag: ReturnType<typeof createRightDrag>;
   reactions: ReturnType<typeof createReactionTracker>;
   seats: [SeatAnim, SeatAnim];
@@ -160,7 +165,14 @@ interface Runtime {
 const MAX_IDS = 256;
 
 function makeSeatAnim(): SeatAnim {
-  const aim = { stoneId: 0, stone: v3(), dir: v3(0, 0, 1), pull: 0, reachable: true, strain: 0 };
+  const aim = {
+    stoneId: 0,
+    stone: v3(),
+    dir: v3(0, 0, 1),
+    pull: 0,
+    reachable: true,
+    strain: 0,
+  };
   const hold = { kind: 'flashlight' as const, target: v3() };
   const frame: CharacterFrame = {
     dt: 0,
@@ -777,6 +789,15 @@ function SceneWorld(props: SceneProps) {
       }
 
       // 몸짓·바라보기·가림
+      const emote = p.emotes?.[seat];
+      const emoteAge =
+        emote && emote.gameId === p.start.gameId && p.view.phase !== 'finished'
+          ? emoteAgeMs(emote, Date.now(), nowServer)
+          : -1;
+      fr.emote =
+        emote && emoteAge >= 0 && emoteAge < EMOTE_DURATION_MS
+          ? { kind: emote.emote, ageMs: emoteAge }
+          : null;
       fr.gesture = sa.steps ? gestureAt(sa.steps, t - sa.stepsStart) : 'neutral';
       if (sa.steps && fr.gesture === 'neutral' && t - sa.stepsStart > 1) sa.steps = null;
       other.headWorld(tmp.head);
@@ -892,6 +913,9 @@ function SceneWorld(props: SceneProps) {
       cam.updateProjectionMatrix();
     }
     stage.lamp.visible = cam.position.y < 70;
+    cam.updateMatrixWorld();
+    rigs[0].layoutBubble(cam);
+    rigs[1].layoutBubble(cam);
   });
 
   return (

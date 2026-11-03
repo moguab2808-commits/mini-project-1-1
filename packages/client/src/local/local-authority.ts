@@ -170,6 +170,8 @@ export class LocalAuthority {
         ok: false,
         error: { code: 'GAME_NOT_ACTIVE', message: '진행 중인 경기가 없다' },
       });
+    } else if (msg.kind === 'emote') {
+      result = runtime.sendEmote(conn.seat, msg.payload as never);
     } else if (msg.kind === 'shot') {
       result = runtime.submitShot(conn.seat, msg.payload as never);
     } else if (msg.kind === 'hazard') {

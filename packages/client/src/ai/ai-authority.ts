@@ -137,6 +137,7 @@ export class AiAuthority {
     let result: Promise<CommandResult>;
     if (msg.kind === 'rematch') result = Promise.resolve(this.requestRematch(msg.payload));
     else if (!runtime) result = Promise.resolve(NOT_ACTIVE);
+    else if (msg.kind === 'emote') result = runtime.sendEmote(HUMAN_SEAT, msg.payload as never);
     else if (msg.kind === 'shot') result = runtime.submitShot(HUMAN_SEAT, msg.payload as never);
     else if (msg.kind === 'hazard') result = runtime.useHazard(HUMAN_SEAT, msg.payload as never);
     else if (msg.kind === 'forfeit') result = runtime.forfeit(HUMAN_SEAT, msg.payload as never);
@@ -185,6 +186,7 @@ export class AiAuthority {
       tuning: this.opts.aiTuning,
       onError: this.opts.onError,
       actions: {
+        sendEmote: (cmd) => runtime.sendEmote(AI_SEAT, cmd),
         submitShot: (cmd) => runtime.submitShot(AI_SEAT, cmd),
         useHazard: (cmd) => runtime.useHazard(AI_SEAT, cmd),
         rotateBoard: (cmd) => runtime.rotateBoard(AI_SEAT, cmd),

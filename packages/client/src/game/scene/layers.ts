@@ -527,19 +527,10 @@ export class AimLayer {
         case 'wall':
           this.showWall(0, x, y, horizontal ? 0 : Math.PI / 2);
           break;
-        case 'fake_wall': {
-          // 세 벽이 벽에 수직 방향으로 나란히 선다(game-core fakeWallTriple과 같은 배치)
-          const d = T.fakeWallSpacing;
-          for (let k = -1; k <= 1; k++) {
-            this.showWall(
-              k + 1,
-              x + (horizontal ? 0 : k * d),
-              y + (horizontal ? k * d : 0),
-              horizontal ? 0 : Math.PI / 2,
-            );
-          }
+        case 'fake_wall':
+          // 선택한 진짜 벽만 표시한다. 나머지 두 허상은 사용 시 권한 측이 무작위로 놓는다.
+          this.showWall(0, x, y, horizontal ? 0 : Math.PI / 2);
           break;
-        }
         case 'moving_wall': {
           // 왕복 축이 orientation이고 벽은 축에 수직이다
           const wallAngle = horizontal ? Math.PI / 2 : 0;

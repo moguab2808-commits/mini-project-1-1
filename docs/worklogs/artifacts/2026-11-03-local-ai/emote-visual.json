@@ -1,0 +1,37 @@
+{
+  "browser": "131.0.6778.33",
+  "renderer": "SwiftShader",
+  "scenarios": [
+    {
+      "kind": "yawn",
+      "aiming": false,
+      "screenshot": "emote-yawn.png"
+    },
+    {
+      "kind": "taunt",
+      "aiming": false,
+      "screenshot": "emote-taunt.png"
+    },
+    {
+      "kind": "doze",
+      "aiming": false,
+      "screenshot": "emote-doze.png"
+    },
+    {
+      "kind": "gg",
+      "aiming": false,
+      "screenshot": "emote-gg.png"
+    },
+    {
+      "kind": "laugh",
+      "aiming": false,
+      "screenshot": "emote-laugh.png"
+    },
+    {
+      "kind": "surprise",
+      "aiming": false,
+      "screenshot": "emote-surprise.png"
+    }
+  ],
+  "errors": []
+}

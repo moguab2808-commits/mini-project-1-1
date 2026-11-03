@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { BOARDS } from '@alkkagi/shared';
 import { makeWall } from './geometry.ts';
+import { Prng } from './prng.ts';
 import {
   isOnWallGrid,
+  isWallPlaceable,
+  planFakeWalls,
   isPlacementValid,
   snapToWallGrid,
   wallFromParams,
@@ -57,6 +60,41 @@ describe('배치 판정', () => {
         world({ stickies: [{ cx: 5, cy: 0, radius: 4.4 }] }),
       ),
     ).toBe(false);
+  });
+
+  it('가짜벽: 선택한 진짜와 두 무작위 벽은 모두 알·설치물·서로를 피하고 같은 시드에서 같다', () => {
+    const w = world({
+      walls: [makeWall(0, 8.8, 'vertical')],
+      stickies: [{ cx: -15, cy: 0, radius: 3 }],
+    });
+    const run = (seed: number) => {
+      const rng = new Prng(seed);
+      return planFakeWalls(0, 0, 'horizontal', w, () => rng.next());
+    };
+    const planned = run(71)!;
+    expect(planned).toHaveLength(3);
+    expect(planned[0]).toEqual(makeWall(0, 0, 'horizontal'));
+    expect(run(71)).toEqual(planned);
+    expect(run(72)).not.toEqual(planned);
+    for (let i = 0; i < planned.length; i++) {
+      expect(
+        isWallPlaceable(planned[i]!, {
+          ...w,
+          walls: [...w.walls, ...planned.filter((_, j) => j !== i)],
+        }),
+      ).toBe(true);
+    }
+  });
+
+  it('가짜벽은 판 밖·알 위 진짜 위치와 추가 두 곳이 없는 판을 거부한다', () => {
+    expect(planFakeWalls(22, 0, 'horizontal', world(), () => 0.5)).toBeNull();
+    expect(planFakeWalls(0, -11, 'horizontal', world(), () => 0.5)).toBeNull();
+    const tiny: PlacementWorld = {
+      ...world({ stones: [-3, -2, -1, 1, 2, 3].map((n) => ({ x: 0, y: n * 2.2 })) }),
+      board: { id: 'standard', shape: 'square', size: 14 },
+    };
+    expect(isPlacementValid('fake_wall', 0, 0, 'horizontal', tiny)).toBe(true);
+    expect(planFakeWalls(0, 0, 'horizontal', tiny, () => 0.5)).toBeNull();
   });
 
   it('효과 params에서 벽을 복원한다', () => {

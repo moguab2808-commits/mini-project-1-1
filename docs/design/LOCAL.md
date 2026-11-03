@@ -5,7 +5,7 @@
 | 구분 | 상태 |
 | --- | --- |
 | 승인된 미구현 설계 | 모노레포 패키지 경계와 `GameSession` 교체 구조 ([DEC-013](../DECISIONS.md#결정-색인)), 로컬 2인의 창 2개 진행·방해요소 입력([DEC-020](../DECISIONS.md#결정-색인)), AI 대전의 클라이언트 실행([DEC-021](../DECISIONS.md#결정-색인)), 공통 실행 모듈 `game-runtime`·좌석 PlayerId·세션 수명·`RoomClient` 분리([DEC-030](../DECISIONS.md#결정-색인)) |
-| 현재 구현 | 로컬 2인 SharedWorker·AI 전용 Worker와 공통 `GameScreen`. 온라인은 작업 브랜치에 `RoomClient`·`RemoteGameSession`을 구현했으며 기준 브랜치 병합 전이다. |
+| 현재 구현 | 로컬 2인 SharedWorker·AI 전용 Worker와 공통 `GameScreen`, 온라인 `RoomClient`·`RemoteGameSession`. 감정표현은 로컬·AI 구현, 서버 Socket.IO 연결은 후속이다. |
 | 검토 초안 | LOCAL-001의 아래 `GameSession` 시그니처와 로컬 권한 측 구성. 이벤트 이름·명령 필드·ack 형식은 [API](API.md)와 맞음을 개발자 B가 확인(PR #18 검토) |
 | 미정 | 아래 미정 사항 |
 
@@ -42,7 +42,7 @@
 - **`GameSession` 인터페이스**: 명령을 보내고 이벤트를 구독한다. 명령·이벤트 모양은 [API](API.md)와 **같은 타입**을 쓴다. M2에서는 `LocalGameSession`을 `RemoteGameSession`으로 바꾸는 것이 전환의 전부가 되도록 한다. 시그니처는 아래 [상세 계약 초안](#상세-계약-초안-local-001)을 따른다.
 - **M1 로컬 모드**: 한 PC에서 **브라우저 창 2개**를 띄워 각 창이 한 플레이어를 맡고 실제 온라인처럼 진행한다 (개발용 `/local` 경로, [DEC-020](../DECISIONS.md#결정-색인)). 서버, DB, 로그인이 필요 없다.
 - **비공개 정보**: 각 창은 권한 측이 `getViewFor(playerId)`로 만든 자기 뷰만 받는다. 방해요소 칸은 내 프로필 위쪽에 있고 내 방해요소 아이콘만 표시한다. 상대 프로필에는 방해요소 칸이 없다. 한 화면을 같이 보는 문제가 없으므로 화면 교대·가리기 화면은 두지 않는다.
-- **게임 상태 머신**은 `game-core`에 둔다: 턴 → 시뮬레이션 → 판정 → (턴이 바뀔 때마다 두 좌석 보유 1개 교체, [DEC-055](../DECISIONS.md#결정-색인)) → 종료. 턴 타이머(30초)는 `game-core`가 시계를 직접 읽지 않고 **외부에서 시간을 주입**받는다 (로컬은 아래 권한 측 워커의 타이머, 서버는 서버 타이머).
+- **게임 상태 머신**은 `game-core`에 둔다: 턴 → 시뮬레이션 → 판정 → (라운드가 바뀔 때마다 두 좌석 보유 1개 교체, [DEC-055](../DECISIONS.md#결정-색인)·[DEC-067](../DECISIONS.md#결정-색인)) → 종료. 턴 타이머(30초)는 `game-core`가 시계를 직접 읽지 않고 **외부에서 시간을 주입**받는다 (로컬은 아래 권한 측 워커의 타이머, 서버는 서버 타이머).
 
 ## 상세 계약 초안 (LOCAL-001)
 
@@ -65,7 +65,7 @@ interface GameSession {
   rotateBoard(cmd: BoardRotate): Promise<CommandResult>; // board:rotate (DEC-036)
   aimHazard(cmd: HazardAim): void;        // hazard:aim, 응답 없음
   sendAim(update: AimUpdate): void;       // aim:update, 응답 없음
-  // 미구현(IMPL-017, DEC-063 확정): sendEmote(cmd: EmoteSend): Promise<CommandResult>; // emote:send, 'emote:shown' 구독 추가
+  sendEmote(cmd: EmoteSend): Promise<CommandResult>; // 로컬·AI 구현, emote:shown 구독. 온라인 연결은 후속
   on<K extends keyof GameEventMap>(type: K, handler: (e: GameEventMap[K]) => void): () => void;
   dispose(): void;                        // 창 닫기·이동. 진행 중이면 이탈로 처리
 }
@@ -184,3 +184,9 @@ interface GameEventMap {
 ### 로컬 입력 계약 변경 (2026-11-02 사용자 승인)
 
 기존 클릭 선택 후 별도 충전·클릭 발동 설명을 대체한다. 내 알을 누른 채 뒤로 당겨 반대 방향으로 조준하고 왕복하는 파워 게이지의 현재 세기로 놓아 발사한다. 오른쪽 클릭으로 취소하며 알 범위로 돌아와도 선택은 유지한다. 조준은 1인칭이며 해제 시 거리 흔들림도 끝난다. 좌석 0은 검정, 좌석 1은 흰색으로 양쪽에서 동일하다. 후레쉬·물총은 E를 누르는 동안만 효과와 피로도가 발생하며 마우스는 위치만 조절한다. 판 돌리기 방해요소는 A/왼쪽 또는 D/오른쪽 방향 입력과 E를 조합해 방향을 정한다.
+
+## 로컬·AI 감정표현 (IMPL-017)
+
+로컬 2인의 SharedWorker와 AI 전용 Worker는 `emote` 명령을 `RoomRuntime.sendEmote`에 전달하고 `emote:shown`을 양쪽 좌석에 중계한다. 스키마·활성 경기·좌석별 빈도 검사는 [API 계약](API.md#감정표현-필드-emote-001)을 따른다. `GameStore`는 좌석별 최근 이벤트를 표시 상태로만 보관하고 경기 시작·종료 때 지운다. AI는 별도 난수로 상황별 표현을 골라 발사·방해요소 판단 난수를 바꾸지 않는다.
+
+숫자키 1~6과 감정표현 메뉴는 로컬·AI 경기 중에만 활성화된다. 3초 입력 제한, 1.5초 아바타 몸짓·말풍선과 기존 효과음 음량을 따르는 Web Audio 합성 효과음을 쓴다. 조준 중에는 팔 조작을 유지한다. 온라인 `RemoteGameSession.sendEmote`는 서버 연결 전까지 `GAME_NOT_ACTIVE`를 반환하고 온라인 화면은 입력 메뉴를 숨긴다([DEC-065](../DECISIONS.md#결정-색인)).

@@ -3,7 +3,7 @@
 // 캔버스는 얼굴 좌표 [-50, 50]²(머리 반지름 50 기준)를 정사각형 전체에 대응한다.
 import type { ResolvedAvatar } from '@alkkagi/shared';
 
-export type FaceEyes = 'open' | 'happy' | 'shut';
+export type FaceEyes = 'open' | 'wide' | 'happy' | 'shut';
 export type FaceMouth = 'smile' | 'frown' | 'flat' | 'open' | 'laugh' | 'tongue';
 
 /** 표정. brow(+)는 미간을 찌푸림, browUp은 얼굴 좌표 단위로 눈썹을 올린다 */
@@ -13,6 +13,7 @@ export interface FaceExpression {
   blink: boolean;
   brow: number;
   browUp: number;
+  browAsym?: number;
 }
 
 export const NEUTRAL_FACE: FaceExpression = {
@@ -56,9 +57,17 @@ export function paintFace(
     const cx = sx * E.x;
     ctx.strokeStyle = E.color;
     ctx.fillStyle = E.color;
-    if (ex.eyes === 'open' && !ex.blink) {
+    if ((ex.eyes === 'open' || ex.eyes === 'wide') && !ex.blink) {
       ctx.beginPath();
-      ctx.ellipse(cx, E.y, E.rx, E.ry, 0, 0, Math.PI * 2);
+      ctx.ellipse(
+        cx,
+        E.y,
+        E.rx * (ex.eyes === 'wide' ? 1.15 : 1),
+        E.ry * (ex.eyes === 'wide' ? 1.4 : 1),
+        0,
+        0,
+        Math.PI * 2,
+      );
       ctx.fill();
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
@@ -100,7 +109,7 @@ export function paintFace(
     ctx.lineWidth = B.width;
     for (const sx of [-1, 1]) {
       ctx.save();
-      ctx.translate(sx * B.x, B.y - ex.browUp);
+      ctx.translate(sx * B.x, B.y - ex.browUp - (sx === 1 ? (ex.browAsym ?? 0) : 0));
       ctx.scale(sx, 1);
       // 오른쪽 눈썹을 기준으로 반시계(화면상) 회전하면 바깥쪽이 올라간다
       ctx.rotate(-ex.brow);

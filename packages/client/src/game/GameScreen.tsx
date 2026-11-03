@@ -2,13 +2,15 @@
 // 캐릭터 반응(`ReactionTracker`)을 연결한다. 입력 판단은 모두 `aim/`의 순수 TypeScript 로직이 하고,
 // 이 파일은 이벤트 연결만 맡는다.
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import type { Seat } from '@alkkagi/shared';
+import type { EmoteId, Seat } from '@alkkagi/shared';
 import { AimController, type RotateDir } from './aim/aim-controller.ts';
 import type { GameClientState, GameStore } from './game-store.ts';
 import { Hud } from './hud/Hud.tsx';
 import { ReactionTracker } from './reactions.ts';
 import { GameScene } from './scene/GameScene.tsx';
 import type { CharacterPose } from './scene/scene-contract.ts';
+import { EmoteController, emoteForKey } from './emotes.ts';
+import { EmoteAudio } from './emote-audio.ts';
 import { useFrameRecording } from './use-frame-recording.ts';
 import type { GameSession } from '../session/game-session.ts';
 import './hud/hud.css';
@@ -58,12 +60,39 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
         now: () => store.serverNow(),
       }),
   );
+  const [emoteController] = useState(
+    () =>
+      new EmoteController(
+        (cmd) => session.sendEmote(cmd),
+        () => performance.now(),
+      ),
+  );
+  const [emoteAudio] = useState(() => new EmoteAudio());
+  emoteController.update(
+    state.start?.gameId ?? null,
+    state.result ? 'finished' : (state.view?.phase ?? null),
+  );
   const [reactionTracker] = useState(() => new ReactionTracker(session.playerId));
   const aim = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   const reactions = useSyncExternalStore(reactionTracker.subscribe, reactionTracker.getReactions);
   const [, setTick] = useState(0);
 
   useFrameRecording(state);
+
+  useEffect(() => {
+    const off = session.on('emote:shown', (event) => {
+      if (event.gameId === store.getState().start?.gameId && !store.getState().result)
+        emoteAudio.play(event.emote);
+    });
+    window.addEventListener('pointerdown', emoteAudio.unlock);
+    window.addEventListener('keydown', emoteAudio.unlock);
+    return () => {
+      off();
+      window.removeEventListener('pointerdown', emoteAudio.unlock);
+      window.removeEventListener('keydown', emoteAudio.unlock);
+      emoteAudio.dispose();
+    };
+  }, [session, store, emoteAudio]);
 
   // 새 경기·새 스냅샷을 입력 로직에 전달한다(경기 시작 효과가 먼저 실행되도록 이 순서를 지킨다)
   useEffect(() => {
@@ -107,6 +136,15 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return;
+      const emote = emoteForKey(e.code);
+      if (emote && session.mode !== 'online') {
+        e.preventDefault();
+        if (!e.repeat) {
+          emoteAudio.unlock();
+          void emoteController.use(emote);
+        }
+        return;
+      }
       const rotate = ROTATE_KEYS[e.code];
       if (rotate !== undefined) {
         if (e.code.startsWith('Arrow')) e.preventDefault(); // 페이지 스크롤 방지
@@ -150,7 +188,7 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
       window.removeEventListener('contextmenu', onContextMenu);
       window.removeEventListener('blur', onBlur);
     };
-  }, [controller]);
+  }, [controller, emoteController, emoteAudio, session.mode]);
 
   const { start, view } = state;
   if (!start || !view) {
@@ -182,6 +220,7 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
           poses={poses}
           reactions={reactions}
           shake={aim.shake}
+          emotes={state.emotes}
         />
       </div>
       <Hud
@@ -199,6 +238,16 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
         onRotateRelease={(dir) => controller.releaseRotate(dir === 1 ? 'btn-ccw' : 'btn-cw')}
         nowServerMs={nowServerMs}
         nowClientMs={nowServerMs - state.clockOffsetMs}
+        emotes={state.emotes}
+        emoteRemainingMs={emoteController.remainingMs()}
+        onEmote={
+          session.mode === 'online'
+            ? undefined
+            : (emote: EmoteId) => {
+                emoteAudio.unlock();
+                void emoteController.use(emote);
+              }
+        }
         onSlotClick={() => controller.onSlotClick()}
         onForfeit={() => {
           void session.forfeit({ gameId: start.gameId });

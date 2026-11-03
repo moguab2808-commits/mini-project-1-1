@@ -165,6 +165,7 @@ describe('AiController + RoomRuntime', () => {
       clock,
       seed: 7,
       actions: {
+        sendEmote: async () => ({ ok: true }),
         submitShot: (cmd) => record('shot')(runtime.submitShot(1, cmd)),
         useHazard: (cmd) => record('hazard')(runtime.useHazard(1, cmd)),
         rotateBoard: (cmd) => record('rotate')(runtime.rotateBoard(1, cmd)),
@@ -243,6 +244,7 @@ describe('AiController 방해요소', () => {
       clock,
       seed: 5,
       actions: {
+        sendEmote: async () => ({ ok: true }),
         submitShot: ok('shot'),
         useHazard: ok('hazard'),
         rotateBoard: ok('rotate'),
@@ -399,6 +401,7 @@ describe('AiController 계획 시간 나누기', () => {
       seed: 1,
       tuning: { aimDelayMinMs: 0, aimDelayMaxMs: 0 },
       actions: {
+        sendEmote: async () => ({ ok: true }),
         submitShot: act,
         useHazard: act,
         rotateBoard: act,
@@ -456,5 +459,72 @@ describe('추가 위치형 무작위 배치 (DEC-055)', () => {
       );
       expect(randomPlacement(view, board, kind, new Prng(7))).toEqual(t);
     }
+  });
+});
+
+describe('AI 감정표현', () => {
+  it('상황에 따라 가끔 사용하고 3초 쿨타임과 종료·dispose를 지킨다', async () => {
+    const calls: { at: number; emote: string }[] = [];
+    for (let seed = 0; seed < 24; seed++) {
+      const clock = new FakeClock();
+      const local: { at: number; emote: string }[] = [];
+      const controller = new AiController({
+        seat: 1,
+        clock,
+        seed,
+        actions: {
+          sendEmote: async (cmd) => {
+            local.push({ at: clock.now(), emote: cmd.emote });
+            return { ok: true };
+          },
+          submitShot: async () => ({ ok: true }),
+          useHazard: async () => ({ ok: true }),
+          rotateBoard: async () => ({ ok: true }),
+          aimHazard: () => undefined,
+          sendAim: () => undefined,
+        },
+      });
+      const v = makeView(
+        [
+          { id: 1, ownerId: 1, x: 0, y: 10, h: 0 },
+          { id: 2, ownerId: 0, x: 0, y: -10, h: 0 },
+        ],
+        { activePlayerId: 0 },
+      );
+      const start: GameStart = {
+        gameId: 'g',
+        seat: 1,
+        players: [
+          { seat: 0, nickname: 'me', appearance: DEFAULT_APPEARANCE },
+          { seat: 1, nickname: 'AI', appearance: DEFAULT_APPEARANCE },
+        ],
+        board: 'standard',
+        theme: 'bar',
+        pieceCount: 5,
+        finalRound: 10,
+        turnSeconds: 30,
+        view: v,
+      };
+      controller.receive('game:start', start);
+      // 같은 시각에 턴·알 개수가 여러 번 바뀌어도 연속 표현하지 않는다.
+      for (let turn = 2; turn < 10; turn++)
+        controller.receive('game:state', { ...v, turnId: turn });
+      expect(local.length).toBeLessThanOrEqual(1);
+      await clock.advance(3000);
+      controller.receive('game:state', { ...v, turnId: 10, phase: 'moving', stoneCounts: [1, 0] });
+      await clock.advance(3000);
+      controller.receive('game:state', { ...v, turnId: 11, phase: 'moving', stoneCounts: [0, 0] });
+      for (let i = 1; i < local.length; i++)
+        expect(local[i]!.at - local[i - 1]!.at).toBeGreaterThanOrEqual(3000);
+      controller.dispose();
+      const count = local.length;
+      controller.receive('game:state', { ...v, turnId: 12 });
+      await clock.advance(10000);
+      expect(local).toHaveLength(count);
+      calls.push(...local);
+    }
+    expect(calls.some((e) => e.emote === 'gg')).toBe(true);
+    expect(calls.some((e) => e.emote === 'surprise')).toBe(true);
+    expect(calls.some((e) => e.emote === 'laugh')).toBe(true);
   });
 });

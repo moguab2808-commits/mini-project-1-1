@@ -1,7 +1,15 @@
 // 게임 화면 HUD 오버레이. 상태는 모두 props로 받는 표시 전용 컴포넌트다.
 // 내 방해요소·게이지는 `view.private`만 쓰고 상대 방해요소는 표시하지 않는다.
 import { useState } from 'react';
-import type { GameOver, GameStart, GameView, RematchState, Seat } from '@alkkagi/shared';
+import {
+  EMOTE_IDS,
+  type EmoteId,
+  type GameOver,
+  type GameStart,
+  type GameView,
+  type RematchState,
+  type Seat,
+} from '@alkkagi/shared';
 import type { Announcement, GameClientState } from '../game-store.ts';
 import { heldHazardState } from '../aim/hazard-state.ts';
 import type { AimNotice, RotateDir } from '../aim/aim-controller.ts';
@@ -29,6 +37,13 @@ import {
   DROPLET_COLS,
   DROPLET_ROWS,
 } from './hud-model.ts';
+import {
+  EMOTE_LABELS,
+  EMOTE_TEXT,
+  EMOTE_DURATION_MS,
+  emoteAgeMs,
+  type DisplayEmote,
+} from '../emotes.ts';
 import './hud.css';
 
 export interface HudProps {
@@ -50,6 +65,9 @@ export interface HudProps {
   nowServerMs: number;
   /** 클라이언트 시계 현재 시각(ms). 받음 카드·발동 안내의 만료 비교용 */
   nowClientMs: number;
+  emotes?: readonly [DisplayEmote | null, DisplayEmote | null];
+  emoteRemainingMs?: number;
+  onEmote?: (emote: EmoteId) => void;
   onSlotClick: () => void;
   onForfeit: () => void;
   onRematch: () => void;
@@ -146,6 +164,21 @@ export function Hud(props: HudProps) {
           {props.hint}
         </div>
       )}
+      {!finished &&
+        props.emotes?.map(
+          (event, seat) =>
+            event &&
+            emoteAgeMs(event, nowClientMs, nowServerMs) >= 0 &&
+            emoteAgeMs(event, nowClientMs, nowServerMs) < EMOTE_DURATION_MS && (
+              <div
+                key={`${seat}:${event.atMs}`}
+                className={`gs-emote-caption ${seat === mySeat ? 'me' : 'opponent'}`}
+                role="status"
+              >
+                {nicknameOf(start, seat as Seat)}: {EMOTE_TEXT[event.emote]}
+              </div>
+            ),
+        )}
       <BlindOverlay view={view} nowServerMs={nowServerMs} />
       {!finished && (
         <>
@@ -154,6 +187,9 @@ export function Hud(props: HudProps) {
             onPress={props.onRotatePress}
             onRelease={props.onRotateRelease}
           />
+          {props.onEmote && (
+            <EmoteMenu remainingMs={props.emoteRemainingMs ?? 0} onEmote={props.onEmote} />
+          )}
           <div className="gs-help">{CONTROLS_HELP}</div>
           <ForfeitButton onForfeit={props.onForfeit} />
         </>
@@ -296,7 +332,7 @@ function Announcements(props: {
         <div key={`${a.kind}:${a.sourceSeat}:${a.startsAtMs}`}>
           <HazardIcon kind={isRandomKind(a.kind) ? 'aircon' : a.kind} size={36} />
           <span>
-            {nicknameOf(props.start, a.sourceSeat)}님이 [{HAZARD_NAMES[a.kind]}]를 사용했어요
+            {`${nicknameOf(props.start, a.sourceSeat)}님이 [${HAZARD_NAMES[a.kind]}]를 사용했어요`}
           </span>
         </div>
       ))}
@@ -484,6 +520,45 @@ function ResultOverlay(props: {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EmoteMenu({
+  remainingMs,
+  onEmote,
+}: {
+  remainingMs: number;
+  onEmote: (emote: EmoteId) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="gs-emote-menu" onPointerDown={(e) => e.stopPropagation()}>
+      {open && (
+        <div className="gs-emote-options" role="group" aria-label="감정표현 목록">
+          {EMOTE_IDS.map((emote, i) => (
+            <button
+              key={emote}
+              type="button"
+              disabled={remainingMs > 0}
+              onClick={() => {
+                onEmote(emote);
+                setOpen(false);
+              }}
+            >
+              <kbd>{i + 1}</kbd> {EMOTE_LABELS[emote]}
+            </button>
+          ))}
+        </div>
+      )}
+      <button
+        type="button"
+        className="gs-emote-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        감정표현 {remainingMs > 0 ? `${Math.ceil(remainingMs / 1000)}초` : '(1~6)'}
+      </button>
     </div>
   );
 }

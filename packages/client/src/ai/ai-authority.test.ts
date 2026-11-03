@@ -95,6 +95,7 @@ function setup(
     'game:over',
     'rematch:state',
     'aim:state',
+    'emote:shown',
   ] as const) {
     session.on(type, (payload) => log.push({ type, payload }));
   }
@@ -160,6 +161,23 @@ function humanBot(
 }
 
 describe('AiAuthority + AiGameSession', () => {
+  it('사람 감정표현을 같은 런타임으로 보내고 쿨타임·잘못된 값을 거부한다', async () => {
+    const { session, log } = setup({ board: 'standard', pieceCount: 5 });
+    await session.connect();
+    await flush();
+    const start = of<GameStart>(log, 'game:start')[0]!;
+    const cmd = { gameId: start.gameId, emote: 'surprise' as const };
+    expect(await session.sendEmote(cmd)).toEqual({ ok: true });
+    await flush();
+    const own = of<{ seat: number; emote: string }>(log, 'emote:shown').filter((e) => e.seat === 0);
+    expect(own).toHaveLength(1);
+    expect(own[0]!.emote).toBe('surprise');
+    const again = await session.sendEmote(cmd);
+    expect(!again.ok && again.error.code).toBe('EMOTE_COOLDOWN');
+    const invalid = await session.sendEmote({ ...cmd, emote: 'other' } as never);
+    expect(!invalid.ok && invalid.error.code).toBe('INVALID_INPUT');
+  });
+
   it.each([
     { board: 'circle', pieceCount: 5, seed: 3 },
     { board: 'standard', pieceCount: 7, seed: 11 },

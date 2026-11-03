@@ -18,6 +18,7 @@ export const ERROR_CODES = [
   'PLAYER_STUNNED',
   'STALE_HAZARD',
   'HAZARD_COOLDOWN',
+  'EMOTE_COOLDOWN',
   'HAZARD_OVERHEATED',
   'HAZARD_INVALID_TARGET',
   'HAZARD_NOT_USABLE',
@@ -109,6 +110,27 @@ export const AimUpdateSchema = z.object({
 });
 export type AimUpdate = z.infer<typeof AimUpdateSchema>;
 export type AimState = AimUpdate & { seat: 0 | 1 };
+
+/** 경기 표시 전용 감정표현. 규칙 상태·revision·전적에는 들어가지 않는다. */
+export const EMOTE_IDS = ['yawn', 'taunt', 'doze', 'gg', 'laugh', 'surprise'] as const;
+export const EmoteIdSchema = z.enum(EMOTE_IDS);
+export type EmoteId = z.infer<typeof EmoteIdSchema>;
+export const EmoteSendSchema = z
+  .object({
+    gameId: z.string().min(1),
+    emote: EmoteIdSchema,
+  })
+  .strict();
+export type EmoteSend = z.infer<typeof EmoteSendSchema>;
+export const EmoteShownSchema = z
+  .object({
+    gameId: z.string().min(1),
+    seat: SeatSchema,
+    emote: EmoteIdSchema,
+    atMs: finite,
+  })
+  .strict();
+export type EmoteShown = z.infer<typeof EmoteShownSchema>;
 
 export const GameForfeitSchema = z.object({ gameId: z.string().min(1) });
 export type GameForfeit = z.infer<typeof GameForfeitSchema>;

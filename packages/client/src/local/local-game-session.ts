@@ -3,6 +3,7 @@ import type {
   AimUpdate,
   BoardRotate,
   CommandResult,
+  EmoteSend,
   GameForfeit,
   HazardAim,
   HazardUse,
@@ -90,6 +91,10 @@ export class LocalGameSession implements GameSession {
   /** 권한 측이 좌석을 받아들이면 이행한다. */
   connect(): Promise<void> {
     return this.ready;
+  }
+
+  sendEmote(cmd: EmoteSend): Promise<CommandResult> {
+    return this.command('emote', cmd);
   }
 
   submitShot(cmd: ShotSubmit): Promise<CommandResult> {

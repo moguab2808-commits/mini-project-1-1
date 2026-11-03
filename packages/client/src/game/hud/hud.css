@@ -599,3 +599,64 @@
     max-width: 100px;
   }
 }
+
+/* 감정표현: 게임 조작을 가리지 않는 아래쪽 메뉴 */
+.gs-emote-menu {
+  position: absolute;
+  left: 20px;
+  bottom: 76px;
+  pointer-events: auto;
+  text-shadow: none;
+}
+.gs-emote-menu button {
+  color: var(--cream);
+  background: #3b291eee;
+  border: 1px solid #dab984;
+  border-radius: 9px;
+  padding: 9px 13px;
+  font: inherit;
+  cursor: pointer;
+}
+.gs-emote-menu button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.gs-emote-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin-bottom: 7px;
+}
+.gs-emote-options kbd {
+  color: var(--accent);
+}
+.gs-emote-caption {
+  position: absolute;
+  padding: 6px 12px;
+  border-radius: 14px;
+  background: #faf3e4;
+  color: #2b1d14;
+  text-shadow: none;
+  font-size: 18px;
+}
+.gs-emote-caption.opponent {
+  left: 25px;
+  top: 120px;
+}
+.gs-emote-caption.me {
+  right: 25px;
+  bottom: 120px;
+}
+@media (max-width: 600px) {
+  .gs-emote-menu {
+    left: 8px;
+    bottom: 100px;
+  }
+  .gs-emote-menu button {
+    padding: 7px;
+    font-size: 12px;
+  }
+  .gs-emote-caption {
+    font-size: 14px;
+  }
+}
