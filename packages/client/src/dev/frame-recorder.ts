@@ -82,8 +82,13 @@ export class FrameRecorder {
     this.marks.push({ label, atSec: (nowMs - this.startMs) / 1000 });
   }
 
-  /** 결과 화면이 뜨기 직전에 호출한다. 기록을 끝내고 요약을 돌려준다. */
-  stop(): FrameReport {
+  /**
+   * 결과 화면이 뜨기 직전에 호출한다. 기록을 끝내고 요약을 돌려준다.
+   * nowMs를 넘기면 마지막 프레임부터 그 시각까지를 마지막 간격으로 닫는다. 결과 직전에 화면이 멈춰
+   * 다음 프레임이 오기 전에 기록이 끝나도 그 멈춤이 원자료·측정 시간에서 빠지지 않게 한다.
+   */
+  stop(nowMs?: number): FrameReport {
+    if (nowMs !== undefined && nowMs > this.lastMs) this.frame(nowMs);
     const report = this.report();
     this.startMs = null;
     return report;

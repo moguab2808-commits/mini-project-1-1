@@ -35,7 +35,7 @@ export function useFrameRecording(state: Pick<GameClientState, 'start' | 'result
           stopSampling?.();
           stopSampling = null;
           if (!recorder.isRecording) return;
-          const report = recorder.stop();
+          const report = recorder.stop(performance.now());
           window.__alkkagiFrameReport = report;
           window.__alkkagiDownloadFrameReport = () => {
             const url = URL.createObjectURL(

@@ -116,3 +116,14 @@ test('sampleFrames: 주입한 raf로 프레임을 기록하고 중지하면 멈�
   assert.equal(r.report().frames, 2);
   assert.equal(cancelled, 7);
 });
+
+test('stop(nowMs): 결과 직전 멈춤을 마지막 간격으로 닫는다', () => {
+  // 마지막 프레임 뒤 2초 동안 프레임이 없다가 결과가 와서 기록을 끝낸 경우
+  const rep = run([16, 16]).stop(1000 + 32 + 2000);
+  assert.deepEqual(rep.intervalsMs, [16, 16, 2000]);
+  assert.ok(Math.abs(rep.durationSec - 2.032) < 1e-9);
+  assert.deepEqual(rep.stalls, [{ atSec: 2.032, intervalMs: 2000 }]);
+  // 마지막 프레임과 같은 시각이거나 이전이면 간격을 더하지 않는다
+  assert.equal(run([16, 16]).stop(1032).frames, 2);
+  assert.equal(run([16, 16]).stop(1000).frames, 2);
+});

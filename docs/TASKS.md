@@ -39,7 +39,7 @@
 | [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) | 디자인 캔버스 현재 요구사항 반영 | P1 | 없음 | 완료 | 개발자 A | [#5](https://github.com/moguab2808-commits/mini-project-1-1/issues/5)·[PR #25](https://github.com/moguab2808-commits/mini-project-1-1/pull/25) |
 | [ASSET-001](#asset-001-에셋-조달-계획) | 에셋 조달 계획 | P2 | DOC-010 | 완료 | 개발자 A | [#6](https://github.com/moguab2808-commits/mini-project-1-1/issues/6)·[PR #28](https://github.com/moguab2808-commits/mini-project-1-1/pull/28) |
 | [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식) | 성능 측정 절차와 플레이 테스트 기록 양식 | P1 | 없음 | 완료 | 개발자 A | [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)·[PR #30](https://github.com/moguab2808-commits/mini-project-1-1/pull/30) |
-| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 진행 중 | 개발자 A | [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34) |
+| [VAL-002](#val-002-개발용-프레임-시간-기록) | 개발용 프레임 시간 기록 | P2 | IMPL-004 | 리뷰 중 | 개발자 A | [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34)·[PR #65](https://github.com/moguab2808-commits/mini-project-1-1/pull/65) |
 | [API-001](#api-001-api실시간-이벤트-계약-확정) | API·실시간 이벤트 계약 확정 | P0 | GAME-001 | 완료 | 개발자 B | [#8](https://github.com/moguab2808-commits/mini-project-1-1/issues/8)·[PR #22](https://github.com/moguab2808-commits/mini-project-1-1/pull/22) |
 | [API-002](#api-002-api-이름식별자-확인과-private-뷰-필드-확정) | API 이름·식별자 확인과 private 뷰 필드 확정 | P1 | API-001 | 완료 | 개발자 A | [PR #33](https://github.com/moguab2808-commits/mini-project-1-1/pull/33) |
 | [DB-001](#db-001-db-스키마-확정) | DB 스키마 확정 | P0 | DOC-010 | 완료 | 개발자 B | [#9](https://github.com/moguab2808-commits/mini-project-1-1/issues/9)·[PR #23](https://github.com/moguab2808-commits/mini-project-1-1/pull/23) |
@@ -416,19 +416,19 @@ Issue·PR: [#7](https://github.com/moguab2808-commits/mini-project-1-1/issues/7)
 ## VAL-002 개발용 프레임 시간 기록
 
 우선순위: P2
-상태: 진행 중
+상태: 리뷰 중
 담당: 개발자 A
 의존성: IMPL-004 (게임 화면 구현. 기록 모듈은 화면 없이 먼저 만들었고, 화면 연결은 IMPL-004 이후)
 범위: [fps 측정 절차](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001)가 요구하는 판 전체의 프레임 간격(ms) 원자료를 개발 중에만 기록·내보내는 코드를 만든다. VAL-001 완료 때 남긴 후속이다. 기록 모듈(`packages/client/src/dev/frame-recorder.ts`)은 화면 없이 만들 수 있어 먼저 만들었고, 실제 화면에 붙이는 일과 운영 빌드 제외 확인은 게임 화면(IMPL-004)이 있어야 한다.
 관련 문서: [ENGINEERING-VALIDATION](ENGINEERING-VALIDATION.md#fps-측정-절차-val-001) / [VAL-001](#val-001-성능-측정-절차와-플레이-테스트-기록-양식)
-Issue·PR: [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34)
+Issue·PR: [#34](https://github.com/moguab2808-commits/mini-project-1-1/issues/34)·[PR #65](https://github.com/moguab2808-commits/mini-project-1-1/pull/65)
 
 수용 기준:
-- [ ] 개발 환경에서만 켜지고 운영 빌드에는 영향이 없다. (미충족: 모듈은 DOM·프레임워크를 참조하지 않고 켜는 책임을 호출 쪽에 두었다. 화면에서 `import.meta.env.DEV`일 때만 동적 import하고 운영 빌드에 들어가지 않음을 확인하는 일은 IMPL-004 이후)
-- [ ] 판 시작부터 결과 화면 직전까지 프레임 간격을 기록해 평균 fps·프레임 시간 95백분위·100ms 이상 멈춤 횟수를 계산할 수 있다. (부분 충족: `start`·`frame`·`stop`과 판정식의 계산은 합성 입력으로 단위 검증했다. 실제 게임 화면의 시작·종료 시점에 연결한 기록은 IMPL-004 이후)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (worklog는 기록했고 병합 전이다)
+- [x] 개발 환경에서만 켜지고 운영 빌드에는 영향이 없다. (게임 화면의 `use-frame-recording.ts`가 `import.meta.env.DEV`일 때만 동적 import한다. 운영 빌드 `dist/`에 기록 코드·전역 함수가 없음을 확인했다)
+- [x] 판 시작부터 결과 화면 직전까지 프레임 간격을 기록해 평균 fps·프레임 시간 95백분위·100ms 이상 멈춤 횟수를 계산할 수 있다. (실제 브라우저의 `/local` 경기에서 시작부터 기권 결과까지 기록하고 요약·원자료 JSON을 내려받았다. 결과 뒤에는 프레임이 늘지 않는다. 마지막 프레임부터 결과까지의 간격도 원자료에 넣는다)
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (worklog는 기록했고 PR #65 리뷰 중이다)
 
-검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#val-002-개발용-프레임-시간-기록-모듈)
+검증 근거: [2026-10-31 worklog](worklogs/2026-10-31.md#val-002-개발용-프레임-시간-기록-모듈)·[2026-11-03 worklog](worklogs/2026-11-03.md#val-002-게임-화면-연결-확인과-운영-빌드-제외)
 
 ## API-001 API·실시간 이벤트 계약 확정
 
