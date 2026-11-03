@@ -60,6 +60,8 @@
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
 | [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
+| [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 예정 | 미정 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69) |
+| [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 예정 | 미정 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 예정 | 개발자 B | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -843,6 +845,45 @@ Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. Render·Neon 서비스 생성, 수동 배포·롤백, UptimeRobot, argon2id 실측은 사용자 승인과 계정 작업이 필요해 남았다. 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
 
 검증 근거: [2026-11-03 worklog IMPL-013 절](worklogs/2026-11-03.md#impl-013-배포)
+
+## CHAR-001 사람 아바타 전환과 꾸미기 설계
+
+우선순위: P1
+상태: 예정
+담당: 미정
+의존성: IMPL-012(지금의 캐릭터 변경 창·API)
+범위: [DEC-048](DECISIONS.md#결정-색인)에 따라 동물 6종을 사람 아바타로 바꾸고 꾸미기(캐릭터·헤어스타일·이목구비·악세사리 등)를 추가하기 위한 미정 사항을 정하고, 시험용 머리로 화풍을 확인한 뒤 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
+관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경)·[화면 미정 사항](PRD.md#화면-미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획) / [DATABASE](design/DATABASE.md#미정-사항) / [API 공통 타입](design/API.md#공통-타입) / [DEC-033](DECISIONS.md#결정-색인)·[DEC-048](DECISIONS.md#결정-색인)
+Issue·PR: [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)
+
+수용 기준:
+- [ ] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 꾸미기 항목·선택지 수·꾸미기 시점·저장 시점·기본 외형·AI 상대 외형이 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
+- [ ] (정상) 3D·2D 제작 방식(코드 도형 유지 여부, 이목구비 표현, 프로필·카드 2D 얼굴 방식)을 정해 TECH_STACK에 기록했고, DEC-033과 다르면 대체 관계를 남겼다.
+- [ ] (정상) 시험용 머리(이목구비 한 세트·헤어 2종·악세사리 1종)를 개발용 화면에서 띄워 스크린샷으로 화풍을 사용자에게 확인받았다. 참고 이미지의 부품 모양·실존 인물 얼굴을 옮기지 않았다.
+- [ ] (예외) 외형 저장 형식(DATABASE)·API 타입과 기존 계정의 동물 캐릭터 값 처리 방식을 정했다. 외형은 상대에게도 보여야 하므로 방 목록·대기실·`game:start`로 전달되는 경로를 포함한다.
+- [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: [2026-11-03 worklog CHAR-001 절](worklogs/2026-11-03.md#char-001-사람-아바타-전환과-꾸미기-설계)
+
+## THEME-001 방 테마 선택 설계
+
+우선순위: P2
+상태: 예정
+담당: 미정
+의존성: IMPL-012(지금의 방 생성 창)
+범위: [DEC-049](DECISIONS.md#결정-색인)에 따라 방을 만들 때 방 테마를 고르는 기능의 미정 사항을 정하고 구현 작업을 등록한다. 구현 자체는 이 작업 뒤 등록하는 작업에서 한다.
+관련 문서: [PRD 방 생성](PRD.md#방-생성)·[화면 미정 사항](PRD.md#화면-미정-사항) / [DATABASE](design/DATABASE.md#미정-사항) / [API 방 명령](design/API.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
+Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72)
+
+수용 기준:
+- [ ] (정상) [화면 미정 사항](PRD.md#화면-미정-사항)의 테마 종류·바뀌는 범위·판 선택과의 관계·고르는 사람과 시점·표시 위치·기본 테마가 사용자 승인으로 정해져 PRD와 DECISIONS에 기록됐다.
+- [ ] (정상) 테마별 에셋 제작 방식과 용량이 [에셋 한도](design/TECH_STACK.md#에셋-조달-계획)(DEC-033) 안에 드는지 확인해 기록했다.
+- [ ] (예외) 테마를 `rooms`·`room:create`·`room:state`·`game:start`에 어떻게 싣는지와, 테마가 게임 규칙·물리·판정에 영향을 주지 않는지를 정했다. AI 대전·로컬 2인 적용 여부를 포함한다.
+- [ ] 구현 작업을 TASKS에 등록하고 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+
+진행: 개수(2개)·범위(배경·조명·책상, 판과 별개)·방 생성 때 선택·방 카드와 대기실 표시·AI와 로컬 적용·기본 테마(지금 화면)·규칙과 물리 무영향을 [DEC-050](DECISIONS.md#결정-색인)으로 정했다. 두 번째 테마의 종류와 이름, 표시 모양, 로컬 2인의 선택 위치, 저장·전송 형식은 남았다.
+
+검증 근거: [2026-11-03 worklog THEME-001 절](worklogs/2026-11-03.md#theme-001-방-테마-선택-설계)
 
 ## DOC-011 README 설치·실행 절차
 
