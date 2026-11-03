@@ -1,6 +1,6 @@
 // 개발용 장면 하네스. `npm run dev -w @alkkagi/client` 후 /scene-harness.html 로 연다(운영 빌드의 입력이 아니다).
 // 쿼리:
-//   seat=0|1 board=standard|circle chars=bear,cat cam=default|first shake=0~1
+//   seat=0|1 board=standard|circle theme=bar|rooftop|classroom|beach chars=bear,cat cam=default|first shake=0~1
 //   walls=1 sticky=1 place=wall|sticky invalid=1 lift=1 spin=1 fall=1 desk=1
 //   aim=<내 알 번호 0~6> charge=<세기> unreach=1 strain=0~1   (내 조준: aim 상태 + 내 포즈)
 //   opp=aim|charge|rotate|hold oppstone=<상대 알 번호> hold=flashlight|water_gun   (상대 포즈, 20Hz로 흔들며 보냄)
@@ -14,6 +14,8 @@
 import {
   BOARDS,
   PHYSICS,
+  THEME_IDS,
+  type ThemeId,
   type GameStart,
   type GameView,
   type HazardKind,
@@ -38,6 +40,8 @@ const q = new URLSearchParams(window.location.search);
 const mySeat: Seat = q.get('seat') === '1' ? 1 : 0;
 const oppSeat: Seat = mySeat === 0 ? 1 : 0;
 const boardId = q.get('board') === 'circle' ? 'circle' : 'standard';
+const themeParam = q.get('theme');
+const themeId: ThemeId = THEME_IDS.find((t) => t === themeParam) ?? 'bar';
 const [c0, c1] = (q.get('chars') ?? 'bear,fox').split(',');
 const PIECES = 7;
 const T0 = Date.now();
@@ -164,6 +168,7 @@ function initial(): { start: GameStart; view: GameView } {
       },
     ],
     board: boardId,
+    theme: themeId,
     pieceCount: PIECES,
     finalRound: 10,
     turnSeconds: 30,

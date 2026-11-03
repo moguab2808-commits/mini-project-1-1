@@ -1,6 +1,14 @@
 // 로비: 왼쪽 프로필바와 방 화면(방 목록·방 생성·즉시 참가·코드 입력·새로고침). PRD 화면별 요구사항 "로비".
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CharacterId, Me, RoomAck, RoomCreate, RoomJoin, RoomSummary } from '@alkkagi/shared';
+import {
+  THEME_LABEL,
+  type CharacterId,
+  type Me,
+  type RoomAck,
+  type RoomCreate,
+  type RoomJoin,
+  type RoomSummary,
+} from '@alkkagi/shared';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { CharacterFace } from '../game/hud/CharacterFace.tsx';
 import type { RoomClient } from '../online/room-client.ts';
@@ -332,6 +340,9 @@ export function LobbyScreen({
                       </strong>
                       {playing && <span className="badge">게임 중</span>}
                     </div>
+                    <span className="room-theme" aria-label="방 테마">
+                      {THEME_LABEL[room.theme]}
+                    </span>
                     <div className="room-host">
                       <CharacterFace characterId={room.host.characterId} size={44} />
                       <div>

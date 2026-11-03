@@ -66,6 +66,7 @@ export class RoomService {
       title: room.title,
       isPublic: room.isPublic,
       status: room.status as RoomSummary['status'],
+      theme: room.theme as RoomSummary['theme'],
       host: toMe(host),
     }));
   }
@@ -255,6 +256,7 @@ export class RoomService {
       isPublic: room.isPublic,
       pieceCount: room.pieceCount,
       board: room.board as RoomState['board'],
+      theme: room.theme as RoomState['theme'],
       status: room.status as RoomState['status'],
       host: toMe(host),
       guest: guest ? toMe(guest) : null,

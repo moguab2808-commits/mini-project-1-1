@@ -4,16 +4,18 @@ import type { FormEvent } from 'react';
 import {
   BOARD_IDS,
   CharacterIdSchema,
+  DEFAULT_THEME,
   PASSWORD_MAX,
   ROOM_CODE_LENGTH,
   ROOM_TITLE_MAX,
   type BoardId,
   type CharacterId,
   type RoomCreate,
+  type ThemeId,
 } from '@alkkagi/shared';
 import { CharacterFace } from '../game/hud/CharacterFace.tsx';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
-import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS } from '../ai/ai-page.tsx';
+import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS, ThemeChoice } from '../ai/ai-page.tsx';
 import { ApiError, describeApiError, type Api } from './api.ts';
 import { FloatingWindow } from './floating-window.tsx';
 import {
@@ -180,6 +182,7 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
   const [title, setTitle] = useState(() => defaultRoomTitle(nickname));
   const [pieceCount, setPieceCount] = useState<AiMatchSettings['pieceCount']>(5);
   const [board, setBoard] = useState<BoardId>('standard');
+  const [theme, setTheme] = useState<ThemeId>(DEFAULT_THEME);
   const [isPublic, setIsPublic] = useState(true);
   const [code, setCode] = useState(() => generateRoomCode());
   const [error, setError] = useState<string | null>(null);
@@ -200,6 +203,7 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
       isPublic,
       pieceCount,
       board,
+      theme,
       ...(isPublic ? {} : { code }),
     });
     setBusy(false);
@@ -237,7 +241,7 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
         {opponent === 'ai' ? (
           // DEC-042 ②: AI 대전은 `/ai`의 설정 폼과 시작 함수를 그대로 쓴다.
           <div className="ai-setup">
-            <AiSetupForm initial={{ board, pieceCount }} onStart={onStartAi} />
+            <AiSetupForm initial={{ board, theme, pieceCount }} onStart={onStartAi} />
           </div>
         ) : (
           <form
@@ -294,6 +298,8 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
                 </label>
               ))}
             </fieldset>
+
+            <ThemeChoice theme={theme} onChange={setTheme} />
 
             <fieldset className="choice">
               <legend>공개 여부</legend>

@@ -98,6 +98,7 @@ export async function insertRoom(
         code: input.isPublic ? null : (input.code ?? null),
         pieceCount: input.pieceCount,
         board: input.board,
+        theme: input.theme,
       })
       .returning(),
   );

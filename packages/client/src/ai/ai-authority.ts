@@ -4,6 +4,8 @@
 import { RoomRuntime, type RuntimeClock } from '@alkkagi/game-runtime';
 import {
   BOARD_IDS,
+  DEFAULT_THEME,
+  THEME_IDS,
   CharacterIdSchema,
   RematchRequestSchema,
   RULES,
@@ -13,6 +15,7 @@ import {
   type GameStart,
   type RematchState,
   type Seat,
+  type ThemeId,
 } from '@alkkagi/shared';
 import type { PortLike } from '../local/local-authority.ts';
 import type { ClientMessage, WorkerMessage } from '../local/messages.ts';
@@ -56,7 +59,7 @@ export class AiAuthority {
   private port: PortLike | null = null;
   private runtime: RoomRuntime | null = null;
   private controller: AiController | null = null;
-  private config: { board: BoardId; pieceCount: number } | null = null;
+  private config: { board: BoardId; theme: ThemeId; pieceCount: number } | null = null;
   private human: { nickname: string; characterId: CharacterId } = {
     nickname: '나',
     characterId: 'bear',
@@ -92,6 +95,7 @@ export class AiAuthority {
       this.port = port;
       this.config = {
         board: BOARD_IDS.includes(msg.board as BoardId) ? (msg.board as BoardId) : DEFAULT_BOARD,
+        theme: THEME_IDS.includes(msg.theme as ThemeId) ? (msg.theme as ThemeId) : DEFAULT_THEME,
         pieceCount: (RULES.pieceCounts as readonly number[]).includes(msg.pieceCount as number)
           ? (msg.pieceCount as number)
           : DEFAULT_PIECE_COUNT,
@@ -143,7 +147,11 @@ export class AiAuthority {
   // ───────── 경기 ─────────
 
   private startGame(): void {
-    const config = this.config ?? { board: DEFAULT_BOARD, pieceCount: DEFAULT_PIECE_COUNT };
+    const config = this.config ?? {
+      board: DEFAULT_BOARD,
+      theme: DEFAULT_THEME,
+      pieceCount: DEFAULT_PIECE_COUNT,
+    };
     this.runtime ??= new RoomRuntime({
       clock: this.opts.clock,
       transport: {
@@ -191,6 +199,7 @@ export class AiAuthority {
     runtime.startGame({
       gameId: `ai-${String(this.gameCount)}`,
       board: config.board,
+      theme: config.theme,
       pieceCount: config.pieceCount,
       seed: this.seed(),
       players: [

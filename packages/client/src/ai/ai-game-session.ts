@@ -1,12 +1,14 @@
 // AI 대전의 GameSession(mode `ai`). 전용 Web Worker의 AI 권한 측과 로컬 2인과 같은 메시지로 통신한다.
 // 서버 연결이 없고 결과를 어디에도 보내지 않는다(DEC-021).
-import type { BoardId } from '@alkkagi/shared';
+import type { BoardId, ThemeId } from '@alkkagi/shared';
 import { LocalGameSession, type SessionPort } from '../local/local-game-session.ts';
 import type { GameMode } from '../session/game-session.ts';
 import { HUMAN_SEAT } from './ai-authority.ts';
 
 export interface AiMatchSettings {
   board: BoardId;
+  /** 방 테마(DEC-050). 없으면 기본 테마 */
+  theme?: ThemeId;
   pieceCount: 5 | 7 | 9;
 }
 
@@ -23,6 +25,7 @@ export class AiGameSession extends LocalGameSession {
     super(port, {
       seat: HUMAN_SEAT,
       board: options.board,
+      theme: options.theme,
       pieceCount: options.pieceCount,
       profile: options.profile,
       heartbeatMs: 0,

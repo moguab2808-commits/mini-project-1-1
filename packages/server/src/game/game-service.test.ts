@@ -14,6 +14,7 @@ const view: RoomView = {
     isPublic: true,
     code: null,
     board: 'standard',
+    theme: 'bar',
     pieceCount: 5,
     status: 'playing',
   },

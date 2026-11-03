@@ -102,6 +102,7 @@ function setup(view: GameView = makeView(), seat: 0 | 1 = 0): Env {
       { seat: 1, nickname: 'b', characterId: 'cat' },
     ],
     board: 'standard',
+    theme: 'bar',
     pieceCount: 7,
     finalRound: 10,
     turnSeconds: 30,

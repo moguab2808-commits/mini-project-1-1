@@ -12,6 +12,7 @@ import {
 import {
   RematchRequestSchema,
   type BoardId,
+  type ThemeId,
   type CharacterId,
   type CommandResult,
   type GameOver,
@@ -73,7 +74,7 @@ interface Session {
   /** 좌석 0은 방장, 1은 참여자. 사용자 번호는 서버 안에서만 쓰고 이벤트에 싣지 않는다(DEC-030) */
   userIds: [number | null, number | null];
   players: [Player, Player] | null;
-  config: { board: BoardId; pieceCount: number } | null;
+  config: { board: BoardId; theme: ThemeId; pieceCount: number } | null;
   /** 시작 커밋 뒤 경기 생성이 끝났는가. 그 사이의 이탈이 기다린다 */
   started: Deferred;
   /** `finishOnce`: 종료 처리 전에 경기 id를 넣어 같은 경기를 두 번 처리하지 않는다 */
@@ -288,7 +289,11 @@ export class GameService {
         { nickname: host.nickname, characterId: host.characterId as CharacterId },
         { nickname: guest.nickname, characterId: guest.characterId as CharacterId },
       ];
-      session.config = { board: room.board as BoardId, pieceCount: room.pieceCount };
+      session.config = {
+        board: room.board as BoardId,
+        theme: room.theme as ThemeId,
+        pieceCount: room.pieceCount,
+      };
       this.#byUser.set(host.id, { session, seat: 0 });
       this.#byUser.set(guest.id, { session, seat: 1 });
       this.#startGame(session);
@@ -359,6 +364,7 @@ export class GameService {
     session.runtime.startGame({
       gameId: randomUUID(),
       board: config.board,
+      theme: config.theme,
       pieceCount: config.pieceCount,
       seed: randomInt(0, 2 ** 32),
       players,
