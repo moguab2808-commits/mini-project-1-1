@@ -237,7 +237,7 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
         {opponent === 'ai' ? (
           // DEC-042 ②: AI 대전은 `/ai`의 설정 폼과 시작 함수를 그대로 쓴다.
           <div className="ai-setup">
-            <AiSetupForm onStart={onStartAi} />
+            <AiSetupForm initial={{ board, pieceCount }} onStart={onStartAi} />
           </div>
         ) : (
           <form
@@ -540,6 +540,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
           <li>판 밖으로 나간 알은 사라져요. 상대 알을 모두 떨어뜨리면 이겨요.</li>
           <li>한 턴은 30초예요. 3번 연속 시간을 넘기면 기권으로 져요.</li>
           <li>10라운드까지 승부가 나지 않으면 남은 알이 많은 쪽이 이겨요.</li>
+          <li>남은 알이 같거나 한 번의 발사로 양쪽 알이 함께 모두 떨어지면 무승부예요.</li>
         </ul>
         <h3>방해요소</h3>
         <ul>

@@ -41,6 +41,14 @@ export interface LobbyScreenProps {
   onRulesShown: () => void;
 }
 
+function isUnauthenticated(result: PromiseSettledResult<unknown>): boolean {
+  return (
+    result.status === 'rejected' &&
+    result.reason instanceof ApiError &&
+    result.reason.code === 'UNAUTHENTICATED'
+  );
+}
+
 export function LobbyScreen({
   api,
   client,
@@ -89,6 +97,11 @@ export function LobbyScreen({
     setLoading(true);
     const [list, mine] = await Promise.allSettled([api.listRooms(), api.me()]);
     if (!mounted.current) return;
+    // 한쪽이라도 세션 만료(401)면 다른 쪽 결과와 상관없이 로그인 화면으로 간다.
+    if ([list, mine].some(isUnauthenticated)) {
+      onAuthLost();
+      return;
+    }
     if (list.status === 'fulfilled') {
       setRooms(list.value);
       setListFailed(false);
@@ -98,10 +111,10 @@ export function LobbyScreen({
       handleApiError(list.reason);
     }
     if (mine.status === 'fulfilled') onMeChange(mine.value);
-    // 안내가 겹치지 않게 목록이 성공했을 때만 전적 실패를 알린다(세션 만료는 어느 쪽이든 로그인 화면으로 간다).
+    // 안내가 겹치지 않게 목록이 성공했을 때만 전적 실패를 알린다.
     else if (list.status === 'fulfilled') handleApiError(mine.reason);
     setLoading(false);
-  }, [api, handleApiError, onMeChange]);
+  }, [api, handleApiError, onAuthLost, onMeChange]);
 
   useEffect(() => {
     void refresh();

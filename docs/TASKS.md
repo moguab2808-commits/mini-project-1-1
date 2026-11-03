@@ -811,7 +811,7 @@ Issue·PR: [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 상태: 리뷰 중
 담당: 개발자 B (2026-10-31 [DEC-035](DECISIONS.md#결정-색인)로 A에서 변경)
 의존성: UI-002, API-001, IMPL-007, IMPL-008
-범위: 로그인·가입·로비(방 목록·새로고침·방 생성·즉시 참가·코드 입력)·캐릭터 변경·환경설정·대기실·결과(재도전하기·나가기) 화면을 PRD 화면 요구사항대로 구현한다.
+범위: 로그인·가입·로비(방 목록·새로고침·방 생성·즉시 참가·코드 입력)·캐릭터 변경·환경설정·대기실·결과(재도전하기·나가기) 화면을 PRD 화면 요구사항대로 구현한다. IMPL-010의 개발용 `/online` 연결 확인 화면은 정식 화면으로 대체해 삭제한다(개발자 A 요청, PR #66 리뷰).
 관련 문서: [화면별 요구사항](PRD.md#화면별-요구사항) / [UI-002](#ui-002-디자인-캔버스-현재-요구사항-반영) / [API](design/API.md)
 Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66)
 
