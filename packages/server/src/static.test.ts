@@ -1,5 +1,6 @@
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { createHmac } from 'node:crypto';
 import path from 'node:path';
 import pg from 'pg';
 import request from 'supertest';
@@ -7,6 +8,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createAppServer, type AppServer } from './app.ts';
 
 // 연결 풀은 요청이 DB를 건드릴 때만 연결하므로 이 테스트는 DB 없이 돌아간다.
+const SESSION_SECRET = 'x'.repeat(32);
+
+// express-session은 서명이 맞아야 세션 ID로 보고 저장소를 조회한다. 잘못된 서명은 조회 없이 넘어가 테스트가 의미를 잃는다.
+function signedSessionCookie(sessionId: string): string {
+  const signature = createHmac('sha256', SESSION_SECRET)
+    .update(sessionId)
+    .digest('base64')
+    .replace(/=+$/, '');
+  return `connect.sid=${encodeURIComponent(`s:${sessionId}.${signature}`)}`;
+}
+
 describe('헬스체크·정적 파일·SPA fallback', () => {
   let dir: string;
   let pool: pg.Pool;
@@ -20,7 +32,7 @@ describe('헬스체크·정적 파일·SPA fallback', () => {
     pool = new pg.Pool({ connectionString: 'postgres://unused:unused@127.0.0.1:1/unused' });
     server = createAppServer({
       pool,
-      sessionSecret: 'x'.repeat(32),
+      sessionSecret: SESSION_SECRET,
       isProduction: false,
       staticDir: dir,
     });
@@ -48,8 +60,9 @@ describe('헬스체크·정적 파일·SPA fallback', () => {
 
   it('세션 쿠키가 있어도 정적 요청은 DB(세션 저장소)를 거치지 않는다', async () => {
     // 풀이 연결 불가라 세션 조회가 일어나면 200이 될 수 없다.
-    await get('/lobby').set('Cookie', 'connect.sid=s%3Aabc.def').expect(200);
-    await get('/assets/app.js').set('Cookie', 'connect.sid=s%3Aabc.def').expect(200);
+    const cookie = signedSessionCookie('abc');
+    await get('/lobby').set('Cookie', cookie).expect(200);
+    await get('/assets/app.js').set('Cookie', cookie).expect(200);
   });
 
   it('있는 정적 자산은 그대로, 없는 정적 자산은 404다', async () => {
@@ -66,7 +79,7 @@ describe('헬스체크·정적 파일·SPA fallback', () => {
   it('클라이언트 빌드가 없으면 정적 파일을 제공하지 않는다', async () => {
     const bare = createAppServer({
       pool,
-      sessionSecret: 'x'.repeat(32),
+      sessionSecret: SESSION_SECRET,
       isProduction: false,
       staticDir: path.join(dir, 'none'),
     });
