@@ -8,11 +8,15 @@
 //   beam=flashlight|water_gun beamby=0|1 coverage=0~1        (발동 중인 후레쉬·물총 효과)
 //   stun=0|1                                                 (그 좌석 기절: 머리 위 별, 내 좌석이면 화면 한 바퀴 회전, 8초)
 //   react0=win react1=lose                                   (시작 0.3초 뒤 반응)
+//   emote0=yawn|taunt|doze|gg|laugh|surprise emote1=… emoteAge=600 (반복 표시, 경과 ms 고정 선택)
 //   flick=1                                                  (1초 뒤 상대가 조준하던 알을 쏜다)
 //   interactive=1                                            (왼쪽 드래그로 조준)
 // 하네스는 합성 GameStart/GameView만 쓰며 `window.__harness`로 상태·포인터 이벤트·조작 함수를 노출한다.
 import {
   APPEARANCE_KEYS,
+  EMOTE_IDS,
+  type EmoteId,
+  type EmoteShown,
   BOARDS,
   DEFAULT_APPEARANCE,
   normalizeAppearance,
@@ -281,6 +285,7 @@ function posesFor(
 }
 
 function Harness() {
+  const [emotes, setEmotes] = useState<[EmoteShown | null, EmoteShown | null]>([null, null]);
   const [view, setView] = useState(init.view);
   const [aim, setAim] = useState<AimRenderState | null>(initialAim);
   const [placement, setPlacement] = useState<PlacementRenderState | null>(
@@ -326,6 +331,26 @@ function Harness() {
     const pump = window.setInterval(() => {
       const v = viewRef.current;
       setView(makeView(v.stones, v.boardRotationDeg, v.effects));
+      if (q.has('emote0') || q.has('emote1'))
+        setEmotes(
+          ([a, b]) =>
+            [0, 1].map((seat) => {
+              const emote = EMOTE_IDS.find((kind) => kind === q.get(`emote${seat}`));
+              const prev = seat === 0 ? a : b;
+              return emote
+                ? {
+                    gameId: 'harness',
+                    seat: seat as Seat,
+                    emote,
+                    atMs:
+                      Date.now() -
+                      (q.has('emoteAge')
+                        ? Math.max(0, Math.min(1200, Number(q.get('emoteAge')) || 0))
+                        : (Date.now() - T0) % 1500),
+                  }
+                : prev;
+            }) as [EmoteShown | null, EmoteShown | null],
+        );
     }, 100);
     for (const s of [0, 1] as const) {
       const k = q.get(`react${s}`);
@@ -446,6 +471,12 @@ function Harness() {
           return next;
         }),
       setAim,
+      emote: (seat: Seat, emote: EmoteId) =>
+        setEmotes((prev) => {
+          const next: [EmoteShown | null, EmoteShown | null] = [...prev];
+          next[seat] = { gameId: 'harness', seat, emote, atMs: Date.now() };
+          return next;
+        }),
     };
   }, []);
 
@@ -483,6 +514,7 @@ function Harness() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <GameScene
+        emotes={emotes}
         start={init.start}
         view={view}
         mySeat={mySeat}

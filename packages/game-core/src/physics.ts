@@ -102,27 +102,28 @@ export function stepPhysics(w: World): number[] {
 
   // 1. 가속(자석·중력 구역)·감속·중력, 2. 이동
   for (const s of live) {
+    // 자석·중력 구역: 움직이는 지면 알과 떠 있는 알 모두에 적용한다
+    if (s.airborne || moving.has(s.id)) {
+      for (const m of w.magnets ?? []) {
+        const dx = m.cx - s.x;
+        const dy = m.cy - s.y;
+        const d = Math.hypot(dx, dy);
+        if (d > 1e-6 && d <= m.radius) {
+          s.vx += (dx / d) * HAZARD_TUNING.magnetAccel * DT;
+          s.vy += (dy / d) * HAZARD_TUNING.magnetAccel * DT;
+        }
+      }
+      for (const g of w.gravityZones ?? []) {
+        if (insideObb(s.x, s.y, g.zone)) {
+          s.vx += g.dx * HAZARD_TUNING.gravityAccel * DT;
+          s.vy += g.dy * HAZARD_TUNING.gravityAccel * DT;
+        }
+      }
+    }
     if (s.airborne) {
       s.vz -= PHYSICS.gravity * DT;
       s.h += s.vz * DT;
     } else {
-      if (moving.has(s.id)) {
-        for (const m of w.magnets ?? []) {
-          const dx = m.cx - s.x;
-          const dy = m.cy - s.y;
-          const d = Math.hypot(dx, dy);
-          if (d > 1e-6 && d <= m.radius) {
-            s.vx += (dx / d) * HAZARD_TUNING.magnetAccel * DT;
-            s.vy += (dy / d) * HAZARD_TUNING.magnetAccel * DT;
-          }
-        }
-        for (const g of w.gravityZones ?? []) {
-          if (insideObb(s.x, s.y, g.zone)) {
-            s.vx += g.dx * HAZARD_TUNING.gravityAccel * DT;
-            s.vy += g.dy * HAZARD_TUNING.gravityAccel * DT;
-          }
-        }
-      }
       const sp = Math.hypot(s.vx, s.vy);
       if (sp > 0) {
         let decel: number = friction;

@@ -2,6 +2,7 @@ import type { Game, GameConfig } from '@alkkagi/game-core';
 import type {
   AimState,
   CommandResult,
+  EmoteShown,
   GameOver,
   GameStart,
   GameView,
@@ -39,6 +40,7 @@ export interface RuntimeEventMap {
   'game:over': GameOver;
   /** 상대의 조준·몸짓 상태 중계(표시용, 권한 상태 아님. DEC-036). 항상 volatile로 보낸다 */
   'aim:state': AimState;
+  'emote:shown': EmoteShown;
 }
 
 export interface SendOptions {

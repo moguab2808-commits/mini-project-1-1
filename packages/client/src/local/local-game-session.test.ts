@@ -74,6 +74,7 @@ function setup(options: ConstructorParameters<typeof LocalAuthority>[0]) {
       'game:over',
       'rematch:state',
       'aim:state',
+      'emote:shown',
     ] as const) {
       session.on(type, (payload) => log.push({ type, payload }));
     }
@@ -96,6 +97,24 @@ const of = <T>(log: { type: string; payload: unknown }[], type: string) =>
   log.filter((e) => e.type === type).map((e) => e.payload as T);
 
 describe('LocalAuthority + LocalGameSession', () => {
+  it('감정표현이 MessageChannel을 왕복해 양쪽에 같게 보이고 쿨타임을 강제한다', async () => {
+    const clock = new FakeClock();
+    const { connect } = setup({ clock, random: () => 0.5, heartbeatTimeoutMs: 0 });
+    const a = connect(0);
+    await a.session.connect();
+    const b = connect(1);
+    await b.session.connect();
+    await flush();
+    const start = of<GameStart>(a.log, 'game:start')[0]!;
+    const cmd = { gameId: start.gameId, emote: 'gg' as const };
+    expect(await a.session.sendEmote(cmd)).toEqual({ ok: true });
+    await flush();
+    expect(of(a.log, 'emote:shown')).toEqual(of(b.log, 'emote:shown'));
+    expect(of(a.log, 'emote:shown')).toHaveLength(1);
+    const again = await a.session.sendEmote(cmd);
+    expect(!again.ok && again.error.code).toBe('EMOTE_COOLDOWN');
+  });
+
   it('두 좌석이 연결되면 경기가 시작되고 각자 자기 좌석의 game:start를 받는다', async () => {
     const clock = new FakeClock();
     const { connect } = setup({ clock, random: () => 0.5, heartbeatTimeoutMs: 0 });

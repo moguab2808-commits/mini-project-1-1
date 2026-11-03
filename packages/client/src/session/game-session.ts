@@ -5,6 +5,8 @@ import type {
   AimUpdate,
   BoardRotate,
   CommandResult,
+  EmoteSend,
+  EmoteShown,
   GameForfeit,
   GameOver,
   GameStart,
@@ -32,6 +34,7 @@ export interface GameEventMap {
   'rematch:state': RematchState;
   /** 상대의 조준·몸짓 상태(상대에게서 중계됨). 권한 상태가 아니다 */
   'aim:state': AimState;
+  'emote:shown': EmoteShown;
 }
 
 export interface GameSession {
@@ -48,6 +51,7 @@ export interface GameSession {
   aimHazard(cmd: HazardAim): void;
   /** 내 조준·몸짓 상태를 상대 화면에 보낸다(`aim:update`). 응답 없음, 초당 20회 이하 */
   sendAim(update: AimUpdate): void;
+  sendEmote(cmd: EmoteSend): Promise<CommandResult>;
   on<K extends keyof GameEventMap>(type: K, handler: (event: GameEventMap[K]) => void): () => void;
   /** 창 닫기·이동. 진행 중이면 이탈로 처리한다 */
   dispose(): void;

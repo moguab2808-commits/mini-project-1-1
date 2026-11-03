@@ -3,6 +3,7 @@ import {
   AimUpdateSchema,
   BoardRotateSchema,
   DEFAULT_THEME,
+  EmoteSendSchema,
   GameForfeitSchema,
   HazardAimSchema,
   HazardUseSchema,
@@ -12,6 +13,7 @@ import {
   type BoardId,
   type BoardRotate,
   type CommandResult,
+  type EmoteSend,
   type GameForfeit,
   type GameOver,
   type GameStart,
@@ -121,6 +123,7 @@ export class RoomRuntime {
   private closed = false;
   private rematchDeadlineMs: number | null = null;
   private rematchUnavailable = false;
+  private lastEmoteAt: [number, number] = [-Infinity, -Infinity];
 
   constructor(options: RuntimeOptions) {
     this.opts = options;
@@ -142,6 +145,7 @@ export class RoomRuntime {
     this.rematchDeadlineMs = null;
     this.rematchUnavailable = false;
     this.finished = false;
+    this.lastEmoteAt = [-Infinity, -Infinity];
     this.sent = [freshSent(), freshSent()];
     this.skippedMs = 0;
     this.lastStepMono = mono;
@@ -239,6 +243,31 @@ export class RoomRuntime {
     const to: Seat = seat === 0 ? 1 : 0;
     this.send(to, 'aim:state', { ...parsed.data, seat }, { volatile: true });
     return true;
+  }
+
+  /** 표시 전용 신뢰 중계. 물리 큐·Game·revision·로그를 바꾸지 않는다. */
+  sendEmote(seat: Seat, cmd: EmoteSend): Promise<CommandResult> {
+    const parsed = EmoteSendSchema.safeParse(cmd);
+    if (!parsed.success || (seat !== 0 && seat !== 1)) return Promise.resolve(INVALID);
+    const game = this.game;
+    if (!game || !this.isRunning || parsed.data.gameId !== game.gameId) {
+      return Promise.resolve(NOT_ACTIVE);
+    }
+    const phase = game.getViewFor(seat).phase;
+    if (phase !== 'aiming' && phase !== 'moving' && phase !== 'resolving') {
+      return Promise.resolve(NOT_ACTIVE);
+    }
+    const now = this.opts.clock.now();
+    if (now - this.lastEmoteAt[seat] < 2800) {
+      return Promise.resolve({
+        ok: false,
+        error: { code: 'EMOTE_COOLDOWN', message: '감정표현을 잠시 뒤에 다시 사용해 주세요' },
+      });
+    }
+    this.lastEmoteAt[seat] = now;
+    const event = { ...parsed.data, seat, atMs: now };
+    for (const to of [0, 1] as const) this.send(to, 'emote:shown', event, { volatile: false });
+    return Promise.resolve({ ok: true });
   }
 
   forfeit(seat: Seat, cmd: GameForfeit): Promise<CommandResult> {

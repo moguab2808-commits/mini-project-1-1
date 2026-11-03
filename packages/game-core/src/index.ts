@@ -4,7 +4,7 @@ export { Prng, deriveSeed } from './prng.ts';
 export {
   INSTALL_KINDS,
   effectFootprint,
-  fakeWallTriple,
+  planFakeWalls,
   gravityZoneObb,
   hasOrientation,
   installFootprints,

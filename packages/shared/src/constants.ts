@@ -95,37 +95,37 @@ export interface HazardMeta {
   cooldownMs?: number;
 }
 
-/** 설치형(벽·끈끈이·추가 위치형 6종)의 지속은 10초다(DEC-064, 8초에서 2초 늘림) */
+/** 설치형(벽·끈끈이·추가 위치형 6종)의 지속은 15초, 미끄럼 장판은 13초다(10초·8초에서 5초 늘림) */
 export const HAZARDS: Record<HazardKind, HazardMeta> = {
   board_spin: { kind: 'board_spin', category: 'fatigue', durationMs: 1000, fatigueCost: 25 },
   flashlight: { kind: 'flashlight', category: 'fatigue', durationMs: 4000, fatigueCost: 40 },
   water_gun: { kind: 'water_gun', category: 'fatigue', durationMs: 5000, fatigueCost: 45 },
   desk_shake: { kind: 'desk_shake', category: 'fatigue', durationMs: 500, fatigueCost: 40 },
-  wall: { kind: 'wall', category: 'cooldown', durationMs: 10000, cooldownMs: 20000 },
-  sticky: { kind: 'sticky', category: 'cooldown', durationMs: 10000, cooldownMs: 20000 },
+  wall: { kind: 'wall', category: 'cooldown', durationMs: 15000, cooldownMs: 20000 },
+  sticky: { kind: 'sticky', category: 'cooldown', durationMs: 15000, cooldownMs: 20000 },
   stun: { kind: 'stun', category: 'cooldown', durationMs: 4000, cooldownMs: 30000 },
   bar_speed: { kind: 'bar_speed', category: 'random', durationMs: 1000 },
   wind: { kind: 'wind', category: 'random', durationMs: 1000 },
-  magnet: { kind: 'magnet', category: 'cooldown', durationMs: 10000, cooldownMs: 20000 },
+  magnet: { kind: 'magnet', category: 'cooldown', durationMs: 15000, cooldownMs: 20000 },
   gravity_zone: {
     kind: 'gravity_zone',
     category: 'cooldown',
-    durationMs: 10000,
+    durationMs: 15000,
     cooldownMs: 20000,
   },
-  ice_floor: { kind: 'ice_floor', category: 'per_turn', durationMs: 8000 },
+  ice_floor: { kind: 'ice_floor', category: 'per_turn', durationMs: 13000 },
   decoy: { kind: 'decoy', category: 'per_turn', durationMs: UNTIL_SWAP_MS },
-  fake_wall: { kind: 'fake_wall', category: 'cooldown', durationMs: 10000, cooldownMs: 20000 },
+  fake_wall: { kind: 'fake_wall', category: 'cooldown', durationMs: 15000, cooldownMs: 20000 },
   heavy_stones: { kind: 'heavy_stones', category: 'per_turn', durationMs: UNTIL_SWAP_MS },
   reverse_zone: {
     kind: 'reverse_zone',
     category: 'cooldown',
-    durationMs: 10000,
+    durationMs: 15000,
     cooldownMs: 20000,
   },
   mine: { kind: 'mine', category: 'per_turn', durationMs: UNTIL_SWAP_MS },
-  pit: { kind: 'pit', category: 'cooldown', durationMs: 10000, cooldownMs: 20000 },
-  moving_wall: { kind: 'moving_wall', category: 'cooldown', durationMs: 10000, cooldownMs: 20000 },
+  pit: { kind: 'pit', category: 'cooldown', durationMs: 15000, cooldownMs: 20000 },
+  moving_wall: { kind: 'moving_wall', category: 'cooldown', durationMs: 15000, cooldownMs: 20000 },
 };
 
 export const HAZARD_TUNING = {
@@ -157,12 +157,12 @@ export const HAZARD_TUNING = {
   blindDecayPerSec: 0.5,
 
   // ── 추가 10종 (제안값, GAME.md "수치 제안값") ──
-  /** 자석 영향 원 반지름 cm, 중심 쪽 가속 cm/s² */
+  /** 자석 영향 원 반지름 cm, 중심 쪽 가속 cm/s²(180의 3배). 떠 있는 알에도 적용 */
   magnetRadius: 8.8,
-  magnetAccel: 180,
+  magnetAccel: 540,
   /** 중력 구역 정사각 한 변 cm, 가속 cm/s². 방향은 45° 단위 */
   gravityZoneSize: 13.2,
-  gravityAccel: 150,
+  gravityAccel: 450,
   /** 미끄럼 장판: 지면 감속 배율(끈끈이 추가 감속에는 곱하지 않는다) */
   iceFrictionMultiplier: 0.4,
   /** 분신술: 원래 자리에서 이 거리 범위 안의 빈 자리 3곳 */
@@ -173,8 +173,6 @@ export const HAZARD_TUNING = {
   /** 분신술 자리의 판 경계 안쪽 여유 */
   decoyEdgeInset: 2.2,
   decoyMaxTries: 64,
-  /** 가짜벽: 세 벽 사이 간격(벽에 수직 방향) */
-  fakeWallSpacing: 6.6,
   /** 알 무게 변화: 내 알 질량 배율 */
   heavyMassMultiplier: 3,
   reverseZoneDiameter: 8.8,

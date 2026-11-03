@@ -9,6 +9,7 @@ import type {
   RematchState,
   Seat,
 } from '@alkkagi/shared';
+import type { DisplayEmote } from './emotes.ts';
 import type { GameSession } from '../session/game-session.ts';
 
 /** 방해요소 받음 카드 표시 시간(PRD 게임 화면) */
@@ -37,6 +38,7 @@ export interface GameClientState {
   clockOffsetMs: number;
   /** 상대의 조준·몸짓 상태(`aim:state`, 표시용). 경기 시작·종료 때 null로 되돌린다 */
   opponentAim: AimState | null;
+  emotes: readonly [DisplayEmote | null, DisplayEmote | null];
 }
 
 export class GameStore {
@@ -59,6 +61,7 @@ export class GameStore {
       rematch: null,
       clockOffsetMs: 0,
       opponentAim: null,
+      emotes: [null, null],
     };
     const on = session.on.bind(session);
     this.unsubscribe.push(
@@ -74,6 +77,7 @@ export class GameStore {
           rematch: null,
           clockOffsetMs: start.view.serverNowMs - this.nowMs(),
           opponentAim: null,
+          emotes: [null, null],
         });
       }),
       on('game:state', (view) => {
@@ -99,7 +103,16 @@ export class GameStore {
         });
       }),
       on('game:over', (result) => {
-        this.set({ result, opponentAim: null });
+        this.set({ result, opponentAim: null, emotes: [null, null] });
+      }),
+      on('emote:shown', (emote) => {
+        if (!this.state.start || this.state.result || emote.gameId !== this.state.start.gameId)
+          return;
+        const previous = this.state.emotes[emote.seat];
+        if (previous && previous.atMs >= emote.atMs) return;
+        const emotes: [DisplayEmote | null, DisplayEmote | null] = [...this.state.emotes];
+        emotes[emote.seat] = { ...emote, receivedAtMs: this.nowMs() };
+        this.set({ emotes });
       }),
       on('aim:state', (aim) => {
         // 다른 경기·내 좌석의 중계는 무시한다

@@ -36,7 +36,7 @@ import {
 } from './geometry.ts';
 import {
   effectFootprint,
-  fakeWallTriple,
+  planFakeWalls,
   gravityZoneObb,
   isInstallKind,
   isOnWallGrid,
@@ -403,6 +403,14 @@ export class Game {
         return fail('HAZARD_INVALID_TARGET', '그 자리에 놓을 수 없다');
       }
     }
+    let fakeWallPlan: Obb[] | null = null;
+    if (kind === 'fake_wall') {
+      const rng = new Prng(deriveSeed(this.seed, 5000 + p.grantNo));
+      fakeWallPlan = planFakeWalls(t!.x!, t!.y!, t!.orientation!, this.placementWorld(), () =>
+        rng.next(),
+      );
+      if (!fakeWallPlan) return fail('HAZARD_INVALID_TARGET', '세 벽을 함께 놓을 빈자리가 없다');
+    }
     let decoyPlan: ReturnType<Game['planDecoys']> = null;
     if (kind === 'decoy') {
       decoyPlan = this.planDecoys(env.seat, t!.stoneId!, p.grantNo);
@@ -425,7 +433,7 @@ export class Game {
     const tgt = other(env.seat);
 
     if (isInstallKind(kind) && kind !== 'wall' && kind !== 'sticky') {
-      this.installNew(kind, src, now, t!, p.grantNo, instanceId);
+      this.installNew(kind, src, now, t!, instanceId, fakeWallPlan);
       this.revision++;
       return OK;
     }
@@ -504,8 +512,8 @@ export class Game {
     src: Seat,
     now: number,
     t: Target,
-    grantNo: number,
     instanceId: string,
+    fakeWallPlan: Obb[] | null,
   ): void {
     const meta = HAZARDS[kind];
     const tgt = other(src);
@@ -513,10 +521,11 @@ export class Game {
     const y = t.y!;
     const T = HAZARD_TUNING;
     if (kind === 'fake_wall') {
-      // 진짜 1개는 지급별 스트림으로 고른다. 세 벽은 좌표순이라 순서로 진짜를 알 수 없다
-      const walls = fakeWallTriple(x, y, t.orientation!).sort((a, b) => a.cx - b.cx || a.cy - b.cy);
-      const realIdx = new Prng(deriveSeed(this.seed, 5000 + grantNo)).int(3);
-      walls.forEach((w, i) => {
+      // 사용자가 고른 벽이 진짜다. 이벤트 순서는 좌표순으로 보내 진짜 위치를 누설하지 않는다.
+      const real = fakeWallPlan![0]!;
+      const walls = [...fakeWallPlan!].sort((a, b) => a.cx - b.cx || a.cy - b.cy);
+      const created: Effect[] = [];
+      walls.forEach((w) => {
         const eff = this.addEffect('wall', src, tgt, now, meta.durationMs, {
           x: w.cx,
           y: w.cy,
@@ -525,12 +534,11 @@ export class Game {
         });
         eff.instanceId = instanceId;
         eff.wall = w;
-        if (i !== realIdx) eff.fake = true;
+        if (w !== real) eff.fake = true;
+        created.push(eff);
       });
       this.syncWorld();
-      for (const e of this.effects.filter((e) => e.instanceId === instanceId && e.wall)) {
-        this.emitTriggered(e, 'start');
-      }
+      for (const e of created) this.emitTriggered(e, 'start');
       return;
     }
     let params: HazardParams = { x, y };
@@ -821,8 +829,8 @@ export class Game {
       this.finish(n0 === n1 ? null : n0 > n1 ? 0 : 1, 'final_round');
       return;
     }
-    // 발사 턴이 바뀔 때마다 두 좌석 모두 교체한다(DEC-055). 종료된 턴에는 교체하지 않는다
-    this.grantAll(true);
+    // 라운드(두 좌석이 한 번씩 쏜 뒤)가 바뀔 때만 두 좌석 모두 교체한다. 종료된 턴에는 교체하지 않는다
+    if (this.completedTurns % 2 === 0) this.grantAll(true);
     this.active = other(this.active);
     this.startTurn(reason);
   }

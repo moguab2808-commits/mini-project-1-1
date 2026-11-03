@@ -86,10 +86,14 @@ export class AvatarHead {
   /** 표정을 바꾼다. 같은 표정이면 다시 그리지 않는다(눈썹 값은 0.05 단위로 끊어 다시 그리는 횟수를 줄인다) */
   setExpression(ex: FaceExpression) {
     const q = (v: number) => Math.round(v * 20) / 20;
-    const key = `${ex.eyes}|${ex.mouth}|${ex.blink ? 1 : 0}|${q(ex.brow)}|${q(ex.browUp)}`;
+    const key = `${ex.eyes}|${ex.mouth}|${ex.blink ? 1 : 0}|${q(ex.brow)}|${q(ex.browUp)}|${ex.browAsym ?? 0}`;
     if (key === this.faceKey) return;
     this.faceKey = key;
-    paintFace(this.ctx, TEX, this.parts, { ...ex, brow: q(ex.brow), browUp: q(ex.browUp) });
+    paintFace(this.ctx, TEX, this.parts, {
+      ...ex,
+      brow: q(ex.brow),
+      browUp: q(ex.browUp),
+    });
     this.tex.needsUpdate = true;
   }
 

@@ -27,6 +27,8 @@ import {
   type BoardDefinition,
   type BoardRotate,
   type CommandResult,
+  type EmoteSend,
+  type EmoteId,
   type GameStart,
   type GameView,
   type HazardAim,
@@ -39,6 +41,7 @@ import type { GameEventMap } from '../session/game-session.ts';
 
 /** AI가 쓰는 명령. 사람의 `GameSession`과 같은 명령·검증을 거친다 */
 export interface AiActions {
+  sendEmote(cmd: EmoteSend): Promise<CommandResult>;
   submitShot(cmd: ShotSubmit): Promise<CommandResult>;
   useHazard(cmd: HazardUse): Promise<CommandResult>;
   rotateBoard(cmd: BoardRotate): Promise<CommandResult>;
@@ -115,6 +118,10 @@ export class AiController {
   private readonly actions: AiActions;
   private readonly clock: RuntimeClock;
   private readonly rng: Prng;
+  /** 표현 난수는 경기 의사결정 난수와 분리한다 */
+  private readonly emoteRng: Prng;
+  private lastEmoteMs = -Infinity;
+  private emoteTurn = -1;
   private readonly tuning: AiTuning;
   private readonly onError?: (error: unknown) => void;
   private start: GameStart | null = null;
@@ -132,6 +139,7 @@ export class AiController {
     this.actions = options.actions;
     this.clock = options.clock;
     this.rng = new Prng(options.seed);
+    this.emoteRng = new Prng(options.seed ^ 0x5e17ac31);
     this.tuning = { ...DEFAULT_AI_TUNING, ...options.tuning };
     this.onError = options.onError;
   }
@@ -145,6 +153,8 @@ export class AiController {
       this.start = start;
       this.shotTurn = null;
       this.hazardTurn = null;
+      this.lastEmoteMs = -Infinity;
+      this.emoteTurn = -1;
       this.onView(start.view);
     } else if (type === 'game:state') {
       this.onView(payload as GameView);
@@ -162,7 +172,32 @@ export class AiController {
 
   private onView(view: GameView): void {
     if (!this.start || view.gameId !== this.start.gameId) return;
+    const previous = this.view;
     this.view = view;
+    if (!view.result && view.phase !== 'finished' && view.phase !== 'waiting') {
+      const lostMine =
+        previous &&
+        previous.gameId === view.gameId &&
+        previous.stoneCounts[this.seat] > view.stoneCounts[this.seat];
+      const lostTheirs =
+        previous &&
+        previous.gameId === view.gameId &&
+        previous.stoneCounts[other(this.seat)] > view.stoneCounts[other(this.seat)];
+      if (lostMine) this.maybeEmote('surprise', 0.55);
+      else if (lostTheirs) this.maybeEmote('laugh', 0.4);
+      if (view.phase === 'aiming' && this.emoteTurn !== view.turnId) {
+        this.emoteTurn = view.turnId;
+        const kind: EmoteId =
+          view.turnId === 1
+            ? 'gg'
+            : view.activePlayerId === this.seat
+              ? 'taunt'
+              : this.emoteRng.next() < 0.5
+                ? 'yawn'
+                : 'doze';
+        this.maybeEmote(kind, view.turnId === 1 ? 0.35 : 0.2);
+      }
+    }
     if (view.phase !== 'aiming' || view.result) return;
     const turn = { gameId: view.gameId, turnId: view.turnId };
     if (view.activePlayerId === this.seat) {
@@ -177,6 +212,14 @@ export class AiController {
       this.hazardTurn = turn;
       this.planHazard(view, turn);
     }
+  }
+
+  private maybeEmote(emote: EmoteId, probability: number): void {
+    const view = this.view;
+    const now = this.clock.now();
+    if (!view || now - this.lastEmoteMs < 3000 || this.emoteRng.next() >= probability) return;
+    this.lastEmoteMs = now;
+    void this.actions.sendEmote({ gameId: view.gameId, emote }).catch(this.onError);
   }
 
   private isCurrent(turn: { gameId: string; turnId: number }, phase?: GameView['phase']): boolean {

@@ -3,7 +3,13 @@
 //
 // 좌석 로컬 좌표(rig-math.ts): 루트 원점은 좌석 기준점 아래 판 윗면 높이, +Z가 판 쪽, 캐릭터 오른쪽은 −X.
 // 팔·손·다리는 루트에 직접 붙여 좌석 로컬 좌표로 매 프레임 배치하고, 몸통·머리는 hips → torso → neck → head 계층이다.
-import { SEAT_GEOMETRY, type Appearance, type HazardKind, type Seat } from '@alkkagi/shared';
+import {
+  SEAT_GEOMETRY,
+  type Appearance,
+  type EmoteId,
+  type HazardKind,
+  type Seat,
+} from '@alkkagi/shared';
 import {
   BoxGeometry,
   CircleGeometry,
@@ -20,6 +26,7 @@ import {
   SphereGeometry,
   Vector3,
   type BufferGeometry,
+  type Camera,
   type Material,
 } from 'three';
 import {
@@ -48,6 +55,8 @@ import {
 } from './rig-math.ts';
 import { AvatarHead } from '../../avatar/avatar-head.ts';
 import type { FaceEyes, FaceMouth } from '../../avatar/face-paint.ts';
+import { EmoteBubble } from './emote-bubble.ts';
+import { emoteMotion } from './emote-motion.ts';
 import { TABLE_Y } from './stage.ts';
 
 type Eyes = FaceEyes;
@@ -74,11 +83,26 @@ interface Face {
   browUp: number;
 }
 
-const FLICK_FACE: Face = { eyes: 'open', mouth: 'open', brow: 0.15, browUp: 0.2 };
+const FLICK_FACE: Face = {
+  eyes: 'open',
+  mouth: 'open',
+  brow: 0.15,
+  browUp: 0.2,
+};
 const GRAB_FACE: Face = { eyes: 'open', mouth: 'flat', brow: 0.15, browUp: 0 };
 const HOLD_FACE: Face = { eyes: 'open', mouth: 'smile', brow: 0.3, browUp: 0 };
-const BLIND_FACE: Face = { eyes: 'shut', mouth: 'frown', brow: -0.3, browUp: 0 };
-const BLIND_FACE_HARD: Face = { eyes: 'shut', mouth: 'open', brow: -0.3, browUp: 0 };
+const BLIND_FACE: Face = {
+  eyes: 'shut',
+  mouth: 'frown',
+  brow: -0.3,
+  browUp: 0,
+};
+const BLIND_FACE_HARD: Face = {
+  eyes: 'shut',
+  mouth: 'open',
+  brow: -0.3,
+  browUp: 0,
+};
 
 interface Gesture {
   eyes: Eyes;
@@ -98,8 +122,18 @@ interface Gesture {
   L: HandSpec | null;
 }
 
-const REST_R: HandSpec = { p: [-9, TABLE_Y + 1.6, 5.6], f: [0.15, 0, 1], curl: 0.55, k: 4 };
-const REST_L: HandSpec = { p: [9, TABLE_Y + 1.6, 5.6], f: [-0.15, 0, 1], curl: 0.55, k: 4 };
+const REST_R: HandSpec = {
+  p: [-9, TABLE_Y + 1.6, 5.6],
+  f: [0.15, 0, 1],
+  curl: 0.55,
+  k: 4,
+};
+const REST_L: HandSpec = {
+  p: [9, TABLE_Y + 1.6, 5.6],
+  f: [-0.15, 0, 1],
+  curl: 0.55,
+  k: 4,
+};
 
 const G = (g: Partial<Gesture>): Gesture => ({
   eyes: 'open',
@@ -194,6 +228,39 @@ export const GESTURES: Record<GestureName, Gesture> = {
   }),
 };
 
+const EMOTE_GESTURES = {
+  yawn: G({
+    eyes: 'shut',
+    mouth: 'open',
+    focusOpponent: true,
+    R: { p: [-1, 24, 10], f: [0, 0.8, 0.3], curl: 0.4, k: 9 },
+  }),
+  taunt: G({
+    eyes: 'open',
+    mouth: 'smile',
+    brow: 0.25,
+    browUp: 0.3,
+    focusOpponent: true,
+    R: { p: [-5, 21, 18], f: [0, 0.2, 1], curl: -0.3, k: 9 },
+  }),
+  doze: G({ eyes: 'shut', mouth: 'flat' }),
+  gg: G({
+    eyes: 'happy',
+    mouth: 'smile',
+    focusOpponent: true,
+    R: { p: [-10, 30, 8], f: [0, 1, 0.3], curl: -0.2, k: 10 },
+  }),
+  surprise: G({
+    eyes: 'wide',
+    mouth: 'open',
+    browUp: 0.7,
+    lean: -0.18,
+    focusOpponent: true,
+    R: { p: [-12, 29, 8], f: [0, 0.7, 1], curl: -0.2, k: 12 },
+    L: { p: [12, 29, 8], f: [0, 0.7, 1], curl: -0.2, k: 12 },
+  }),
+};
+
 // ───────── 모델 ─────────
 
 interface HandState {
@@ -251,6 +318,7 @@ export interface CharacterFrame {
   opacity: number;
   /** 기절 중이면 머리 위에 별이 돈다 */
   stunned?: boolean;
+  emote?: { kind: EmoteId; ageMs: number } | null;
 }
 
 const UP = new Vector3(0, 1, 0);
@@ -287,6 +355,9 @@ export class CharacterRig {
   private readonly hands: [HandState, HandState];
   private readonly flashlight = new Group();
   private readonly waterGun = new Group();
+  /** 감정표현: 카메라를 향하는 머리 위 말풍선 */
+  private readonly emoteBubble = new EmoteBubble();
+  private readonly bubblePoint = new Vector3();
   /** 기절 표시: 머리 위를 도는 별 */
   private readonly stunStars = new Group();
   private readonly stunStarMeshes: Mesh[] = [];
@@ -307,7 +378,13 @@ export class CharacterRig {
     hy: 0,
     hp: 0,
   };
-  private readonly body: BodyState = { lean: 0, yaw: 0, roll: 0, rise: 0, bob: 0 };
+  private readonly body: BodyState = {
+    lean: 0,
+    yaw: 0,
+    roll: 0,
+    rise: 0,
+    bob: 0,
+  };
   private leanRate = 4;
   private blinkIn = 2 + Math.random() * 3;
   private blinkT = 0;
@@ -322,7 +399,13 @@ export class CharacterRig {
   private holdKind: HazardKind | null = null;
 
   // 임시값(할당 없이 재사용)
-  private readonly reach: ReachResult = { p: 0, lean: 0, rise: 0, yaw: 0, ok: true };
+  private readonly reach: ReachResult = {
+    p: 0,
+    lean: 0,
+    rise: 0,
+    yaw: 0,
+    ok: true,
+  };
   private readonly arm = createArmSolution();
   private readonly tS = v3();
   private readonly tW = v3();
@@ -334,7 +417,12 @@ export class CharacterRig {
   private readonly hipV = v3();
   private readonly lookV = v3();
   private readonly look = { yaw: 0, pitch: 0 };
-  private readonly aimFace: Face = { eyes: 'open', mouth: 'flat', brow: 0.22, browUp: 0 };
+  private readonly aimFace: Face = {
+    eyes: 'open',
+    mouth: 'flat',
+    brow: 0.22,
+    browUp: 0,
+  };
   private lastAimId: number | null = null;
 
   constructor(appearance: Appearance, seat: Seat) {
@@ -439,6 +527,8 @@ export class CharacterRig {
     this.buildDevices(this.hands[0].hand);
 
     this.buildStunStars();
+    this.emoteBubble.sprite.position.y = RIG.headUp + RIG.headRadius * HEAD_SCALE + 10;
+    this.root.add(this.emoteBubble.sprite);
   }
 
   /** 머리 위 기절 별 5개(목에 붙여 머리를 따라간다) */
@@ -487,7 +577,11 @@ export class CharacterRig {
   }
 
   private fadeStd(color: number | string, rough = 0.75): MeshStandardMaterial {
-    const m = new MeshStandardMaterial({ color, roughness: rough, transparent: true });
+    const m = new MeshStandardMaterial({
+      color,
+      roughness: rough,
+      transparent: true,
+    });
     this.mats.push(m);
     this.fadeMats.push(m);
     return m;
@@ -512,7 +606,11 @@ export class CharacterRig {
 
   private buildDevices(hand: Group) {
     const dark = this.std(0x26262c, 0.4);
-    const metal = new MeshStandardMaterial({ color: 0xc9c9cf, roughness: 0.25, metalness: 0.7 });
+    const metal = new MeshStandardMaterial({
+      color: 0xc9c9cf,
+      roughness: 0.25,
+      metalness: 0.7,
+    });
     this.mats.push(metal);
     const lens = new MeshBasicMaterial({ color: 0xfff3b0 });
     this.mats.push(lens);
@@ -553,6 +651,23 @@ export class CharacterRig {
   }
 
   // ───── 상태 ─────
+
+  private emoteGesture(kind: EmoteId): Gesture {
+    switch (kind) {
+      case 'yawn':
+        return EMOTE_GESTURES.yawn;
+      case 'taunt':
+        return EMOTE_GESTURES.taunt;
+      case 'doze':
+        return EMOTE_GESTURES.doze;
+      case 'gg':
+        return EMOTE_GESTURES.gg;
+      case 'laugh':
+        return GESTURES.laugh;
+      case 'surprise':
+        return EMOTE_GESTURES.surprise;
+    }
+  }
 
   private setFace(eyes: Eyes, mouth: Mouth) {
     this.faceEyes = eyes;
@@ -601,7 +716,10 @@ export class CharacterRig {
 
   update(f: CharacterFrame) {
     const { dt, t } = f;
-    const g = GESTURES[f.gesture];
+    const emote = f.emote;
+    const motion = emote ? emoteMotion(emote.kind, emote.ageMs) : null;
+    const g = emote ? this.emoteGesture(emote.kind) : GESTURES[f.gesture];
+    this.emoteBubble.update(f.firstPerson ? null : (emote?.kind ?? null));
     const st = this.st;
     const [R, L] = this.hands;
     let tgLean = g.lean;
@@ -696,12 +814,21 @@ export class CharacterRig {
     } else if (g.L && !rightBusy) this.setHandSpec(L, g.L);
     else this.setHandSpec(L, REST_L);
 
+    // 조준·발사·판 잡기·장비를 쥔 팔은 유지하고 감정표현은 얼굴·고개만 더한다.
+    if (emote && motion && !f.aim && this.flickT < 0 && !f.grab && !f.hold) {
+      if (emote.kind === 'gg') {
+        R.tpos.x += motion.wave;
+        R.tfwd.x += motion.wave * 0.2;
+      }
+      if (emote.kind === 'taunt') R.tcurl = motion.beckon;
+    }
     // ── 얼굴: 가림 찡그림 > 위 결정
     let tear = g.tear && !f.aim;
     if (f.blind > 0.3) {
       face = f.blind > 0.6 ? BLIND_FACE_HARD : BLIND_FACE;
       tear = false;
     }
+    if (emote) face = g;
     this.setFace(face.eyes, face.mouth);
 
     // ── 몸
@@ -712,7 +839,7 @@ export class CharacterRig {
     st.rise += (tgRise - st.rise) * kl;
     st.yaw += (tgYaw - st.yaw) * kl;
     const busy = !!f.aim || this.flickT >= 0 || !!f.grab;
-    st.pitchAdd += ((busy ? 0 : g.pitchAdd) - st.pitchAdd) * k;
+    st.pitchAdd += ((busy && !emote ? 0 : g.pitchAdd + (motion?.pitch ?? 0)) - st.pitchAdd) * k;
     st.bounce += ((busy ? 0 : g.bounce) - st.bounce) * k;
     st.wobble += ((busy ? 0 : g.wobble) - st.wobble) * k;
     st.roll += ((busy ? 0 : g.roll) - st.roll) * k;
@@ -727,7 +854,7 @@ export class CharacterRig {
       Math.abs(Math.sin(t * 9)) * st.bounce + Math.sin(t * 1.6 + this.seat * 2) * 0.22;
     hipPos(this.body, this.hipV);
     this.hips.position.set(this.hipV.x, this.hipV.y, this.hipV.z);
-    this.torso.rotation.set(st.lean, st.yaw, 0, 'YXZ');
+    this.torso.rotation.set(st.lean, st.yaw, (motion?.bounce ?? 0) * 0.04, 'YXZ');
 
     // ── 머리 바라보기
     if (!look) {
@@ -742,7 +869,7 @@ export class CharacterRig {
     const la = lookAngles(this.tH, look, this.look);
     const yawL = clamp(f.lookYaw ?? la.yaw - st.yaw, -1.0, 1.0);
     const pitchL = clamp(
-      f.lookPitch !== undefined ? f.lookPitch : la.pitch - st.lean + st.pitchAdd,
+      (f.lookPitch !== undefined ? f.lookPitch : la.pitch - st.lean) + st.pitchAdd,
       -0.6,
       0.9,
     );
@@ -764,6 +891,7 @@ export class CharacterRig {
       blink: this.blinkT > 0,
       brow: st.brow,
       browUp: st.browUp / FACE_UNIT,
+      browAsym: emote?.kind === 'taunt' ? 4 : 0,
     });
     this.tear.visible = tear;
     if (tear) {
@@ -859,6 +987,21 @@ export class CharacterRig {
     h.elbow.position.set(this.arm.elbow.x, this.arm.elbow.y, this.arm.elbow.z);
   }
 
+  /** 기본 시점 위쪽에 가까운 머리도 말풍선이 창 밖으로 잘리지 않게 한다. */
+  layoutBubble(camera: Camera) {
+    if (!this.emoteBubble.sprite.visible) return;
+    const point = this.headWorld(this.bubblePoint);
+    point.y += RIG.headRadius * HEAD_SCALE + 8;
+    point.project(camera);
+    // 위쪽 여백이 없으면 얼굴을 덮지 않도록 말풍선을 머리 옆으로 옮긴다.
+    if (point.y > 0.78) point.x += point.x > 0.2 ? -0.48 : 0.48;
+    point.x = clamp(point.x, -0.65, 0.65);
+    point.y = clamp(point.y, -0.78, 0.78);
+    point.unproject(camera);
+    this.root.worldToLocal(point);
+    this.emoteBubble.sprite.position.copy(point);
+  }
+
   /** 총구·렌즈의 월드 위치 */
   muzzleWorld(out: Vector3): Vector3 {
     return this.muzzle.getWorldPosition(out);
@@ -875,6 +1018,7 @@ export class CharacterRig {
 
   dispose() {
     this.avatar.dispose();
+    this.emoteBubble.dispose();
     for (const g of this.geos) g.dispose();
     for (const m of this.mats) m.dispose();
   }

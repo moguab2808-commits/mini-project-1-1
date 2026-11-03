@@ -1038,13 +1038,13 @@ describe('추가 방해요소 입력 (IMPL-016)', () => {
     expect(at('magnet')).toBe(true);
   });
 
-  it('가짜벽은 세 벽 중 하나라도 알과 겹치면 빨간 후보다', () => {
+  it('가짜벽은 선택한 진짜 벽 위치만 미리 판정한다', () => {
     const env = setup(makeView({ held: 'fake_wall' }));
     env.controller.onKey('e');
-    // 가운데 벽은 y=-4.4, 아래 벽이 y=-11의 알과 겹친다
-    env.controller.onPointer(ptr('move', { x: 0, y: -4.4 }));
+    env.controller.onPointer(ptr('move', { x: 0, y: -11 }));
     expect(env.controller.getSnapshot().placement!.valid).toBe(false);
-    env.controller.onPointer(ptr('move', { x: 0, y: 2.2 }));
+    // 이전 고정 삼중 미리보기에서 거부하던 자리도 진짜 벽이 비어 있으면 허용한다.
+    env.controller.onPointer(ptr('move', { x: 0, y: -4.4 }));
     expect(env.controller.getSnapshot().placement!.valid).toBe(true);
   });
 
