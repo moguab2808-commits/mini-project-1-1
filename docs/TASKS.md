@@ -62,13 +62,13 @@
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
-| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR) |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #68](https://github.com/moguab2808-commits/mini-project-1-1/pull/68)(코드)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)·[PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
 | [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 취소 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
 | [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
-| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 완료 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81) |
+| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 완료 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84) |
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
@@ -849,17 +849,18 @@ Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 의존성: OPS-001, IMPL-009, IMPL-011
 범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
 관련 문서: [OPERATIONS](design/OPERATIONS.md#세부-절차-확정안) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
-Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR)
+Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #68](https://github.com/moguab2808-commits/mini-project-1-1/pull/68)(코드)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR)
 
 수용 기준:
-- [x] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다. 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다.
+- [x] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다.
+- [ ] (정상) 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다. (Auto-Deploy Off는 사용자 전언과 Deploys 화면의 간접 근거(병합 24건에 자동 배포 없음, 최신 트리거 Manual)가 있고, 운영 로그에 비밀값이 없는지는 확인하지 못했다. Settings 화면·로그를 확인해 기록한다)
 - [x] (오류) `/api`·`/socket.io`·`/health` 밖 확장자 없는 GET은 `index.html`, 없는 정적 자산은 404를 돌려준다.
-- [ ] (오류) 롤백 절차로 직전 배포를 복원해 확인했다. (직전 성공 배포가 있어야 하므로 두 번째 배포 때 함께 확인한다)
+- [ ] (오류) 롤백 절차로 직전 배포를 복원해 확인했다. (직전 배포 `e97b81a`는 마이그레이션 `0002`(`character_id` 삭제) 이전 코드라 지금 롤백하면 계정 API가 깨질 수 있다. 다음 배포의 직전인 `ddc5337`으로 확인한다)
 - [x] (예외) 서버 시작 때 `rooms` 정리가 실패하면 서버가 시작하지 않는다. 절전 방지 요청 사용 여부와 Render 로그 보관 기간을 구현 단계에서 정해 기록했다.
-- [ ] (예외) argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남기고 목표(약 100~300ms)에 맞게 [AUTH](design/AUTH.md#해시프록시) 파라미터를 조정했다. (IMPL-007에서 옮겨 옴. 2026-11-04 측정에서 현재 값은 약 30~70ms로 목표에 못 미쳤고 파라미터 조정과 재측정이 남았다)
+- [ ] (예외) argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남기고 목표(약 100~300ms)에 맞게 [AUTH](design/AUTH.md#해시프록시) 파라미터를 조정했다. (IMPL-007에서 옮겨 옴. 2026-11-04 약식 측정은 DB 왕복을 포함한 상한이 약 70ms 이하라 목표에 못 미치는 것으로 보이나 오차가 커서 확정하지 못했다. 서버 안에서 해시 시간을 직접 기록해 재측정하고 조정한다)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. 2026-11-04 사용자가 Render·Neon 서비스를 만들고 `main`을 수동 배포했으며 UptimeRobot 모니터를 설정했다. Claude가 운영 URL을 읽기 전용으로 점검해 `/health`·정적 화면·SPA fallback·404·Socket.IO 핸드셰이크를, 사용자가 두 계정 PvP·Auto-Deploy Off·UptimeRobot 핑을 확인했다. **남은 것**: 롤백 확인, Render 로그 보관 7일 적용 확인, argon2id 파라미터 조정과 재측정. 이 PR은 확인한 범위의 중간 기록이며 IMPL-013은 진행 중으로 둔다. 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
+진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. 사용자가 Render·Neon 서비스를 만들고(첫 배포 `e97b81a`, Blueprint) `main`을 수동 배포했으며(현재 Live `ddc5337`, PR #95 병합) UptimeRobot 모니터를 2026-11-03에 설정했다. 2026-11-04 Claude가 운영 URL을 읽기 전용으로 점검해 `/health`·정적 화면·SPA fallback·404·Socket.IO 핸드셰이크를, 사용자가 두 계정 PvP·Auto-Deploy Off·UptimeRobot 핑을 확인했다. **남은 것**: Auto-Deploy Off 설정과 운영 로그 비밀값 부재 확인, 롤백 확인(다음 배포에서), Render 로그 보관 7일 적용 확인, argon2id 해시 시간의 서버 내 측정과 파라미터 조정. 이 PR은 확인한 범위의 중간 기록이며 IMPL-013은 진행 중으로 둔다. 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
 
 검증 근거: [2026-11-03 worklog IMPL-013 절](worklogs/2026-11-03.md#impl-013-배포)(코드), [2026-11-04 worklog IMPL-013 운영 배포 확인](worklogs/2026-11-04.md#impl-013-운영-배포-확인)(운영)
 
