@@ -1,0 +1,48 @@
+{
+  "aim_both": [
+    {
+      "n": 140,
+      "meanMs": 41.77,
+      "fpsMean": 23.9,
+      "p95Ms": 50.9,
+      "fpsLow5": 19.6
+    },
+    {
+      "n": 71,
+      "meanMs": 79.78,
+      "fpsMean": 12.5,
+      "p95Ms": 83.4,
+      "fpsLow5": 12
+    },
+    {
+      "n": 71,
+      "meanMs": 80.25,
+      "fpsMean": 12.5,
+      "p95Ms": 83.4,
+      "fpsLow5": 12
+    }
+  ],
+  "rest_both": [
+    {
+      "n": 107,
+      "meanMs": 53.72,
+      "fpsMean": 18.6,
+      "p95Ms": 66.7,
+      "fpsLow5": 15
+    },
+    {
+      "n": 109,
+      "meanMs": 53.35,
+      "fpsMean": 18.7,
+      "p95Ms": 66.7,
+      "fpsLow5": 15
+    },
+    {
+      "n": 110,
+      "meanMs": 52.56,
+      "fpsMean": 19,
+      "p95Ms": 66.7,
+      "fpsLow5": 15
+    }
+  ]
+}
