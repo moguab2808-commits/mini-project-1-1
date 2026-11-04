@@ -76,7 +76,7 @@
 | [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
 | [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 예정 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
-| [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품) | 인게임 HUD·결과 화풍과 캐릭터 전신 부품 | P1 | IMPL-019의 화풍 첫 PR | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
+| [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1169,13 +1169,13 @@ Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 우선순위: P1
 상태: 예정
 담당: 개발자 B
-의존성: UI-004, IMPL-012. 방 생성 창의 캐릭터 전신은 [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품)의 `AvatarFullBody`를 끼운다(그 전에는 자리 표시)
-범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP를 먼저 병합해 A가 쓰게 한다. 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
+의존성: UI-004, IMPL-012
+범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 기반(화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP·2D 전신 부품 `AvatarFullBody`)을 먼저 병합해 A·B가 나눠 진행하게 한다([DEC-073](DECISIONS.md#결정-색인)). 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
 관련 문서: [PRD 화면별 요구사항](PRD.md#화면별-요구사항)·[화면 미정 사항](PRD.md#화면-미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
 Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86)
 
 수용 기준:
-- [ ] (정상) 첫 PR: `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체가 병합됐다.
+- [ ] (정상) 첫 PR(공통 기반): `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체, `packages/client/src/avatar/AvatarFullBody.tsx`(`Appearance`·크기를 받아 기존 `AvatarFace` 머리 + 코드로 그린 셔츠·바지·신발·팔)가 병합됐다.
 - [ ] (정상) 로그인 화면이 일러스트를 배경으로 쓰고, 로그인·회원등록 탭·입력·버튼이 그림 가운데를 가리지 않는다. 기존 검증·안내 문구는 그대로다.
 - [ ] (정상) 로비가 오른쪽 위 프로필 명판(캐릭터·닉네임·전적·승률·환경설정·로그아웃)과 코드 입력·방 생성·즉시 참가 버튼, 새로고침, 방 테마별 지역 4열 방 목록(열마다 대기·전체 수, 열 안 스크롤)을 보인다. 대기 중만 보기 필터는 없다. 방 선택·입장·더블클릭·게임 중 표시·비공개 코드 입력 동작은 그대로다.
 - [ ] (정상) 방 생성 창 왼쪽에 투명 창과 내 캐릭터 전신(`AvatarFullBody`)이 보이고 오른쪽 설정·만들기 동작은 그대로다.
@@ -1207,18 +1207,17 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 
 검증 근거: 미작성
 
-## IMPL-021 인게임 HUD·결과 화풍과 캐릭터 전신 부품
+## IMPL-021 인게임 HUD·결과 화풍
 
 우선순위: P1
 상태: 예정
 담당: 개발자 A
-의존성: [IMPL-019](#impl-019-l-화풍-화면-적용)의 화풍 첫 PR(`theme.css`·글꼴). 캐릭터 전신 부품은 의존 없이 먼저 만들 수 있다
-범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 인게임 HUD(프로필·남은 시간·라운드·방해요소 칸·받음 카드·발동 안내·판 돌리기·감정표현·기권)와 결과창(재도전하기·나가기)에 L 화풍을 적용하고, 방 생성 창에 쓸 2D 전신 부품 `AvatarFullBody`를 `packages/client/src/avatar/`에 만든다. HUD 배치·동작과 3D 장면은 바꾸지 않는다(시선·시점은 IMPL-020).
+의존성: [IMPL-019](#impl-019-l-화풍-화면-적용)의 첫 PR(공통 기반, [DEC-073](DECISIONS.md#결정-색인))
+범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 인게임 HUD(프로필·남은 시간·라운드·방해요소 칸·받음 카드·발동 안내·판 돌리기·감정표현·기권)와 결과창(재도전하기·나가기)에 L 화풍을 적용한다. 2D 전신 부품은 IMPL-019 첫 PR이 만든다([DEC-073](DECISIONS.md#결정-색인)). HUD 배치·동작과 3D 장면은 바꾸지 않는다(시선·시점은 IMPL-020).
 관련 문서: [PRD 게임 화면](PRD.md#게임-화면) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
 Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87)
 
 수용 기준:
-- [ ] (정상) `AvatarFullBody`가 `Appearance`를 받아 같은 외형의 머리(기존 `AvatarFace`)와 코드로 그린 몸(셔츠·바지·신발·팔)을 그리고, 크기를 받아 늘리고 줄일 수 있다. 먼저 병합해 B가 방 생성 창에 끼운다.
 - [ ] (정상) HUD와 결과창이 `theme.css`의 화풍(반투명 원목·금빛 테두리·광택 버튼·글꼴)으로 보이고, 장면을 가리지 않도록 프로필은 지금처럼 배경 없이 둔다. 배치·동작·키는 그대로다.
 - [ ] (예외) 작은 창(현재 반응형 기준)에서도 HUD 요소가 겹치지 않고 글자가 읽힌다.
 - [ ] (정상) 로컬 2인·AI 경기로 경기 진행·결과·재도전 화면을 확인했다.

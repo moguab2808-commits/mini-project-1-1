@@ -46,7 +46,7 @@
 | 방해요소 아이콘 9종 + 에어컨·바람 화살표 | **AI 생성(Claude), SVG 코드로 작성**(래스터 이미지 아님) | Claude 이용 약관 **미확인** | 9종이 한 스타일로 보이도록 같은 프롬프트 틀을 쓴다. 반입할 때 생성 도구(Claude)와 이용 조건 확인일을 CREDITS에 적는다 |
 | 효과음 10종(발사, 알 충돌, 알 떨어짐, 내 턴 시작, 시간 5초 남음, 방해요소 받음, 방해요소 발동, 승리, 패배, 무승부) | jsfxr·ChipTone **전부 자체 생성** | 도구 이용 약관 **미확인**(sfxr.me 접속 실패) | 외부 음원은 쓰지 않는다. 감정표현 6종 효과음([DEC-056](../DECISIONS.md#결정-색인))은 Web Audio 발진기로 직접 합성한다(로컬·AI 구현, 외부 도구·음원 반입 없음). 승패 소리가 어색하면 별도 결정으로 보완한다 |
 | 글꼴 | Jua·Black Han Sans(Google Fonts) woff2를 `packages/client/public/fonts/`에 두고 직접 제공 | **미확인** | L 세트가 쓰는 글꼴이다([DEC-069](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인)). 반입 전에 이용 조건을 확인하고 CREDITS에 적는다([IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용)) |
-| 방 생성 창 캐릭터 전신 | 직접 제작 SVG 부품 `AvatarFullBody`(`AvatarFace` + 코드로 그린 몸) | 해당 없음(직접 제작) | [DEC-072](../DECISIONS.md#결정-색인), [IMPL-021](../TASKS.md#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품) |
+| 방 생성 창 캐릭터 전신 | 직접 제작 SVG 부품 `AvatarFullBody`(`AvatarFace` + 코드로 그린 몸) | 해당 없음(직접 제작) | [DEC-072](../DECISIONS.md#결정-색인)·[DEC-073](../DECISIONS.md#결정-색인), [IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용) 첫 PR |
 | 로그인·로비·방 생성 배경 일러스트(L 세트) | 사용자가 직접 만든 이미지. 원본 `packages/client/public/images/login-bg.png`(1536×864, 약 1.9MB) | 해당 없음(직접 제작) | [DEC-070](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인). 직접 제작이라 CREDITS에 적지 않는다. [IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용)에서 WebP(400KB 이하 목표)로 줄여 바꾼다 |
 
 ### 라이선스 기록
