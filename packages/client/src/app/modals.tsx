@@ -17,7 +17,6 @@ import {
 } from '@alkkagi/shared';
 import { AvatarFace } from '../avatar/AvatarFace.tsx';
 import { AvatarFigureView } from '../avatar/AvatarFigureView.tsx';
-import { AvatarPreview } from '../avatar/AvatarPreview.tsx';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS, ThemeChoice } from '../ai/ai-page.tsx';
 import { ApiError, describeApiError, type Api } from './api.ts';
@@ -425,7 +424,9 @@ export function AvatarModal({
   return (
     <FloatingWindow title="캐릭터 꾸미기" onClose={onClose} wide>
       <div className="avatar-editor">
-        <AvatarPreview appearance={draft} />
+        <div className="avatar-preview">
+          <AvatarFigureView appearance={draft} draggable />
+        </div>
         <div className="avatar-options">
           <div className="avatar-tabs" role="tablist" aria-label="꾸미기 항목">
             {APPEARANCE_KEYS.map((k) => (

@@ -1,5 +1,5 @@
-// 내 캐릭터 3D 전신(AvatarFigure)을 투명 배경 캔버스에 그린다. 방 생성 창 왼쪽에 쓴다(IMPL-019, DEC-070·DEC-074).
-// 저절로 천천히 좌우를 돌아본다. WebGL을 못 쓰면 2D 얼굴(AvatarFace)로 대신한다.
+// 내 캐릭터 3D 전신(AvatarFigure)을 투명 배경 캔버스에 그린다. 방 생성 창(IMPL-019, DEC-074)과 캐릭터 꾸미기 창(IMPL-022, DEC-076) 왼쪽에 쓴다.
+// 기본은 저절로 천천히 좌우를 돌아보고, `draggable`이면 끌어서 돌려 본다(꾸미기 창). WebGL을 못 쓰면 2D 얼굴(AvatarFace)로 대신한다.
 import type { Appearance } from '@alkkagi/shared';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -18,8 +18,16 @@ const FOV = 26;
 /** 전신이 위아래 여백을 두고 들어오는 거리 */
 const CAM_DIST = (FIGURE_HEIGHT * 0.62) / Math.tan(((FOV / 2) * Math.PI) / 180);
 
-export function AvatarFigureView({ appearance }: { appearance: Appearance }) {
+export function AvatarFigureView({
+  appearance,
+  draggable = false,
+}: {
+  appearance: Appearance;
+  /** 왼쪽 버튼으로 끌어 좌우로 돌린다. 끄면 저절로 천천히 좌우를 돌아본다 */
+  draggable?: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const yawRef = useRef(0.35);
   const sceneRef = useRef<Scene | null>(null);
   const figureRef = useRef<AvatarFigure | null>(null);
   const [failed, setFailed] = useState(false);
@@ -78,7 +86,7 @@ export function AvatarFigureView({ appearance }: { appearance: Appearance }) {
       last = now;
       const figure = figureRef.current;
       if (figure) {
-        figure.root.rotation.y = Math.sin(t * 0.45) * 0.45;
+        figure.root.rotation.y = draggable ? yawRef.current : Math.sin(t * 0.45) * 0.45;
         figure.update(t, dt);
       }
       renderer.render(scene, cam);
@@ -92,7 +100,7 @@ export function AvatarFigureView({ appearance }: { appearance: Appearance }) {
       sceneRef.current = null;
       renderer.dispose();
     };
-  }, []);
+  }, [draggable]);
 
   // 외형이 바뀌면 모델만 바꾼다
   useEffect(() => {
@@ -106,7 +114,7 @@ export function AvatarFigureView({ appearance }: { appearance: Appearance }) {
     }
     scene.add(figure.root);
     figureRef.current = figure;
-  }, [look, failed]);
+  }, [look, failed, draggable]);
 
   if (failed) {
     return (
@@ -116,6 +124,29 @@ export function AvatarFigureView({ appearance }: { appearance: Appearance }) {
     );
   }
   return (
-    <canvas ref={canvasRef} className="figure-view" role="img" aria-label="내 캐릭터 3D 전신" />
+    <canvas
+      ref={canvasRef}
+      className={draggable ? 'figure-view figure-view-drag' : 'figure-view'}
+      role="img"
+      aria-label={draggable ? '내 캐릭터 3D 전신(끌어서 돌리기)' : '내 캐릭터 3D 전신'}
+      onPointerDown={
+        draggable
+          ? (e) => {
+              const start = e.clientX;
+              const base = yawRef.current;
+              e.currentTarget.setPointerCapture(e.pointerId);
+              const move = (ev: PointerEvent) => {
+                yawRef.current = base + (ev.clientX - start) * 0.012;
+              };
+              const up = () => {
+                window.removeEventListener('pointermove', move);
+                window.removeEventListener('pointerup', up);
+              };
+              window.addEventListener('pointermove', move);
+              window.addEventListener('pointerup', up);
+            }
+          : undefined
+      }
+    />
   );
 }
