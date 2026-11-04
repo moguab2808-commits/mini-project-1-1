@@ -2,7 +2,7 @@
 
 ## 기준과 확인 범위
 
-기준 브랜치: `main`. 확인일: 2026-11-04. 작업 상태는 [TASKS](TASKS.md), 상세 검증은 [2026-10-28](worklogs/2026-10-28.md)·[2026-10-29](worklogs/2026-10-29.md)·[2026-10-30](worklogs/2026-10-30.md)·[2026-10-31](worklogs/2026-10-31.md)·[2026-11-02](worklogs/2026-11-02.md)·[2026-11-03](worklogs/2026-11-03.md) worklog를 따른다.
+기준 브랜치: `main`. 확인일: 2026-11-04. 작업 상태는 [TASKS](TASKS.md), 상세 검증은 [2026-10-28](worklogs/2026-10-28.md)·[2026-10-29](worklogs/2026-10-29.md)·[2026-10-30](worklogs/2026-10-30.md)·[2026-10-31](worklogs/2026-10-31.md)·[2026-11-02](worklogs/2026-11-02.md)·[2026-11-03](worklogs/2026-11-03.md)·[2026-11-04](worklogs/2026-11-04.md) worklog를 따른다.
 
 ## 기준 브랜치에 반영된 범위
 
@@ -12,7 +12,7 @@
 - 제품 요구사항: 계정·로비·게임 화면, 방해요소 시스템, 보관·장애·규모 정책, 위임 결정 ([DOC-004~009](TASKS.md#작업-목록), [DEC-006~012](DECISIONS.md#결정-색인))
 - 기술 스택·아키텍처 ([DOC-010](TASKS.md#doc-010-기술-스택과-아키텍처-결정), [DEC-013](DECISIONS.md#결정-색인), [ADR-0003](adr/0003-tech-stack-and-architecture.md))
 - 상세 설계: 게임·수치 기본값([GAME-001·002](TASKS.md#game-001-게임-처리-상세-설계-확정)), 로컬 2인([LOCAL-001](TASKS.md#local-001-로컬-2인-모드-설계-확정)), API([API-001](TASKS.md#api-001-api실시간-이벤트-계약-확정)), DB([DB-001](TASKS.md#db-001-db-스키마-확정)), 인증([AUTH-001](TASKS.md#auth-001-인증-상세-설계-확정)), 운영([OPS-001](TASKS.md#ops-001-운영-설계-확정))
-- 디자인 캔버스([UI-001·002](TASKS.md#ui-002-디자인-캔버스-현재-요구사항-반영)). 2026-11-04부터 디자인 참고 기준은 같은 캔버스의 L 한밤의 마법 알까기 세트다([DEC-069](DECISIONS.md#결정-색인), [UI-004](TASKS.md#ui-004-디자인-참고-기준을-l-세트로-변경) 작업 브랜치). L 세트 배치·화풍 적용([DEC-070](DECISIONS.md#결정-색인))과 인게임 조정([DEC-071](DECISIONS.md#결정-색인))을 확정했고 구현은 [IMPL-019](TASKS.md#impl-019-l-화풍-화면-적용)·[IMPL-020](TASKS.md#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정)으로 남았다.
+- 디자인 캔버스([UI-001·002](TASKS.md#ui-002-디자인-캔버스-현재-요구사항-반영)). 2026-11-04부터 디자인 참고 기준은 같은 캔버스의 L 한밤의 마법 알까기 세트다([DEC-069](DECISIONS.md#결정-색인), [UI-004](TASKS.md#ui-004-디자인-참고-기준을-l-세트로-변경) 작업 브랜치). L 세트 배치·화풍 적용([DEC-070](DECISIONS.md#결정-색인))과 인게임 조정([DEC-071](DECISIONS.md#결정-색인))을 확정했고 구현은 [IMPL-019](TASKS.md#impl-019-l-화풍-화면-적용)(개발자 B, [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86))·[IMPL-020](TASKS.md#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정)·[IMPL-021](TASKS.md#impl-021-인게임-hud결과-화풍)(개발자 A, [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87))으로 남았다. 분담·공통 화풍 파일·글꼴·배경·지역 열 규칙은 [DEC-072](DECISIONS.md#결정-색인)으로 정했고, B의 첫 PR(`theme.css`·글꼴·일러스트 WebP)이 병합되면 A가 IMPL-021을 시작한다([DEC-073](DECISIONS.md#결정-색인)). 방 생성 창 전신은 3D 전신(WebGL 불가 시 2D 얼굴)으로 한다([DEC-074](DECISIONS.md#결정-색인)). 문서는 PR #85 병합이 남았다.
 - 에셋 조달 방식([ASSET-001](TASKS.md#asset-001-에셋-조달-계획)), fps 측정 절차·플레이 테스트 양식([VAL-001](TASKS.md#val-001-성능-측정-절차와-플레이-테스트-기록-양식))
 - 프로젝트 골격([IMPL-001](TASKS.md#impl-001-프로젝트-골격), PR #51)
 - `game-core`·`shared` 스키마: 규칙·물리·상태 머신·방해요소·`getViewFor`([IMPL-002](TASKS.md#impl-002-game-core), PR #53). 단위 테스트로 확인했고 플레이 테스트·성능 측정은 없다

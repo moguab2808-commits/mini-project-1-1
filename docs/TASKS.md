@@ -1170,15 +1170,16 @@ Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 상태: 예정
 담당: 개발자 B
 의존성: UI-004, IMPL-012
-범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 기반(화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP·2D 전신 부품 `AvatarFullBody`)을 먼저 병합해 A·B가 나눠 진행하게 한다([DEC-073](DECISIONS.md#결정-색인)). 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
+범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 기반(화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP)을 먼저 병합해 A·B가 나눠 진행하게 한다([DEC-073](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)). 방 생성 창의 캐릭터 전신은 B가 만든 3D 전신(`avatar-figure.ts`)을 쓰고 WebGL을 쓸 수 없으면 2D 얼굴로 대신한다([DEC-074](DECISIONS.md#결정-색인)). 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
 관련 문서: [PRD 화면별 요구사항](PRD.md#화면별-요구사항)·[화면 미정 사항](PRD.md#화면-미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
 Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86)
 
 수용 기준:
-- [ ] (정상) 첫 PR(공통 기반): `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체, `packages/client/src/avatar/AvatarFullBody.tsx`(`Appearance`·크기를 받아 기존 `AvatarFace` 머리 + 코드로 그린 셔츠·바지·신발·팔)가 병합됐다.
+- [ ] (정상) 첫 PR(공통 기반): `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체가 병합됐다. `AvatarFullBody`는 만들지 않는다([DEC-074](DECISIONS.md#결정-색인)).
 - [ ] (정상) 로그인 화면이 일러스트를 배경으로 쓰고, 로그인·회원등록 탭·입력·버튼이 그림 가운데를 가리지 않는다. 기존 검증·안내 문구는 그대로다.
 - [ ] (정상) 로비가 오른쪽 위 프로필 명판(캐릭터·닉네임·전적·승률·환경설정·로그아웃)과 코드 입력·방 생성·즉시 참가 버튼, 새로고침, 방 테마별 지역 4열 방 목록(열마다 대기·전체 수, 열 안 스크롤)을 보인다. 대기 중만 보기 필터는 없다. 방 선택·입장·더블클릭·게임 중 표시·비공개 코드 입력 동작은 그대로다.
-- [ ] (정상) 방 생성 창 왼쪽에 투명 창과 내 캐릭터 전신(`AvatarFullBody`)이 보이고 오른쪽 설정·만들기 동작은 그대로다.
+- [ ] (정상) 방 생성 창 왼쪽에 투명 창과 내 캐릭터 3D 전신(`avatar-figure.ts`)이 내 외형으로 보이고 오른쪽 설정·만들기 동작은 그대로다.
+- [ ] (예외) WebGL을 쓸 수 없으면 방 생성 창 왼쪽에 2D 얼굴(`AvatarFace`)이 대신 보이고 방 만들기는 그대로 된다.
 - [ ] (정상) 대기실·플로팅 창·토스트·부팅 화면이 같은 화풍이다.
 - [ ] (예외) 방이 없는 지역 열은 빈 상태 문구를 보이고, 한 지역에 방이 많으면 그 열만 스크롤된다. 창 폭 1100px 미만이면 지역 열이 2×2로 접히고 버튼·명판이 겹치지 않는다.
 - [ ] (정상) `npm run build`·`npm test`·린트가 통과하고 두 계정 브라우저로 로그인→로비→방 생성→대기실 흐름을 확인했다.
@@ -1213,7 +1214,7 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 상태: 예정
 담당: 개발자 A
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용)의 첫 PR(공통 기반, [DEC-073](DECISIONS.md#결정-색인))
-범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 인게임 HUD(프로필·남은 시간·라운드·방해요소 칸·받음 카드·발동 안내·판 돌리기·감정표현·기권)와 결과창(재도전하기·나가기)에 L 화풍을 적용한다. 2D 전신 부품은 IMPL-019 첫 PR이 만든다([DEC-073](DECISIONS.md#결정-색인)). HUD 배치·동작과 3D 장면은 바꾸지 않는다(시선·시점은 IMPL-020).
+범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 인게임 HUD(프로필·남은 시간·라운드·방해요소 칸·받음 카드·발동 안내·판 돌리기·감정표현·기권)와 결과창(재도전하기·나가기)에 L 화풍을 적용한다. 공통 기반은 IMPL-019 첫 PR이 만든다([DEC-073](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)). HUD 배치·동작과 3D 장면은 바꾸지 않는다(시선·시점은 IMPL-020).
 관련 문서: [PRD 게임 화면](PRD.md#게임-화면) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
 Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87)
 
