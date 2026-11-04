@@ -73,7 +73,7 @@
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 진행 중 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
-| [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
 | [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 예정 | 미정 | 미생성 |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 예정 | 미정 | 미생성 |
 
@@ -1147,12 +1147,12 @@ Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## UI-004 디자인 참고 기준을 L 세트로 변경
 
 우선순위: P1
-상태: 진행 중
+상태: 리뷰 중
 담당: Claude — 사용자 요청 수행
 의존성: 없음
 범위: 2026-11-04 사용자 요청에 따라 문서가 가리키는 화면 디자인 참고 기준을 `알까기 바 (2).html`·UI-001 초기 보드에서 claude.ai 디자인 캔버스의 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트(로그인·방 목록·방 생성)로 바꾼다([DEC-069](DECISIONS.md#결정-색인)). 세트와 PRD가 다른 배치·기능, 인게임 화풍 적용 범위, 로그인 일러스트 출처는 확정하지 않고 미정으로 둔다. 코드·화면 구현은 포함하지 않는다.
 관련 문서: [PRD 화면별 요구사항](PRD.md#화면별-요구사항)·[화면 미정 사항](PRD.md#화면-미정-사항) / [LOCAL 미정 사항](design/LOCAL.md#미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
-Issue·PR: 미생성
+Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85)
 
 수용 기준:
 - [x] (정상) PRD·LOCAL·TECH_STACK·PROGRESS에서 현재 디자인 참고 기준을 가리키는 문구가 L 세트로 바뀌었다. 과거 기록(worklog, 완료된 UI-001·002, DEC-032·036의 당시 근거)은 이력으로 두었다.
