@@ -62,7 +62,7 @@
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
-| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)·[PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
@@ -849,7 +849,7 @@ Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 의존성: OPS-001, IMPL-009, IMPL-011
 범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
 관련 문서: [OPERATIONS](design/OPERATIONS.md#세부-절차-확정안) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
-Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)
+Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR)
 
 수용 기준:
 - [x] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다. 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다.
