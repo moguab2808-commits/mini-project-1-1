@@ -78,7 +78,7 @@
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-022](#impl-022-캐릭터-꾸미기-창-3d-미리보기-화풍) | 캐릭터 꾸미기 창 3D 미리보기 화풍 | P2 | IMPL-019 | 완료 | 개발자 B | [#94](https://github.com/moguab2808-commits/mini-project-1-1/pull/94) |
-| [IMPL-023](#impl-023-게임-캐릭터-손-다섯-손가락) | 게임 캐릭터 손 다섯 손가락 | P2 | IMPL-019 | 리뷰 중 | 개발자 B | 미생성 |
+| [IMPL-023](#impl-023-게임-캐릭터-손-다섯-손가락) | 게임 캐릭터 손 다섯 손가락 | P2 | IMPL-019 | 리뷰 중 | 개발자 B | [#95](https://github.com/moguab2808-commits/mini-project-1-1/pull/95) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1254,7 +1254,7 @@ Issue·PR: [PR #94](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용), [DEC-077](DECISIONS.md#결정-색인)
 범위: [DEC-077](DECISIONS.md#결정-색인)에 따라 게임 장면 캐릭터의 손을 손가락 다섯 개로 바꾸고 조준·튕기기 손 모양(손등 오른쪽, 중지를 엄지에 걸었다가 튕김)을 만든다. 손 모델 `packages/client/src/avatar/avatar-hand.ts`는 IMPL-019에서 `main`에 들어왔고 지금은 방 생성·꾸미기 창의 3D 전신만 쓴다. 이 작업은 게임 리그(`packages/client/src/game/scene/characters.ts`)가 이를 쓰도록 옮긴다. 로컬 구현이 백업 커밋 `4b57e4c`(브랜치 `feat/impl-019-profile-figure`)에 있다. IMPL-022 병합 뒤의 `main`(`656c602`)과 다시 시험해 `characters.ts`만 충돌 없이 합쳐지는 것을 확인하고 이 파일만 반입했다([worklog](worklogs/2026-11-04.md#impl-023-게임-캐릭터-손-다섯-손가락)). 이 백업 브랜치는 개발자 B의 로컬에만 있으며 원격에 없다. 이 작업의 PR에서 원격에 올리거나 내용을 반입한다. `characters.ts`는 인게임 장면 쪽 파일(개발자 A가 #89에서 `IDLE_LOOK`을 넣음)이므로 이 파일의 변경은 개발자 A의 리뷰를 받는다([DEC-072](DECISIONS.md#결정-색인) ②의 상대 리뷰). 인게임 상반신 구성·조작·판정은 바꾸지 않는다.
 관련 문서: [PRD 게임 화면](PRD.md#게임-화면) / [GAME](design/GAME.md)
-Issue·PR: 미생성
+Issue·PR: [PR #95](https://github.com/moguab2808-commits/mini-project-1-1/pull/95)(Issue 없음)
 
 수용 기준:
 - [x] (정상) 게임 장면의 손이 손가락 다섯 개이고, 조준 중 오른손은 손등이 캐릭터 오른쪽을 향하고 굽힌 중지 끝마디에 엄지 끝이 닿아 있다. 칠 때 중지가 앞으로 펴지고 엄지는 그 자리에 있다. 상대 캐릭터에도 같다.
