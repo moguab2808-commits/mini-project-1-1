@@ -214,16 +214,17 @@ describe('힘을 주는 설치물', () => {
     assert.equal(away.y, plain.y);
   });
 
-  test('미끄럼 장판: 판 밖·다른 설치물과 겹치면 HAZARD_INVALID_TARGET이고 상태·난수를 바꾸지 않는다', () => {
+  test('미끄럼 장판: 판 밖은 HAZARD_INVALID_TARGET이고, 다른 설치물과는 겹쳐도 된다(DEC-075)', () => {
     const g = mk();
-    assert.equal(code(use(g, 0, T0, 'sticky', { x: -15, y: -15 })), 'OK');
+    assert.equal(code(use(g, 0, T0, 'sticky', { x: -5, y: -5 })), 'OK');
     g.debugGrant(1, 'ice_floor');
     const before = { view: JSON.stringify(g.getViewFor(1)), prng: g.debugPrngStates() };
-    // 끈끈이(반지름 6.6)와 겹침(중심 거리 < 6.6 + 13.2), 판 밖(반 변 23 − 반지름 13.2 = 9.8 초과)
-    assert.equal(code(again(g, 1, T0, { x: -5, y: -5 })), 'HAZARD_INVALID_TARGET');
+    // 판 밖(반 변 23 − 반지름 13.2 = 9.8 초과)
     assert.equal(code(again(g, 1, T0, { x: 10, y: 0 })), 'HAZARD_INVALID_TARGET');
     assert.deepEqual({ view: JSON.stringify(g.getViewFor(1)), prng: g.debugPrngStates() }, before);
-    assert.equal(code(again(g, 1, T0 + 2, { x: 8, y: 8 })), 'OK');
+    // 끈끈이 위에 겹쳐 놓을 수 있고, 그 뒤에도 미끄럼 장판 위에 다른 설치물을 놓을 수 있다
+    assert.equal(code(again(g, 1, T0, { x: 0, y: 0 })), 'OK');
+    assert.equal(code(use(g, 0, T0, 'magnet', { x: 12, y: 12 })), 'OK');
   });
 
   test('방향 반전: 구역에 들어온 알이 돌아간다(한 번만)', () => {

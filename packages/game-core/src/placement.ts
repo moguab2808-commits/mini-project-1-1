@@ -234,7 +234,8 @@ export function effectFootprint(
     case 'sticky':
       return circle(x, y, T.stickyDiameter / 2);
     case 'ice_floor':
-      return circle(x, y, T.iceFloorDiameter / 2);
+      // 미끄럼 장판은 다른 설치물과 겹쳐도 된다(DEC-075). 다른 설치물의 배치를 막지 않는다
+      return null;
     case 'magnet':
       return circle(x, y, T.magnetRadius);
     case 'reverse_zone':
@@ -276,8 +277,16 @@ function existingFootprints(world: PlacementWorld): Footprint[] {
   ];
 }
 
-/** 차지 영역들이 판 안이고 다른 설치물과 겹치지 않으며, 필요하면 알과도 겹치지 않는가 */
-function footprintsPlaceable(fs: Footprint[], world: PlacementWorld, noStones: boolean): boolean {
+/**
+ * 차지 영역들이 판 안이고 다른 설치물과 겹치지 않으며, 필요하면 알과도 겹치지 않는가.
+ * `overlapOk`면 다른 설치물과의 겹침은 보지 않는다(미끄럼 장판, DEC-075)
+ */
+function footprintsPlaceable(
+  fs: Footprint[],
+  world: PlacementWorld,
+  noStones: boolean,
+  overlapOk = false,
+): boolean {
   if (!fs.every((f) => footprintInside(world.board, f))) return false;
   if (noStones) {
     const R = PHYSICS.stoneRadius;
@@ -285,6 +294,7 @@ function footprintsPlaceable(fs: Footprint[], world: PlacementWorld, noStones: b
       return false;
     }
   }
+  if (overlapOk) return true;
   const existing = existingFootprints(world);
   return !fs.some((f) => existing.some((o) => footprintsOverlap(f, o)));
 }
@@ -311,7 +321,12 @@ export function isPlacementValid(
   world: PlacementWorld,
 ): boolean {
   if (snapsToWallGrid(kind) && (!isOnWallGrid(x) || !isOnWallGrid(y))) return false;
-  return footprintsPlaceable(installFootprints(kind, x, y, orientation), world, blocksStones(kind));
+  return footprintsPlaceable(
+    installFootprints(kind, x, y, orientation),
+    world,
+    blocksStones(kind),
+    kind === 'ice_floor',
+  );
 }
 
 /** 공개 뷰의 효과 `params`(x, y, angleDeg 또는 orientation)로 벽 직사각형을 복원한다. */
