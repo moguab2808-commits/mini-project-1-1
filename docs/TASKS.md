@@ -76,7 +76,7 @@
 | [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
 | [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 진행 중 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
-| [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 진행 중 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
+| [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1211,7 +1211,7 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 ## IMPL-021 인게임 HUD·결과 화풍
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 A
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용)의 첫 PR(공통 기반, [DEC-073](DECISIONS.md#결정-색인))
 범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 인게임 HUD(프로필·남은 시간·라운드·방해요소 칸·받음 카드·발동 안내·판 돌리기·감정표현·기권)와 결과창(재도전하기·나가기)에 L 화풍을 적용한다. 공통 기반은 IMPL-019 첫 PR이 만든다([DEC-073](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)). HUD 배치·동작과 3D 장면은 바꾸지 않는다(시선·시점은 IMPL-020).
@@ -1222,6 +1222,6 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 - [x] (정상) HUD와 결과창이 `theme.css`의 화풍(반투명 원목·금빛 테두리·광택 버튼·글꼴)으로 보이고, 장면을 가리지 않도록 프로필은 지금처럼 배경 없이 둔다. 배치·동작·키는 그대로다.
 - [x] (예외) 작은 창(현재 반응형 기준)에서도 HUD 요소가 겹치지 않고 글자가 읽힌다.
 - [x] (정상) 로컬 2인·AI 경기로 경기 진행·결과·재도전 화면을 확인했다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다(PR #91).
 
-검증 근거: [2026-11-04 worklog IMPL-021](worklogs/2026-11-04.md#impl-021-인게임-hud결과-화풍)(리뷰·병합 전)
+검증 근거: [2026-11-04 worklog IMPL-021](worklogs/2026-11-04.md#impl-021-인게임-hud결과-화풍)
