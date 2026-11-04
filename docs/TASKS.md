@@ -74,9 +74,9 @@
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 진행 중 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 | [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
-| [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 예정 | 개발자 B | 미생성 |
-| [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 예정 | 개발자 A | 미생성 |
-| [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품) | 인게임 HUD·결과 화풍과 캐릭터 전신 부품 | P1 | IMPL-019의 화풍 첫 PR | 예정 | 개발자 A | 미생성 |
+| [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 예정 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
+| [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
+| [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품) | 인게임 HUD·결과 화풍과 캐릭터 전신 부품 | P1 | IMPL-019의 화풍 첫 PR | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1172,7 +1172,7 @@ Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 의존성: UI-004, IMPL-012. 방 생성 창의 캐릭터 전신은 [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품)의 `AvatarFullBody`를 끼운다(그 전에는 자리 표시)
 범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP를 먼저 병합해 A가 쓰게 한다. 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍과-캐릭터-전신-부품)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
 관련 문서: [PRD 화면별 요구사항](PRD.md#화면별-요구사항)·[화면 미정 사항](PRD.md#화면-미정-사항) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
-Issue·PR: 미생성
+Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86)
 
 수용 기준:
 - [ ] (정상) 첫 PR: `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체가 병합됐다.
@@ -1194,7 +1194,7 @@ Issue·PR: 미생성
 의존성: IMPL-016
 범위: [DEC-071](DECISIONS.md#결정-색인)에 따라 ① 중력 구역 방향 화살표를 판 평면 위에 평평하게 그리고 ② 미끄럼 장판을 끈끈이처럼 위치를 지정해 설치하는 원형 영역(지름 26.4cm)으로 바꾸며 ③ 인게임 캐릭터의 기본 얼굴 방향을 조금 위로 들고 ④ 정면을 볼 때 상대가 화면 가운데에 더 가깝게 보이도록 기본 시점을 살짝 낮춘다. `shared` 스키마(`ice_floor` target·params), `game-core` 효과, AI 배치, 클라이언트 입력·표시를 함께 바꾼다.
 관련 문서: [PRD 추가 방해요소](PRD.md#추가-방해요소-10종-dec-055)·[게임 화면](PRD.md#게임-화면) / [GAME](design/GAME.md#추가-방해요소-10종과-턴-교체-haz-001)·[API](design/API.md)·[LOCAL](design/LOCAL.md)
-Issue·PR: 미생성
+Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87)
 
 수용 기준:
 - [ ] (정상) 중력 구역의 배치 미리보기와 설치 뒤 화살표가 판 평면 위에 평평하게 보이고, 판 돌리기 뒤에도 같은 평면에서 방향이 맞다.
@@ -1215,7 +1215,7 @@ Issue·PR: 미생성
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용)의 화풍 첫 PR(`theme.css`·글꼴). 캐릭터 전신 부품은 의존 없이 먼저 만들 수 있다
 범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)에 따라 인게임 HUD(프로필·남은 시간·라운드·방해요소 칸·받음 카드·발동 안내·판 돌리기·감정표현·기권)와 결과창(재도전하기·나가기)에 L 화풍을 적용하고, 방 생성 창에 쓸 2D 전신 부품 `AvatarFullBody`를 `packages/client/src/avatar/`에 만든다. HUD 배치·동작과 3D 장면은 바꾸지 않는다(시선·시점은 IMPL-020).
 관련 문서: [PRD 게임 화면](PRD.md#게임-화면) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-종류별-방식)
-Issue·PR: 미생성
+Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87)
 
 수용 기준:
 - [ ] (정상) `AvatarFullBody`가 `Appearance`를 받아 같은 외형의 머리(기존 `AvatarFace`)와 코드로 그린 몸(셔츠·바지·신발·팔)을 그리고, 크기를 받아 늘리고 줄일 수 있다. 먼저 병합해 B가 방 생성 창에 끼운다.
