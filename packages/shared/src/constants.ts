@@ -165,8 +165,10 @@ export const HAZARD_TUNING = {
   /** 중력 구역 정사각 한 변 cm, 가속 cm/s². 방향은 45° 단위 */
   gravityZoneSize: 13.2,
   gravityAccel: 450,
-  /** 미끄럼 장판: 지면 감속 배율(끈끈이 추가 감속에는 곱하지 않는다) */
+  /** 미끄럼 장판: 원 안 지면 감속 배율(끈끈이 추가 감속에는 곱하지 않는다) */
   iceFrictionMultiplier: 0.4,
+  /** 미끄럼 장판 원 지름 cm. 끈끈이 지름의 2배(DEC-071) */
+  iceFloorDiameter: 26.4,
   /** 분신술: 원래 자리에서 이 거리 범위 안의 빈 자리 3곳 */
   decoyMinDistance: 4.4,
   decoyMaxDistance: 11,

@@ -488,7 +488,6 @@ function SceneWorld(props: SceneProps) {
     let deskShake = 0;
     let n = 0;
     let zn = 0;
-    let ice = false;
     const wallItem = (): HazardDraw => {
       let h = rt.hazards[n];
       if (!h) {
@@ -530,10 +529,9 @@ function SceneWorld(props: SceneProps) {
         const progress = (nowServer - e.startsAtMs) / span;
         [sx, sz] = deskShakeOffset(progress, nowServer / 1000, HAZARD_TUNING.deskShakeMaxDistance);
         if (progress >= 0 && progress < 1) deskShake = Math.max(deskShake, (1 - progress) * 0.8);
-      } else if (e.kind === 'ice_floor') {
-        ice = nowServer >= e.startsAtMs && nowServer < e.expiresAtMs;
       } else if (
         e.kind === 'magnet' ||
+        e.kind === 'ice_floor' ||
         e.kind === 'gravity_zone' ||
         e.kind === 'reverse_zone' ||
         e.kind === 'mine' ||
@@ -603,7 +601,7 @@ function SceneWorld(props: SceneProps) {
     hazards.update(rt.hazards, n, t);
     // 내 분신술 허상(시전자 화면에서만 반투명으로). 상대 화면에서는 일반 알이다
     for (const d of p.view.decoys ?? []) zoneItem('decoy', d.x, d.y, 1);
-    zoneLayer.update(rt.zones, zn, ice ? BOARDS[p.start.board] : null, t);
+    zoneLayer.update(rt.zones, zn, t);
 
     // 알: 선택 판정용 월드 좌표, 속도(발사 감지·바라보기)
     const r = rt.deltaDeg * DEG;
@@ -853,7 +851,7 @@ function SceneWorld(props: SceneProps) {
     tmp.fp.z += fwdZ * (2 - EYE_LIFT.back * lift);
     // 1인칭 시선: 판 중심 → 조준 중인 알·움직이는 알 쪽으로
     // default(lift)는 상대 캐릭터 얼굴까지 보이도록 판 너머를 보고, 조준 중에도 시선을 덜 옮긴다
-    rt.lookV.set(0, -2 + 6 * lift, fwdZ * 8 * lift);
+    rt.lookV.set(0, -2 + (EYE_LIFT.lookHeight + 2) * lift, fwdZ * 8 * lift);
     const follow = 1 - 0.65 * lift;
     if (meSa.frame.aim) {
       seatToWorld(mySeat, meSa.frame.aim.stone, tmp.w);

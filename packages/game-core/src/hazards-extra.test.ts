@@ -40,9 +40,16 @@ function again(g: Game, seat: Seat, t: number, target?: Target) {
   });
 }
 
+/** 지금 턴 주인이 쏜다 */
 function shoot(g: Game, t: number, stoneId: number, angle: number, power: number) {
   const v = g.getViewFor(0);
-  return g.submitShot(env(0, t), { gameId: 'g1', turnId: v.turnId, stoneId, angle, power });
+  return g.submitShot(env(v.activePlayerId, t), {
+    gameId: 'g1',
+    turnId: v.turnId,
+    stoneId,
+    angle,
+    power,
+  });
 }
 
 /** 발사한 뒤 정지할 때까지 진행하며, 정지 직전(교체 전) 상태를 돌려준다 */
@@ -69,26 +76,28 @@ function clearLane(g: Game): void {
 const code = (r: { ok: boolean; error?: { code: string } }) => (r.ok ? 'OK' : r.error!.code);
 
 describe('턴 교체와 사용 제한', () => {
-  test('턴이 바뀌면 설치물·효과가 두 좌석 모두 사라진다', () => {
+  test('라운드가 바뀌면 설치물·효과가 두 좌석 모두 사라진다(DEC-067)', () => {
     const g = mk();
-    assert.equal(code(use(g, 0, T0, 'magnet', { x: 0, y: 0 })), 'OK');
-    assert.equal(code(use(g, 1, T0 + 1, 'ice_floor')), 'OK');
+    assert.equal(code(use(g, 0, T0, 'magnet', { x: -12, y: 12 })), 'OK');
+    assert.equal(code(use(g, 1, T0 + 1, 'ice_floor', { x: 8, y: -8 })), 'OK');
     assert.equal(g.getViewFor(0).effects.length, 2);
     clearLane(g);
-    runShot(g, T0 + 10, 2, Math.PI / 2, 1);
+    const first = runShot(g, T0 + 10, 2, Math.PI / 2, 1);
+    assert.equal(g.getViewFor(0).effects.length, 2, '라운드 첫 턴이 끝날 때는 이어진다');
+    runShot(g, first.t, 5, -Math.PI / 2, 1);
     assert.equal(g.getViewFor(0).effects.length, 0);
     assert.equal(g.getViewFor(1).effects.length, 0);
   });
 
   test('턴당 1회형은 두 번째 사용이 HAZARD_NOT_USABLE이고 상태·난수를 바꾸지 않는다', () => {
     const g = mk();
-    assert.equal(code(use(g, 0, T0, 'ice_floor')), 'OK');
+    assert.equal(code(use(g, 0, T0, 'ice_floor', { x: 0, y: 0 })), 'OK');
     const v = g.getViewFor(0);
     assert.equal(v.private.usable, false);
     assert.equal(v.private.fatigueGauge, null);
     assert.equal(v.private.cooldownEndsAtMs, null);
     const before = { view: JSON.stringify(g.getViewFor(0)), prng: g.debugPrngStates() };
-    assert.equal(code(again(g, 0, T0)), 'HAZARD_NOT_USABLE');
+    assert.equal(code(again(g, 0, T0, { x: 0, y: 0 })), 'HAZARD_NOT_USABLE');
     assert.deepEqual({ view: JSON.stringify(g.getViewFor(0)), prng: g.debugPrngStates() }, before);
   });
 
@@ -106,7 +115,11 @@ describe('턴 교체와 사용 제한', () => {
       'INVALID_INPUT',
     );
     assert.equal(code(use(g, 0, T0, 'magnet')), 'INVALID_INPUT');
-    assert.equal(code(use(g, 0, T0, 'ice_floor', { x: 0, y: 0 })), 'INVALID_INPUT');
+    assert.equal(code(use(g, 0, T0, 'ice_floor')), 'INVALID_INPUT');
+    assert.equal(
+      code(use(g, 0, T0, 'ice_floor', { x: 0, y: 0, orientation: 'vertical' })),
+      'INVALID_INPUT',
+    );
     assert.equal(code(use(g, 0, T0, 'gravity_zone', { x: 0, y: 0 })), 'INVALID_INPUT');
     assert.equal(code(use(g, 0, T0, 'moving_wall', { x: 0, y: 0 })), 'INVALID_INPUT');
     assert.equal(code(use(g, 0, T0, 'decoy', { x: 0, y: 0 })), 'INVALID_INPUT');
@@ -174,15 +187,43 @@ describe('힘을 주는 설치물', () => {
     assert.ok(stoneOf(st, 2).x > 0.5);
   });
 
-  test('미끄럼 장판: 같은 세기로 더 멀리 간다(양쪽 알 모두)', () => {
+  test('미끄럼 장판: 원 안을 지나는 알은 같은 세기로 더 멀리 간다(DEC-071)', () => {
     const plain = stoneOf(straightShot(undefined, 10), 2);
+    let params: unknown;
     const ice = stoneOf(
-      straightShot((g) => use(g, 1, T0, 'ice_floor'), 10),
+      straightShot((g) => {
+        assert.equal(code(use(g, 1, T0, 'ice_floor', { x: 0, y: -2 })), 'OK');
+        params = g.getViewFor(0).effects[0]!.params;
+      }, 10),
       2,
     );
+    assert.deepEqual(params, { x: 0, y: -2 });
     const d0 = plain.y + 11.5;
     const d1 = ice.y + 11.5;
+    // 끝까지 원 안(반지름 13.2, y −15.2~11.2)에서 미끄러진다
+    assert.ok(ice.y < -2 + HAZARD_TUNING.iceFloorDiameter / 2, `${ice.y}`);
     assert.ok(Math.abs(d1 / d0 - 1 / HAZARD_TUNING.iceFrictionMultiplier) < 0.15, `${d0} → ${d1}`);
+  });
+
+  test('미끄럼 장판: 원 밖을 지나는 알은 그대로다', () => {
+    const plain = stoneOf(straightShot(undefined, 10), 2);
+    const away = stoneOf(
+      straightShot((g) => assert.equal(code(use(g, 1, T0, 'ice_floor', { x: 9, y: 9 })), 'OK'), 10),
+      2,
+    );
+    assert.equal(away.y, plain.y);
+  });
+
+  test('미끄럼 장판: 판 밖·다른 설치물과 겹치면 HAZARD_INVALID_TARGET이고 상태·난수를 바꾸지 않는다', () => {
+    const g = mk();
+    assert.equal(code(use(g, 0, T0, 'sticky', { x: -15, y: -15 })), 'OK');
+    g.debugGrant(1, 'ice_floor');
+    const before = { view: JSON.stringify(g.getViewFor(1)), prng: g.debugPrngStates() };
+    // 끈끈이(반지름 6.6)와 겹침(중심 거리 < 6.6 + 13.2), 판 밖(반 변 23 − 반지름 13.2 = 9.8 초과)
+    assert.equal(code(again(g, 1, T0, { x: -5, y: -5 })), 'HAZARD_INVALID_TARGET');
+    assert.equal(code(again(g, 1, T0, { x: 10, y: 0 })), 'HAZARD_INVALID_TARGET');
+    assert.deepEqual({ view: JSON.stringify(g.getViewFor(1)), prng: g.debugPrngStates() }, before);
+    assert.equal(code(again(g, 1, T0 + 2, { x: 8, y: 8 })), 'OK');
   });
 
   test('방향 반전: 구역에 들어온 알이 돌아간다(한 번만)', () => {
@@ -424,8 +465,9 @@ describe('속임수형 뷰 경계 (DEC-058)', () => {
     // 어느 알이든 허상에 닿으면 그 허상만 사라진다
     const target = mine.decoys![0]!;
     g.debugSetStone(5, target.x, target.y);
-    runShot(g, T0 + 2, 0, 0, 1);
-    // 교체로 분신술이 끝났으므로 교체 전 마지막 판단은 이벤트 대신 상태로 본다
+    const first = runShot(g, T0 + 2, 0, 0, 1);
+    runShot(g, first.t, 6, -Math.PI / 2, 1);
+    // 라운드 교체로 분신술이 끝났으므로 교체 전 마지막 판단은 이벤트 대신 상태로 본다
     assert.equal(g.getViewFor(1).stones.length, 10, '교체 뒤 허상이 모두 사라진다');
   });
 

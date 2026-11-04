@@ -118,8 +118,12 @@ export function stunRoll(progress: number): number {
   return Math.PI * 2 * p * p * (3 - 2 * p);
 }
 
-/** default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°) */
-export const EYE_LIFT = { up: 16, back: 24, fovLess: 4 } as const;
+/**
+ * default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°),
+ * 바라보는 점의 판 윗면 위 높이(cm, lift=1일 때). 정면에서 상대 캐릭터가 화면 가운데에 더 가깝게 보이도록
+ * 높이를 16 → 12로 낮추고 바라보는 점을 4 → 7로 올렸다(DEC-071 ④)
+ */
+export const EYE_LIFT = { up: 12, back: 24, fovLess: 4, lookHeight: 7 } as const;
 
 /** 좁은 화면에서는 판이 잘리지 않게 뒤로 물러난다 */
 export function aspectDistanceScale(aspect: number): number {

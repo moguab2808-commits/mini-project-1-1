@@ -1,4 +1,4 @@
-// 설치물(벽·끈끈이·추가 위치형 7종) 배치 가능 판정. 권한 측(`Game.useHazard`)과 클라이언트 미리보기·AI가
+// 설치물(벽·끈끈이·추가 위치형 8종) 배치 가능 판정. 권한 측(`Game.useHazard`)과 클라이언트 미리보기·AI가
 // 같은 기하 조건을 쓰도록 한 곳에 둔다. 순수 함수이며 상태를 바꾸지 않는다.
 // 규칙: docs/design/GAME.md "추가 방해요소 10종과 턴 교체"의 공통 규칙(DEC-057).
 import {
@@ -33,7 +33,7 @@ export interface PlacementWorld {
   stones: ReadonlyArray<{ x: number; y: number }>;
   walls: ReadonlyArray<Obb>;
   stickies: ReadonlyArray<PlacementCircle>;
-  /** 벽·끈끈이 밖의 설치물(자석·중력 구역·방향 반전·폭탄·구멍·이동 장애물 경로) 차지 영역 */
+  /** 벽·끈끈이 밖의 설치물(자석·중력 구역·미끄럼 장판·방향 반전·폭탄·구멍·이동 장애물 경로) 차지 영역 */
   others?: ReadonlyArray<Footprint>;
 }
 
@@ -41,6 +41,7 @@ export interface PlacementWorld {
 export const INSTALL_KINDS = [
   'wall',
   'sticky',
+  'ice_floor',
   'magnet',
   'gravity_zone',
   'fake_wall',
@@ -196,6 +197,8 @@ export function installFootprints(
       return [{ type: 'obb', obb: makeWall(x, y, orientation) }];
     case 'sticky':
       return [circle(x, y, T.stickyDiameter / 2)];
+    case 'ice_floor':
+      return [circle(x, y, T.iceFloorDiameter / 2)];
     case 'magnet':
       return [circle(x, y, T.magnetRadius)];
     case 'reverse_zone':
@@ -230,6 +233,8 @@ export function effectFootprint(
     }
     case 'sticky':
       return circle(x, y, T.stickyDiameter / 2);
+    case 'ice_floor':
+      return circle(x, y, T.iceFloorDiameter / 2);
     case 'magnet':
       return circle(x, y, T.magnetRadius);
     case 'reverse_zone':

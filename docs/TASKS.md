@@ -75,7 +75,7 @@
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 진행 중 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 | [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
 | [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 진행 중 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
-| [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
+| [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 진행 중 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 
 ## DOC-001 문서 책임과 구조 재편
@@ -1190,7 +1190,7 @@ Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 ## IMPL-020 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정
 
 우선순위: P1
-상태: 예정
+상태: 진행 중
 담당: 개발자 A
 의존성: IMPL-016
 범위: [DEC-071](DECISIONS.md#결정-색인)에 따라 ① 중력 구역 방향 화살표를 판 평면 위에 평평하게 그리고 ② 미끄럼 장판을 끈끈이처럼 위치를 지정해 설치하는 원형 영역(지름 26.4cm)으로 바꾸며 ③ 인게임 캐릭터의 기본 얼굴 방향을 조금 위로 들고 ④ 정면을 볼 때 상대가 화면 가운데에 더 가깝게 보이도록 기본 시점을 살짝 낮춘다. `shared` 스키마(`ice_floor` target·params), `game-core` 효과, AI 배치, 클라이언트 입력·표시를 함께 바꾼다.
@@ -1198,15 +1198,15 @@ Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87)
 
 수용 기준:
-- [ ] (정상) 중력 구역의 배치 미리보기와 설치 뒤 화살표가 판 평면 위에 평평하게 보이고, 판 돌리기 뒤에도 같은 평면에서 방향이 맞다.
-- [ ] (정상) 미끄럼 장판은 E 뒤 판 위를 클릭해 설치하고 ESC·오른쪽 클릭으로 취소한다. 원 안을 지나는 지면 알만 감속 ×0.4가 적용되고 원 밖 알은 그대로다. 13초 뒤 사라진다.
-- [ ] (예외) 판 밖·다른 설치물과 겹치는 자리는 빨간 후보로 표시되고 `HAZARD_INVALID_TARGET`으로 거부되며 상태·난수를 바꾸지 않는다. `target` 누락은 `INVALID_INPUT`이다.
-- [ ] (정상) AI는 미끄럼 장판을 배치 가능한 후보 중 무작위 위치에 둔다.
-- [ ] (정상) 기본 자세에서 캐릭터 얼굴이 이전보다 위쪽(상대 쪽)을 향하고, 기본 시점에서 상대 캐릭터가 화면 가운데에 더 가깝게 보인다. 바꾼 각도·높이 값을 GAME 또는 LOCAL 설계에 적었다.
-- [ ] (정상) `game-core`·`shared` 단위 테스트와 로컬 2인·AI 경기로 확인했다.
+- [x] (정상) 중력 구역의 배치 미리보기와 설치 뒤 화살표가 판 평면 위에 평평하게 보이고, 판 돌리기 뒤에도 같은 평면에서 방향이 맞다.
+- [x] (정상) 미끄럼 장판은 E 뒤 판 위를 클릭해 설치하고 ESC·오른쪽 클릭으로 취소한다. 원 안을 지나는 지면 알만 감속 ×0.4가 적용되고 원 밖 알은 그대로다. 13초 뒤 사라진다.
+- [x] (예외) 판 밖·다른 설치물과 겹치는 자리는 빨간 후보로 표시되고 `HAZARD_INVALID_TARGET`으로 거부되며 상태·난수를 바꾸지 않는다. `target` 누락은 `INVALID_INPUT`이다.
+- [x] (정상) AI는 미끄럼 장판을 배치 가능한 후보 중 무작위 위치에 둔다.
+- [x] (정상) 기본 자세에서 캐릭터 얼굴이 이전보다 위쪽(상대 쪽)을 향하고, 기본 시점에서 상대 캐릭터가 화면 가운데에 더 가깝게 보인다. 바꾼 각도·높이 값을 GAME 또는 LOCAL 설계에 적었다.
+- [x] (정상) `game-core`·`shared` 단위 테스트와 로컬 2인·AI 경기로 확인했다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 미작성
+검증 근거: [2026-11-04 worklog IMPL-020](worklogs/2026-11-04.md#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정)(리뷰·병합 전)
 
 ## IMPL-021 인게임 HUD·결과 화풍
 

@@ -110,7 +110,7 @@ export interface Effect {
   fake?: boolean;
   /** 시전자 뷰·이벤트에만 담는다(분신술·알 무게 변화) */
   casterOnly?: boolean;
-  /** 자석·구멍 영역 */
+  /** 자석·구멍·미끄럼 장판 영역 */
   field?: { cx: number; cy: number; radius: number };
   /** 중력 구역 정사각형과 방향 단위 벡터 */
   zone?: { zone: Obb; dx: number; dy: number };
@@ -132,7 +132,7 @@ const TARGET_FIELDS: Partial<Record<HazardKind, readonly string[] | null>> = {
   fake_wall: ['x', 'y', 'orientation'],
   moving_wall: ['x', 'y', 'orientation'],
   decoy: ['stoneId'],
-  ice_floor: null,
+  ice_floor: ['x', 'y'],
   heavy_stones: null,
 };
 
@@ -437,7 +437,7 @@ export class Game {
       this.revision++;
       return OK;
     }
-    if (kind === 'decoy' || kind === 'heavy_stones' || kind === 'ice_floor') {
+    if (kind === 'decoy' || kind === 'heavy_stones') {
       const eff = this.addEffect(
         kind,
         src,
@@ -451,7 +451,7 @@ export class Game {
             : undefined,
       );
       eff.instanceId = instanceId;
-      if (kind !== 'ice_floor') eff.casterOnly = true;
+      eff.casterOnly = true;
       if (decoyPlan) {
         const stone = this.world.stones.find((s) => s.id === t!.stoneId)!;
         [stone.x, stone.y] = decoyPlan.real;
@@ -506,9 +506,17 @@ export class Game {
     return OK;
   }
 
-  /** 추가 위치형 7종을 놓는다. 검증은 끝난 상태다 */
+  /** 추가 위치형 8종을 놓는다. 검증은 끝난 상태다 */
   private installNew(
-    kind: 'magnet' | 'gravity_zone' | 'fake_wall' | 'reverse_zone' | 'mine' | 'pit' | 'moving_wall',
+    kind:
+      | 'magnet'
+      | 'gravity_zone'
+      | 'ice_floor'
+      | 'fake_wall'
+      | 'reverse_zone'
+      | 'mine'
+      | 'pit'
+      | 'moving_wall',
     src: Seat,
     now: number,
     t: Target,
@@ -543,11 +551,16 @@ export class Game {
     }
     let params: HazardParams = { x, y };
     const extra: Partial<Effect> = {};
-    if (kind === 'magnet' || kind === 'pit') {
+    if (kind === 'magnet' || kind === 'pit' || kind === 'ice_floor') {
       extra.field = {
         cx: x,
         cy: y,
-        radius: kind === 'magnet' ? T.magnetRadius : T.pitDiameter / 2,
+        radius:
+          kind === 'magnet'
+            ? T.magnetRadius
+            : kind === 'pit'
+              ? T.pitDiameter / 2
+              : T.iceFloorDiameter / 2,
       };
     } else if (kind === 'reverse_zone') {
       const radius = T.reverseZoneDiameter / 2;
@@ -1083,9 +1096,7 @@ export class Game {
     w.gravityZones = fx.flatMap((e) => (e.zone ? [e.zone] : []));
     w.reverseZones = fx.flatMap((e) => (e.reverse ? [e.reverse] : []));
     w.mines = fx.flatMap((e) => (e.mine && !e.mine.exploded ? [e.mine] : []));
-    w.frictionScale = fx.some((e) => e.kind === 'ice_floor')
-      ? HAZARD_TUNING.iceFrictionMultiplier
-      : 1;
+    w.iceAreas = fx.flatMap((e) => (e.kind === 'ice_floor' && e.field ? [e.field] : []));
     const mass: [number, number] = [1, 1];
     for (const e of fx)
       if (e.kind === 'heavy_stones') mass[e.source] = HAZARD_TUNING.heavyMassMultiplier;

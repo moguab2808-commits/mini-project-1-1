@@ -24,11 +24,12 @@ export interface AimRenderState {
 }
 
 export interface PlacementRenderState {
-  /** 판 위 위치형 9종(벽·끈끈이·추가 7종)과 분신술(내 알 고르기) */
+  /** 판 위 위치형 10종(벽·끈끈이·추가 8종)과 분신술(내 알 고르기) */
   kind: Extract<
     HazardKind,
     | 'wall'
     | 'sticky'
+    | 'ice_floor'
     | 'magnet'
     | 'gravity_zone'
     | 'fake_wall'
