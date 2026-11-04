@@ -326,9 +326,9 @@ const UP = new Vector3(0, 1, 0);
 const HEAD_SCALE = 1.1;
 /**
  * 쉬는 자세에서 바라보는 점(좌석 로컬): 판 중심 너머 `ahead`cm, 판 윗면 위 `height`cm.
- * 머리 중심(높이 24)에서 약 13° 아래를 본다. 이전 높이 6(약 21° 아래)은 고개가 너무 숙여져 보여 올렸다(DEC-071 ③)
+ * 상대 얼굴(높이 24, 판 중심 너머 30) 쪽을 거의 정면으로 본다(머리 중심 기준 약 2° 아래, DEC-071 ③)
  */
-export const IDLE_LOOK = { height: 13, ahead: 18 } as const;
+export const IDLE_LOOK = { height: 22, ahead: 30 } as const;
 const _a = new Vector3();
 const _b = new Vector3();
 const _m = new Matrix4();
