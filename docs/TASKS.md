@@ -77,6 +77,7 @@
 | [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 리뷰 중 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
+| [IMPL-022](#impl-022-캐릭터-꾸미기-창-3d-미리보기-화풍) | 캐릭터 꾸미기 창 3D 미리보기 화풍 | P2 | IMPL-019 | 예정 | 개발자 B | 미생성 |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1225,3 +1226,21 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 - [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다(PR #91).
 
 검증 근거: [2026-11-04 worklog IMPL-021](worklogs/2026-11-04.md#impl-021-인게임-hud결과-화풍)
+
+## IMPL-022 캐릭터 꾸미기 창 3D 미리보기 화풍
+
+우선순위: P2
+상태: 예정
+담당: 개발자 B
+의존성: [IMPL-019](#impl-019-l-화풍-화면-적용)
+범위: IMPL-019에서 캐릭터 꾸미기 창의 껍데기·버튼·탭을 L 화풍으로 바꿨지만 창 안의 3D 미리보기(`packages/client/src/avatar/AvatarPreview.tsx`)는 옛 상반신 장면 그대로라 어두운 갈색 배경이 남아 새 창과 어울리지 않는다([worklog 한계](worklogs/2026-11-04.md#impl-019-대기실플로팅-창토스트-l-화풍)). 미리보기 배경을 새 화풍(오목한 칸 안에 투명 배경)에 맞춘다. 미리보기는 지금 [DEC-059](DECISIONS.md#결정-색인)대로 상반신이다. 방 생성 창처럼 전신(`avatar-figure.ts`)으로 바꿀지는 정해지지 않았고([DEC-074](DECISIONS.md#결정-색인)는 방 생성 창만 전신으로 정했다) 바꾸려면 착수 전에 사용자 결정이 필요하다.
+관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 꾸미기 창의 3D 미리보기가 새 화풍의 창과 어울리는 배경으로 보이고 항목을 바꾸면 바로 반영된다.
+- [ ] (예외) WebGL을 쓸 수 없으면 2D 얼굴로 대신한다(현재 동작 유지).
+- [ ] 미리보기를 전신으로 바꾸는 경우에는 사용자 결정을 결정 기록에 남겼다(상반신 유지면 해당 없음).
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 미작성
