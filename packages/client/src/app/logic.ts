@@ -8,8 +8,10 @@ import {
   ROOM_CODE_ALPHABET,
   ROOM_CODE_LENGTH,
   ROOM_TITLE_MAX,
+  THEME_IDS,
   type PlayerRecord,
   type RoomSummary,
+  type ThemeId,
 } from '@alkkagi/shared';
 
 /** 승률(%)을 반올림한 정수로 돌려준다. 분모는 전체 경기 수(무승부 포함)이며 경기가 없으면 null이다. */
@@ -121,4 +123,27 @@ export function defaultRoomTitle(nickname: string): string {
 /** 목록에서 입장 버튼을 쓸 수 있는 방(대기 중). 게임 중인 방에는 입장할 수 없다(관전 없음). */
 export function canEnter(room: Pick<RoomSummary, 'status'>): boolean {
   return room.status === 'waiting';
+}
+
+/** 로비 방 목록의 한 지역(방 테마 열). 대기는 입장할 수 있는 방 수, 전체는 게임 중인 방을 포함한 수다. */
+export interface RoomRegion<R extends Pick<RoomSummary, 'theme' | 'status'>> {
+  theme: ThemeId;
+  rooms: R[];
+  waiting: number;
+  total: number;
+}
+
+/** 방을 테마별 지역으로 나눈다. 지역 순서는 `THEME_IDS`이며 방이 없는 지역도 포함하고, 방 순서는 입력 그대로다(DEC-070). */
+export function groupRoomsByTheme<R extends Pick<RoomSummary, 'theme' | 'status'>>(
+  rooms: readonly R[],
+): RoomRegion<R>[] {
+  return THEME_IDS.map((theme) => {
+    const inTheme = rooms.filter((room) => room.theme === theme);
+    return {
+      theme,
+      rooms: inTheme,
+      waiting: inTheme.filter(canEnter).length,
+      total: inTheme.length,
+    };
+  });
 }
