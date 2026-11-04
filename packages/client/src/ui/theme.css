@@ -1,0 +1,205 @@
+/*
+ * L 한밤의 마법 알까기 공통 화풍 (DEC-069·DEC-072 ②, IMPL-019 첫 PR).
+ * 참고 시안: 디자인 캔버스 UiL-Login·UiL-Lobby·UiL-Create 보드.
+ * 규칙: 이 파일은 A·B가 덧붙이기만 한다. 기존 규칙을 바꾸려면 상대 리뷰를 받는다.
+ * 화면별 스타일은 B는 app/app.css, A는 game/hud/hud.css에만 둔다.
+ */
+
+/* 글꼴: public/fonts의 woff2를 직접 제공한다(외부 CDN 요청 없음, OFL-1.1, docs/CREDITS.md).
+   한글 전체 파일을 먼저 두고, 영문·숫자는 뒤에 둔 latin 파일이 맡는다. */
+@font-face {
+  font-family: 'Jua';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jua-korean-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Jua';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jua-latin-400-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Black Han Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/black-han-sans-korean-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Black Han Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/black-han-sans-latin-400-normal.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  /* 글꼴 */
+  --l-font: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+  --l-font-title: 'Black Han Sans', 'Jua', 'Malgun Gothic', system-ui, sans-serif;
+
+  /* 색: 원목·크림·금빛·보라/파랑 */
+  --l-wood-top: #b97a45;
+  --l-wood-bottom: #7a4421;
+  --l-wood-deep: #5a2408;
+  --l-ink: #4a2a14;
+  --l-cream: #fff7ea;
+  --l-cream-text: #ffe3bb;
+  --l-title: #fff6d8;
+  --l-gold: #ffd36b;
+  --l-gold-edge: rgba(255, 214, 140, 0.6);
+  --l-glow: rgba(255, 170, 70, 0.4);
+  --l-violet: #8a4ae0;
+  --l-blue: #3a86e8;
+  --l-focus: #9f6bff;
+  --l-danger: #d9694f;
+  --l-ok: #7fb069;
+
+  /* 반경 */
+  --l-r-tray: 28px;
+  --l-r-well: 18px;
+  --l-r-btn: 18px;
+  --l-r-input: 14px;
+}
+
+/* 반투명 원목 패널(쟁반). 뒤 배경이 비치고 금빛 테두리 빛이 돈다. */
+.l-tray {
+  border-radius: var(--l-r-tray);
+  background: linear-gradient(180deg, rgba(185, 122, 69, 0.62), rgba(122, 68, 33, 0.66));
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 225, 175, 0.6),
+    inset 0 -5px 0 rgba(60, 24, 6, 0.35),
+    0 0 0 3px var(--l-gold-edge),
+    0 0 34px var(--l-glow),
+    0 18px 34px rgba(0, 0, 0, 0.35);
+}
+
+/* 오목한 칸(쟁반 안의 입력·선택 묶음). */
+.l-well {
+  border-radius: var(--l-r-well);
+  padding: 10px 12px;
+  background: rgba(60, 26, 8, 0.42);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+
+/* 칸 제목 */
+.l-label {
+  margin-bottom: 7px;
+  font-size: 14px;
+  color: var(--l-cream-text);
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+}
+
+/* 입력 칸 */
+.l-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--l-r-input);
+  color: var(--l-ink);
+  font-family: var(--l-font);
+  font-size: 18px;
+  background: rgba(255, 247, 234, 0.92);
+  box-shadow:
+    inset 0 3px 0 rgba(120, 60, 20, 0.15),
+    0 0 0 2px var(--l-gold-edge);
+}
+.l-input:focus {
+  outline: 3px solid var(--l-focus);
+  outline-offset: 2px;
+}
+
+/* 광택 버튼. 색은 변형 클래스(.l-btn-primary·.l-btn-magic·.l-btn-cream)로 정한다. */
+.l-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--l-r-btn);
+  color: #fff;
+  font-family: var(--l-font-title);
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(90, 30, 0, 0.55);
+}
+.l-btn:hover:not(:disabled) {
+  filter: brightness(1.07);
+}
+.l-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.l-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* 주황: 주요 동작(만들기·입장하기) */
+.l-btn-primary {
+  background: linear-gradient(180deg, #ffd76a 0%, #ffa431 55%, #f07a1a 100%);
+  box-shadow:
+    inset 0 5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -6px 0 rgba(150, 60, 0, 0.35),
+    0 6px 0 #9a4a14,
+    0 12px 22px rgba(80, 30, 0, 0.45);
+}
+
+/* 보라·파랑: 마법 느낌의 선택·강조 */
+.l-btn-magic {
+  background: linear-gradient(90deg, var(--l-violet), var(--l-blue));
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -5px 0 rgba(20, 10, 80, 0.35),
+    0 5px 0 #2a2a8a,
+    0 0 18px rgba(160, 100, 255, 0.5);
+}
+
+/* 크림: 보조·취소 동작 */
+.l-btn-cream {
+  color: var(--l-wood-deep);
+  text-shadow: none;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  box-shadow:
+    inset 0 4px 0 #fff,
+    inset 0 -5px 0 rgba(180, 110, 40, 0.3),
+    0 5px 0 #9a6a30;
+}
+
+/* 로고·큰 제목: 굵은 글꼴에 갈색 윤곽과 금빛 번짐 */
+.l-logo {
+  font-family: var(--l-font-title);
+  font-weight: 400;
+  color: var(--l-title);
+  text-shadow:
+    3px 3px 0 var(--l-wood-deep),
+    -3px 3px 0 var(--l-wood-deep),
+    3px -3px 0 var(--l-wood-deep),
+    -3px -3px 0 var(--l-wood-deep),
+    0 7px 0 var(--l-wood-deep),
+    0 0 28px rgba(255, 190, 90, 0.9);
+}
+
+/* 보라·파랑 띠(화면 이름·안내 한 줄) */
+.l-ribbon {
+  display: inline-block;
+  padding: 5px 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(90deg, rgba(110, 40, 200, 0.9), rgba(40, 120, 230, 0.9));
+  box-shadow:
+    0 0 18px rgba(160, 100, 255, 0.6),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}

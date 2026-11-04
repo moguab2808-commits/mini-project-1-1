@@ -73,8 +73,8 @@
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 진행 중 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
-| [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 리뷰 중 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
-| [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 예정 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
+| [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
+| [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 진행 중 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 예정 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 
@@ -1148,7 +1148,7 @@ Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/1
 ## UI-004 디자인 참고 기준을 L 세트로 변경
 
 우선순위: P1
-상태: 리뷰 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: 없음
 범위: 2026-11-04 사용자 요청에 따라 문서가 가리키는 화면 디자인 참고 기준을 `알까기 바 (2).html`·UI-001 초기 보드에서 claude.ai 디자인 캔버스의 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트(로그인·방 목록·방 생성)로 바꾼다([DEC-069](DECISIONS.md#결정-색인)). 세트와 PRD가 다른 배치·기능, 인게임 화풍 적용 범위, 로그인 일러스트 출처는 확정하지 않고 미정으로 둔다. 코드·화면 구현은 포함하지 않는다.
@@ -1160,14 +1160,14 @@ Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 - [x] (정상) DEC-069를 추가하고 DEC-006·007·060에 대체 관계를 양쪽으로 적었다.
 - [x] (예외) 세트와 PRD가 다른 배치·기능(프로필 위치, 지역 4열, 방 생성 캐릭터 창, 로그인 일러스트, 미포함 화면의 화풍)은 사용자 확정 전까지 PRD 화면 미정 사항에 남겼다.
 - [x] 미정 항목의 반영 여부를 사용자와 정하고([DEC-070](DECISIONS.md#결정-색인)) PRD·LOCAL·TECH_STACK에 반영했으며 구현 작업 [IMPL-019](#impl-019-l-화풍-화면-적용)를 등록했다. 같은 날 확정한 인게임 조정([DEC-071](DECISIONS.md#결정-색인))은 [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정)으로 등록했다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다(PR #85, 2026-11-04).
 
 검증 근거: [2026-11-04 worklog UI-004 절](worklogs/2026-11-04.md#ui-004-디자인-참고-기준을-l-세트로-변경)
 
 ## IMPL-019 L 화풍 화면 적용
 
 우선순위: P1
-상태: 예정
+상태: 진행 중
 담당: 개발자 B
 의존성: UI-004, IMPL-012
 범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 기반(화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP)을 먼저 병합해 A·B가 나눠 진행하게 한다([DEC-073](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)). 방 생성 창의 캐릭터 전신은 B가 만든 3D 전신(`avatar-figure.ts`)을 쓰고 WebGL을 쓸 수 없으면 2D 얼굴로 대신한다([DEC-074](DECISIONS.md#결정-색인)). 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
@@ -1185,7 +1185,7 @@ Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 - [ ] (정상) `npm run build`·`npm test`·린트가 통과하고 두 계정 브라우저로 로그인→로비→방 생성→대기실 흐름을 확인했다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: 미작성
+검증 근거: [2026-11-04 worklog IMPL-019 공통 기반](worklogs/2026-11-04.md#impl-019-공통-기반-첫-pr-themecss글꼴일러스트)(첫 PR 진행 중, 나머지 기준은 미작성)
 
 ## IMPL-020 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정
 

@@ -14,6 +14,7 @@ import { hasSeenRules, markRulesSeen } from './settings.ts';
 import { ToastProvider, useToast } from './toast.tsx';
 import { usePendingNotice } from './use-pending-notice.ts';
 import { WaitingRoom } from './waiting-room.tsx';
+import '../ui/theme.css';
 import './app.css';
 
 type Phase =
