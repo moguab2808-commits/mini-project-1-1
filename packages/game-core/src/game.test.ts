@@ -64,7 +64,7 @@ function events(g: Game, type: CoreEvent['type']) {
 }
 
 describe('HAZARD-GRANT: 지급과 교체', () => {
-  test('발사 턴이 바뀔 때마다 두 좌석 모두 교체되고 직전 종류는 다시 나오지 않는다(DEC-055)', () => {
+  test('라운드가 바뀔 때마다 두 좌석 모두 교체되고 직전 종류는 다시 나오지 않는다(DEC-055·DEC-067)', () => {
     const g = mk();
     const all: CoreEvent[] = [...g.drainEvents()];
     const ids = new Set<string>();
@@ -80,6 +80,8 @@ describe('HAZARD-GRANT: 지급과 교체', () => {
     let t = T0;
     while (!g.isFinished) {
       const before = g.getViewFor(0).turnId;
+      const heldBefore = g.getViewFor(0).private.held!.hazardInstanceId;
+      const roundEnds = g.getViewFor(0).activePlayerId !== 0; // 후공(1)이 쏘면 라운드가 끝난다
       t = passTurn(g, t);
       for (const e of g.drainEvents()) {
         all.push(e);
@@ -87,15 +89,22 @@ describe('HAZARD-GRANT: 지급과 교체', () => {
           assert.equal(e.payload.turnId, before + 1, '교체 지급은 새 턴 id를 담는다');
         }
       }
-      if (!g.isFinished) holds();
+      if (g.isFinished) break;
+      if (roundEnds) holds();
+      else
+        assert.equal(
+          g.getViewFor(0).private.held!.hazardInstanceId,
+          heldBefore,
+          '라운드 첫 턴이 끝날 때는 이어진다',
+        );
     }
     const grants = all.filter((e) => e.type === 'hazard:granted');
-    assert.equal(grants.length, 40, '시작 2개 + 턴 교체 19번 × 2좌석(종료 턴은 교체 없음)');
+    assert.equal(grants.length, 20, '시작 2개 + 라운드 교체 9번 × 2좌석(종료 라운드는 교체 없음)');
     assert.equal(
       grants.filter((e) => e.type === 'hazard:granted' && e.payload.replaced).length,
-      38,
+      18,
     );
-    assert.equal(ids.size, 40, '교체마다 새 인스턴스 id');
+    assert.equal(ids.size, 20, '교체마다 새 인스턴스 id');
     for (const ks of kinds) {
       for (let i = 1; i < ks.length; i++) assert.notEqual(ks[i], ks[i - 1], '직전 종류 제외');
       assert.equal(ks.includes('desk_shake'), false);
@@ -127,7 +136,8 @@ describe('HAZARD-GRANT: 지급과 교체', () => {
     g.debugGrant(1, 'board_spin');
     use(g, 1, T0 + 10);
     assert.equal(g.debugState().players[1]!.gauge > 0, true);
-    passTurn(g, T0); // 턴이 바뀌면 교체
+    // 라운드(두 좌석이 한 번씩 쏜 뒤)가 바뀌면 교체한다(DEC-067)
+    passTurn(g, passTurn(g, T0));
     const st = g.debugState();
     assert.equal(st.players[0]!.cooldownEndsAtMs, null);
     assert.equal(st.players[1]!.gauge, 0);

@@ -158,7 +158,13 @@ function staticEffects(): GameView['effects'] {
     add('moving_wall', { x: 0, y: 2, orientation: 'horizontal', angleDeg: 90 });
   }
   if (q.get('ice')) {
-    fx.push({ kind: 'ice_floor', targetSeat: 1, startsAtMs: now, expiresAtMs: now + 600000 });
+    fx.push({
+      kind: 'ice_floor',
+      targetSeat: 1,
+      startsAtMs: now,
+      expiresAtMs: now + 600000,
+      params: { x: -4, y: 6 },
+    });
   }
   const beam = q.get('beam');
   if (beam === 'flashlight' || beam === 'water_gun') {

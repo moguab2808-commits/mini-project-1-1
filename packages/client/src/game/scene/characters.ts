@@ -324,6 +324,11 @@ export interface CharacterFrame {
 const UP = new Vector3(0, 1, 0);
 /** 머리 크기 배율(부품은 반지름 RIG.headRadius 기준). 큰 머리 화풍(IMPL-018 화풍 확인) */
 const HEAD_SCALE = 1.1;
+/**
+ * 쉬는 자세에서 바라보는 점(좌석 로컬): 판 중심 너머 `ahead`cm, 판 윗면 위 `height`cm.
+ * 상대 얼굴(높이 24, 판 중심 너머 30) 쪽을 거의 정면으로 본다(머리 중심 기준 약 2° 아래, DEC-071 ③)
+ */
+export const IDLE_LOOK = { height: 22, ahead: 30 } as const;
 const _a = new Vector3();
 const _b = new Vector3();
 const _m = new Matrix4();
@@ -861,7 +866,7 @@ export class CharacterRig {
       if (g.focusOpponent) look = f.opponentHead;
       else if (f.watch) look = f.watch;
       else {
-        setV(this.lookV, 0, 6, SEAT_GEOMETRY.anchorDistance + 18);
+        setV(this.lookV, 0, IDLE_LOOK.height, SEAT_GEOMETRY.anchorDistance + IDLE_LOOK.ahead);
         look = this.lookV;
       }
     }

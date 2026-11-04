@@ -1,8 +1,8 @@
-// 추가 방해요소 10종의 판 위 표시(자석·중력 구역·방향 반전·폭탄·구멍·이동 장애물 경로·미끄럼 장판·분신술 허상).
+// 추가 방해요소 10종의 판 위 표시(자석·중력 구역·미끄럼 장판·방향 반전·폭탄·구멍·이동 장애물 경로·분신술 허상).
 // 파일 에셋 없이 코드 도형만 쓴다. 객체는 종류별로 한 번 만들어 재사용하고 프레임마다 값만 바꾼다.
 // 회전 그룹 안에 들어가므로 위치는 서버 좌표(X=x, Z=-y)이고 rotation.y는 서버 좌표계 각(반시계)이다.
 // 이동 장애물 본체는 `HazardLayer`의 벽으로 그린다(GameScene이 `movingWallAt`으로 위치를 계산).
-import { HAZARD_TUNING, PHYSICS, type BoardDefinition } from '@alkkagi/shared';
+import { HAZARD_TUNING, PHYSICS } from '@alkkagi/shared';
 import {
   CircleGeometry,
   ConeGeometry,
@@ -17,10 +17,18 @@ import {
   type BufferGeometry,
   type Material,
 } from 'three';
+import { flatArrowGeometry } from './arrow-geometry.ts';
 import { STONE_REST_Y } from './layers.ts';
 
 export type ZoneKind =
-  'magnet' | 'gravity_zone' | 'reverse_zone' | 'mine' | 'pit' | 'moving_track' | 'decoy';
+  | 'magnet'
+  | 'gravity_zone'
+  | 'ice_floor'
+  | 'reverse_zone'
+  | 'mine'
+  | 'pit'
+  | 'moving_track'
+  | 'decoy';
 
 export interface ZoneDraw {
   kind: ZoneKind;
@@ -55,9 +63,6 @@ export class ZoneLayer {
   private readonly geos: BufferGeometry[] = [];
   private readonly mats: Material[] = [];
   private readonly pools = new Map<ZoneKind, Pool>();
-  /** 미끄럼 장판 막: 정사각형 판용과 원형 판용 */
-  private readonly iceSquare: Mesh;
-  private readonly iceCircle: Mesh;
 
   constructor() {
     const g = <G extends BufferGeometry>(geo: G): G => {
@@ -98,15 +103,16 @@ export class ZoneLayer {
       return grp;
     });
 
-    // 중력 구역: 푸른 정사각형 + 방향 화살표 3개(흐르듯 움직인다)
+    // 중력 구역: 푸른 정사각형 + 판 평면에 눕힌 큰 화살표 1개와 흐르는 작은 화살표 2개(DEC-071 ①)
     const half = T.gravityZoneSize / 2;
     const zoneGeo = g(flat(new PlaneGeometry(T.gravityZoneSize, T.gravityZoneSize)));
     const zoneEdge = g(flat(new RingGeometry(half * 1.38, half * 1.414, 4, 1, Math.PI / 4)));
-    const chevron = g(flat(new ConeGeometry(1.6, 2.4, 3)));
-    chevron.rotateY(-Math.PI / 2);
+    const bigArrow = g(flatArrowGeometry(T.gravityZoneSize * 0.62, T.gravityZoneSize * 0.36));
+    const smallArrow = g(flatArrowGeometry(2.6, 1.6));
     const zoneMat = translucent(0x6fb3d9, 0.18);
     const zoneEdgeMat = translucent(0x6fb3d9, 0.65);
-    const chevronMat = translucent(0xeaf6ff, 0.75);
+    const bigArrowMat = translucent(0xeaf6ff, 0.85);
+    const smallArrowMat = translucent(0xeaf6ff, 0.55);
     this.pool('gravity_zone', () => {
       const grp = new Group();
       const plane = new Mesh(zoneGeo, zoneMat);
@@ -115,14 +121,51 @@ export class ZoneLayer {
       edge.position.y = FLOOR_Y + 0.01;
       edge.name = 'square';
       plane.name = 'squarePlane';
-      const arrows = new Group();
-      arrows.name = 'arrows';
-      for (let i = 0; i < 3; i++) {
-        const c = new Mesh(chevron, chevronMat);
-        c.position.y = FLOOR_Y + 0.02;
-        arrows.add(c);
+      const dir = new Group();
+      dir.name = 'dir';
+      const big = new Mesh(bigArrow, bigArrowMat);
+      big.position.y = FLOOR_Y + 0.02;
+      const flow = new Group();
+      flow.name = 'flow';
+      for (const side of [1, -1]) {
+        const c = new Mesh(smallArrow, smallArrowMat);
+        c.position.set(0, FLOOR_Y + 0.03, side * half * 0.62);
+        flow.add(c);
       }
-      grp.add(plane, edge, arrows);
+      dir.add(big, flow);
+      grp.add(plane, edge, dir);
+      return grp;
+    });
+
+    // 미끄럼 장판: 얼음빛 원 + 테두리 + 반짝이는 줄(DEC-071 ②, 끈끈이 지름의 2배)
+    const iceR = T.iceFloorDiameter / 2;
+    const iceDisc = g(flat(new CircleGeometry(iceR, 64)));
+    const iceRing = g(flat(new RingGeometry(iceR - 0.4, iceR, 64)));
+    const iceGlint = g(flat(new PlaneGeometry(iceR * 1.1, 0.35)));
+    const iceMat = translucent(0xbfe8ff, 0.3);
+    const iceRingMat = translucent(0xe6f7ff, 0.8);
+    const iceGlintMat = translucent(0xffffff, 0.5);
+    this.pool('ice_floor', () => {
+      const grp = new Group();
+      const disc = new Mesh(iceDisc, iceMat);
+      disc.position.y = FLOOR_Y - 0.02;
+      disc.name = 'disc';
+      const ring = new Mesh(iceRing, iceRingMat);
+      ring.position.y = FLOOR_Y - 0.01;
+      const glints = new Group();
+      glints.name = 'glints';
+      for (const [gx, gz, rot] of [
+        [-iceR * 0.2, -iceR * 0.35, 0.6],
+        [iceR * 0.25, iceR * 0.2, 0.6],
+        [-iceR * 0.05, iceR * 0.5, 0.6],
+      ] as const) {
+        const gl = new Mesh(iceGlint, iceGlintMat);
+        gl.position.set(gx, FLOOR_Y, gz);
+        gl.rotation.y = rot;
+        gl.scale.x = 0.5 + Math.abs(gx / iceR);
+        glints.add(gl);
+      }
+      grp.add(disc, ring, glints);
       return grp;
     });
 
@@ -217,16 +260,6 @@ export class ZoneLayer {
       grp.add(body);
       return grp;
     });
-
-    // 미끄럼 장판: 판 전체를 덮는 얼음빛 막
-    const iceMat = translucent(0xbfe8ff, 0.3);
-    this.iceSquare = new Mesh(g(flat(new PlaneGeometry(1, 1))), iceMat);
-    this.iceCircle = new Mesh(g(flat(new CircleGeometry(0.5, 64))), iceMat);
-    for (const ice of [this.iceSquare, this.iceCircle]) {
-      ice.position.y = FLOOR_Y - 0.02;
-      ice.visible = false;
-      this.group.add(ice);
-    }
   }
 
   private pool(kind: ZoneKind, make: () => Group): void {
@@ -247,10 +280,9 @@ export class ZoneLayer {
   }
 
   /**
-   * @param ice 미끄럼 장판이 켜져 있으면 판 정의(덮을 크기), 아니면 null
    * @param timeSec 화면 시각(초). 깜빡임·흐름 애니메이션에 쓴다
    */
-  update(items: readonly ZoneDraw[], count: number, ice: BoardDefinition | null, timeSec: number) {
+  update(items: readonly ZoneDraw[], count: number, timeSec: number) {
     for (const p of this.pools.values()) p.used = 0;
     for (let i = 0; i < count; i++) {
       const it = items[i];
@@ -274,15 +306,23 @@ export class ZoneLayer {
             const o = grp.getObjectByName(name);
             if (o) o.rotation.y = it.angle;
           }
-          const arrows = grp.getObjectByName('arrows');
-          if (arrows) {
-            arrows.rotation.y = it.dir;
-            const half = T.gravityZoneSize / 2 - 1.5;
-            arrows.children.forEach((c, k) => {
-              const u = ((timeSec * 0.6 + k / 3) % 1) * 2 - 1;
-              c.position.x = u * half;
-            });
+          const dir = grp.getObjectByName('dir');
+          if (dir) dir.rotation.y = it.dir;
+          const flow = grp.getObjectByName('flow');
+          if (flow) {
+            // 작은 화살표가 방향을 따라 흐른다(구역 안에서 되풀이)
+            const half = T.gravityZoneSize / 2 - 1.6;
+            flow.position.x = (((timeSec * 0.6) % 1) * 2 - 1) * half;
           }
+          break;
+        }
+        case 'ice_floor': {
+          grp.scale.set(s, 1, s);
+          const disc = grp.getObjectByName('disc') as Mesh | undefined;
+          const mat = disc?.material as MeshBasicMaterial | undefined;
+          if (mat) mat.opacity = 0.28 + Math.sin(timeSec * 2) * 0.05;
+          const glints = grp.getObjectByName('glints');
+          if (glints) glints.rotation.y = Math.sin(timeSec * 0.5) * 0.08;
           break;
         }
         case 'reverse_zone': {
@@ -314,14 +354,6 @@ export class ZoneLayer {
         const grp = p.items[i];
         if (grp) grp.visible = false;
       }
-    }
-    this.iceSquare.visible = ice?.shape === 'square';
-    this.iceCircle.visible = ice?.shape === 'circle';
-    if (ice) {
-      const mesh = ice.shape === 'square' ? this.iceSquare : this.iceCircle;
-      const size = ice.shape === 'square' ? ice.size : ice.diameter;
-      mesh.scale.set(size, 1, size);
-      (mesh.material as MeshBasicMaterial).opacity = 0.28 + Math.sin(timeSec * 2) * 0.05;
     }
   }
 

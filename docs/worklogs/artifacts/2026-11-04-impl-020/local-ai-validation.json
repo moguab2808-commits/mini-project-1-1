@@ -1,0 +1,983 @@
+{
+  "at": "2026-11-04T05:44:47.301Z",
+  "viewport": {
+    "width": 960,
+    "height": 640
+  },
+  "method": "Unmodified real Worker/SharedWorker; observed transport and normal commands. Scene harness only for static theme/performance comparison.",
+  "errors": [],
+  "themes": [
+    {
+      "theme": "bar",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        150,
+        150,
+        150,
+        133.30000000000018,
+        166.69999999999982,
+        216.60000000000036,
+        183.29999999999973,
+        133.4000000000001,
+        100,
+        116.59999999999991,
+        100,
+        100,
+        216.5999999999999,
+        166.69999999999982,
+        116.70000000000073,
+        133.29999999999927,
+        133.40000000000055,
+        133.30000000000018,
+        100,
+        116.69999999999982,
+        116.59999999999945,
+        116.70000000000073,
+        99.89999999999964,
+        83.39999999999964,
+        100,
+        83.40000000000055,
+        83.30000000000018,
+        83.29999999999927,
+        83.30000000000018,
+        116.69999999999982,
+        83.30000000000018,
+        116.60000000000036,
+        100,
+        133.39999999999964,
+        133.30000000000018,
+        200,
+        166.60000000000036,
+        150,
+        166.69999999999982
+      ],
+      "meanMs": 129.05384615384617,
+      "p95Ms": 216.5999999999999
+    },
+    {
+      "theme": "rooftop",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        183.30000000000018,
+        200,
+        183.4000000000001,
+        199.9000000000001,
+        200,
+        233.29999999999973,
+        250,
+        200,
+        283.2999999999997,
+        233.40000000000055,
+        249.89999999999964,
+        216.69999999999982,
+        216.70000000000073,
+        250,
+        233.29999999999927,
+        200,
+        200,
+        200,
+        200,
+        183.30000000000018,
+        200,
+        183.30000000000018,
+        200,
+        183.39999999999964
+      ],
+      "meanMs": 211.79999999999998,
+      "p95Ms": 250
+    },
+    {
+      "theme": "classroom",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        150,
+        149.9000000000001,
+        133.4000000000001,
+        150,
+        150,
+        183.29999999999973,
+        166.5999999999999,
+        183.4000000000001,
+        166.5999999999999,
+        150.10000000000036,
+        150,
+        133.29999999999973,
+        183.29999999999973,
+        183.30000000000018,
+        150,
+        150,
+        150,
+        150,
+        133.30000000000018,
+        183.39999999999964,
+        150,
+        133.30000000000018,
+        149.90000000000055,
+        133.39999999999964,
+        150,
+        133.30000000000018,
+        133.39999999999964,
+        133.30000000000018,
+        133.39999999999964,
+        149.90000000000055,
+        133.30000000000018,
+        133.29999999999927,
+        150,
+        150
+      ],
+      "meanMs": 150.48235294117646,
+      "p95Ms": 183.39999999999964
+    },
+    {
+      "theme": "beach",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        183.5,
+        199.89999999999964,
+        183.30000000000018,
+        200,
+        183.30000000000018,
+        166.69999999999982,
+        183.30000000000018,
+        183.39999999999964,
+        166.60000000000036,
+        166.69999999999982,
+        250,
+        199.89999999999964,
+        183.40000000000055,
+        216.69999999999982,
+        166.60000000000036,
+        166.59999999999945,
+        183.40000000000055,
+        166.69999999999982,
+        199.89999999999964,
+        183.40000000000055,
+        233.29999999999927,
+        233.30000000000018,
+        200,
+        166.69999999999982,
+        166.60000000000036,
+        200,
+        183.39999999999964
+      ],
+      "meanMs": 189.50370370370368,
+      "p95Ms": 233.30000000000018
+    }
+  ],
+  "local": {
+    "first": {
+      "theme": "beach",
+      "players": [
+        {
+          "seat": 0,
+          "nickname": "플레이어 1",
+          "appearance": {
+            "headShape": 0,
+            "hair": 0,
+            "eyebrows": 0,
+            "eyes": 0,
+            "nose": 0,
+            "lips": 0,
+            "skinTone": 0
+          }
+        },
+        {
+          "seat": 1,
+          "nickname": "플레이어 2",
+          "appearance": {
+            "headShape": 0,
+            "hair": 1,
+            "eyebrows": 0,
+            "eyes": 1,
+            "nose": 0,
+            "lips": 0,
+            "skinTone": 1
+          }
+        }
+      ]
+    },
+    "renderedTwoTabUiSmoke": true,
+    "grantCoverageMode": "Real LocalGameSession and SharedWorker in browser tabs without a WebGL scene; rendered two-tab UI is checked separately above.",
+    "matches": 47,
+    "hazards": [
+      {
+        "kind": "ice_floor",
+        "target": {
+          "x": 2.2,
+          "y": -8.8
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "flashlight",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "stun",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "fake_wall",
+        "target": {
+          "x": 8.8,
+          "y": -13.200000000000001,
+          "orientation": "horizontal"
+        },
+        "result": {
+          "ok": true
+        },
+        "walls": [
+          {
+            "gameId": "local-44",
+            "kind": "wall",
+            "phase": "start",
+            "sourceSeat": 1,
+            "targetSeat": 0,
+            "startsAtMs": 1793771147937,
+            "expiresAtMs": 1793771162937,
+            "params": {
+              "x": -4.4,
+              "y": -22,
+              "orientation": "horizontal",
+              "angleDeg": 0
+            }
+          },
+          {
+            "gameId": "local-44",
+            "kind": "wall",
+            "phase": "start",
+            "sourceSeat": 1,
+            "targetSeat": 0,
+            "startsAtMs": 1793771147937,
+            "expiresAtMs": 1793771162937,
+            "params": {
+              "x": 8.8,
+              "y": -13.200000000000001,
+              "orientation": "horizontal",
+              "angleDeg": 0
+            }
+          },
+          {
+            "gameId": "local-44",
+            "kind": "wall",
+            "phase": "start",
+            "sourceSeat": 1,
+            "targetSeat": 0,
+            "startsAtMs": 1793771147937,
+            "expiresAtMs": 1793771162937,
+            "params": {
+              "x": 13.200000000000001,
+              "y": -15.400000000000002,
+              "orientation": "horizontal",
+              "angleDeg": 0
+            }
+          }
+        ]
+      },
+      {
+        "kind": "water_gun",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "sticky",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": -2.2
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "mine",
+        "target": {
+          "x": 8.8,
+          "y": -8.8
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "reverse_zone",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": 11
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "magnet",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": -13.200000000000001
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "wind",
+        "automatic": true,
+        "effects": [
+          "wind"
+        ]
+      },
+      {
+        "kind": "bar_speed",
+        "automatic": true,
+        "effects": [
+          "bar_speed"
+        ]
+      },
+      {
+        "kind": "moving_wall",
+        "target": {
+          "x": 2.2,
+          "y": 2.2,
+          "orientation": "horizontal"
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "wall",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": -2.2,
+          "orientation": "horizontal"
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "pit",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": 4.4
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "heavy_stones",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "board_spin",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "gravity_zone",
+        "target": {
+          "x": 4.4,
+          "y": 6.6000000000000005,
+          "directionRad": 1.5707963267948966
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "decoy",
+        "target": {
+          "stoneId": 7
+        },
+        "result": {
+          "ok": true
+        }
+      }
+    ],
+    "failedAttempts": [
+      {
+        "kind": "ice_floor",
+        "target": null,
+        "result": {
+          "ok": false,
+          "error": {
+            "code": "INVALID_INPUT",
+            "message": "대상 형식이 맞지 않다"
+          }
+        }
+      },
+      {
+        "kind": "ice_floor",
+        "target": null,
+        "result": {
+          "ok": false,
+          "error": {
+            "code": "INVALID_INPUT",
+            "message": "대상 형식이 맞지 않다"
+          }
+        }
+      }
+    ],
+    "shotAndTurnSwap": true,
+    "closeForfeit": true,
+    "fallbackThemes": [
+      {
+        "query": "&theme=invalid",
+        "theme": "bar"
+      },
+      {
+        "query": "",
+        "theme": "bar"
+      }
+    ]
+  },
+  "ai": {
+    "matches": [
+      {
+        "theme": "bar",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 2,
+              "hair": 3,
+              "eyebrows": 3,
+              "eyes": 1,
+              "nose": 3,
+              "lips": 0,
+              "skinTone": 1
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-1",
+              "emote": "yawn",
+              "seat": 1,
+              "atMs": 1793771163433
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-2",
+              "kind": "bar_speed",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771169426,
+              "expiresAtMs": 9007199254740991,
+              "params": {
+                "multiplier": 3
+              }
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      },
+      {
+        "theme": "rooftop",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 2,
+              "hair": 1,
+              "eyebrows": 1,
+              "eyes": 0,
+              "nose": 2,
+              "lips": 0,
+              "skinTone": 1
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "moving_wall",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771174714,
+              "expiresAtMs": 1793771189714,
+              "params": {
+                "x": -4.4,
+                "y": 11,
+                "orientation": "vertical",
+                "angleDeg": 0
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "moving_wall",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771174714,
+              "expiresAtMs": 1793771185150,
+              "params": {
+                "x": -4.4,
+                "y": 11,
+                "orientation": "vertical",
+                "angleDeg": 0
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-2",
+              "kind": "bar_speed",
+              "phase": "start",
+              "sourceSeat": 0,
+              "targetSeat": 1,
+              "startsAtMs": 1793771188186,
+              "expiresAtMs": 9007199254740991,
+              "params": {
+                "multiplier": 3
+              }
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      },
+      {
+        "theme": "classroom",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 1,
+              "hair": 3,
+              "eyebrows": 0,
+              "eyes": 2,
+              "nose": 3,
+              "lips": 2,
+              "skinTone": 2
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-1",
+              "emote": "gg",
+              "seat": 1,
+              "atMs": 1793771190551
+            }
+          },
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-1",
+              "emote": "laugh",
+              "seat": 1,
+              "atMs": 1793771196691
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      },
+      {
+        "theme": "beach",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 2,
+              "hair": 2,
+              "eyebrows": 4,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 1,
+              "skinTone": 3
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "flashlight",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771208769,
+              "expiresAtMs": 1793771212769,
+              "params": {
+                "aimX": -1.1703333672532645,
+                "aimY": -30,
+                "aimH": 25.384434040029767,
+                "coverage": 0
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "flashlight",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771208769,
+              "expiresAtMs": 1793771210749,
+              "params": {
+                "aimX": 0.8707789387712757,
+                "aimY": -30,
+                "aimH": 24.728636745884767,
+                "coverage": 1
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-2",
+              "kind": "bar_speed",
+              "phase": "start",
+              "sourceSeat": 0,
+              "targetSeat": 1,
+              "startsAtMs": 1793771221022,
+              "expiresAtMs": 9007199254740991,
+              "params": {
+                "multiplier": 3
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-2",
+              "kind": "wind",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771221022,
+              "expiresAtMs": 9007199254740991,
+              "params": {
+                "directionRad": 1.7076675815863327
+              }
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      }
+    ],
+    "hazardEvents": [
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-2",
+          "kind": "bar_speed",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771169426,
+          "expiresAtMs": 9007199254740991,
+          "params": {
+            "multiplier": 3
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "moving_wall",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771174714,
+          "expiresAtMs": 1793771189714,
+          "params": {
+            "x": -4.4,
+            "y": 11,
+            "orientation": "vertical",
+            "angleDeg": 0
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "moving_wall",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771174714,
+          "expiresAtMs": 1793771185150,
+          "params": {
+            "x": -4.4,
+            "y": 11,
+            "orientation": "vertical",
+            "angleDeg": 0
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "flashlight",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771208769,
+          "expiresAtMs": 1793771212769,
+          "params": {
+            "aimX": -1.1703333672532645,
+            "aimY": -30,
+            "aimH": 25.384434040029767,
+            "coverage": 0
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "flashlight",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771208769,
+          "expiresAtMs": 1793771210749,
+          "params": {
+            "aimX": 0.8707789387712757,
+            "aimY": -30,
+            "aimH": 24.728636745884767,
+            "coverage": 1
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-2",
+          "kind": "wind",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771221022,
+          "expiresAtMs": 9007199254740991,
+          "params": {
+            "directionRad": 1.7076675815863327
+          }
+        }
+      }
+    ],
+    "emoteEvents": [
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-1",
+          "emote": "yawn",
+          "seat": 1,
+          "atMs": 1793771163433
+        }
+      },
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-1",
+          "emote": "gg",
+          "seat": 1,
+          "atMs": 1793771190551
+        }
+      },
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-1",
+          "emote": "laugh",
+          "seat": 1,
+          "atMs": 1793771196691
+        }
+      }
+    ]
+  },
+  "emotes": {
+    "local": {
+      "events0": [
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "yawn",
+            "seat": 0,
+            "atMs": 1793771130288
+          }
+        },
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "gg",
+            "seat": 1,
+            "atMs": 1793771140612
+          }
+        }
+      ],
+      "events1": [
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "yawn",
+            "seat": 0,
+            "atMs": 1793771130288
+          }
+        },
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "gg",
+            "seat": 1,
+            "atMs": 1793771140612
+          }
+        }
+      ],
+      "repeatedKeyboardBlocked": true,
+      "authorityCooldown": {
+        "ok": false,
+        "error": {
+          "code": "EMOTE_COOLDOWN",
+          "message": "감정표현을 잠시 뒤에 다시 사용해 주세요"
+        }
+      }
+    },
+    "finished": {
+      "ok": false,
+      "error": {
+        "code": "GAME_NOT_ACTIVE",
+        "message": "진행 중인 경기가 없다"
+      }
+    }
+  },
+  "browser": "156.0.8078.4",
+  "passed": true
+}

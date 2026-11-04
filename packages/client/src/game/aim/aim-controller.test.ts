@@ -1080,13 +1080,37 @@ describe('추가 방해요소 입력 (IMPL-016)', () => {
     expect(env.hazards[0]!.target).toEqual({ stoneId: 1 });
   });
 
-  it('미끄럼 장판·알 무게 변화는 E 한 번에 target 없이 보낸다', () => {
-    for (const kind of ['ice_floor', 'heavy_stones'] as const) {
-      const env = setup(makeView({ held: kind }));
-      env.controller.onKey('e');
-      expect(env.hazards).toHaveLength(1);
-      expect(env.hazards[0]!.target).toBeUndefined();
-    }
+  it('알 무게 변화는 E 한 번에 target 없이 보낸다', () => {
+    const env = setup(makeView({ held: 'heavy_stones' }));
+    env.controller.onKey('e');
+    expect(env.hazards).toHaveLength(1);
+    expect(env.hazards[0]!.target).toBeUndefined();
+  });
+
+  it('미끄럼 장판은 E 뒤 판을 클릭해 {x, y}로 설치하고, 판 밖은 빨간 후보로 보내지 않는다(DEC-071)', () => {
+    const env = setup(makeView({ held: 'ice_floor' }));
+    env.controller.onKey('e');
+    expect(env.hazards).toHaveLength(0);
+    // 판 반 변 23 − 반지름 13.2 = 9.8을 넘으면 판 밖
+    env.controller.onPointer(ptr('move', { x: 12, y: 0 }));
+    expect(env.controller.getSnapshot().placement).toMatchObject({
+      kind: 'ice_floor',
+      valid: false,
+    });
+    env.controller.onPointer(ptr('down', { x: 12, y: 0 }));
+    expect(env.hazards).toHaveLength(0);
+    env.controller.onPointer(ptr('move', { x: 3.3, y: 1.7 }));
+    expect(env.controller.getSnapshot().placement!.valid).toBe(true);
+    env.controller.onPointer(ptr('down', { x: 3.3, y: 1.7 }));
+    expect(env.hazards[0]!.target).toEqual({ x: 3.3, y: 1.7 });
+  });
+
+  it('미끄럼 장판 배치는 ESC로 취소한다', () => {
+    const env = setup(makeView({ held: 'ice_floor' }));
+    env.controller.onKey('e');
+    env.controller.onKey('escape');
+    expect(env.controller.getSnapshot().placement).toBeNull();
+    expect(env.hazards).toHaveLength(0);
   });
 
   it('턴당 1회형을 쓴 뒤(usable=false)에는 E를 눌러도 보내지 않는다', () => {
