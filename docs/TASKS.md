@@ -62,13 +62,13 @@
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
-| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47) |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #68](https://github.com/moguab2808-commits/mini-project-1-1/pull/68)(코드)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)·[PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
 | [UI-003](#ui-003-사람-아바타-화풍-ui-적용-설계) | 사람 아바타 화풍 UI 적용 설계 | P2 | CHAR-001 | 취소 | 미정 | [#73](https://github.com/moguab2808-commits/mini-project-1-1/issues/73) |
 | [HAZ-001](#haz-001-방해요소-10종-추가와-턴-교체-설계) | 방해요소 10종 추가와 턴 교체 설계 | P1 | IMPL-004, IMPL-005, IMPL-009 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
-| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 진행 중 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81) |
+| [IMPL-016](#impl-016-방해요소-10종-추가와-턴-교체) | 방해요소 10종 추가와 턴 교체 | P1 | HAZ-001 | 완료 | Claude — 사용자 요청 수행 | [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/81)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84) |
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
@@ -78,7 +78,7 @@
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-022](#impl-022-캐릭터-꾸미기-창-3d-미리보기-화풍) | 캐릭터 꾸미기 창 3D 미리보기 화풍 | P2 | IMPL-019 | 완료 | 개발자 B | [#94](https://github.com/moguab2808-commits/mini-project-1-1/pull/94) |
-| [IMPL-023](#impl-023-게임-캐릭터-손-다섯-손가락) | 게임 캐릭터 손 다섯 손가락 | P2 | IMPL-019 | 리뷰 중 | 개발자 B | [#95](https://github.com/moguab2808-commits/mini-project-1-1/pull/95) |
+| [IMPL-023](#impl-023-게임-캐릭터-손-다섯-손가락) | 게임 캐릭터 손 다섯 손가락 | P2 | IMPL-019 | 완료 | 개발자 B | [#95](https://github.com/moguab2808-commits/mini-project-1-1/pull/95) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -849,18 +849,20 @@ Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 의존성: OPS-001, IMPL-009, IMPL-011
 범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
 관련 문서: [OPERATIONS](design/OPERATIONS.md#세부-절차-확정안) / [ADR-0003](adr/0003-tech-stack-and-architecture.md) / [DEC-029](DECISIONS.md#결정-색인)
-Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)
+Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #68](https://github.com/moguab2808-commits/mini-project-1-1/pull/68)(코드)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR)
 
 수용 기준:
-- [ ] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다. 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다.
-- [ ] (오류) `/api`·`/socket.io`·`/health` 밖 확장자 없는 GET은 `index.html`, 없는 정적 자산은 404를 돌려준다. 롤백 절차로 직전 배포를 복원해 확인했다.
+- [x] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다.
+- [ ] (정상) 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다. (Auto-Deploy Off는 사용자 전언과 Deploys 화면의 간접 근거(병합 24건에 자동 배포 없음, 최신 트리거 Manual)가 있고, 운영 로그에 비밀값이 없는지는 확인하지 못했다. Settings 화면·로그를 확인해 기록한다)
+- [x] (오류) `/api`·`/socket.io`·`/health` 밖 확장자 없는 GET은 `index.html`, 없는 정적 자산은 404를 돌려준다.
+- [ ] (오류) 롤백 절차로 직전 배포를 복원해 확인했다. (직전 배포 `e97b81a`는 마이그레이션 `0002`(`character_id` 삭제) 이전 코드라 지금 롤백하면 계정 API가 깨질 수 있다. 다음 배포의 직전인 `ddc5337`으로 확인한다)
 - [x] (예외) 서버 시작 때 `rooms` 정리가 실패하면 서버가 시작하지 않는다. 절전 방지 요청 사용 여부와 Render 로그 보관 기간을 구현 단계에서 정해 기록했다.
-- [ ] (예외) argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남기고 목표(약 100~300ms)에 맞게 [AUTH](design/AUTH.md#해시프록시) 파라미터를 조정했다. (IMPL-007에서 옮겨 옴)
+- [ ] (예외) argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남기고 목표(약 100~300ms)에 맞게 [AUTH](design/AUTH.md#해시프록시) 파라미터를 조정했다. (IMPL-007에서 옮겨 옴. 2026-11-04 약식 측정은 DB 왕복을 포함한 상한이 약 70ms 이하라 목표에 못 미치는 것으로 보이나 오차가 커서 확정하지 못했다. 서버 안에서 해시 시간을 직접 기록해 재측정하고 조정한다)
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. Render·Neon 서비스 생성, 수동 배포·롤백, UptimeRobot, argon2id 실측은 사용자 승인과 계정 작업이 필요해 남았다. 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
+진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. 사용자가 Render·Neon 서비스를 만들고(첫 배포 `e97b81a`, Blueprint) `main`을 수동 배포했으며(현재 Live `ddc5337`, PR #95 병합) UptimeRobot 모니터를 2026-11-03에 설정했다. 2026-11-04 Claude가 운영 URL을 읽기 전용으로 점검해 `/health`·정적 화면·SPA fallback·404·Socket.IO 핸드셰이크를, 사용자가 두 계정 PvP·Auto-Deploy Off·UptimeRobot 핑을 확인했다. **남은 것**: Auto-Deploy Off 설정과 운영 로그 비밀값 부재 확인, 롤백 확인(다음 배포에서), Render 로그 보관 7일 적용 확인, argon2id 해시 시간의 서버 내 측정과 파라미터 조정. 이 PR은 확인한 범위의 중간 기록이며 IMPL-013은 진행 중으로 둔다. 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
 
-검증 근거: [2026-11-03 worklog IMPL-013 절](worklogs/2026-11-03.md#impl-013-배포)
+검증 근거: [2026-11-03 worklog IMPL-013 절](worklogs/2026-11-03.md#impl-013-배포)(코드), [2026-11-04 worklog IMPL-013 운영 배포 확인](worklogs/2026-11-04.md#impl-013-운영-배포-확인)(운영)
 
 ## CHAR-001 사람 아바타 전환과 꾸미기 설계
 
@@ -970,7 +972,7 @@ Issue·PR: [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 ## IMPL-016 방해요소 10종 추가와 턴 교체
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: Claude — 사용자 요청 수행
 의존성: HAZ-001
 범위: [DEC-055](DECISIONS.md#결정-색인)를 `shared`·`game-core`·서버·클라이언트·AI에 구현한다. 발사 턴마다 두 사람 교체와 직전 종류 제외, 추가 10종의 물리·배치·연출, 속임수형의 상대 뷰 숨김을 포함한다.
@@ -983,11 +985,11 @@ Issue·PR: [PR #81](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 - [x] (예외) 상대 뷰·이벤트에 가짜벽의 진짜 여부, 분신술의 진짜 알, 알 무게 효과가 없다(뷰 테스트). 분신술·알 무게는 상대에게 발동 안내가 없고 가짜벽은 "벽"으로 안내된다. (`game-runtime` 좌석 지정 전송 테스트 포함)
 - [x] (예외) 사용 제한(쿨타임 20초·턴당 1회)을 넘는 요청과 다른 설치물과 겹치는 배치는 거부되고 상태와 난수를 바꾸지 않는다. 분신술 허상은 어느 알이 닿아도 사라진다.
 - [x] (정상) AI 대전·로컬 2인에서 18종이 지급·사용되고 AI가 위치형을 배치 가능한 무작위 위치에 둔다. (실제 SharedWorker 47회 재도전에서 18종 전부 사용, 실패 0. 실제 AI Worker 4종 테마 경기의 발사·방해요소 사용과 단위 테스트를 함께 확인; [로컬·AI 마무리 검증](worklogs/2026-11-03.md#impl-015016017018-로컬ai-마무리))
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다(PR #81·#84).
 
 진행: `shared`(18종·`per_turn`·수치·`stoneCounts`·`decoys`·`hazard:granted.turnId`)·`game-core`(턴 교체, 10종 물리·배치·뷰 경계)·`game-runtime`(시전자 전용 안내 좌석 지정 전송)·클라이언트(입력·미리보기·장면 표시·HUD·AI)를 구현했다. 구현 해석과 가짜벽 변경은 [DEC-066](DECISIONS.md#결정-색인)으로 확정했다(지정한 진짜 벽 + 무작위 가짜 두 벽 동시 설치, 알 겹침 금지, 분신 벽·구멍 회피, 판 회전 일치). 수치는 제안값이며 플레이 테스트 전이다.
 
-검증 근거: [기존 구현](worklogs/2026-11-03.md#impl-016-방해요소-10종-추가와-턴-교체), [로컬·AI 마무리 검증](worklogs/2026-11-03.md#impl-015016017018-로컬ai-마무리) (DEC-066·실제 경기). 기능 검증은 마쳤고 이번 변경의 PR·병합 후 완료 처리한다.
+검증 근거: [기존 구현](worklogs/2026-11-03.md#impl-016-방해요소-10종-추가와-턴-교체), [로컬·AI 마무리 검증](worklogs/2026-11-03.md#impl-015016017018-로컬ai-마무리) (DEC-066·실제 경기). 기능 검증을 마쳤고 PR #81·#84로 `main`에 병합돼 완료했다.
 
 ### IMPL-016 자석·중력 강화와 라운드 교체 (DEC-067)
 
@@ -1249,10 +1251,10 @@ Issue·PR: [PR #94](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 ## IMPL-023 게임 캐릭터 손 다섯 손가락
 
 우선순위: P2
-상태: 리뷰 중
+상태: 완료
 담당: 개발자 B
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용), [DEC-077](DECISIONS.md#결정-색인)
-범위: [DEC-077](DECISIONS.md#결정-색인)에 따라 게임 장면 캐릭터의 손을 손가락 다섯 개로 바꾸고 조준·튕기기 손 모양(손등 오른쪽, 중지를 엄지에 걸었다가 튕김)을 만든다. 손 모델 `packages/client/src/avatar/avatar-hand.ts`는 IMPL-019에서 `main`에 들어왔고 지금은 방 생성·꾸미기 창의 3D 전신만 쓴다. 이 작업은 게임 리그(`packages/client/src/game/scene/characters.ts`)가 이를 쓰도록 옮긴다. 로컬 구현이 백업 커밋 `4b57e4c`(브랜치 `feat/impl-019-profile-figure`)에 있다. IMPL-022 병합 뒤의 `main`(`656c602`)과 다시 시험해 `characters.ts`만 충돌 없이 합쳐지는 것을 확인하고 이 파일만 반입했다([worklog](worklogs/2026-11-04.md#impl-023-게임-캐릭터-손-다섯-손가락)). 이 백업 브랜치는 개발자 B의 로컬에만 있으며 원격에 없다. 이 작업의 PR에서 원격에 올리거나 내용을 반입한다. `characters.ts`는 인게임 장면 쪽 파일(개발자 A가 #89에서 `IDLE_LOOK`을 넣음)이므로 이 파일의 변경은 개발자 A의 리뷰를 받는다([DEC-072](DECISIONS.md#결정-색인) ②의 상대 리뷰). 인게임 상반신 구성·조작·판정은 바꾸지 않는다.
+범위: [DEC-077](DECISIONS.md#결정-색인)에 따라 게임 장면 캐릭터의 손을 손가락 다섯 개로 바꾸고 조준·튕기기 손 모양(손등 오른쪽, 중지를 엄지에 걸었다가 튕김)을 만든다. 손 모델 `packages/client/src/avatar/avatar-hand.ts`는 IMPL-019에서 `main`에 들어왔고 지금은 방 생성·꾸미기 창의 3D 전신만 쓴다. 이 작업은 게임 리그(`packages/client/src/game/scene/characters.ts`)가 이를 쓰도록 옮긴다. 로컬 구현이 백업 커밋 `4b57e4c`(브랜치 `feat/impl-019-profile-figure`)에 있다. IMPL-022 병합 뒤의 `main`(`656c602`)과 다시 시험해 `characters.ts`만 충돌 없이 합쳐지는 것을 확인하고 이 파일만 반입했다([worklog](worklogs/2026-11-04.md#impl-023-게임-캐릭터-손-다섯-손가락)). 이 백업 브랜치는 개발자 B의 로컬에만 있고 원격에 올리지 않는다. 필요한 코드는 `characters.ts`뿐이라 반입했고, 나머지(로비 프로필바 전신 3D·옛 번호 문구·옛 캡처)는 [DEC-070](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)으로 바뀐 옛 설계라 가져오지 않았다. `characters.ts`는 인게임 장면 쪽 파일(개발자 A가 #89에서 `IDLE_LOOK`을 넣음)이므로 이 파일의 변경은 개발자 A의 리뷰를 받는다([DEC-072](DECISIONS.md#결정-색인) ②의 상대 리뷰). 인게임 상반신 구성·조작·판정은 바꾸지 않는다.
 관련 문서: [PRD 게임 화면](PRD.md#게임-화면) / [GAME](design/GAME.md)
 Issue·PR: [PR #95](https://github.com/moguab2808-commits/mini-project-1-1/pull/95)(Issue 없음)
 
@@ -1260,6 +1262,6 @@ Issue·PR: [PR #95](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 - [x] (정상) 게임 장면의 손이 손가락 다섯 개이고, 조준 중 오른손은 손등이 캐릭터 오른쪽을 향하고 굽힌 중지 끝마디에 엄지 끝이 닿아 있다. 칠 때 중지가 앞으로 펴지고 엄지는 그 자리에 있다. 상대 캐릭터에도 같다.
 - [x] (경계) 쉬기·판 잡기·방해요소 들기·감정표현 손 모양이 손가락 다섯 개로도 이전과 같은 동작으로 보이고, 1인칭에서 카메라 가까운 손 숨김이 그대로다.
 - [x] (경계) 게임 화면 프레임 시간을 변경 전(`main`)과 같은 조건으로 비교해 기록했다(손 도형이 늘었다). SwiftShader 소프트웨어 렌더링 480×270 비교이며 실제 GPU 결과는 아니다.
-- [ ] 사용자가 실제 화면을 확인하고, 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 사용자가 실제 화면을 확인하고, 변경·검증 결과를 worklog에 기록해 리뷰 후 기준 브랜치에 병합됐다(PR #95).
 
 검증 근거: [2026-11-04 worklog IMPL-023](worklogs/2026-11-04.md#impl-023-게임-캐릭터-손-다섯-손가락)(조준·튕기기·감정표현 손 모양은 사용자가 로컬 2인 두 창에서 확인, 세부 항목별 답은 받지 못함)
