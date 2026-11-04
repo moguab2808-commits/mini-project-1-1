@@ -68,14 +68,16 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
 
   return (
     <main className="auth-page">
-      <section className="auth-card">
-        <h1 className="logo">알까기 바</h1>
-        <div className="tabs" role="tablist">
+      <header className="auth-hero">
+        <h1 className="l-logo auth-logo">증강 알까기</h1>
+      </header>
+      <section className="auth-card l-tray" aria-label={tab === 'login' ? '로그인' : '회원등록'}>
+        <div className="auth-tabs" role="tablist">
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'login'}
-            className={tab === 'login' ? 'tab tab-on' : 'tab'}
+            className={tab === 'login' ? 'auth-tab auth-tab-on' : 'auth-tab'}
             onClick={() => {
               switchTab('login');
             }}
@@ -86,7 +88,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
             type="button"
             role="tab"
             aria-selected={tab === 'signup'}
-            className={tab === 'signup' ? 'tab tab-on' : 'tab'}
+            className={tab === 'signup' ? 'auth-tab auth-tab-on' : 'auth-tab'}
             onClick={() => {
               switchTab('signup');
             }}
@@ -95,51 +97,56 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
           </button>
         </div>
         <form
-          className="form"
+          className="auth-form"
           onSubmit={(e) => {
             void submit(e);
           }}
         >
-          <label className="field">
-            <span>닉네임</span>
-            <input
-              value={nickname}
-              maxLength={NICKNAME_MAX}
-              autoComplete="username"
-              autoFocus
-              onChange={(e) => {
-                setNickname(e.target.value);
-              }}
-            />
-          </label>
-          <label className="field">
-            <span>비밀번호</span>
-            <input
-              type="password"
-              value={password}
-              maxLength={PASSWORD_MAX}
-              autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-            />
-          </label>
-          {tab === 'signup' && (
-            <label className="field">
-              <span>비밀번호 확인</span>
+          <div className="auth-fields l-well">
+            <label className="auth-field">
+              <span>닉네임</span>
               <input
-                type="password"
-                value={passwordConfirm}
-                maxLength={PASSWORD_MAX}
-                autoComplete="new-password"
+                className="l-input"
+                value={nickname}
+                maxLength={NICKNAME_MAX}
+                autoComplete="username"
+                autoFocus
                 onChange={(e) => {
-                  setPasswordConfirm(e.target.value);
+                  setNickname(e.target.value);
                 }}
               />
             </label>
-          )}
+            <label className="auth-field">
+              <span>비밀번호</span>
+              <input
+                className="l-input"
+                type="password"
+                value={password}
+                maxLength={PASSWORD_MAX}
+                autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+              />
+            </label>
+            {tab === 'signup' && (
+              <label className="auth-field">
+                <span>비밀번호 확인</span>
+                <input
+                  className="l-input"
+                  type="password"
+                  value={passwordConfirm}
+                  maxLength={PASSWORD_MAX}
+                  autoComplete="new-password"
+                  onChange={(e) => {
+                    setPasswordConfirm(e.target.value);
+                  }}
+                />
+              </label>
+            )}
+          </div>
           {tab === 'signup' && (
-            <p className="hint">
+            <p className="auth-hint">
               닉네임은 한글·영문·숫자 {NICKNAME_MIN}~{NICKNAME_MAX}자, 비밀번호는 {PASSWORD_MIN}~
               {PASSWORD_MAX}자예요.
             </p>
@@ -159,7 +166,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
               {WAKING_SERVER_MESSAGE}
             </p>
           )}
-          <button type="submit" className="btn btn-primary" disabled={busy}>
+          <button type="submit" className="l-btn l-btn-primary auth-submit" disabled={busy}>
             {busy ? '잠시만요…' : tab === 'login' ? '로그인' : '회원등록'}
           </button>
         </form>

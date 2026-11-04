@@ -54,7 +54,7 @@ function AppRoot() {
   if (phase.t === 'boot') {
     return (
       <main className="boot-page">
-        <h1 className="logo">알까기 바</h1>
+        <h1 className="l-logo">증강 알까기</h1>
         <p role="status">{waking ? WAKING_SERVER_MESSAGE : '불러오는 중…'}</p>
       </main>
     );

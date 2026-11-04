@@ -47,7 +47,7 @@
 | 효과음 10종(발사, 알 충돌, 알 떨어짐, 내 턴 시작, 시간 5초 남음, 방해요소 받음, 방해요소 발동, 승리, 패배, 무승부) | jsfxr·ChipTone **전부 자체 생성** | 도구 이용 약관 **미확인**(sfxr.me 접속 실패) | 외부 음원은 쓰지 않는다. 감정표현 6종 효과음([DEC-056](../DECISIONS.md#결정-색인))은 Web Audio 발진기로 직접 합성한다(로컬·AI 구현, 외부 도구·음원 반입 없음). 승패 소리가 어색하면 별도 결정으로 보완한다 |
 | 글꼴 | Jua·Black Han Sans(Google Fonts) woff2를 `packages/client/public/fonts/`에 두고 직접 제공 | SIL OFL 1.1(확인일 2026-11-04) | L 세트가 쓰는 글꼴이다([DEC-069](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인)). 한글·영문 woff2 4개(약 590KB)와 라이선스 전문을 `packages/client/public/fonts/`에 두고 `packages/client/src/ui/theme.css`의 `@font-face`로 쓴다. [CREDITS](../CREDITS.md)에 기록했다 |
 | 방 생성 창 캐릭터 전신 | 직접 제작 3D 전신 `avatar-figure.ts`(코드 도형, 개발자 B가 로비·꾸미기 창용으로 만든 것). WebGL을 쓸 수 없으면 2D 얼굴 `AvatarFace`로 대신 | 해당 없음(직접 제작) | [DEC-074](../DECISIONS.md#결정-색인)(DEC-072 ④·DEC-073의 2D `AvatarFullBody` 대체), [IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용). 인게임 장면은 상반신 유지([DEC-059](../DECISIONS.md#결정-색인)) |
-| 로그인·로비·방 생성 배경 일러스트(L 세트) | 사용자가 직접 만든 이미지. `packages/client/public/images/login-bg.webp`(1536×864, 약 212KB, 원본 PNG에서 변환) | 해당 없음(직접 제작) | [DEC-070](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인). 직접 제작이라 CREDITS에 적지 않는다. 400KB 이하 목표를 지켰다([IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용) 첫 PR) |
+| 로그인·로비·방 생성 배경 일러스트(L 세트) | 사용자가 직접 만든 이미지. `packages/client/public/images/login-bg.webp`(1536×864, 약 188KB, 사용자가 2026-11-04에 교체한 그림의 PNG에서 변환) | 해당 없음(직접 제작) | [DEC-070](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인). 직접 제작이라 CREDITS에 적지 않는다. 400KB 이하 목표를 지켰다([IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용) 첫 PR) |
 
 ### 라이선스 기록
 
