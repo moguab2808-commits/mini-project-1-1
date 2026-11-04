@@ -45,7 +45,7 @@ export const HAZARD_HINTS: Record<HazardKind, string> = {
   wind: '자동으로 발동해요',
   magnet: '판 위에 놓으면 지나가는 알이 끌려가요',
   gravity_zone: '구역을 지나는 알이 정한 방향으로 미끄러져요 (R로 방향 바꾸기)',
-  ice_floor: '판 전체가 미끄러워져요 (턴당 1회)',
+  ice_floor: '판 위 원 안이 미끄러워져요 (턴당 1회)',
   decoy: '내 알 하나를 골라 허상 2개와 섞어요 (턴당 1회)',
   fake_wall: '벽 3개를 세우지만 진짜는 1개뿐이에요',
   heavy_stones: '내 알이 무거워져 덜 밀려요 (턴당 1회)',

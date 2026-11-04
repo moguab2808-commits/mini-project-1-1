@@ -583,7 +583,7 @@ export function SettingsModal({
 
 export function RulesModal({ onClose }: { onClose: () => void }) {
   return (
-    <FloatingWindow title="알까기 바 규칙" onClose={onClose} wide>
+    <FloatingWindow title="증강 알까기 규칙" onClose={onClose} wide>
       <div className="rules">
         <h3>조작</h3>
         <ul>

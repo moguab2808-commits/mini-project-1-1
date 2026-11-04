@@ -1,4 +1,4 @@
-// 설치물(벽·끈끈이·추가 위치형 7종) 배치 가능 판정. 권한 측(`Game.useHazard`)과 클라이언트 미리보기·AI가
+// 설치물(벽·끈끈이·추가 위치형 8종) 배치 가능 판정. 권한 측(`Game.useHazard`)과 클라이언트 미리보기·AI가
 // 같은 기하 조건을 쓰도록 한 곳에 둔다. 순수 함수이며 상태를 바꾸지 않는다.
 // 규칙: docs/design/GAME.md "추가 방해요소 10종과 턴 교체"의 공통 규칙(DEC-057).
 import {
@@ -33,7 +33,7 @@ export interface PlacementWorld {
   stones: ReadonlyArray<{ x: number; y: number }>;
   walls: ReadonlyArray<Obb>;
   stickies: ReadonlyArray<PlacementCircle>;
-  /** 벽·끈끈이 밖의 설치물(자석·중력 구역·방향 반전·폭탄·구멍·이동 장애물 경로) 차지 영역 */
+  /** 벽·끈끈이 밖의 설치물(자석·중력 구역·미끄럼 장판·방향 반전·폭탄·구멍·이동 장애물 경로) 차지 영역 */
   others?: ReadonlyArray<Footprint>;
 }
 
@@ -41,6 +41,7 @@ export interface PlacementWorld {
 export const INSTALL_KINDS = [
   'wall',
   'sticky',
+  'ice_floor',
   'magnet',
   'gravity_zone',
   'fake_wall',
@@ -196,6 +197,8 @@ export function installFootprints(
       return [{ type: 'obb', obb: makeWall(x, y, orientation) }];
     case 'sticky':
       return [circle(x, y, T.stickyDiameter / 2)];
+    case 'ice_floor':
+      return [circle(x, y, T.iceFloorDiameter / 2)];
     case 'magnet':
       return [circle(x, y, T.magnetRadius)];
     case 'reverse_zone':
@@ -230,6 +233,9 @@ export function effectFootprint(
     }
     case 'sticky':
       return circle(x, y, T.stickyDiameter / 2);
+    case 'ice_floor':
+      // 미끄럼 장판은 다른 설치물과 겹쳐도 된다(DEC-075). 다른 설치물의 배치를 막지 않는다
+      return null;
     case 'magnet':
       return circle(x, y, T.magnetRadius);
     case 'reverse_zone':
@@ -271,8 +277,16 @@ function existingFootprints(world: PlacementWorld): Footprint[] {
   ];
 }
 
-/** 차지 영역들이 판 안이고 다른 설치물과 겹치지 않으며, 필요하면 알과도 겹치지 않는가 */
-function footprintsPlaceable(fs: Footprint[], world: PlacementWorld, noStones: boolean): boolean {
+/**
+ * 차지 영역들이 판 안이고 다른 설치물과 겹치지 않으며, 필요하면 알과도 겹치지 않는가.
+ * `overlapOk`면 다른 설치물과의 겹침은 보지 않는다(미끄럼 장판, DEC-075)
+ */
+function footprintsPlaceable(
+  fs: Footprint[],
+  world: PlacementWorld,
+  noStones: boolean,
+  overlapOk = false,
+): boolean {
   if (!fs.every((f) => footprintInside(world.board, f))) return false;
   if (noStones) {
     const R = PHYSICS.stoneRadius;
@@ -280,6 +294,7 @@ function footprintsPlaceable(fs: Footprint[], world: PlacementWorld, noStones: b
       return false;
     }
   }
+  if (overlapOk) return true;
   const existing = existingFootprints(world);
   return !fs.some((f) => existing.some((o) => footprintsOverlap(f, o)));
 }
@@ -306,7 +321,12 @@ export function isPlacementValid(
   world: PlacementWorld,
 ): boolean {
   if (snapsToWallGrid(kind) && (!isOnWallGrid(x) || !isOnWallGrid(y))) return false;
-  return footprintsPlaceable(installFootprints(kind, x, y, orientation), world, blocksStones(kind));
+  return footprintsPlaceable(
+    installFootprints(kind, x, y, orientation),
+    world,
+    blocksStones(kind),
+    kind === 'ice_floor',
+  );
 }
 
 /** 공개 뷰의 효과 `params`(x, y, angleDeg 또는 orientation)로 벽 직사각형을 복원한다. */

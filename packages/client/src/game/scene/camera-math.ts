@@ -118,8 +118,11 @@ export function stunRoll(progress: number): number {
   return Math.PI * 2 * p * p * (3 - 2 * p);
 }
 
-/** default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°) */
-export const EYE_LIFT = { up: 16, back: 24, fovLess: 4 } as const;
+/**
+ * default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°, 음수면 넓힘),
+ * 수평에서 아래로 숙이는 각(°). 위치는 낮게 두고 판이 보이도록 27° 숙인다(DEC-071 ④, 2026-11-04 사용자 확인).
+ */
+export const EYE_LIFT = { up: 8, back: 24, fovLess: -4, pitchDownDeg: 27 } as const;
 
 /** 좁은 화면에서는 판이 잘리지 않게 뒤로 물러난다 */
 export function aspectDistanceScale(aspect: number): number {

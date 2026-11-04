@@ -54,8 +54,8 @@ export interface World {
   magnets?: StickyArea[];
   /** 중력 구역 정사각형과 미끄러지는 방향 단위 벡터 */
   gravityZones?: Array<{ zone: Obb; dx: number; dy: number }>;
-  /** 지면 감속 배율(미끄럼 장판). 끈끈이 추가 감속에는 곱하지 않는다 */
-  frictionScale?: number;
+  /** 미끄럼 장판 원. 중심이 안에 있는 지면 알의 지면 감속에 배율을 곱한다(끈끈이 추가 감속에는 곱하지 않는다) */
+  iceAreas?: StickyArea[];
   reverseZones?: ReverseZone[];
   mines?: Mine[];
   pits?: StickyArea[];
@@ -98,7 +98,7 @@ export function stepPhysics(w: World): number[] {
       .filter((s) => !s.airborne && Math.hypot(s.vx, s.vy) >= PHYSICS.settleSpeed)
       .map((s) => s.id),
   );
-  const friction = PHYSICS.friction * (w.frictionScale ?? 1);
+  const ice = w.iceAreas ?? [];
 
   // 1. 가속(자석·중력 구역)·감속·중력, 2. 이동
   for (const s of live) {
@@ -145,7 +145,8 @@ export function stepPhysics(w: World): number[] {
     } else {
       const sp = Math.hypot(s.vx, s.vy);
       if (sp > 0) {
-        let decel: number = friction;
+        const onIce = ice.some((a) => Math.hypot(s.x - a.cx, s.y - a.cy) <= a.radius);
+        let decel: number = PHYSICS.friction * (onIce ? HAZARD_TUNING.iceFrictionMultiplier : 1);
         for (const a of w.stickies) {
           if (Math.hypot(s.x - a.cx, s.y - a.cy) <= a.radius) {
             decel += HAZARD_TUNING.stickyExtraFriction;

@@ -18,6 +18,7 @@ import {
   SRGBColorSpace,
   type BufferGeometry,
 } from 'three';
+import { flatArrowGeometry } from './arrow-geometry.ts';
 import type { AimRenderState, PlacementRenderState } from './scene-contract.ts';
 import { fallScale, type FallState } from './fall.ts';
 import { powerColor, STONE_FLATNESS } from './scene-math.ts';
@@ -425,8 +426,16 @@ export class AimLayer {
     );
     squareGeo.rotateX(-Math.PI / 2);
     this.previewSquare = new Mesh(squareGeo, this.previewMat);
-    this.previewArrow = new Mesh(g(new ConeGeometry(1.8, 4, 3)), this.lineMat);
-    this.previewArrow.rotation.z = -Math.PI / 2;
+    // 방향 화살표는 판 평면 위에 눕혀 그린다(DEC-071 ①)
+    this.previewArrow = new Mesh(
+      g(
+        flatArrowGeometry(
+          HAZARD_TUNING.gravityZoneSize * 0.62,
+          HAZARD_TUNING.gravityZoneSize * 0.36,
+        ),
+      ),
+      this.lineMat,
+    );
     const trackGeo = g(
       new PlaneGeometry(
         2 * HAZARD_TUNING.movingWallAmplitude + HAZARD_TUNING.wallThickness,
@@ -545,8 +554,8 @@ export class AimLayer {
           this.previewSquare.position.set(x, 0.08, -y);
           const dir = placement.directionRad ?? 0;
           this.previewArrow.visible = true;
-          this.previewArrow.position.set(x, 0.6, -y);
-          this.previewArrow.rotation.set(0, dir, -Math.PI / 2);
+          this.previewArrow.position.set(x, 0.12, -y);
+          this.previewArrow.rotation.set(0, dir, 0);
           break;
         }
         case 'decoy':
@@ -554,6 +563,9 @@ export class AimLayer {
           break;
         case 'sticky':
           this.showCircle(x, y, T.stickyDiameter / 2);
+          break;
+        case 'ice_floor':
+          this.showCircle(x, y, T.iceFloorDiameter / 2);
           break;
         case 'magnet':
           this.showCircle(x, y, T.magnetRadius);
