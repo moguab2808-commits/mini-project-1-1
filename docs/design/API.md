@@ -263,13 +263,13 @@ sequenceDiagram
 | --- | --- |
 | 교체 지급 | 라운드가 바뀔 때마다(두 좌석이 한 번씩 쏜 뒤, [DEC-067](../DECISIONS.md#결정-색인)) 두 좌석에 `hazard:granted`를 보낸다. `{ gameId, hazardInstanceId, kind, round, turnId, replaced }`로 `turnId`(교체 뒤 새 턴)를 더한다. 순서는 [이벤트 순서](#이벤트-순서) 규칙 3의 라운드 교체 지급과 같다(경기 종료 턴 제외) |
 | `hazard:use.target` | 종류별로 아래 형식만 받고 그 밖의 필드·누락은 `INVALID_INPUT`이다. 좌표는 판 좌표계 cm |
-| `magnet`·`reverse_zone`·`mine`·`pit` | `{ x, y }` |
+| `magnet`·`reverse_zone`·`mine`·`pit`·`ice_floor` | `{ x, y }`. `ice_floor`는 [DEC-071](../DECISIONS.md#결정-색인)로 설치형이 됐다 |
 | `gravity_zone` | `{ x, y, directionRad }`. `directionRad`는 판 좌표계 라디안이며 서버가 45° 단위로 반올림한다([DEC-058](../DECISIONS.md#결정-색인)) |
 | `fake_wall`·`moving_wall` | `{ x, y, orientation }`. 벽 격자에 스냅한다. `fake_wall`은 지정 위치에 진짜 벽, 무작위 위치에 가짜 두 벽을 같은 시각으로 생성하며 `orientation`은 세 벽의 방향([DEC-066](../DECISIONS.md#결정-색인)), `moving_wall`은 왕복 축이다 |
 | `decoy` | `{ stoneId }`. 내 멈춘 지면 알의 id |
-| `ice_floor`·`heavy_stones` | `target` 없음 |
+| `heavy_stones` | `target` 없음 |
 | 거부 | 판 밖·다른 설치물과 겹침·알과 겹침(벽·가짜벽·폭탄·구멍)·내 알이 아니거나 움직이는 알(분신술)·허상 자리 부족은 `HAZARD_INVALID_TARGET`. 턴당 1회형의 두 번째 사용은 `HAZARD_NOT_USABLE`. 거부는 상태·난수를 바꾸지 않는다 |
-| `hazard:triggered.params` | `magnet`·`reverse_zone`·`mine`·`pit`은 `{ x, y }`, `gravity_zone`은 `{ x, y, directionRad, angleDeg }`(`angleDeg`는 판 돌리기로 돈 정사각 구역의 각, DEC-066 확정), `moving_wall`은 `{ x, y, orientation, angleDeg }`(왕복 위치는 `startsAtMs`와 `shared` 수치로 클라이언트가 계산), `fake_wall`·`wall`은 벽마다 기존 벽과 같은 `{ x, y, orientation, angleDeg }`, `mine`의 `end`에는 터졌는지 `exploded`를 더한다 |
+| `hazard:triggered.params` | `magnet`·`reverse_zone`·`mine`·`pit`·`ice_floor`는 `{ x, y }`, `gravity_zone`은 `{ x, y, directionRad, angleDeg }`(`angleDeg`는 판 돌리기로 돈 정사각 구역의 각, DEC-066 확정), `moving_wall`은 `{ x, y, orientation, angleDeg }`(왕복 위치는 `startsAtMs`와 `shared` 수치로 클라이언트가 계산), `fake_wall`·`wall`은 벽마다 기존 벽과 같은 `{ x, y, orientation, angleDeg }`, `mine`의 `end`에는 터졌는지 `exploded`를 더한다 |
 | 속임수형 발동 안내 | `fake_wall`: 시전자·상대 모두 같은 `kind: wall` 안내 3개(`real` 없음, 좌표순, [DEC-058](../DECISIONS.md#결정-색인)). `decoy`·`heavy_stones`: 시전자에게만 보내고 상대에게는 보내지 않는다. 나머지 7종은 양쪽에 같게 보낸다 |
 | `GameView` | 공개 필드 `stoneCounts: [n0, n1]`(진짜 남은 알 수)를 더한다([DEC-058](../DECISIONS.md#결정-색인)). 분신술 중 진짜 알은 원래 id를 유지하고 허상은 새 id를 받는다. 상대 뷰의 `stones`에는 진짜 알과 허상 2개가 함께 들어가고, 시전자 뷰에는 허상을 `decoys: [{ decoyId, x, y }]`로 따로 담는다. 가짜벽은 양쪽 모두 `wall` 효과 3개(`real` 없음)다. `heavy_stones`·`decoy` 효과는 시전자 뷰에만 넣는다 |
 | `private` | 변화 없음. 턴당 1회형은 `fatigueGauge: null`·`cooldownEndsAtMs: null`이고 사용 뒤 `usable: false`다 |
