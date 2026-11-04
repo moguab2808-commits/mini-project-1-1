@@ -74,9 +74,10 @@
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
 | [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 진행 중 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 | [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
-| [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 진행 중 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
+| [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 리뷰 중 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
 | [IMPL-021](#impl-021-인게임-hud결과-화풍) | 인게임 HUD·결과 화풍 | P1 | IMPL-019의 첫 PR(공통 기반) | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
+| [IMPL-022](#impl-022-캐릭터-꾸미기-창-3d-미리보기-화풍) | 캐릭터 꾸미기 창 3D 미리보기 화풍 | P2 | IMPL-019 | 예정 | 개발자 B | 미생성 |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -1167,7 +1168,7 @@ Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 ## IMPL-019 L 화풍 화면 적용
 
 우선순위: P1
-상태: 진행 중
+상태: 리뷰 중
 담당: 개발자 B
 의존성: UI-004, IMPL-012
 범위: [DEC-070](DECISIONS.md#결정-색인)·[DEC-072](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)에 따라 [L 한밤의 마법 알까기](https://claude.ai/artifact/PFvjbTKVncmZLbfQAUEBVV) 세트의 화풍과 배치를 로그인·회원등록, 로비(오른쪽 위 프로필 명판·버튼, 방 테마별 지역 4열 방 목록), 방 생성 창(왼쪽 캐릭터 전신 창), 대기실, 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드), 토스트, 부팅·연결 중 화면에 적용한다. 첫 PR로 공통 기반(화풍 파일 `packages/client/src/ui/theme.css`·글꼴·일러스트 WebP)을 먼저 병합해 A·B가 나눠 진행하게 한다([DEC-073](DECISIONS.md#결정-색인)·[DEC-074](DECISIONS.md#결정-색인)). 방 생성 창의 캐릭터 전신은 B가 만든 3D 전신(`avatar-figure.ts`)을 쓰고 WebGL을 쓸 수 없으면 2D 얼굴로 대신한다([DEC-074](DECISIONS.md#결정-색인)). 인게임 HUD·결과창은 [IMPL-021](#impl-021-인게임-hud결과-화풍)이 맡는다. 방 참여 동작([DEC-024](DECISIONS.md#결정-색인))·서버 API는 바꾸지 않는다.
@@ -1175,17 +1176,17 @@ Issue·PR: [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 Issue·PR: [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86)
 
 수용 기준:
-- [ ] (정상) 첫 PR(공통 기반): `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체가 병합됐다. `AvatarFullBody`는 만들지 않는다([DEC-074](DECISIONS.md#결정-색인)).
-- [ ] (정상) 로그인 화면이 일러스트를 배경으로 쓰고, 로그인·회원등록 탭·입력·버튼이 그림 가운데를 가리지 않는다. 기존 검증·안내 문구는 그대로다.
-- [ ] (정상) 로비가 오른쪽 위 프로필 명판(캐릭터·닉네임·전적·승률·환경설정·로그아웃)과 코드 입력·방 생성·즉시 참가 버튼, 새로고침, 방 테마별 지역 4열 방 목록(열마다 대기·전체 수, 열 안 스크롤)을 보인다. 대기 중만 보기 필터는 없다. 방 선택·입장·더블클릭·게임 중 표시·비공개 코드 입력 동작은 그대로다.
-- [ ] (정상) 방 생성 창 왼쪽에 투명 창과 내 캐릭터 3D 전신(`avatar-figure.ts`)이 내 외형으로 보이고 오른쪽 설정·만들기 동작은 그대로다.
-- [ ] (예외) WebGL을 쓸 수 없으면 방 생성 창 왼쪽에 2D 얼굴(`AvatarFace`)이 대신 보이고 방 만들기는 그대로 된다.
-- [ ] (정상) 대기실·플로팅 창·토스트·부팅 화면이 같은 화풍이다.
-- [ ] (예외) 방이 없는 지역 열은 빈 상태 문구를 보이고, 한 지역에 방이 많으면 그 열만 스크롤된다. 창 폭 1100px 미만이면 지역 열이 2×2로 접히고 버튼·명판이 겹치지 않는다.
-- [ ] (정상) `npm run build`·`npm test`·린트가 통과하고 두 계정 브라우저로 로그인→로비→방 생성→대기실 흐름을 확인했다.
+- [x] (정상) 첫 PR(공통 기반): `theme.css`의 변수·클래스(DEC-072 ②), Jua·Black Han Sans woff2 직접 제공과 CREDITS 기록, 일러스트 WebP(400KB 이하 목표) 교체가 병합됐다. `AvatarFullBody`는 만들지 않는다([DEC-074](DECISIONS.md#결정-색인)).
+- [x] (정상) 로그인 화면이 일러스트를 배경으로 쓰고, 로그인·회원등록 탭·입력·버튼이 그림 가운데를 가리지 않는다. 기존 검증·안내 문구는 그대로다.
+- [x] (정상) 로비가 오른쪽 위 프로필 명판(캐릭터·닉네임·전적·승률·환경설정·로그아웃)과 코드 입력·방 생성·즉시 참가 버튼, 새로고침, 방 테마별 지역 4열 방 목록(열마다 대기·전체 수, 열 안 스크롤)을 보인다. 대기 중만 보기 필터는 없다. 방 선택·입장·더블클릭·게임 중 표시·비공개 코드 입력 동작은 그대로다.
+- [x] (정상) 방 생성 창 왼쪽에 투명 창과 내 캐릭터 3D 전신(`avatar-figure.ts`)이 내 외형으로 보이고 오른쪽 설정·만들기 동작은 그대로다.
+- [x] (예외) WebGL을 쓸 수 없으면 방 생성 창 왼쪽에 2D 얼굴(`AvatarFace`)이 대신 보이고 방 만들기는 그대로 된다.
+- [x] (정상) 대기실·플로팅 창·토스트·부팅 화면이 같은 화풍이다.
+- [x] (예외) 방이 없는 지역 열은 빈 상태 문구를 보이고, 한 지역에 방이 많으면 그 열만 스크롤된다. 창 폭 1100px 미만이면 지역 열이 2×2로 접히고 버튼·명판이 겹치지 않는다.
+- [x] (정상) `npm run build`·`npm test`·린트가 통과하고 두 계정 브라우저로 로그인→로비→방 생성→대기실 흐름을 확인했다.
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [공통 기반](worklogs/2026-11-04.md#impl-019-공통-기반-첫-pr-themecss글꼴일러스트)·[로그인 화면](worklogs/2026-11-04.md#impl-019-로그인회원등록부팅-화면-l-화풍)·[로비 화면](worklogs/2026-11-04.md#impl-019-로비-화면-l-화풍-오른쪽-위-명판테마별-지역-4열)·[방 생성 창](worklogs/2026-11-04.md#impl-019-방-생성-창-l-화풍-왼쪽-3d-전신)(진행 중, 나머지 화면은 미작성)
+검증 근거: [공통 기반](worklogs/2026-11-04.md#impl-019-공통-기반-첫-pr-themecss글꼴일러스트)·[로그인 화면](worklogs/2026-11-04.md#impl-019-로그인회원등록부팅-화면-l-화풍)·[로비 화면](worklogs/2026-11-04.md#impl-019-로비-화면-l-화풍-오른쪽-위-명판테마별-지역-4열)·[방 생성 창](worklogs/2026-11-04.md#impl-019-방-생성-창-l-화풍-왼쪽-3d-전신)·[대기실·플로팅 창·토스트](worklogs/2026-11-04.md#impl-019-대기실플로팅-창토스트-l-화풍)(리뷰 중. 두 계정 브라우저 흐름은 사용자 확인)
 
 ## IMPL-020 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정
 
@@ -1225,3 +1226,20 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 - [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다(PR #91).
 
 검증 근거: [2026-11-04 worklog IMPL-021](worklogs/2026-11-04.md#impl-021-인게임-hud결과-화풍)
+
+## IMPL-022 캐릭터 꾸미기 창 3D 미리보기 화풍
+
+우선순위: P2
+상태: 예정
+담당: 개발자 B
+의존성: [IMPL-019](#impl-019-l-화풍-화면-적용), [DEC-076](DECISIONS.md#결정-색인)
+범위: [DEC-076](DECISIONS.md#결정-색인)에 따라 캐릭터 꾸미기 창의 3D 미리보기를 방 생성 창과 같은 **3D 전신**(`avatar-figure.ts`, `AvatarFigureView`)으로 교체하고 배경을 L 화풍(오목한 칸 안의 투명 배경)에 맞춘다. 지금 미리보기(`packages/client/src/avatar/AvatarPreview.tsx`)는 옛 상반신 장면이라 어두운 갈색 배경이 남아 새 창과 어울리지 않는다([worklog 한계](worklogs/2026-11-04.md#impl-019-대기실플로팅-창토스트-l-화풍)). 인게임 장면의 상반신은 바꾸지 않는다.
+관련 문서: [PRD 캐릭터 변경](PRD.md#캐릭터-변경) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
+Issue·PR: 미생성
+
+수용 기준:
+- [ ] (정상) 꾸미기 창 왼쪽 미리보기가 방 생성 창과 같은 3D 전신이고 L 화풍에 맞는 배경으로 보이며, 항목을 바꾸면 바로 반영된다.
+- [ ] (예외) WebGL을 쓸 수 없으면 2D 얼굴로 대신한다(현재 동작 유지).
+- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+
+검증 근거: 미작성

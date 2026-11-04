@@ -35,46 +35,73 @@ input {
   font: inherit;
 }
 
-/* 공통 컨트롤 */
+/* 공통 컨트롤(플로팅 창·대기실): L 화풍 광택 버튼과 입력 칸(DEC-070) */
 .btn {
-  min-height: 40px;
-  padding: 0 16px;
-  border: 2px solid var(--cream);
-  border-radius: 10px;
-  background: var(--wood-light);
-  color: var(--cream);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--l-r-btn);
+  color: var(--l-wood-deep);
+  font-family: var(--l-font-title);
+  font-size: 17px;
   cursor: pointer;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  box-shadow:
+    inset 0 4px 0 #fff,
+    inset 0 -5px 0 rgba(180, 110, 40, 0.3),
+    0 5px 0 #9a6a30;
 }
 .btn:hover:not(:disabled) {
-  background: #6d513c;
+  filter: brightness(1.05);
+}
+.btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 .btn:disabled {
   opacity: 0.5;
-  cursor: default;
+  cursor: not-allowed;
 }
 .btn-primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-.btn-primary:hover:not(:disabled) {
-  background: #f6c473;
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(90, 30, 0, 0.55);
+  background: linear-gradient(180deg, #ffd76a 0%, #ffa431 55%, #f07a1a 100%);
+  box-shadow:
+    inset 0 5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -6px 0 rgba(150, 60, 0, 0.35),
+    0 6px 0 #9a4a14,
+    0 12px 22px rgba(80, 30, 0, 0.45);
 }
 .btn-small {
   min-height: 32px;
   padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
 }
 .icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--cream);
+  border-radius: 12px;
+  color: var(--l-wood-deep);
+  font-size: 16px;
   cursor: pointer;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  box-shadow:
+    inset 0 3px 0 #fff,
+    0 3px 0 #9a6a30;
 }
 .icon-btn:hover {
-  background: var(--wood-light);
+  filter: brightness(1.05);
+}
+.icon-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
 }
 .form {
   display: flex;
@@ -84,47 +111,56 @@ input {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 .field > span {
-  color: var(--sub);
+  color: var(--l-cream-text);
   font-size: 14px;
+  text-shadow: 0 1px 0 var(--l-wood-deep);
 }
 .field input:not([type='range']) {
-  height: 40px;
-  padding: 0 12px;
-  border: 2px solid var(--wood-light);
-  border-radius: 10px;
-  background: var(--cream);
-  color: var(--ink);
+  height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--l-r-input);
+  background: rgba(255, 247, 234, 0.92);
+  color: var(--l-ink);
+  font-family: var(--l-font);
+  font-size: 18px;
+  box-shadow:
+    inset 0 3px 0 rgba(120, 60, 20, 0.15),
+    0 0 0 2px var(--l-gold-edge);
+}
+.field input[type='range'] {
+  accent-color: #ffa431;
 }
 .field input:focus,
 .code-cell:focus {
-  outline: 3px solid var(--accent);
-  outline-offset: 1px;
+  outline: 3px solid var(--l-focus);
+  outline-offset: 2px;
 }
 .hint {
-  color: var(--sub);
+  color: var(--l-cream-text);
   font-size: 14px;
 }
 .msg {
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 15px;
 }
 .msg-error {
-  background: rgba(217, 105, 79, 0.2);
-  color: #ffb4a3;
+  background: rgba(60, 20, 8, 0.75);
+  color: #ffd0c2;
 }
 .msg-info {
-  background: rgba(240, 181, 83, 0.18);
-  color: var(--accent);
+  background: rgba(60, 26, 8, 0.75);
+  color: var(--l-title);
 }
 .masked {
   letter-spacing: 2px;
 }
 
-/* 토스트 */
+/* 토스트: 반투명 원목 말풍선에 금빛 테두리 */
 .toast-layer {
   position: fixed;
   top: 16px;
@@ -137,12 +173,21 @@ input {
 }
 .toast {
   max-width: min(480px, calc(100vw - 32px));
-  padding: 10px 18px;
-  border: 2px solid var(--cream);
-  border-radius: 12px;
-  background: var(--ink);
-  color: var(--cream);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  padding: 12px 22px;
+  border-radius: 18px;
+  color: var(--l-title);
+  font-family: var(--l-font);
+  font-size: 16px;
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+  background: linear-gradient(180deg, rgba(185, 122, 69, 0.94), rgba(122, 68, 33, 0.96));
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 225, 175, 0.6),
+    inset 0 -4px 0 rgba(60, 24, 6, 0.35),
+    0 0 0 3px var(--l-gold-edge),
+    0 0 24px var(--l-glow),
+    0 10px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* 부팅·로그인: L 세트 일러스트를 배경으로 쓴다(DEC-070). 그림 가운데는 비워 두고 로고는 위, 창은 아래에 둔다. */
@@ -301,27 +346,179 @@ input {
   }
 }
 
-/* 대기실 (후속 PR에서 L 화풍으로 바꾼다) */
+/* 대기실(DEC-070): 블러 처리한 일러스트 배경 위에 반투명 원목 창을 둔다. 방장은 2D 얼굴이다. */
 .waiting-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-sizing: border-box;
   min-height: 100dvh;
+  padding: 26px 30px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  color: #fff;
+  font-family: var(--l-font);
+  background: #2a140a;
+}
+.waiting-page::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  z-index: -1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(40, 16, 4, 0.55) 0%,
+      rgba(40, 16, 4, 0.15) 40%,
+      rgba(30, 12, 4, 0.7) 100%
+    ),
+    url('/images/login-bg.webp') center / cover no-repeat;
+  filter: blur(6px);
+}
+.waiting-top {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+}
+.waiting-logo {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.waiting-ribbon {
+  font-size: 17px;
+}
+.waiting-leave {
+  height: 52px;
+  padding: 0 24px;
+  font-size: 18px;
+}
+.waiting-card {
+  width: min(560px, 100%);
+  margin: auto 0;
+  box-sizing: border-box;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.waiting-title {
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+  font-family: var(--l-font-title);
+  font-weight: 400;
+  font-size: 30px;
+  color: var(--l-title);
+  text-shadow:
+    2px 2px 0 var(--l-wood-deep),
+    -2px 2px 0 var(--l-wood-deep),
+    0 3px 0 var(--l-wood-deep),
+    0 0 14px rgba(255, 190, 90, 0.6);
+}
+.waiting-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.waiting-info > div {
+  min-width: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 16px;
-  box-sizing: border-box;
+  gap: 2px;
+  min-height: 70px;
 }
-.waiting-card {
-  width: min(420px, 100%);
-  padding: 24px;
-  box-sizing: border-box;
-  border: 3px solid var(--wood-light);
-  border-radius: 16px;
-  background: var(--wood);
+.waiting-info dt {
+  color: var(--l-cream-text);
+  font-size: 13px;
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+}
+.waiting-info dd {
+  margin: 0;
+  font-family: var(--l-font-title);
+  font-size: 20px;
+  text-shadow: 0 2px 0 var(--l-wood-deep);
+}
+/* 방 테마 칸: 로비 지역 그림을 깐다 */
+.waiting-info-theme {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--l-r-well);
+  box-shadow: 0 0 0 2px rgba(255, 214, 140, 0.55);
+}
+.waiting-info-theme .region-art {
+  z-index: 0;
+}
+.waiting-info-theme dt,
+.waiting-info-theme dd {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  text-shadow:
+    0 2px 0 rgba(40, 16, 4, 0.85),
+    0 0 8px rgba(40, 16, 4, 0.7);
+}
+.waiting-host {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+}
+.waiting-host-text {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 2px;
+}
+.waiting-host-name {
+  overflow-wrap: anywhere;
+  font-family: var(--l-font-title);
+  font-weight: 400;
+  font-size: 22px;
+  text-shadow: 0 2px 0 var(--l-wood-deep);
+}
+.waiting-host .room-host-record {
+  color: var(--l-cream-text);
+}
+.waiting-status {
+  align-self: center;
+  margin: 0;
+  font-size: 18px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .waiting-status {
+    animation: waiting-pulse 1.8s ease-in-out infinite;
+  }
+}
+@keyframes waiting-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+@media (max-width: 640px) {
+  .waiting-page {
+    padding: 18px 16px 28px;
+  }
+  .waiting-logo {
+    font-size: 32px;
+  }
+  .waiting-info {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* 로비: 위쪽 줄(로고·새로고침·버튼·오른쪽 위 프로필 명판)과 방 테마별 지역 4열 방 목록(DEC-070). 배경은 로그인과 같은 일러스트다. */
@@ -1008,41 +1205,11 @@ input {
   background: rgba(40, 16, 4, 0.6);
 }
 
-/* 방 코드: 금빛 칸 */
+/* 방 코드 칸은 공통 규칙(.code-box)을 쓰고 설정 창 안에서만 한 줄로 둔다 */
 .create-form .code-box {
   min-width: 0;
-  justify-content: space-between;
   flex-wrap: nowrap;
   padding: 0 16px;
-  border: 0;
-  border-radius: 16px;
-  color: #6a3a08;
-  background:
-    radial-gradient(ellipse 80% 45% at 50% 10%, rgba(255, 255, 255, 0.85), transparent 70%),
-    linear-gradient(180deg, #ffe58a, #e9aa22);
-  box-shadow:
-    inset 0 -4px 0 rgba(120, 60, 0, 0.3),
-    0 4px 0 #8a5208,
-    0 0 16px rgba(255, 200, 60, 0.45);
-}
-.create-form .code-box .hint {
-  color: #6a3a08;
-  font-size: 14px;
-}
-.create-form .code-box .code-text {
-  color: #6a3a08;
-  font-family: var(--l-font-title);
-  font-size: 26px;
-  letter-spacing: 5px;
-}
-.create-form .code-box .btn {
-  min-height: 32px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
-  color: var(--l-wood-deep);
-  box-shadow: 0 3px 0 #9a6a30;
 }
 .create-form .create-pair-code .code-box {
   min-height: 56px;
@@ -1060,10 +1227,6 @@ input {
   margin: 0;
   color: var(--l-cream-text);
   font-size: 14px;
-}
-.create-form .msg-error {
-  background: rgba(60, 20, 8, 0.75);
-  color: #ffd0c2;
 }
 .board-preview {
   width: 24px;
@@ -1096,7 +1259,7 @@ input {
   }
 }
 
-/* 플로팅 창 */
+/* 플로팅 창(캐릭터 꾸미기·환경설정·코드 입력·규칙 카드): 로비 위에 뜨는 반투명 원목 창(DEC-070) */
 .float-layer {
   position: fixed;
   inset: 0;
@@ -1109,44 +1272,86 @@ input {
 }
 .float-window {
   pointer-events: auto;
-  width: min(380px, 100%);
+  width: min(420px, 100%);
   max-height: calc(100dvh - 32px);
   overflow: auto;
   box-sizing: border-box;
-  border: 3px solid var(--accent);
-  border-radius: 16px;
-  background: var(--wood);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  border-radius: var(--l-r-tray);
+  color: #fff;
+  font-family: var(--l-font);
+  background: linear-gradient(180deg, rgba(185, 122, 69, 0.93), rgba(122, 68, 33, 0.95));
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 225, 175, 0.6),
+    inset 0 -5px 0 rgba(60, 24, 6, 0.35),
+    0 0 0 3px var(--l-gold-edge),
+    0 0 34px var(--l-glow),
+    0 18px 40px rgba(0, 0, 0, 0.5);
 }
 .float-window-wide {
-  width: min(480px, 100%);
+  width: min(520px, 100%);
+}
+.float-window:has(.avatar-editor) {
+  width: min(780px, 100%);
 }
 .float-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px 10px 18px;
-  border-bottom: 2px solid var(--wood-light);
+  padding: 14px 16px 12px 22px;
+  border-bottom: 2px solid rgba(255, 214, 140, 0.35);
 }
 .float-head h2 {
-  font-size: 20px;
+  margin: 0;
+  font-family: var(--l-font-title);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--l-title);
+  text-shadow:
+    2px 2px 0 var(--l-wood-deep),
+    -2px 2px 0 var(--l-wood-deep),
+    0 3px 0 var(--l-wood-deep);
 }
 .float-body {
-  padding: 16px 18px 18px;
+  padding: 16px 20px 22px;
 }
+
+/* 방 코드 칸: 금빛(방 생성 창·대기실 공통) */
 .code-box {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 10px 12px;
-  border: 2px dashed var(--wood-light);
-  border-radius: 10px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 16px;
+  color: #6a3a08;
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 10%, rgba(255, 255, 255, 0.85), transparent 70%),
+    linear-gradient(180deg, #ffe58a, #e9aa22);
+  box-shadow:
+    inset 0 -4px 0 rgba(120, 60, 0, 0.3),
+    0 4px 0 #8a5208,
+    0 0 16px rgba(255, 200, 60, 0.45);
+}
+.code-box .hint {
+  color: #6a3a08;
+  font-size: 14px;
 }
 .code-text {
-  font-size: 24px;
-  letter-spacing: 4px;
-  color: var(--accent);
+  color: #6a3a08;
+  font-family: var(--l-font-title);
+  font-size: 26px;
+  letter-spacing: 5px;
+}
+.code-box .btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  box-shadow: 0 3px 0 #9a6a30;
 }
 .code-cells {
   display: flex;
@@ -1154,20 +1359,23 @@ input {
   gap: 8px;
 }
 .code-cell {
-  width: 44px;
-  height: 52px;
+  width: 46px;
+  height: 56px;
   box-sizing: border-box;
-  border: 2px solid var(--wood-light);
-  border-radius: 10px;
-  background: var(--cream);
-  color: var(--ink);
-  font-size: 24px;
+  border: 0;
+  border-radius: var(--l-r-input);
+  background: rgba(255, 247, 234, 0.92);
+  color: var(--l-ink);
+  font-family: var(--l-font-title);
+  font-size: 26px;
   text-align: center;
   text-transform: uppercase;
+  box-shadow:
+    inset 0 3px 0 rgba(120, 60, 20, 0.15),
+    0 0 0 2px var(--l-gold-edge);
 }
-.float-window:has(.avatar-editor) {
-  width: min(760px, 100%);
-}
+
+/* 캐릭터 꾸미기 */
 .avatar-editor {
   display: grid;
   grid-template-columns: minmax(200px, 1fr) minmax(0, 1.4fr);
@@ -1179,8 +1387,9 @@ input {
   width: 100%;
   height: 100%;
   min-height: 320px;
-  border-radius: 12px;
-  background: #3a2618;
+  border-radius: var(--l-r-well);
+  background: rgba(60, 26, 8, 0.42);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.28);
   cursor: grab;
   touch-action: none;
 }
@@ -1202,21 +1411,31 @@ input {
   gap: 6px;
 }
 .avatar-tab {
-  padding: 6px 10px;
-  border: 2px solid var(--wood-light);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--cream);
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--l-wood-deep);
   font: inherit;
+  font-size: 15px;
   cursor: pointer;
+  background: rgba(255, 247, 234, 0.88);
+  box-shadow:
+    inset 0 3px 0 #fff,
+    0 3px 0 rgba(122, 68, 33, 0.8);
 }
 .avatar-tab:hover {
-  border-color: #8a6a4d;
+  filter: brightness(1.05);
+}
+.avatar-tab:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
 }
 .avatar-tab-on {
-  border-color: var(--accent);
-  background: #4a3626;
-  color: var(--accent);
+  color: #4a1e04;
+  background: linear-gradient(180deg, #ffd76a, #ffa431 60%, #f07a1a);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.55),
+    0 4px 0 #9a4a14;
 }
 .avatar-choices {
   display: grid;
@@ -1228,10 +1447,13 @@ input {
   align-items: center;
   justify-content: center;
   padding: 6px 2px;
-  border: 3px solid var(--wood-light);
-  border-radius: 12px;
-  background: transparent;
+  border: 0;
+  border-radius: 14px;
   cursor: pointer;
+  background: rgba(255, 247, 234, 0.88);
+  box-shadow:
+    inset 0 3px 0 #fff,
+    0 3px 0 rgba(122, 68, 33, 0.8);
 }
 .avatar-choice svg {
   width: 100%;
@@ -1239,16 +1461,22 @@ input {
   height: auto;
 }
 .avatar-choice:hover:not(:disabled) {
-  border-color: #8a6a4d;
+  filter: brightness(1.05);
+}
+.avatar-choice:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
 }
 .avatar-choice-on {
-  border-color: var(--accent);
-  background: #4a3626;
+  box-shadow:
+    inset 0 3px 0 #fff,
+    0 0 0 3px var(--l-gold),
+    0 0 14px rgba(255, 200, 90, 0.75);
 }
 .avatar-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
   margin-top: auto;
 }
 @media (max-width: 640px) {
@@ -1260,12 +1488,18 @@ input {
     height: 220px;
   }
 }
+
+/* 규칙 카드 */
 .rules h3 {
-  margin: 12px 0 4px;
-  color: var(--accent);
-  font-size: 17px;
+  margin: 14px 0 6px;
+  color: var(--l-gold);
+  font-family: var(--l-font-title);
+  font-weight: 400;
+  font-size: 18px;
+  text-shadow: 0 2px 0 var(--l-wood-deep);
 }
 .rules ul {
+  margin: 0;
   padding-left: 18px;
   list-style: disc;
   display: flex;
@@ -1276,31 +1510,4 @@ input {
 .rules .btn {
   margin-top: 16px;
   width: 100%;
-}
-
-/* 대기실 */
-.waiting-title {
-  font-size: 26px;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-.waiting-info {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-}
-.waiting-info dt {
-  color: var(--sub);
-  font-size: 13px;
-}
-.waiting-host {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.waiting-status {
-  text-align: center;
-  color: var(--accent);
-  font-size: 18px;
 }
