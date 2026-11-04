@@ -1,0 +1,1095 @@
+{
+  "at": "2026-11-04T05:54:54.040Z",
+  "viewport": {
+    "width": 960,
+    "height": 640
+  },
+  "method": "Unmodified real Worker/SharedWorker; observed transport and normal commands. Scene harness only for static theme/performance comparison.",
+  "errors": [],
+  "themes": [
+    {
+      "theme": "bar",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        116.60000000000014,
+        116.59999999999991,
+        116.79999999999973,
+        133.30000000000018,
+        116.59999999999991,
+        116.70000000000027,
+        116.69999999999982,
+        99.90000000000009,
+        116.69999999999982,
+        116.70000000000027,
+        116.59999999999991,
+        116.79999999999973,
+        116.60000000000036,
+        116.69999999999982,
+        99.90000000000009,
+        133.29999999999973,
+        116.80000000000018,
+        116.5,
+        116.69999999999982,
+        116.69999999999982,
+        100,
+        133.30000000000018,
+        100.10000000000036,
+        116.59999999999945,
+        116.60000000000036,
+        133.39999999999964,
+        116.70000000000073,
+        116.59999999999945,
+        100,
+        100,
+        116.60000000000036,
+        100,
+        116.69999999999982,
+        150,
+        216.60000000000036,
+        450,
+        366.6999999999998,
+        466.6999999999998
+      ],
+      "meanMs": 143.4157894736842,
+      "p95Ms": 450
+    },
+    {
+      "theme": "rooftop",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        283.3000000000002,
+        250,
+        233.29999999999973,
+        266.60000000000036,
+        250,
+        250.09999999999945,
+        233.30000000000018,
+        266.60000000000036,
+        250,
+        233.30000000000018,
+        250,
+        250,
+        250,
+        250,
+        233.39999999999964,
+        249.89999999999964,
+        283.3000000000002,
+        233.30000000000018,
+        233.39999999999964,
+        233.30000000000018,
+        266.6999999999998
+      ],
+      "meanMs": 249.9904761904762,
+      "p95Ms": 283.3000000000002
+    },
+    {
+      "theme": "classroom",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        200.10000000000036,
+        199.89999999999964,
+        216.70000000000027,
+        216.5999999999999,
+        166.69999999999982,
+        150,
+        150,
+        166.70000000000027,
+        199.99999999999955,
+        183.30000000000018,
+        183.30000000000018,
+        200,
+        200,
+        183.30000000000018,
+        183.39999999999964,
+        166.60000000000036,
+        150,
+        166.59999999999945,
+        166.70000000000073,
+        150,
+        150,
+        166.59999999999945,
+        166.69999999999982,
+        233.40000000000055,
+        183.19999999999982,
+        200.10000000000036,
+        216.59999999999945,
+        150
+      ],
+      "meanMs": 180.94642857142858,
+      "p95Ms": 216.70000000000027
+    },
+    {
+      "theme": "beach",
+      "renderer": {
+        "vendor": "Google Inc. (Google)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "samples": [
+        250,
+        283.39999999999964,
+        316.60000000000036,
+        300.0999999999999,
+        299.9000000000001,
+        299.89999999999964,
+        366.6999999999998,
+        250,
+        266.7000000000007,
+        266.59999999999945,
+        283.3000000000002,
+        283.39999999999964,
+        300,
+        266.60000000000036,
+        283.3000000000002,
+        266.6999999999998,
+        249.89999999999964,
+        233.40000000000055
+      ],
+      "meanMs": 281.47222222222223,
+      "p95Ms": 366.6999999999998
+    }
+  ],
+  "local": {
+    "first": {
+      "theme": "beach",
+      "players": [
+        {
+          "seat": 0,
+          "nickname": "플레이어 1",
+          "appearance": {
+            "headShape": 0,
+            "hair": 0,
+            "eyebrows": 0,
+            "eyes": 0,
+            "nose": 0,
+            "lips": 0,
+            "skinTone": 0
+          }
+        },
+        {
+          "seat": 1,
+          "nickname": "플레이어 2",
+          "appearance": {
+            "headShape": 0,
+            "hair": 1,
+            "eyebrows": 0,
+            "eyes": 1,
+            "nose": 0,
+            "lips": 0,
+            "skinTone": 1
+          }
+        }
+      ]
+    },
+    "renderedTwoTabUiSmoke": true,
+    "grantCoverageMode": "Real LocalGameSession and SharedWorker in browser tabs without a WebGL scene; rendered two-tab UI is checked separately above.",
+    "matches": 39,
+    "hazards": [
+      {
+        "kind": "ice_floor",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "gravity_zone",
+        "target": {
+          "x": 4.4,
+          "y": 6.6000000000000005,
+          "directionRad": 1.5707963267948966
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "mine",
+        "target": {
+          "x": 8.8,
+          "y": -8.8
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "sticky",
+        "target": {
+          "x": 2.2,
+          "y": 15.400000000000002
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "magnet",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": -13.200000000000001
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "decoy",
+        "target": {
+          "stoneId": 7
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "bar_speed",
+        "automatic": true,
+        "effects": [
+          "bar_speed",
+          "moving_wall"
+        ]
+      },
+      {
+        "kind": "stun",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "flashlight",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "fake_wall",
+        "target": {
+          "x": 8.8,
+          "y": -13.200000000000001,
+          "orientation": "horizontal"
+        },
+        "result": {
+          "ok": true
+        },
+        "walls": [
+          {
+            "gameId": "local-26",
+            "kind": "wall",
+            "phase": "start",
+            "sourceSeat": 1,
+            "targetSeat": 0,
+            "startsAtMs": 1793771766483,
+            "expiresAtMs": 1793771781483,
+            "params": {
+              "x": 8.8,
+              "y": -13.200000000000001,
+              "orientation": "horizontal",
+              "angleDeg": 0
+            }
+          },
+          {
+            "gameId": "local-26",
+            "kind": "wall",
+            "phase": "start",
+            "sourceSeat": 1,
+            "targetSeat": 0,
+            "startsAtMs": 1793771766483,
+            "expiresAtMs": 1793771781483,
+            "params": {
+              "x": 11,
+              "y": 22,
+              "orientation": "horizontal",
+              "angleDeg": 0
+            }
+          },
+          {
+            "gameId": "local-26",
+            "kind": "wall",
+            "phase": "start",
+            "sourceSeat": 1,
+            "targetSeat": 0,
+            "startsAtMs": 1793771766483,
+            "expiresAtMs": 1793771781483,
+            "params": {
+              "x": 13.200000000000001,
+              "y": 4.4,
+              "orientation": "horizontal",
+              "angleDeg": 0
+            }
+          }
+        ]
+      },
+      {
+        "kind": "pit",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": 4.4
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "moving_wall",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": -8.8,
+          "orientation": "vertical"
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "wind",
+        "automatic": true,
+        "effects": [
+          "wind"
+        ]
+      },
+      {
+        "kind": "board_spin",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "reverse_zone",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": 11
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "wall",
+        "target": {
+          "x": 6.6000000000000005,
+          "y": 22,
+          "orientation": "horizontal"
+        },
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "water_gun",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "kind": "heavy_stones",
+        "target": null,
+        "result": {
+          "ok": true
+        }
+      }
+    ],
+    "failedAttempts": [],
+    "shotAndTurnSwap": true,
+    "closeForfeit": true,
+    "fallbackThemes": [
+      {
+        "query": "&theme=invalid",
+        "theme": "bar"
+      },
+      {
+        "query": "",
+        "theme": "bar"
+      }
+    ]
+  },
+  "ai": {
+    "matches": [
+      {
+        "theme": "bar",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 2,
+              "hair": 3,
+              "eyebrows": 0,
+              "eyes": 1,
+              "nose": 2,
+              "lips": 1,
+              "skinTone": 2
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-1",
+              "emote": "surprise",
+              "seat": 1,
+              "atMs": 1793771780468
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "sticky",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771782501,
+              "expiresAtMs": 1793771797501,
+              "params": {
+                "x": 2.8755675768252926,
+                "y": 7.966736401368438
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "sticky",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771782501,
+              "expiresAtMs": 1793771785003.6667,
+              "params": {
+                "x": 2.8755675768252926,
+                "y": 7.966736401368438
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-2",
+              "emote": "gg",
+              "seat": 1,
+              "atMs": 1793771787806
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      },
+      {
+        "theme": "rooftop",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 2,
+              "hair": 3,
+              "eyebrows": 3,
+              "eyes": 4,
+              "nose": 4,
+              "lips": 0,
+              "skinTone": 0
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "reverse_zone",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771797371,
+              "expiresAtMs": 1793771812371,
+              "params": {
+                "x": -2.2,
+                "y": -13.200000000000001
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "reverse_zone",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771797371,
+              "expiresAtMs": 1793771803796.3333,
+              "params": {
+                "x": -2.2,
+                "y": -13.200000000000001
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-1",
+              "emote": "yawn",
+              "seat": 1,
+              "atMs": 1793771803804
+            }
+          },
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-2",
+              "emote": "gg",
+              "seat": 1,
+              "atMs": 1793771806826
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      },
+      {
+        "theme": "classroom",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 2,
+              "hair": 2,
+              "eyebrows": 0,
+              "eyes": 3,
+              "nose": 4,
+              "lips": 3,
+              "skinTone": 3
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "emote:shown",
+            "payload": {
+              "gameId": "ai-2",
+              "emote": "gg",
+              "seat": 1,
+              "atMs": 1793771821244
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      },
+      {
+        "theme": "beach",
+        "players": [
+          {
+            "seat": 0,
+            "nickname": "나",
+            "appearance": {
+              "headShape": 0,
+              "hair": 0,
+              "eyebrows": 0,
+              "eyes": 0,
+              "nose": 0,
+              "lips": 0,
+              "skinTone": 0
+            }
+          },
+          {
+            "seat": 1,
+            "nickname": "AI",
+            "appearance": {
+              "headShape": 4,
+              "hair": 1,
+              "eyebrows": 0,
+              "eyes": 3,
+              "nose": 1,
+              "lips": 1,
+              "skinTone": 1
+            }
+          }
+        ],
+        "events": [
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "wall",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771824864,
+              "expiresAtMs": 1793771839864,
+              "params": {
+                "x": -4.4,
+                "y": 8.8,
+                "orientation": "vertical",
+                "angleDeg": 90
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "wall",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771824864,
+              "expiresAtMs": 1793771839864,
+              "params": {
+                "x": 4.4,
+                "y": 6.6000000000000005,
+                "orientation": "vertical",
+                "angleDeg": 90
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "wall",
+              "phase": "start",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771824864,
+              "expiresAtMs": 1793771839864,
+              "params": {
+                "x": 22,
+                "y": 8.8,
+                "orientation": "vertical",
+                "angleDeg": 90
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "wall",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771824864,
+              "expiresAtMs": 1793771839864,
+              "params": {
+                "x": -4.4,
+                "y": 8.8,
+                "orientation": "vertical",
+                "angleDeg": 90
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "wall",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771824864,
+              "expiresAtMs": 1793771839864,
+              "params": {
+                "x": 4.4,
+                "y": 6.6000000000000005,
+                "orientation": "vertical",
+                "angleDeg": 90
+              }
+            }
+          },
+          {
+            "t": "event",
+            "type": "hazard:triggered",
+            "payload": {
+              "gameId": "ai-1",
+              "kind": "wall",
+              "phase": "end",
+              "sourceSeat": 1,
+              "targetSeat": 0,
+              "startsAtMs": 1793771824864,
+              "expiresAtMs": 1793771839864,
+              "params": {
+                "x": 22,
+                "y": 8.8,
+                "orientation": "vertical",
+                "angleDeg": 90
+              }
+            }
+          }
+        ],
+        "turnReached": 3,
+        "appearanceStableOnRematch": true
+      }
+    ],
+    "hazardEvents": [
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "sticky",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771782501,
+          "expiresAtMs": 1793771797501,
+          "params": {
+            "x": 2.8755675768252926,
+            "y": 7.966736401368438
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "sticky",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771782501,
+          "expiresAtMs": 1793771785003.6667,
+          "params": {
+            "x": 2.8755675768252926,
+            "y": 7.966736401368438
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "reverse_zone",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771797371,
+          "expiresAtMs": 1793771812371,
+          "params": {
+            "x": -2.2,
+            "y": -13.200000000000001
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "reverse_zone",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771797371,
+          "expiresAtMs": 1793771803796.3333,
+          "params": {
+            "x": -2.2,
+            "y": -13.200000000000001
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "wall",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771824864,
+          "expiresAtMs": 1793771839864,
+          "params": {
+            "x": -4.4,
+            "y": 8.8,
+            "orientation": "vertical",
+            "angleDeg": 90
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "wall",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771824864,
+          "expiresAtMs": 1793771839864,
+          "params": {
+            "x": 4.4,
+            "y": 6.6000000000000005,
+            "orientation": "vertical",
+            "angleDeg": 90
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "wall",
+          "phase": "start",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771824864,
+          "expiresAtMs": 1793771839864,
+          "params": {
+            "x": 22,
+            "y": 8.8,
+            "orientation": "vertical",
+            "angleDeg": 90
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "wall",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771824864,
+          "expiresAtMs": 1793771839864,
+          "params": {
+            "x": -4.4,
+            "y": 8.8,
+            "orientation": "vertical",
+            "angleDeg": 90
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "wall",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771824864,
+          "expiresAtMs": 1793771839864,
+          "params": {
+            "x": 4.4,
+            "y": 6.6000000000000005,
+            "orientation": "vertical",
+            "angleDeg": 90
+          }
+        }
+      },
+      {
+        "t": "event",
+        "type": "hazard:triggered",
+        "payload": {
+          "gameId": "ai-1",
+          "kind": "wall",
+          "phase": "end",
+          "sourceSeat": 1,
+          "targetSeat": 0,
+          "startsAtMs": 1793771824864,
+          "expiresAtMs": 1793771839864,
+          "params": {
+            "x": 22,
+            "y": 8.8,
+            "orientation": "vertical",
+            "angleDeg": 90
+          }
+        }
+      }
+    ],
+    "emoteEvents": [
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-1",
+          "emote": "surprise",
+          "seat": 1,
+          "atMs": 1793771780468
+        }
+      },
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-2",
+          "emote": "gg",
+          "seat": 1,
+          "atMs": 1793771787806
+        }
+      },
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-1",
+          "emote": "yawn",
+          "seat": 1,
+          "atMs": 1793771803804
+        }
+      },
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-2",
+          "emote": "gg",
+          "seat": 1,
+          "atMs": 1793771806826
+        }
+      },
+      {
+        "t": "event",
+        "type": "emote:shown",
+        "payload": {
+          "gameId": "ai-2",
+          "emote": "gg",
+          "seat": 1,
+          "atMs": 1793771821244
+        }
+      }
+    ]
+  },
+  "emotes": {
+    "local": {
+      "events0": [
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "yawn",
+            "seat": 0,
+            "atMs": 1793771745718
+          }
+        },
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "gg",
+            "seat": 1,
+            "atMs": 1793771759479
+          }
+        }
+      ],
+      "events1": [
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "yawn",
+            "seat": 0,
+            "atMs": 1793771745718
+          }
+        },
+        {
+          "t": "event",
+          "type": "emote:shown",
+          "payload": {
+            "gameId": "local-1",
+            "emote": "gg",
+            "seat": 1,
+            "atMs": 1793771759479
+          }
+        }
+      ],
+      "repeatedKeyboardBlocked": true,
+      "authorityCooldown": {
+        "ok": false,
+        "error": {
+          "code": "EMOTE_COOLDOWN",
+          "message": "감정표현을 잠시 뒤에 다시 사용해 주세요"
+        }
+      }
+    },
+    "finished": {
+      "ok": false,
+      "error": {
+        "code": "GAME_NOT_ACTIVE",
+        "message": "진행 중인 경기가 없다"
+      }
+    }
+  },
+  "browser": "156.0.8078.4",
+  "passed": true
+}
