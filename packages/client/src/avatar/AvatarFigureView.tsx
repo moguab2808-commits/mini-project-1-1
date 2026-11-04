@@ -30,6 +30,8 @@ export function AvatarFigureView({
   const yawRef = useRef(0.35);
   const sceneRef = useRef<Scene | null>(null);
   const figureRef = useRef<AvatarFigure | null>(null);
+  /** 끄는 중이면 그 끌기의 window 리스너를 떼는 함수. 끝나거나 창이 닫히면 비운다 */
+  const stopDragRef = useRef<(() => void) | null>(null);
   const [failed, setFailed] = useState(false);
   const look = JSON.stringify(appearance);
 
@@ -102,6 +104,9 @@ export function AvatarFigureView({
     };
   }, [draggable]);
 
+  // 끄는 중에 창이 닫혀도 window 리스너가 남지 않게 한다
+  useEffect(() => () => stopDragRef.current?.(), []);
+
   // 외형이 바뀌면 모델만 바꾼다
   useEffect(() => {
     const scene = sceneRef.current;
@@ -141,9 +146,14 @@ export function AvatarFigureView({
               const up = () => {
                 window.removeEventListener('pointermove', move);
                 window.removeEventListener('pointerup', up);
+                window.removeEventListener('pointercancel', up);
+                stopDragRef.current = null;
               };
+              stopDragRef.current?.();
+              stopDragRef.current = up;
               window.addEventListener('pointermove', move);
               window.addEventListener('pointerup', up);
+              window.addEventListener('pointercancel', up);
             }
           : undefined
       }

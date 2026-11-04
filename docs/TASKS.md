@@ -1239,11 +1239,12 @@ Issue·PR: [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/8
 Issue·PR: 미생성
 
 수용 기준:
-- [x] (정상) 꾸미기 창 왼쪽 미리보기가 방 생성 창과 같은 3D 전신이고 L 화풍에 맞는 배경으로 보이며, 항목을 바꾸면 바로 반영된다.
+- [x] (정상) 꾸미기 창 왼쪽 미리보기가 방 생성 창과 같은 3D 전신이고 L 화풍에 맞는 배경으로 보인다.
+- [ ] (정상) 항목을 바꾸면 미리보기에 바로 반영되고, 끌어서 좌우로 돌려 볼 수 있다(실제 브라우저에서 사용자 확인 대기).
 - [x] (예외) WebGL을 쓸 수 없으면 2D 얼굴로 대신한다(현재 동작 유지).
 - [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
 
-검증 근거: [2026-11-04 worklog IMPL-022](worklogs/2026-11-04.md#impl-022-캐릭터-꾸미기-창-3d-전신-미리보기)(끌어서 돌리기는 사용자 확인 대기)
+검증 근거: [2026-11-04 worklog IMPL-022](worklogs/2026-11-04.md#impl-022-캐릭터-꾸미기-창-3d-전신-미리보기)(항목 변경 반영·끌어서 돌리기·저장 흐름은 사용자 확인 대기)
 
 ## IMPL-023 게임 캐릭터 손 다섯 손가락
 
@@ -1251,7 +1252,7 @@ Issue·PR: 미생성
 상태: 예정
 담당: 개발자 B
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용), [DEC-077](DECISIONS.md#결정-색인)
-범위: [DEC-077](DECISIONS.md#결정-색인)에 따라 게임 장면 캐릭터의 손을 손가락 다섯 개로 바꾸고 조준·튕기기 손 모양(손등 오른쪽, 중지를 엄지에 걸었다가 튕김)을 만든다. 손 모델 `packages/client/src/avatar/avatar-hand.ts`는 IMPL-019에서 `main`에 들어왔고 지금은 방 생성·꾸미기 창의 3D 전신만 쓴다. 이 작업은 게임 리그(`packages/client/src/game/scene/characters.ts`)가 이를 쓰도록 옮긴다. 로컬 구현이 백업 커밋 `4b57e4c`(브랜치 `feat/impl-019-profile-figure`)에 있고 `main`에 얹으면 충돌 없이 합쳐짐을 시험했다([worklog](worklogs/2026-11-04.md#impl-022-캐릭터-꾸미기-창-3d-전신-미리보기)). 인게임 상반신 구성·조작·판정은 바꾸지 않는다.
+범위: [DEC-077](DECISIONS.md#결정-색인)에 따라 게임 장면 캐릭터의 손을 손가락 다섯 개로 바꾸고 조준·튕기기 손 모양(손등 오른쪽, 중지를 엄지에 걸었다가 튕김)을 만든다. 손 모델 `packages/client/src/avatar/avatar-hand.ts`는 IMPL-019에서 `main`에 들어왔고 지금은 방 생성·꾸미기 창의 3D 전신만 쓴다. 이 작업은 게임 리그(`packages/client/src/game/scene/characters.ts`)가 이를 쓰도록 옮긴다. 로컬 구현이 백업 커밋 `4b57e4c`(브랜치 `feat/impl-019-profile-figure`)에 있고 `main`에 얹으면 충돌 없이 합쳐짐을 시험했다([worklog](worklogs/2026-11-04.md#impl-022-캐릭터-꾸미기-창-3d-전신-미리보기)). 이 백업 브랜치는 개발자 B의 로컬에만 있으며 원격에 없다. IMPL-022 병합 뒤 이 작업의 PR에서 원격에 올리거나 내용을 반입한다. `characters.ts`는 인게임 장면 쪽 파일(개발자 A가 #89에서 `IDLE_LOOK`을 넣음)이므로 이 파일의 변경은 개발자 A의 리뷰를 받는다([DEC-072](DECISIONS.md#결정-색인) ②의 상대 리뷰). 인게임 상반신 구성·조작·판정은 바꾸지 않는다.
 관련 문서: [PRD 게임 화면](PRD.md#게임-화면) / [GAME](design/GAME.md)
 Issue·PR: 미생성
 
