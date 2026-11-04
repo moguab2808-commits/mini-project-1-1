@@ -850,8 +850,12 @@ function SceneWorld(props: SceneProps) {
     tmp.fp.y += 1.5 + EYE_LIFT.up * lift;
     tmp.fp.z += fwdZ * (2 - EYE_LIFT.back * lift);
     // 1인칭 시선: 판 중심 → 조준 중인 알·움직이는 알 쪽으로
-    // default(lift)는 상대 캐릭터 얼굴까지 보이도록 판 너머를 보고, 조준 중에도 시선을 덜 옮긴다
-    rt.lookV.set(0, -2 + (EYE_LIFT.lookHeight + 2) * lift, fwdZ * 8 * lift);
+    // default(lift)는 상대 캐릭터 얼굴을 화면 가운데에 두고, 조준 중에도 시선을 덜 옮긴다
+    rt.lookV.set(
+      0,
+      -2 + (SEAT_GEOMETRY.headHeight + 2) * lift,
+      fwdZ * SEAT_GEOMETRY.anchorDistance * lift,
+    );
     const follow = 1 - 0.65 * lift;
     if (meSa.frame.aim) {
       seatToWorld(mySeat, meSa.frame.aim.stone, tmp.w);

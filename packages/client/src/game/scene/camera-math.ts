@@ -119,11 +119,12 @@ export function stunRoll(progress: number): number {
 }
 
 /**
- * default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°),
- * 바라보는 점의 판 윗면 위 높이(cm, lift=1일 때). 정면에서 상대 캐릭터가 화면 가운데에 더 가깝게 보이도록
- * 높이를 16 → 12로 낮추고 바라보는 점을 4 → 7로 올렸다(DEC-071 ④)
+ * default 시점이 눈 위치에서 올라가는 높이·뒤로 물러나는 거리(cm), 줄이는 화각(°).
+ * 기본 시점은 상대 캐릭터 얼굴(판 윗면 위 headHeight, 판 중심 너머 anchorDistance)을 화면 가운데에 두고
+ * 수평에서 약 20° 아래(바로 아래 0°·정면 90° 기준 약 70°)를 바라본다(DEC-071 ④, 사용자 요청 2026-11-04).
+ * 눈(머리 중심 + 1.5 + up, 상대 얼굴까지 수평 약 95cm)에서 상대 얼굴까지: atan(34.5 / 95) ≈ 20°.
  */
-export const EYE_LIFT = { up: 12, back: 24, fovLess: 4, lookHeight: 7 } as const;
+export const EYE_LIFT = { up: 33, back: 37, fovLess: 4 } as const;
 
 /** 좁은 화면에서는 판이 잘리지 않게 뒤로 물러난다 */
 export function aspectDistanceScale(aspect: number): number {
