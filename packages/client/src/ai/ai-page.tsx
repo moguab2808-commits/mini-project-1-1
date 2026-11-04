@@ -1,6 +1,6 @@
 // 개발용 `/ai` 화면: AI 대전 설정(판·알 개수) 후 시작. 로비의 방 생성 창(IMPL-012)은
 // `AiSetupForm`과 `startAiGame`을 그대로 쓴다. 서버 요청이 없다(DEC-021).
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   BOARD_IDS,
   DEFAULT_THEME,
@@ -19,6 +19,8 @@ export const PIECE_COUNTS = [5, 7, 9] as const;
 export interface AiSetupFormProps {
   initial?: AiMatchSettings;
   onStart: (settings: AiMatchSettings) => void;
+  /** 방 테마 칩 안에 그릴 그림(방 생성 창이 로비의 지역 그림을 넘긴다) */
+  themeArt?: (theme: ThemeId) => ReactNode;
 }
 
 export interface ThemeChoiceProps {
@@ -26,10 +28,12 @@ export interface ThemeChoiceProps {
   onChange: (theme: ThemeId) => void;
   /** 방 생성 창의 칩 모양(`chip`)을 쓴다. AI 설정 폼은 `.ai-setup` 스타일을 쓰므로 끈다 */
   chips?: boolean;
+  /** 칩 안에 그릴 테마 그림. 없으면 글자 라벨만 보인다 */
+  art?: (theme: ThemeId) => ReactNode;
 }
 
 /** 방 테마 선택(DEC-050·052). 사람 방과 AI 대전이 같은 칩을 쓴다 */
-export function ThemeChoice({ theme, onChange, chips = true }: ThemeChoiceProps) {
+export function ThemeChoice({ theme, onChange, chips = true, art }: ThemeChoiceProps) {
   return (
     <fieldset className={chips ? 'choice' : undefined}>
       <legend>방 테마</legend>
@@ -48,7 +52,14 @@ export function ThemeChoice({ theme, onChange, chips = true }: ThemeChoiceProps)
               onChange(id);
             }}
           />
-          {THEME_LABEL[id]}
+          {art ? (
+            <>
+              {art(id)}
+              <span className="theme-name">{THEME_LABEL[id]}</span>
+            </>
+          ) : (
+            THEME_LABEL[id]
+          )}
         </label>
       ))}
     </fieldset>
@@ -56,7 +67,7 @@ export function ThemeChoice({ theme, onChange, chips = true }: ThemeChoiceProps)
 }
 
 /** 판·알 개수(5·7·9, 기본 5)·방 테마를 고르고 "AI와 시작"을 누른다(DEC-024·032·050) */
-export function AiSetupForm({ initial, onStart }: AiSetupFormProps) {
+export function AiSetupForm({ initial, onStart, themeArt }: AiSetupFormProps) {
   const [board, setBoard] = useState<BoardId>(initial?.board ?? 'standard');
   const [theme, setTheme] = useState<ThemeId>(initial?.theme ?? DEFAULT_THEME);
   const [pieceCount, setPieceCount] = useState<AiMatchSettings['pieceCount']>(
@@ -104,7 +115,7 @@ export function AiSetupForm({ initial, onStart }: AiSetupFormProps) {
           </label>
         ))}
       </fieldset>
-      <ThemeChoice theme={theme} onChange={setTheme} />
+      <ThemeChoice theme={theme} onChange={setTheme} art={themeArt} />
       <p>방 목록에 올리지 않고 바로 시작해요. 결과는 전적에 반영되지 않아요.</p>
       <button type="submit" className="l-btn l-btn-primary">
         AI와 시작

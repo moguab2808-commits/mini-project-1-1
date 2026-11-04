@@ -22,6 +22,7 @@ import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS, ThemeChoice } from '../ai/ai-page.tsx';
 import { ApiError, describeApiError, type Api } from './api.ts';
 import { FloatingWindow } from './floating-window.tsx';
+import { RegionArt } from './region-art.tsx';
 import {
   applyCodeCellInput,
   defaultRoomTitle,
@@ -70,6 +71,9 @@ export function CopyCodeButton({ code }: { code: string }) {
     </button>
   );
 }
+
+/** 방 테마 칩 안의 그림: 로비 방 목록의 지역 그림과 같다 */
+const themeArt = (id: ThemeId) => <RegionArt theme={id} />;
 
 function BoardPreview({ board }: { board: BoardId }) {
   return (
@@ -280,7 +284,11 @@ export function CreateRoomModal({
         {opponent === 'ai' ? (
           // DEC-042 ②: AI 대전은 `/ai`의 설정 폼과 시작 함수를 그대로 쓴다.
           <div className="ai-setup">
-            <AiSetupForm initial={{ board, theme, pieceCount }} onStart={onStartAi} />
+            <AiSetupForm
+              initial={{ board, theme, pieceCount }}
+              onStart={onStartAi}
+              themeArt={themeArt}
+            />
           </div>
         ) : (
           <form
@@ -341,7 +349,7 @@ export function CreateRoomModal({
               </fieldset>
             </div>
 
-            <ThemeChoice theme={theme} onChange={setTheme} />
+            <ThemeChoice theme={theme} onChange={setTheme} art={themeArt} />
 
             <div className="create-pair create-pair-code">
               <fieldset className="choice">

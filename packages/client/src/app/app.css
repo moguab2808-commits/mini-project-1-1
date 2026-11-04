@@ -944,7 +944,8 @@ input {
 .create-form .ai-setup fieldset:has([data-theme]) legend {
   grid-column: 1 / -1;
 }
-.create-form [data-theme] {
+.create-form [data-theme],
+.create-form .ai-setup label[data-theme] {
   height: 66px;
   align-items: flex-end;
   padding: 0 0 4px;
@@ -978,6 +979,24 @@ input {
 }
 .create-form [data-theme='beach'] {
   background: linear-gradient(180deg, #5ac0f0 0 45%, #2aa0e0 45% 62%, #f8dc98 62%);
+}
+
+/* 테마 칩 안의 지역 그림(로비 방 목록과 같은 그림)과 이름 띠 */
+.create-form [data-theme]:has(.theme-name),
+.create-form .ai-setup label[data-theme]:has(.theme-name) {
+  padding: 0;
+}
+.create-form [data-theme] .region-art {
+  z-index: 0;
+  opacity: 1;
+}
+.create-form [data-theme] .theme-name {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 3px 0;
+  text-align: center;
+  background: rgba(40, 16, 4, 0.6);
 }
 
 /* 방 코드: 금빛 칸 */
