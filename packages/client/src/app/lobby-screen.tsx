@@ -1,5 +1,6 @@
-// 로비: 왼쪽 프로필바와 방 화면(방 목록·방 생성·즉시 참가·코드 입력·새로고침). PRD 화면별 요구사항 "로비".
-import { useCallback, useEffect, useRef, useState } from 'react';
+// 로비: 위쪽 줄(로고·새로고침·코드 입력·방 생성·즉시 참가·오른쪽 위 프로필 명판)과 방 테마별 지역 4열 방 목록(DEC-070).
+// PRD 화면별 요구사항 "로비".
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   THEME_LABEL,
   type Appearance,
@@ -13,7 +14,7 @@ import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { AvatarFace } from '../avatar/AvatarFace.tsx';
 import type { RoomClient } from '../online/room-client.ts';
 import { ApiError, describeApiError, type Api } from './api.ts';
-import { canEnter, formatRecord, formatWinRate } from './logic.ts';
+import { canEnter, formatRecord, formatWinRate, groupRoomsByTheme } from './logic.ts';
 import { roomErrorMessage } from './messages.ts';
 import {
   AvatarModal,
@@ -23,6 +24,7 @@ import {
   RulesModal,
   SettingsModal,
 } from './modals.tsx';
+import { REGION_COLOR, RegionArt } from './region-art.tsx';
 import { useToast } from './toast.tsx';
 
 type Modal =
@@ -211,73 +213,41 @@ export function LobbyScreen({
     setModal(null);
   }, []);
 
+  const regions = rooms ? groupRoomsByTheme(rooms) : [];
+
   return (
     <div className="lobby">
-      <aside className="profile-bar">
+      <header className="lobby-top">
+        <h1 className="l-logo lobby-logo">증강 알까기</h1>
         <button
           type="button"
-          className="profile-card"
-          aria-label="캐릭터 꾸미기"
-          disabled={locked}
+          className="l-btn l-btn-cream lobby-icon-btn"
+          aria-label={loading ? '불러오는 중…' : '새로고침'}
+          title={loading ? '불러오는 중…' : '새로고침'}
+          disabled={loading || locked}
           onClick={() => {
-            setModal({ t: 'character' });
+            void refresh();
           }}
         >
-          <AvatarFace appearance={me.appearance} size={72} />
-          <strong className="profile-name">{me.nickname}</strong>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M20 12a8 8 0 1 1-2.3-5.6" />
+            <path d="M20 4v5h-5" />
+          </svg>
         </button>
-        <dl className="profile-stats">
-          <div>
-            <dt>승률</dt>
-            <dd>{formatWinRate(me.record)}</dd>
-          </div>
-          <div>
-            <dt>전적</dt>
-            <dd>{formatRecord(me.record)}</dd>
-          </div>
-        </dl>
-        <div className="profile-actions">
+        <span className="lobby-spacer" />
+        <div className="lobby-actions">
           <button
             type="button"
-            className="btn"
-            disabled={locked}
-            onClick={() => {
-              setModal({ t: 'settings' });
-            }}
-          >
-            환경설정
-          </button>
-          <button type="button" className="btn" disabled={locked} onClick={onLogout}>
-            {locked ? '로그아웃 중…' : '로그아웃'}
-          </button>
-        </div>
-      </aside>
-
-      <main className="room-area">
-        <div className="room-toolbar">
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={blocked}
-            onClick={() => {
-              setModal({ t: 'create' });
-            }}
-          >
-            방 생성
-          </button>
-          <button
-            type="button"
-            className="btn"
-            disabled={blocked}
-            onClick={() => {
-              void quickJoin();
-            }}
-          >
-            즉시 참가
-          </button>
-          <button
-            type="button"
-            className="btn"
+            className="l-btn l-btn-cream lobby-act lobby-act-code"
             disabled={blocked}
             onClick={() => {
               setModal({ t: 'code' });
@@ -287,96 +257,207 @@ export function LobbyScreen({
           </button>
           <button
             type="button"
-            className="btn"
-            disabled={loading || locked}
+            className="l-btn l-btn-magic lobby-act lobby-act-create"
+            disabled={blocked}
             onClick={() => {
-              void refresh();
+              setModal({ t: 'create' });
             }}
           >
-            {loading ? '불러오는 중…' : '새로고침'}
+            방 생성 ✦
+          </button>
+          <button
+            type="button"
+            className="l-btn l-btn-primary lobby-act lobby-act-quick"
+            disabled={blocked}
+            onClick={() => {
+              void quickJoin();
+            }}
+          >
+            즉시 참가 ▶
           </button>
         </div>
+        <section className="lobby-plate l-tray" aria-label="내 프로필">
+          <button
+            type="button"
+            className="lobby-avatar"
+            aria-label="캐릭터 꾸미기"
+            disabled={locked}
+            onClick={() => {
+              setModal({ t: 'character' });
+            }}
+          >
+            <AvatarFace appearance={me.appearance} size={72} />
+          </button>
+          <div className="lobby-plate-info">
+            <strong className="lobby-plate-name">{me.nickname}</strong>
+            <span className="lobby-plate-record">{formatRecord(me.record)}</span>
+          </div>
+          <span className="lobby-rate" aria-label={`승률 ${formatWinRate(me.record)}`}>
+            {formatWinRate(me.record)}
+          </span>
+          <button
+            type="button"
+            className="l-btn l-btn-cream lobby-plate-btn"
+            aria-label="환경설정"
+            title="환경설정"
+            disabled={locked}
+            onClick={() => {
+              setModal({ t: 'settings' });
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="3.5" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="l-btn l-btn-cream lobby-plate-btn"
+            aria-label={locked ? '로그아웃 중…' : '로그아웃'}
+            title={locked ? '로그아웃 중…' : '로그아웃'}
+            disabled={locked}
+            onClick={onLogout}
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9" />
+            </svg>
+          </button>
+        </section>
+      </header>
 
-        {rooms === null ? (
-          <p className="empty">
+      {rooms === null ? (
+        <main className="lobby-state">
+          <p className="l-tray lobby-state-msg">
             {listFailed
               ? '방 목록을 불러오지 못했어요. 새로고침을 눌러 주세요.'
               : '방 목록을 불러오는 중이에요'}
           </p>
-        ) : rooms.length === 0 ? (
-          <p className="empty">대기 중인 방이 없어요</p>
-        ) : (
-          <ul className="room-grid">
-            {rooms.map((room) => {
-              const selected = room.roomId === selectedId;
-              const playing = !canEnter(room);
-              return (
-                <li key={room.roomId}>
-                  <div
-                    className={selected ? 'room-card room-card-on' : 'room-card'}
-                    role="button"
-                    tabIndex={0}
-                    aria-pressed={selected}
-                    onClick={() => {
-                      setSelectedId(selected ? null : room.roomId);
-                    }}
-                    onDoubleClick={() => {
-                      void enterFromList(room);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedId(selected ? null : room.roomId);
-                      }
-                    }}
-                  >
-                    <div className="room-card-head">
-                      <strong className="room-title">
-                        {!room.isPublic && (
-                          <span role="img" aria-label="비공개 방">
-                            🔒{' '}
-                          </span>
-                        )}
-                        {room.title}
-                      </strong>
-                      {playing && <span className="badge">게임 중</span>}
-                    </div>
-                    <span className="room-theme" aria-label="방 테마">
-                      {THEME_LABEL[room.theme]}
-                    </span>
-                    <div className="room-host">
-                      <AvatarFace appearance={room.host.appearance} size={44} />
-                      <div>
-                        <div className="room-host-name">{room.host.nickname}</div>
-                        <div className="room-host-record">
-                          {formatRecord(room.host.record)} · 승률 {formatWinRate(room.host.record)}
-                        </div>
-                      </div>
-                    </div>
-                    {selected && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-small"
-                        disabled={blocked || playing}
-                        onClick={(e) => {
-                          e.stopPropagation();
+        </main>
+      ) : (
+        <main className="lobby-regions">
+          {regions.map((region) => (
+            <section
+              key={region.theme}
+              className="lobby-region l-tray"
+              aria-label={`${THEME_LABEL[region.theme]} 대결장`}
+              style={{ '--region-color': REGION_COLOR[region.theme] } as CSSProperties}
+            >
+              <div className="region-head">
+                <RegionArt theme={region.theme} />
+                <h2 className="region-name">{THEME_LABEL[region.theme]}</h2>
+                <span className="region-count">
+                  대기 <b>{region.waiting}</b> / 전체 {region.total}
+                </span>
+              </div>
+              <ul className="region-rooms">
+                {region.rooms.map((room) => {
+                  const selected = room.roomId === selectedId;
+                  const playing = !canEnter(room);
+                  const status = playing ? '게임 중' : room.isPublic ? '대기 중' : '비공개';
+                  return (
+                    <li key={room.roomId}>
+                      <div
+                        className={selected ? 'room-row room-row-on' : 'room-row'}
+                        data-playing={playing ? 'true' : undefined}
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={selected}
+                        onClick={() => {
+                          setSelectedId(selected ? null : room.roomId);
+                        }}
+                        onDoubleClick={() => {
                           void enterFromList(room);
                         }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedId(selected ? null : room.roomId);
+                          }
+                        }}
                       >
-                        {playing ? '게임 중' : '입장'}
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </main>
+                        <AvatarFace appearance={room.host.appearance} size={40} />
+                        <div className="room-row-body">
+                          <div className="room-row-title">
+                            {!room.isPublic && (
+                              <svg
+                                className="room-lock"
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                role="img"
+                                aria-label="비공개 방"
+                              >
+                                <rect x="5" y="11" width="14" height="10" rx="3" fill="#c98a14" />
+                                <path
+                                  d="M8 11V8a4 4 0 0 1 8 0v3"
+                                  fill="none"
+                                  stroke="#c98a14"
+                                  strokeWidth="2.6"
+                                />
+                              </svg>
+                            )}
+                            <strong className="room-title">{room.title}</strong>
+                          </div>
+                          <span className="room-row-host">
+                            {room.host.nickname} · 승률 {formatWinRate(room.host.record)}
+                          </span>
+                          <span className="room-row-record">{formatRecord(room.host.record)}</span>
+                        </div>
+                        {selected ? (
+                          <button
+                            type="button"
+                            className="l-btn l-btn-primary room-enter"
+                            disabled={blocked || playing}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void enterFromList(room);
+                            }}
+                          >
+                            {playing ? '게임 중' : '입장'}
+                          </button>
+                        ) : (
+                          <span
+                            className={`room-chip room-chip-${
+                              playing ? 'playing' : room.isPublic ? 'wait' : 'private'
+                            }`}
+                          >
+                            {status}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+                {region.rooms.length === 0 && <li className="region-empty">아직 방이 없어요</li>}
+              </ul>
+            </section>
+          ))}
+        </main>
+      )}
 
       {modal?.t === 'create' && (
         <CreateRoomModal
           nickname={me.nickname}
+          appearance={me.appearance}
           onCreate={createRoom}
           onStartAi={onStartAi}
           onClose={closeModal}

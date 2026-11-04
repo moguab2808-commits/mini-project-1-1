@@ -1,7 +1,14 @@
 // 실행: 루트에서 npm test (Vitest). 계정·로비 화면의 순수 로직·REST 클라이언트·저장 설정을 검증한다.
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import { DEFAULT_APPEARANCE, ROOM_CODE_ALPHABET, RoomCodeSchema } from '@alkkagi/shared';
+import {
+  DEFAULT_APPEARANCE,
+  ROOM_CODE_ALPHABET,
+  RoomCodeSchema,
+  THEME_IDS,
+  type RoomSummary,
+  type ThemeId,
+} from '@alkkagi/shared';
 import { ApiError, createApi } from './api.ts';
 import {
   applyCodeCellInput,
@@ -10,6 +17,7 @@ import {
   formatRecord,
   formatWinRate,
   generateRoomCode,
+  groupRoomsByTheme,
   isCompleteCode,
   normalizeCodeInput,
   validateLogin,
@@ -127,6 +135,33 @@ test('방 제목 기본값은 20자를 넘지 않는다. 게임 중인 방에는
   assert.ok(defaultRoomTitle('가'.repeat(12)).length <= 20);
   assert.equal(canEnter({ status: 'waiting' }), true);
   assert.equal(canEnter({ status: 'playing' }), false);
+});
+
+test('방 목록을 테마별 지역으로 나눈다: 순서는 THEME_IDS, 대기·전체 수, 빈 지역 포함(DEC-070)', () => {
+  const room = (roomId: number, theme: ThemeId, status: 'waiting' | 'playing') =>
+    ({ roomId, theme, status }) as Pick<RoomSummary, 'roomId' | 'theme' | 'status'>;
+  const regions = groupRoomsByTheme([
+    room(1, 'beach', 'waiting'),
+    room(2, 'bar', 'playing'),
+    room(3, 'bar', 'waiting'),
+    room(4, 'beach', 'playing'),
+    room(5, 'bar', 'waiting'),
+  ]);
+  assert.deepEqual(
+    regions.map((r) => r.theme),
+    [...THEME_IDS],
+  );
+  const [bar, rooftop, classroom, beach] = regions;
+  assert.deepEqual(
+    bar!.rooms.map((r) => r.roomId),
+    [2, 3, 5],
+    '입력 순서를 유지한다',
+  );
+  assert.equal(bar!.waiting, 2);
+  assert.equal(bar!.total, 3);
+  assert.deepEqual([rooftop!.rooms.length, rooftop!.waiting, rooftop!.total], [0, 0, 0]);
+  assert.deepEqual([classroom!.rooms.length, classroom!.waiting, classroom!.total], [0, 0, 0]);
+  assert.deepEqual([beach!.waiting, beach!.total], [1, 2]);
 });
 
 test('오류 안내: 코드별 문구, 모르는 코드는 일반 오류 문구', () => {
