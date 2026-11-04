@@ -53,6 +53,7 @@ import {
   type ReachResult,
   type V3,
 } from './rig-math.ts';
+import { AvatarHand } from '../../avatar/avatar-hand.ts';
 import { AvatarHead } from '../../avatar/avatar-head.ts';
 import type { FaceEyes, FaceMouth } from '../../avatar/face-paint.ts';
 import { EmoteBubble } from './emote-bubble.ts';
@@ -278,7 +279,14 @@ interface HandState {
   elbow: Mesh;
   shoulderBall: Mesh;
   hand: Group;
-  finger: Group;
+  model: AvatarHand;
+  /** 튕길 손 모양(중지를 엄지에 건다) 0~1, 손등을 오른쪽으로 세우는 정도 0~1, 튕겨 편 정도 0~1 */
+  flick: number;
+  tflick: number;
+  roll: number;
+  troll: number;
+  snap: number;
+  tsnap: number;
 }
 
 /** 이번 프레임 캐릭터 입력. 좌표는 모두 좌석 로컬 */
@@ -331,6 +339,7 @@ const HEAD_SCALE = 1.1;
 export const IDLE_LOOK = { height: 22, ahead: 30 } as const;
 const _a = new Vector3();
 const _b = new Vector3();
+const _c = new Vector3();
 const _m = new Matrix4();
 
 function placeLimb(m: Mesh, a: V3, b: V3) {
@@ -498,16 +507,10 @@ export class CharacterRig {
       const elbow = this.mesh(new SphereGeometry(1.95, 10, 8), armSkin, this.root);
       const hand = new Group();
       this.root.add(hand);
-      const palm = this.mesh(new SphereGeometry(2.3, 14, 10), armSkin, hand);
-      palm.scale.set(1, 0.62, 1.15);
-      this.mesh(new SphereGeometry(0.85, 8, 6), armSkin, hand).position.set(-side * 1.9, 0.3, 1.1);
-      const finger = new Group();
-      finger.position.set(0, 0.35, 2);
-      hand.add(finger);
-      const f = this.mesh(new CylinderGeometry(0.62, 0.56, 3, 8), armSkin, finger);
-      f.rotation.x = Math.PI / 2;
-      f.position.z = 1.5;
-      this.mesh(new SphereGeometry(0.58, 8, 6), armSkin, finger).position.z = 3;
+      // 손가락 다섯 개(IMPL-019). 손목이 손바닥 뒤 wristBack에 오도록 손바닥 중심을 원점에 둔다
+      const model = new AvatarHand(side, armSkin, this.geos);
+      model.pose(rest.curl);
+      hand.add(model.group);
       const p = v3(...rest.p);
       const fw = v3(...rest.f);
       return {
@@ -525,7 +528,13 @@ export class CharacterRig {
         elbow,
         shoulderBall,
         hand,
-        finger,
+        model,
+        flick: 0,
+        tflick: 0,
+        roll: 0,
+        troll: 0,
+        snap: 0,
+        tsnap: 0,
       };
     };
     this.hands = [mk(-1, REST_R), mk(1, REST_L)];
@@ -738,9 +747,14 @@ export class CharacterRig {
     // ── 오른손: 튕기기 > 조준 > 판 잡기 > 방해요소 > 몸짓 > 쉬기
     let rightBusy = true;
     let leftBrace = false;
+    // 조준·튕기기 중 오른손은 손등을 오른쪽으로 세우고 중지를 엄지에 걸었다가 튕긴다
+    let flickHand = 0;
+    let snap = 0;
     if (this.flickT >= 0) {
       this.flickT += dt;
       const ft = this.flickT;
+      flickHand = 1;
+      snap = ft >= 0.08 ? 1 : 0;
       const s = this.flickStone;
       const d = this.flickDir;
       if (ft < 0.08) {
@@ -759,6 +773,7 @@ export class CharacterRig {
       face = FLICK_FACE;
     } else if (f.aim) {
       const a = f.aim;
+      flickHand = 1;
       aimHandTarget(a.stone, a.dir, a.pull, a.reachable, this.tP);
       this.setHand(R, this.tP, a.dir, 0.9 + a.pull * 0.9, 5, 8);
       reachPose(this.tP, a.dir, this.reach);
@@ -805,6 +820,10 @@ export class CharacterRig {
       this.setHandSpec(R, REST_R);
       rightBusy = false;
     }
+
+    R.tflick = flickHand;
+    R.troll = flickHand;
+    R.tsnap = snap;
 
     // ── 왼손
     if (f.blind > 0.5) {
@@ -951,6 +970,10 @@ export class CharacterRig {
     h.fwd.y /= fl;
     h.fwd.z /= fl;
     h.curl = damp(h.curl, h.tcurl, h.fk, dt);
+    h.flick = damp(h.flick, h.tflick, 8, dt);
+    h.roll = damp(h.roll, h.troll, 8, dt);
+    // 튕기는 순간은 아주 빠르게 펴고, 다시 걸 때는 천천히 돌아온다
+    h.snap = damp(h.snap, h.tsnap, h.tsnap > h.snap ? 60 : 6, dt);
 
     // 손은 직선이 아니라 살짝 들어 올렸다 내려놓는다. 먼 거리·숙임이면 떨린다(오른손)
     const lift = clamp(distV(h.pos, h.tpos) * 0.25, 0, 3.5);
@@ -984,9 +1007,14 @@ export class CharacterRig {
     h.hand.position.set(this.tH.x, this.tH.y, this.tH.z);
     _a.set(this.tH.x + h.fwd.x, this.tH.y + h.fwd.y, this.tH.z + h.fwd.z);
     _b.set(this.tH.x, this.tH.y, this.tH.z);
-    _m.lookAt(_a, _b, UP);
+    // 손등 방향: 위(UP)에서 roll만큼 캐릭터 오른쪽(fwd × UP)으로 세운다
+    _c.set(h.fwd.x, h.fwd.y, h.fwd.z).cross(UP);
+    if (_c.lengthSq() > 1e-6) _c.normalize();
+    _c.multiplyScalar(h.roll).addScaledVector(UP, 1 - h.roll);
+    if (_c.lengthSq() < 1e-6) _c.copy(UP);
+    _m.lookAt(_a, _b, _c.normalize());
     h.hand.quaternion.setFromRotationMatrix(_m);
-    h.finger.rotation.x = h.curl;
+    h.model.pose(h.curl, h.flick, h.snap);
     placeLimb(h.upper, this.tS, this.arm.elbow);
     placeLimb(h.fore, this.arm.elbow, this.arm.wrist);
     h.elbow.position.set(this.arm.elbow.x, this.arm.elbow.y, this.arm.elbow.z);
