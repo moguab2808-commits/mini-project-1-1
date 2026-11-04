@@ -1,5 +1,5 @@
 // 로비 위에 뜨는 플로팅 창 내용: 방 생성, 코드 입력, 캐릭터 변경, 환경설정, 규칙 설명(PRD 로비·방 생성·캐릭터 변경·환경설정).
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   BOARD_IDS,
@@ -16,6 +16,7 @@ import {
   type ThemeId,
 } from '@alkkagi/shared';
 import { AvatarFace } from '../avatar/AvatarFace.tsx';
+import { AvatarFigureView } from '../avatar/AvatarFigureView.tsx';
 import { AvatarPreview } from '../avatar/AvatarPreview.tsx';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
 import { AiSetupForm, BOARD_LABEL, PIECE_COUNTS, ThemeChoice } from '../ai/ai-page.tsx';
@@ -175,6 +176,8 @@ export type CreateResult = null | { message: string; codeTaken: boolean };
 
 export interface CreateRoomModalProps {
   nickname: string;
+  /** 왼쪽 전신에 보일 내 외형 */
+  appearance: Appearance;
   /** 사람(PvP) 방을 만든다. 오류 결과를 돌려주면 창을 유지한다. */
   onCreate: (input: RoomCreate) => Promise<CreateResult>;
   /** AI 대전은 서버 요청 없이 이 브라우저에서 바로 시작한다(DEC-021). */
@@ -182,7 +185,13 @@ export interface CreateRoomModalProps {
   onClose: () => void;
 }
 
-export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: CreateRoomModalProps) {
+export function CreateRoomModal({
+  nickname,
+  appearance,
+  onCreate,
+  onStartAi,
+  onClose,
+}: CreateRoomModalProps) {
   const [opponent, setOpponent] = useState<'pvp' | 'ai'>('pvp');
   const [title, setTitle] = useState(() => defaultRoomTitle(nickname));
   const [pieceCount, setPieceCount] = useState<AiMatchSettings['pieceCount']>(5);
@@ -192,6 +201,16 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
   const [code, setCode] = useState(() => generateRoomCode());
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -222,10 +241,24 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
     setError(result.message);
   };
 
+  // 방 생성 창(DEC-070): 로비를 덮는 L 화풍 화면. 왼쪽은 배경 없이 뒤가 비치는 창에 내 캐릭터 전신, 오른쪽은 설정과 만들기 버튼.
   return (
-    <FloatingWindow title="방 생성" onClose={onClose} wide>
-      <div className="form">
-        <fieldset className="choice">
+    <div className="create-layer" role="dialog" aria-label="방 생성">
+      <header className="create-top">
+        <h2 className="l-logo create-logo">증강 알까기</h2>
+        <span className="l-ribbon create-ribbon">✦ 방 생성 · 새 대결장을 열어요</span>
+        <span className="lobby-spacer" />
+        <button type="button" className="l-btn l-btn-cream create-back" onClick={onClose}>
+          ◀ 방 목록으로
+        </button>
+      </header>
+
+      <section className="create-figure l-tray" aria-label="내 캐릭터">
+        <AvatarFigureView appearance={appearance} />
+      </section>
+
+      <div className="create-form l-tray">
+        <fieldset className="choice create-opponent">
           <legend>대전 상대</legend>
           {(['pvp', 'ai'] as const).map((value) => (
             <label key={value} className={opponent === value ? 'chip chip-on' : 'chip'}>
@@ -238,7 +271,8 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
                   setError(null);
                 }}
               />
-              {value === 'pvp' ? '사람' : 'AI'}
+              {value === 'pvp' ? '사람과 대결' : 'AI와 연습'}
+              {value === 'ai' && <small>전적 미반영</small>}
             </label>
           ))}
         </fieldset>
@@ -250,14 +284,15 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
           </div>
         ) : (
           <form
-            className="form"
+            className="create-fields"
             onSubmit={(e) => {
               void submit(e);
             }}
           >
-            <label className="field">
+            <label className="field create-title">
               <span>방 제목</span>
               <input
+                className="l-input"
                 value={title}
                 maxLength={ROOM_TITLE_MAX}
                 onChange={(e) => {
@@ -266,83 +301,94 @@ export function CreateRoomModal({ nickname, onCreate, onStartAi, onClose }: Crea
               />
             </label>
 
-            <fieldset className="choice">
-              <legend>알 개수</legend>
-              {PIECE_COUNTS.map((n) => (
-                <label key={n} className={pieceCount === n ? 'chip chip-on' : 'chip'}>
-                  <input
-                    type="radio"
-                    name="pieceCount"
-                    checked={pieceCount === n}
-                    onChange={() => {
-                      setPieceCount(n);
-                    }}
-                  />
-                  {n}개
-                </label>
-              ))}
-            </fieldset>
+            <div className="create-pair">
+              <fieldset className="choice">
+                <legend>알 개수</legend>
+                {PIECE_COUNTS.map((n) => (
+                  <label key={n} className={pieceCount === n ? 'chip chip-on' : 'chip'}>
+                    <input
+                      type="radio"
+                      name="pieceCount"
+                      checked={pieceCount === n}
+                      onChange={() => {
+                        setPieceCount(n);
+                      }}
+                    />
+                    {n}개
+                  </label>
+                ))}
+              </fieldset>
 
-            <fieldset className="choice">
-              <legend>판</legend>
-              {BOARD_IDS.map((id) => (
-                <label
-                  key={id}
-                  className={board === id ? 'chip chip-on chip-board' : 'chip chip-board'}
-                >
-                  <input
-                    type="radio"
-                    name="board"
-                    checked={board === id}
-                    onChange={() => {
-                      setBoard(id);
-                    }}
-                  />
-                  <BoardPreview board={id} />
-                  {BOARD_LABEL[id]}
-                </label>
-              ))}
-            </fieldset>
+              <fieldset className="choice">
+                <legend>판</legend>
+                {BOARD_IDS.map((id) => (
+                  <label
+                    key={id}
+                    className={board === id ? 'chip chip-on chip-board' : 'chip chip-board'}
+                  >
+                    <input
+                      type="radio"
+                      name="board"
+                      checked={board === id}
+                      onChange={() => {
+                        setBoard(id);
+                      }}
+                    />
+                    <BoardPreview board={id} />
+                    {BOARD_LABEL[id]}
+                  </label>
+                ))}
+              </fieldset>
+            </div>
 
             <ThemeChoice theme={theme} onChange={setTheme} />
 
-            <fieldset className="choice">
-              <legend>공개 여부</legend>
-              {([true, false] as const).map((value) => (
-                <label key={String(value)} className={isPublic === value ? 'chip chip-on' : 'chip'}>
-                  <input
-                    type="radio"
-                    name="isPublic"
-                    checked={isPublic === value}
-                    onChange={() => {
-                      setIsPublic(value);
-                    }}
-                  />
-                  {value ? '공개' : '비공개'}
-                </label>
-              ))}
-            </fieldset>
+            <div className="create-pair create-pair-code">
+              <fieldset className="choice">
+                <legend>공개 여부</legend>
+                {([true, false] as const).map((value) => (
+                  <label
+                    key={String(value)}
+                    className={isPublic === value ? 'chip chip-on' : 'chip'}
+                  >
+                    <input
+                      type="radio"
+                      name="isPublic"
+                      checked={isPublic === value}
+                      onChange={() => {
+                        setIsPublic(value);
+                      }}
+                    />
+                    {value ? '공개' : '비공개'}
+                  </label>
+                ))}
+              </fieldset>
 
-            {!isPublic && (
               <div className="code-box">
-                <span className="hint">방 코드 (자동 생성)</span>
-                <strong className="code-text">{code}</strong>
-                <CopyCodeButton code={code} />
+                {isPublic ? (
+                  <span className="hint">방 코드 없음</span>
+                ) : (
+                  <>
+                    <span className="hint">방 코드 (자동 생성)</span>
+                    <strong className="code-text">{code}</strong>
+                    <CopyCodeButton code={code} />
+                  </>
+                )}
               </div>
-            )}
+            </div>
 
             {error && (
               <p className="msg msg-error" role="alert">
                 {error}
               </p>
             )}
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              {busy ? '만드는 중…' : '방 만들기'}
+            <button type="submit" className="l-btn l-btn-primary create-submit" disabled={busy}>
+              {busy ? '만드는 중…' : '방 만들기 ✦'}
             </button>
           </form>
         )}
       </div>
-    </FloatingWindow>
+    </div>
   );
 }
 

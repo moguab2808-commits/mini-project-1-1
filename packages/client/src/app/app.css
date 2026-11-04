@@ -148,7 +148,8 @@ input {
 /* 부팅·로그인: L 세트 일러스트를 배경으로 쓴다(DEC-070). 그림 가운데는 비워 두고 로고는 위, 창은 아래에 둔다. */
 .boot-page,
 .auth-page,
-.lobby {
+.lobby,
+.create-layer {
   position: relative;
   color: #fff;
   font-family: var(--l-font);
@@ -699,6 +700,374 @@ input {
   }
 }
 
+/* 방 생성 창: 로비를 덮는 L 화풍 화면(DEC-070). 왼쪽은 배경 없이 뒤가 비치는 창에 내 캐릭터 3D 전신, 오른쪽은 설정과 만들기 버튼이다. */
+.create-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  box-sizing: border-box;
+  padding: 26px 30px 40px;
+  display: grid;
+  grid-template-columns: minmax(280px, 540px) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px 22px;
+  overflow: auto;
+}
+.create-top {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+}
+.create-logo {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.create-ribbon {
+  font-size: 17px;
+}
+.create-back {
+  height: 52px;
+  padding: 0 20px;
+  font-size: 18px;
+}
+.create-figure {
+  position: relative;
+  min-height: 0;
+  background: linear-gradient(180deg, rgba(255, 240, 215, 0.12), rgba(122, 68, 33, 0.18));
+}
+.create-figure::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  width: 200px;
+  height: 26px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(40, 14, 0, 0.45), transparent 70%);
+  pointer-events: none;
+}
+.figure-view {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.figure-view-flat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.create-form {
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+}
+.create-fields,
+.create-form .ai-setup form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.create-form .ai-setup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 오목한 칸: 선택 묶음·방 제목·코드 */
+.create-form .choice,
+.create-form .create-title,
+.create-form .ai-setup fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--l-r-well);
+  background: rgba(60, 26, 8, 0.42);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+.create-form .choice legend,
+.create-form .ai-setup legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 7px;
+  padding: 0;
+  color: var(--l-cream-text);
+  font-size: 14px;
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+}
+.create-form .choice legend + *,
+.create-form .ai-setup legend + * {
+  clear: left;
+}
+.create-pair {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 10px;
+}
+.create-pair-code {
+  grid-template-columns: 210px minmax(0, 1fr);
+}
+.create-pair > .choice {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.create-pair > .choice legend {
+  display: none;
+}
+.create-title {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.create-title > span {
+  flex: none;
+  color: var(--l-cream-text);
+  font-size: 14px;
+}
+.create-form .create-title .l-input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  border: 0;
+  border-radius: var(--l-r-input);
+  background: rgba(255, 247, 234, 0.92);
+  color: var(--l-ink);
+  font-size: 18px;
+  box-shadow:
+    inset 0 3px 0 rgba(120, 60, 20, 0.15),
+    0 0 0 2px var(--l-gold-edge);
+}
+
+/* 선택 버튼(칩): 선택하면 주황으로 빛난다 */
+.create-form .chip,
+.create-form .ai-setup label {
+  position: relative;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  color: var(--l-wood-deep);
+  font-size: 17px;
+  background: rgba(255, 247, 234, 0.88);
+  box-shadow:
+    inset 0 3px 0 #fff,
+    0 3px 0 rgba(122, 68, 33, 0.8);
+}
+.create-form .chip input,
+.create-form .ai-setup input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.create-form .chip-on,
+.create-form .ai-setup label:has(input:checked) {
+  color: #4a1e04;
+  background: linear-gradient(180deg, #ffd76a, #ffa431 60%, #f07a1a);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.55),
+    0 4px 0 #9a4a14;
+}
+.create-form .chip:has(input:focus-visible),
+.create-form .ai-setup label:has(input:focus-visible) {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+/* 대전 상대: 큰 버튼 두 개(보라·파랑 / 크림) */
+.create-form .create-opponent {
+  flex-wrap: nowrap;
+  gap: 10px;
+  padding: 8px;
+}
+.create-form .create-opponent legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.create-form .create-opponent .chip {
+  min-height: 52px;
+  border-radius: var(--l-r-btn);
+  color: var(--l-wood-deep);
+  font-family: var(--l-font-title);
+  font-size: 20px;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  box-shadow:
+    inset 0 4px 0 #fff,
+    inset 0 -5px 0 rgba(180, 110, 40, 0.3),
+    0 5px 0 #9a6a30;
+}
+.create-form .create-opponent .chip-on {
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(90, 30, 0, 0.55);
+  background: linear-gradient(90deg, var(--l-violet), var(--l-blue));
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -5px 0 rgba(20, 10, 80, 0.35),
+    0 5px 0 #2a2a8a,
+    0 0 18px rgba(160, 100, 255, 0.5);
+}
+.create-form .create-opponent small {
+  font-family: var(--l-font);
+  font-size: 12px;
+}
+
+/* 방 테마: 그림 타일 네 개 */
+.create-form .choice:has([data-theme]),
+.create-form .ai-setup fieldset:has([data-theme]) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.create-form .choice:has([data-theme]) legend,
+.create-form .ai-setup fieldset:has([data-theme]) legend {
+  grid-column: 1 / -1;
+}
+.create-form [data-theme] {
+  height: 66px;
+  align-items: flex-end;
+  padding: 0 0 4px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 15px;
+  text-shadow:
+    0 2px 0 rgba(40, 16, 4, 0.85),
+    0 0 8px rgba(40, 16, 4, 0.7);
+  filter: saturate(0.8) brightness(0.9);
+  box-shadow: 0 0 0 2px rgba(255, 214, 140, 0.45);
+}
+.create-form [data-theme].chip-on,
+.create-form .ai-setup label[data-theme]:has(input:checked) {
+  color: #fff;
+  filter: none;
+  box-shadow:
+    0 0 0 3px var(--l-gold),
+    0 0 18px rgba(255, 200, 90, 0.9);
+}
+.create-form [data-theme='bar'] {
+  background: linear-gradient(180deg, #7a3a5a, #f6a25a 60%, #c9783a 60%);
+}
+.create-form [data-theme='rooftop'] {
+  background:
+    radial-gradient(circle at 75% 25%, #fff6c8 0 6px, transparent 8px),
+    linear-gradient(180deg, #14104a, #4a3aa8);
+}
+.create-form [data-theme='classroom'] {
+  background: linear-gradient(180deg, #2a5a3a 0 60%, #b97a45 60%);
+}
+.create-form [data-theme='beach'] {
+  background: linear-gradient(180deg, #5ac0f0 0 45%, #2aa0e0 45% 62%, #f8dc98 62%);
+}
+
+/* 방 코드: 금빛 칸 */
+.create-form .code-box {
+  min-width: 0;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 16px;
+  color: #6a3a08;
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 10%, rgba(255, 255, 255, 0.85), transparent 70%),
+    linear-gradient(180deg, #ffe58a, #e9aa22);
+  box-shadow:
+    inset 0 -4px 0 rgba(120, 60, 0, 0.3),
+    0 4px 0 #8a5208,
+    0 0 16px rgba(255, 200, 60, 0.45);
+}
+.create-form .code-box .hint {
+  color: #6a3a08;
+  font-size: 14px;
+}
+.create-form .code-box .code-text {
+  color: #6a3a08;
+  font-family: var(--l-font-title);
+  font-size: 26px;
+  letter-spacing: 5px;
+}
+.create-form .code-box .btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  color: var(--l-wood-deep);
+  box-shadow: 0 3px 0 #9a6a30;
+}
+.create-form .create-pair-code .code-box {
+  min-height: 56px;
+}
+
+/* 만들기 버튼과 안내 */
+.create-submit,
+.create-form .ai-setup button[type='submit'] {
+  margin-top: auto;
+  height: 68px;
+  border-radius: 22px;
+  font-size: 30px;
+}
+.create-form .ai-setup p {
+  margin: 0;
+  color: var(--l-cream-text);
+  font-size: 14px;
+}
+.create-form .msg-error {
+  background: rgba(60, 20, 8, 0.75);
+  color: #ffd0c2;
+}
+.board-preview {
+  width: 24px;
+  height: 24px;
+  fill: #b98a54;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+/* 창 폭 900px 미만: 캐릭터 창이 위로 올라가고 화면이 스크롤된다 */
+@media (max-width: 900px) {
+  .create-layer {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 260px auto;
+  }
+  .create-pair,
+  .create-pair-code {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .create-form .create-title {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 640px) {
+  .create-layer {
+    padding: 18px 16px 28px;
+  }
+  .create-logo {
+    font-size: 32px;
+  }
+}
+
 /* 플로팅 창 */
 .float-layer {
   position: fixed;
@@ -736,108 +1105,6 @@ input {
 }
 .float-body {
   padding: 16px 18px 18px;
-}
-.choice {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.choice legend {
-  width: 100%;
-  margin-bottom: 4px;
-  padding: 0;
-  color: var(--sub);
-  font-size: 14px;
-}
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 2px solid var(--wood-light);
-  border-radius: 10px;
-  cursor: pointer;
-}
-.chip input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.chip-on {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-.chip:has(input:focus-visible) {
-  outline: 3px solid var(--cream);
-  outline-offset: 2px;
-}
-/* 방 생성 창의 AI 설정은 `/ai`의 `AiSetupForm`을 그대로 쓴다(DEC-042). 그 마크업에 칩 모양을 입힌다. */
-.ai-setup form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.ai-setup fieldset {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.ai-setup legend {
-  width: 100%;
-  margin-bottom: 4px;
-  padding: 0;
-  color: var(--sub);
-  font-size: 14px;
-}
-.ai-setup label {
-  display: inline-flex;
-  align-items: center;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 2px solid var(--wood-light);
-  border-radius: 10px;
-  cursor: pointer;
-}
-.ai-setup input[type='radio'] {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.ai-setup label:has(input:checked) {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-.ai-setup label:has(input:focus-visible) {
-  outline: 3px solid var(--cream);
-  outline-offset: 2px;
-}
-.ai-setup p {
-  color: var(--sub);
-  font-size: 14px;
-}
-.ai-setup button[type='submit'] {
-  min-height: 40px;
-  border: 2px solid var(--accent);
-  border-radius: 10px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  cursor: pointer;
-}
-.board-preview {
-  width: 24px;
-  height: 24px;
-  fill: #b98a54;
-  stroke: var(--ink);
-  stroke-width: 2;
 }
 .code-box {
   display: flex;

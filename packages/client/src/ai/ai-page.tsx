@@ -34,7 +34,11 @@ export function ThemeChoice({ theme, onChange, chips = true }: ThemeChoiceProps)
     <fieldset className={chips ? 'choice' : undefined}>
       <legend>방 테마</legend>
       {THEME_IDS.map((id) => (
-        <label key={id} className={chips ? (theme === id ? 'chip chip-on' : 'chip') : undefined}>
+        <label
+          key={id}
+          data-theme={id}
+          className={chips ? (theme === id ? 'chip chip-on' : 'chip') : undefined}
+        >
           <input
             type="radio"
             name="theme"
@@ -100,9 +104,11 @@ export function AiSetupForm({ initial, onStart }: AiSetupFormProps) {
           </label>
         ))}
       </fieldset>
-      <ThemeChoice theme={theme} onChange={setTheme} chips={false} />
+      <ThemeChoice theme={theme} onChange={setTheme} />
       <p>방 목록에 올리지 않고 바로 시작해요. 결과는 전적에 반영되지 않아요.</p>
-      <button type="submit">AI와 시작</button>
+      <button type="submit" className="l-btn l-btn-primary">
+        AI와 시작
+      </button>
     </form>
   );
 }

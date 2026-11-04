@@ -457,6 +457,7 @@ export function LobbyScreen({
       {modal?.t === 'create' && (
         <CreateRoomModal
           nickname={me.nickname}
+          appearance={me.appearance}
           onCreate={createRoom}
           onStartAi={onStartAi}
           onClose={closeModal}
