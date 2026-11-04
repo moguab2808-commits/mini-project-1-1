@@ -708,7 +708,8 @@ input {
   box-sizing: border-box;
   padding: 26px 30px 40px;
   display: grid;
-  grid-template-columns: minmax(280px, 540px) minmax(0, 1fr);
+  /* 설정 창이 최소 600px을 먼저 차지하고 남는 폭을 캐릭터 열이 쓴다(최대 540px) */
+  grid-template-columns: minmax(200px, 540px) minmax(600px, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   gap: 18px 22px;
   overflow: auto;
@@ -765,7 +766,9 @@ input {
   justify-content: center;
 }
 .create-form {
+  min-width: 0;
   min-height: 0;
+  container-type: inline-size;
   box-sizing: border-box;
   padding: 14px;
   display: flex;
@@ -828,6 +831,12 @@ input {
 }
 .create-pair > .choice legend {
   display: none;
+}
+/* 설정 창 안쪽 폭이 좁으면(방 코드가 잘리지 않게) 두 칸 행을 한 줄씩 쌓는다 */
+@container (max-width: 600px) {
+  .create-pair-code {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .create-title {
   flex-direction: row;

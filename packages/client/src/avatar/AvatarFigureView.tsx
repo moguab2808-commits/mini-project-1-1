@@ -54,12 +54,17 @@ export function AvatarFigureView({ appearance }: { appearance: Appearance }) {
     const centerY = FIGURE_HEIGHT / 2 - 1;
 
     let raf = 0;
+    // 마지막으로 맞춘 캔버스 크기. 비율이 같아도 크기가 바뀌면 그림 버퍼를 다시 맞춘다
+    let sizedW = 0;
+    let sizedH = 0;
     let last = performance.now();
     const t0 = last;
     const loop = (now: number) => {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
-      if (w > 0 && h > 0 && cam.aspect !== w / h) {
+      if (w > 0 && h > 0 && (w !== sizedW || h !== sizedH)) {
+        sizedW = w;
+        sizedH = h;
         renderer.setSize(w, h, false);
         cam.aspect = w / h;
         // 가로가 좁으면 전신이 잘리지 않게 뒤로 물러난다
