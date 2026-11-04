@@ -44,6 +44,8 @@ import {
   emoteAgeMs,
   type DisplayEmote,
 } from '../emotes.ts';
+// 화풍 변수(--l-*)를 쓰므로 공통 화풍을 먼저 불러온다(앱 밖 하네스에서도 같게 보이도록)
+import '../../ui/theme.css';
 import './hud.css';
 
 export interface HudProps {

@@ -1,10 +1,19 @@
-/* 게임 화면 HUD. 색·글꼴은 시안(알까기 바 (2).html)을 따른다. 글꼴 Jua는 반입 확인 전이라 시스템 글꼴로 대체된다. */
+/*
+ * 게임 화면 HUD. 화풍은 L 한밤의 마법 알까기 세트(DEC-069·DEC-070 ⑤)를 따르고 색·글꼴은 ui/theme.css의
+ * --l-* 변수를 쓴다(IMPL-021). 배치·크기는 그대로 두고 질감(반투명 원목·금빛 테두리·광택 버튼)만 바꾼다.
+ * 프로필은 장면을 가리지 않도록 배경 없이 둔다.
+ */
 .gs-root {
-  --ink: #2b1d14;
-  --cream: #faf3e4;
-  --accent: #f0b553;
-  --danger: #d9694f;
-  --ok: #7fb069;
+  --ink: var(--l-ink);
+  --cream: var(--l-cream);
+  --accent: var(--l-gold);
+  --danger: var(--l-danger);
+  --ok: var(--l-ok);
+  /* HUD 공통 질감: 반투명 원목 + 금빛 테두리 빛(.l-tray를 작은 요소에 맞게 줄임) */
+  --gs-wood: linear-gradient(180deg, rgba(185, 122, 69, 0.78), rgba(122, 68, 33, 0.82));
+  --gs-wood-edge:
+    inset 0 2px 0 rgba(255, 225, 175, 0.55), inset 0 -3px 0 rgba(60, 24, 6, 0.35),
+    0 0 0 2px var(--l-gold-edge), 0 0 14px var(--l-glow), 0 6px 14px rgba(0, 0, 0, 0.35);
   position: fixed;
   inset: 0;
   width: 100%;
@@ -15,7 +24,7 @@
   overflow: hidden;
   background: #1b130e;
   color: var(--cream);
-  font-family: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif;
+  font-family: var(--l-font);
   user-select: none;
 }
 .gs-scene {
@@ -29,6 +38,7 @@
 }
 .gs-shadow {
   text-shadow:
+    0 1px 0 var(--l-wood-deep),
     0 1px 3px rgba(0, 0, 0, 0.9),
     0 0 8px rgba(0, 0, 0, 0.7);
 }
@@ -57,8 +67,10 @@
   text-align: right;
 }
 .gs-profile.active {
-  border-color: var(--accent);
-  box-shadow: 0 0 16px rgba(240, 181, 83, 0.55);
+  border-color: var(--l-gold-edge);
+  box-shadow:
+    0 0 18px var(--l-glow),
+    inset 0 0 12px rgba(255, 211, 107, 0.25);
 }
 .gs-face {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
@@ -87,7 +99,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 .gs-dot.on {
-  background: var(--accent);
+  background: radial-gradient(circle at 35% 30%, #fff3c4, var(--l-gold) 55%, #e09a2a);
 }
 
 /* 상단 중앙 */
@@ -99,19 +111,45 @@
   text-align: center;
 }
 .gs-time {
+  font-family: var(--l-font-title);
   font-size: 44px;
   line-height: 1;
+  color: var(--l-title);
+  text-shadow:
+    2px 2px 0 var(--l-wood-deep),
+    -2px 2px 0 var(--l-wood-deep),
+    2px -2px 0 var(--l-wood-deep),
+    -2px -2px 0 var(--l-wood-deep),
+    0 4px 0 var(--l-wood-deep),
+    0 0 18px rgba(255, 190, 90, 0.85);
 }
 .gs-time.low {
-  color: var(--danger);
+  color: #ffb3a0;
+  text-shadow:
+    2px 2px 0 #6a1408,
+    -2px 2px 0 #6a1408,
+    2px -2px 0 #6a1408,
+    -2px -2px 0 #6a1408,
+    0 4px 0 #6a1408,
+    0 0 18px rgba(255, 90, 60, 0.9);
 }
+/* 라운드: 보라·파랑 띠(.l-ribbon) */
 .gs-round {
-  font-size: 16px;
-  margin-top: 2px;
+  display: inline-block;
+  font-size: 15px;
+  margin-top: 6px;
+  padding: 2px 14px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(90deg, rgba(110, 40, 200, 0.88), rgba(40, 120, 230, 0.88));
+  box-shadow:
+    0 0 14px rgba(160, 100, 255, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
 }
 .gs-turn {
   font-size: 14px;
-  opacity: 0.9;
+  margin-top: 3px;
+  color: var(--l-cream-text);
 }
 
 /* 방해요소 칸 */
@@ -128,9 +166,10 @@
   position: relative;
   width: 76px;
   height: 76px;
-  border-radius: 14px;
-  border: 3px solid var(--cream);
-  background: rgba(27, 19, 14, 0.55);
+  border-radius: 16px;
+  border: 0;
+  background: var(--gs-wood);
+  box-shadow: var(--gs-wood-edge);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,8 +180,11 @@
   font: inherit;
 }
 .gs-slot.empty {
-  border-style: dashed;
-  opacity: 0.55;
+  background: rgba(60, 26, 8, 0.35);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.3),
+    0 0 0 2px var(--l-gold-edge);
+  opacity: 0.7;
   cursor: default;
 }
 .gs-slot.dim {
@@ -158,14 +200,19 @@
   bottom: -8px;
   min-width: 24px;
   height: 24px;
-  border-radius: 6px;
-  background: var(--cream);
-  color: var(--ink);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  color: var(--l-wood-deep);
+  font-family: var(--l-font-title);
   font-size: 15px;
+  text-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 0 2px 0 #fff,
+    0 2px 0 #9a6a30,
+    0 2px 5px rgba(0, 0, 0, 0.5);
 }
 .gs-slot-cool {
   position: absolute;
@@ -175,8 +222,8 @@
   justify-content: center;
   font-size: 30px;
   color: #fff;
-  background: rgba(60, 60, 60, 0.55);
-  border-radius: 11px;
+  background: rgba(40, 20, 8, 0.6);
+  border-radius: 16px;
 }
 .gs-slot-na {
   position: absolute;
@@ -185,26 +232,30 @@
   font-size: 11px;
   padding: 1px 5px;
   border-radius: 6px;
-  background: rgba(27, 19, 14, 0.85);
+  background: rgba(60, 26, 8, 0.85);
+  color: var(--l-cream-text);
 }
 .gs-gauge {
   width: 76px;
   height: 9px;
   border-radius: 5px;
-  border: 2px solid var(--cream);
-  background: rgba(27, 19, 14, 0.6);
+  border: 0;
+  background: rgba(60, 26, 8, 0.7);
+  box-shadow: 0 0 0 2px var(--l-gold-edge);
   overflow: hidden;
   box-sizing: border-box;
 }
 .gs-gauge > i {
   display: block;
   height: 100%;
-  background: var(--ok);
+  background: linear-gradient(180deg, #b6e39b, var(--ok));
 }
 .gs-gauge.hot > i {
-  background: var(--danger);
+  background: linear-gradient(180deg, #ffa58c, var(--danger));
 }
 .gs-slot-name {
+  /* E 키 표시(칸 아래로 8px 나옴)와 겹치지 않게 띄운다 */
+  margin-top: 6px;
   font-size: 13px;
   max-width: 130px;
   text-align: right;
@@ -218,15 +269,24 @@
   width: 190px;
   padding: 18px 16px;
   margin: -110px 0 0 -95px;
-  border-radius: 18px;
-  background: var(--cream);
-  color: var(--ink);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fffaf0, #ffe7bf);
+  color: var(--l-ink);
   text-align: center;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  text-shadow: none;
+  box-shadow:
+    inset 0 3px 0 #fff,
+    inset 0 -4px 0 rgba(180, 110, 40, 0.25),
+    0 0 0 3px var(--l-gold-edge),
+    0 0 26px var(--l-glow),
+    0 10px 28px rgba(0, 0, 0, 0.5);
   animation: gs-grant-fly 1.5s ease-in forwards;
 }
 .gs-grant strong {
   display: block;
+  font-family: var(--l-font-title);
+  font-weight: 400;
+  color: var(--l-wood-deep);
   font-size: 22px;
   margin-top: 6px;
 }
@@ -267,8 +327,8 @@
   gap: 8px;
   padding: 6px 16px 6px 8px;
   border-radius: 999px;
-  background: rgba(27, 19, 14, 0.78);
-  border: 2px solid var(--accent);
+  background: var(--gs-wood);
+  box-shadow: var(--gs-wood-edge);
   font-size: 18px;
 }
 .gs-notice {
@@ -278,8 +338,11 @@
   transform: translateX(-50%);
   padding: 6px 16px;
   border-radius: 999px;
-  background: rgba(27, 19, 14, 0.82);
-  border: 2px solid var(--danger);
+  background: linear-gradient(180deg, rgba(150, 50, 30, 0.9), rgba(100, 30, 15, 0.92));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 190, 160, 0.45),
+    0 0 0 2px rgba(255, 160, 130, 0.6),
+    0 6px 14px rgba(0, 0, 0, 0.35);
   font-size: 16px;
 }
 .gs-wait {
@@ -289,7 +352,7 @@
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  background: rgba(27, 19, 14, 0.82);
+  background: radial-gradient(ellipse at 50% 40%, rgba(70, 30, 120, 0.82), rgba(20, 10, 40, 0.92));
   pointer-events: auto;
 }
 .gs-wind {
@@ -329,32 +392,59 @@
   gap: 8px;
   pointer-events: auto;
 }
+/* 버튼: .l-btn 광택 버튼. 기본은 크림(.l-btn-cream), primary는 주황, danger는 붉은 광택 */
 .gs-btn {
-  font: inherit;
+  font-family: var(--l-font-title);
   font-size: 16px;
   padding: 8px 18px;
-  border-radius: 10px;
-  border: 2px solid var(--cream);
-  background: rgba(27, 19, 14, 0.7);
-  color: var(--cream);
+  border-radius: 14px;
+  border: 0;
+  color: var(--l-wood-deep);
+  text-shadow: none;
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  box-shadow:
+    inset 0 3px 0 #fff,
+    inset 0 -4px 0 rgba(180, 110, 40, 0.3),
+    0 4px 0 #9a6a30,
+    0 6px 12px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
 .gs-btn:hover:not(:disabled) {
-  background: rgba(60, 42, 30, 0.9);
+  filter: brightness(1.07);
+}
+.gs-btn:active:not(:disabled) {
+  transform: translateY(2px);
+}
+.gs-btn:focus-visible,
+.gs-chip:focus-visible,
+.gs-slot:focus-visible,
+.gs-emote-menu button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 .gs-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
 .gs-btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ink);
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(90, 30, 0, 0.55);
+  background: linear-gradient(180deg, #ffd76a 0%, #ffa431 55%, #f07a1a 100%);
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -5px 0 rgba(150, 60, 0, 0.35),
+    0 5px 0 #9a4a14,
+    0 8px 16px rgba(80, 30, 0, 0.45);
 }
 .gs-btn.danger {
-  background: var(--danger);
-  border-color: var(--danger);
   color: #fff;
+  text-shadow: 0 2px 0 rgba(90, 10, 0, 0.55);
+  background: linear-gradient(180deg, #ff9a7a 0%, #e5603f 55%, #b8391f 100%);
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -5px 0 rgba(120, 20, 0, 0.35),
+    0 5px 0 #7a2410,
+    0 8px 16px rgba(80, 10, 0, 0.45);
 }
 
 /* 결과 */
@@ -364,36 +454,69 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(27, 19, 14, 0.6);
+  background: radial-gradient(ellipse at 50% 45%, rgba(40, 18, 70, 0.45), rgba(15, 8, 25, 0.72));
   pointer-events: auto;
 }
+/* 결과창: .l-tray 쟁반 */
 .gs-result-box {
   min-width: 380px;
   padding: 28px 40px;
-  border-radius: 20px;
-  background: rgba(38, 27, 20, 0.95);
-  border: 3px solid var(--accent);
+  border-radius: var(--l-r-tray);
+  background: linear-gradient(180deg, rgba(185, 122, 69, 0.88), rgba(122, 68, 33, 0.92));
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 225, 175, 0.6),
+    inset 0 -5px 0 rgba(60, 24, 6, 0.35),
+    0 0 0 3px var(--l-gold-edge),
+    0 0 34px var(--l-glow),
+    0 18px 34px rgba(0, 0, 0, 0.35);
   text-align: center;
 }
+/* 결과 제목: .l-logo 글꼴·윤곽 */
 .gs-result-title {
+  font-family: var(--l-font-title);
   font-size: 56px;
   line-height: 1.1;
+  color: var(--l-title);
+  text-shadow:
+    3px 3px 0 var(--l-wood-deep),
+    -3px 3px 0 var(--l-wood-deep),
+    3px -3px 0 var(--l-wood-deep),
+    -3px -3px 0 var(--l-wood-deep),
+    0 6px 0 var(--l-wood-deep),
+    0 0 28px rgba(255, 190, 90, 0.9);
 }
 .gs-result-title.win {
-  color: var(--accent);
+  color: var(--l-gold);
 }
 .gs-result-title.lose {
-  color: var(--danger);
+  color: #c9d6ff;
+  text-shadow:
+    3px 3px 0 #23215a,
+    -3px 3px 0 #23215a,
+    3px -3px 0 #23215a,
+    -3px -3px 0 #23215a,
+    0 6px 0 #23215a,
+    0 0 28px rgba(140, 120, 255, 0.8);
 }
 .gs-result-reason {
+  display: inline-block;
   font-size: 16px;
-  margin: 6px 0 14px;
-  opacity: 0.9;
+  margin: 10px 0 14px;
+  padding: 3px 16px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(90deg, rgba(110, 40, 200, 0.9), rgba(40, 120, 230, 0.9));
+  box-shadow:
+    0 0 14px rgba(160, 100, 255, 0.55),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
 }
 .gs-result-msg {
   min-height: 24px;
   font-size: 18px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
+  color: var(--l-cream-text);
 }
 .gs-result-actions {
   display: flex;
@@ -429,19 +552,24 @@
   font-size: 15px;
   padding: 6px 12px;
   border-radius: 999px;
-  border: 2px solid var(--cream);
-  background: rgba(27, 19, 14, 0.7);
-  color: var(--cream);
+  border: 0;
+  background: var(--gs-wood);
+  box-shadow: var(--gs-wood-edge);
+  color: var(--l-cream);
   cursor: pointer;
-  text-shadow: none;
+  text-shadow: 0 1px 0 var(--l-wood-deep);
 }
 .gs-chip:hover:not(:disabled) {
-  background: rgba(60, 42, 30, 0.9);
+  filter: brightness(1.1);
 }
 .gs-chip.on {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ink);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(90, 30, 0, 0.55);
+  background: linear-gradient(180deg, #ffd76a 0%, #ffa431 55%, #f07a1a 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 2px var(--l-gold-edge),
+    0 0 14px var(--l-glow);
 }
 .gs-chip:disabled {
   opacity: 0.4;
@@ -475,8 +603,11 @@
   transform: translateX(-50%);
   padding: 6px 16px;
   border-radius: 14px;
-  background: rgba(250, 243, 228, 0.92);
-  color: var(--ink);
+  background: linear-gradient(180deg, rgba(255, 250, 240, 0.95), rgba(255, 231, 191, 0.95));
+  box-shadow:
+    0 0 0 2px var(--l-gold-edge),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  color: var(--l-ink);
   font-size: 17px;
   text-shadow: none;
   white-space: nowrap;
@@ -557,6 +688,15 @@
   .gs-time {
     font-size: 30px;
   }
+  /* 도움말이 두 줄로 접혀도 기권 버튼과 겹치지 않게 올린다 */
+  .gs-forfeit {
+    left: 8px;
+    bottom: 44px;
+  }
+  .gs-emote-menu {
+    left: 8px;
+    bottom: 92px;
+  }
 }
 @media (max-width: 480px) {
   .gs-top {
@@ -609,10 +749,12 @@
   text-shadow: none;
 }
 .gs-emote-menu button {
-  color: var(--cream);
-  background: #3b291eee;
-  border: 1px solid #dab984;
-  border-radius: 9px;
+  color: var(--l-cream);
+  background: var(--gs-wood);
+  border: 0;
+  box-shadow: var(--gs-wood-edge);
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+  border-radius: 12px;
   padding: 9px 13px;
   font: inherit;
   cursor: pointer;
@@ -628,14 +770,18 @@
   margin-bottom: 7px;
 }
 .gs-emote-options kbd {
-  color: var(--accent);
+  color: var(--l-gold);
+  font-family: var(--l-font-title);
 }
 .gs-emote-caption {
   position: absolute;
   padding: 6px 12px;
   border-radius: 14px;
-  background: #faf3e4;
-  color: #2b1d14;
+  background: linear-gradient(180deg, #fffaf0, #ffe7bf);
+  box-shadow:
+    0 0 0 2px var(--l-gold-edge),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  color: var(--l-ink);
   text-shadow: none;
   font-size: 18px;
 }
