@@ -32,7 +32,7 @@ npm run dev -w @alkkagi/client -- --host 127.0.0.1
 
 로컬 창을 닫거나 새로고침하면 이탈로 처리한다. 새 로컬 경기를 만들려면 두 창을 모두 닫고 다시 연다. 오래 가려진 탭의 타이머 제한은 [로컬 실행의 한계](docs/design/LOCAL.md#로컬-2인-구성-창-2개)를 확인한다.
 
-온라인 서버는 PostgreSQL 연결 설정 `DATABASE_URL`과 32자 이상인 `SESSION_SECRET`이 필요하다. 변수 이름은 [.env.example](.env.example)에 있으며 복사해 `.env`로 만들고 값을 채운다. 환경에 값을 설정한 뒤 `npm run db:migrate -w @alkkagi/server`, `npm run dev -w @alkkagi/server`를 실행한다. 마이그레이션 명령은 루트 `.env`도 읽지만 개발 서버 명령은 프로세스 환경을 읽는다. `/`(로그인·로비·대기실)는 서버를 띄운 뒤 개발 서버로 연다.
+온라인 서버는 PostgreSQL 연결 설정 `DATABASE_URL`과 32자 이상인 `SESSION_SECRET`이 필요하다. 변수 이름은 [.env.example](.env.example)에 있으며 복사해 `.env`로 만들고 값을 채운다. 환경에 값을 설정한 뒤 `npm run db:migrate -w @alkkagi/server`, `npm run dev -w @alkkagi/server`를 실행한다. 마이그레이션·개발 서버 명령은 모두 프로젝트 루트의 `.env`를 읽는다. 같은 이름의 환경변수를 셸에서 이미 설정했다면 셸의 값이 우선한다. `/`(로그인·로비·대기실)는 서버를 띄운 뒤 개발 서버로 연다.
 
 DB 테스트는 `DATABASE_URL`이 설정된 환경에서 `npm run test:db`로 실행한다. 연결 계정에 임시 DB 생성·삭제 권한이 필요하고, 테스트는 임시 DB를 만들었다가 지운다. 환경변수 실제 값과 비밀정보는 문서에 적지 않는다.
 

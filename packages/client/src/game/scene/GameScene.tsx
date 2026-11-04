@@ -850,11 +850,14 @@ function SceneWorld(props: SceneProps) {
     tmp.fp.y += 1.5 + EYE_LIFT.up * lift;
     tmp.fp.z += fwdZ * (2 - EYE_LIFT.back * lift);
     // 1인칭 시선: 판 중심 → 조준 중인 알·움직이는 알 쪽으로
-    // default(lift)는 상대 캐릭터 얼굴을 화면 가운데에 두고, 조준 중에도 시선을 덜 옮긴다
+    // default(lift)는 고정된 눈 위치에서 수평 아래 pitchDownDeg로 판을 내려다본다. 조준 중에도 시선을 덜 옮긴다
+    const pd = EYE_LIFT.pitchDownDeg * DEG;
+    const eyeY = SEAT_GEOMETRY.headHeight + 1.5 + EYE_LIFT.up;
+    const eyeZ = -fwdZ * SEAT_GEOMETRY.anchorDistance + fwdZ * (2 - EYE_LIFT.back);
     rt.lookV.set(
       0,
-      -2 + (SEAT_GEOMETRY.headHeight + 2) * lift,
-      fwdZ * SEAT_GEOMETRY.anchorDistance * lift,
+      -2 + (eyeY - Math.sin(pd) * 60 + 2) * lift,
+      (eyeZ + fwdZ * Math.cos(pd) * 60) * lift,
     );
     const follow = 1 - 0.65 * lift;
     if (meSa.frame.aim) {
