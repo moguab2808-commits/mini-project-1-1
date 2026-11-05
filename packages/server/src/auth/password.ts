@@ -9,12 +9,40 @@ export const ARGON2_OPTIONS = {
   parallelism: 1,
 } as const;
 
-export function hashPassword(password: string): Promise<string> {
-  return hash(password, ARGON2_OPTIONS);
+export type HashTimingSink = (line: string) => void;
+
+const stdoutSink: HashTimingSink = (line) => {
+  console.log(line);
+};
+
+/**
+ * 해시 시간 로그(OPERATIONS "서버 로그"): DB 조회와 분리해 argon2id 계산 시간만 잰다.
+ * 허용 키(ts·event·op·ms)만 내보내며 비밀번호·해시·닉네임은 담지 않는다.
+ */
+async function timed<T>(
+  op: 'hash' | 'verify',
+  sink: HashTimingSink,
+  run: () => Promise<T>,
+): Promise<T> {
+  const start = performance.now();
+  try {
+    return await run();
+  } finally {
+    const ms = Math.round((performance.now() - start) * 10) / 10;
+    sink(JSON.stringify({ ts: new Date().toISOString(), event: 'argon2_timing', op, ms }));
+  }
 }
 
-export function verifyPassword(passwordHash: string, password: string): Promise<boolean> {
-  return verify(passwordHash, password);
+export function hashPassword(password: string, sink: HashTimingSink = stdoutSink): Promise<string> {
+  return timed('hash', sink, () => hash(password, ARGON2_OPTIONS));
+}
+
+export function verifyPassword(
+  passwordHash: string,
+  password: string,
+  sink: HashTimingSink = stdoutSink,
+): Promise<boolean> {
+  return timed('verify', sink, () => verify(passwordHash, password));
 }
 
 let dummyHash: Promise<string> | undefined;
@@ -24,6 +52,6 @@ let dummyHash: Promise<string> | undefined;
  * 닉네임 없음과 비밀번호 틀림을 응답 시간으로 구분하지 못하게 한다.
  */
 export function getDummyHash(): Promise<string> {
-  dummyHash ??= hashPassword('dummy-password-for-timing-equalization');
+  dummyHash ??= hashPassword('dummy-password-for-timing-equalization', () => {});
   return dummyHash;
 }
