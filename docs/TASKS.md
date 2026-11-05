@@ -1105,7 +1105,7 @@ Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
-- [x] README의 명령을 새 환경에서 그대로 따라 실행해 확인한 결과가 worklog에 있다. (2026-11-05 새 클론에서 확인, DB 접속이 필요한 단계는 제외)
+- [x] README의 명령을 새 환경에서 그대로 따라 실행해 확인한 결과가 worklog에 있다. (2026-11-05 새 클론에서 확인, DB 접속이 필요한 단계는 제외하고 [DEC-065](DECISIONS.md#결정-색인)의 온라인·DB 확인 범위로 미룬다. 대상은 [IMPL-015](#impl-015-방-테마-구현)·[IMPL-018](#impl-018-사람-아바타-구현)의 DB 테스트와 온라인 두 계정 확인)
 - [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (병합 직후 체크 규칙에 따라 이 PR에서 함께 닫는다)
 
 진행: README에 서버 없는 AI·로컬 2인 실행·테마·입력·재도전을 정리했고(2026-11-03 로컬 확인), 2026-11-05 새 클론에서 `npm ci`·테스트·린트·빌드·개발 서버·서버 환경 변수 오류·운영 접속을 확인해 Windows 줄바꿈 안내와 배포 접속 절을 더했다([worklog](worklogs/2026-11-05.md#doc-011-readme-새-환경-검증)). DB 접속이 필요한 단계는 미확인으로 남겼다.

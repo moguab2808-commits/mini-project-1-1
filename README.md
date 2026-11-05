@@ -26,7 +26,7 @@ npm run format
 npm run build
 ```
 
-Windows에서 Git이 줄바꿈을 CRLF로 바꿔 받으면(`core.autocrlf=true`) `npm run format`이 대부분의 파일에서 경고를 내며 실패한다. 이때는 `git config core.autocrlf false`로 바꾼 뒤 다시 내려받는다. 줄바꿈만 무시하고 확인하려면 `npx prettier --config config/prettier.json --ignore-path config/prettier.ignore --end-of-line auto --check .`를 쓴다.
+Windows에서 Git이 줄바꿈을 CRLF로 바꿔 받으면(`core.autocrlf=true`) `npm run format`이 대부분의 파일에서 경고를 내며 실패한다. 처음 내려받을 때 `git clone -c core.autocrlf=false <저장소 주소>`를 쓰면 피할 수 있다. 이미 받은 저장소는 `git config core.autocrlf false`만으로는 작업 폴더의 파일이 그대로이므로, 변경 사항을 커밋하거나 `git stash`한 뒤 `git rm --cached -r .`와 `git reset --hard`로 작업 폴더를 다시 만든다(저장하지 않은 변경은 사라진다). 줄바꿈만 무시하고 확인하려면 `npx prettier --config config/prettier.json --ignore-path config/prettier.ignore --end-of-line auto --check .`를 쓴다.
 
 클라이언트 개발 서버는 `npm run dev -w @alkkagi/client`로 실행한다. `/local?seat=0`·`/local?seat=1`은 같은 브라우저의 두 창, `/ai`는 AI 대전이고, 로그인·로비·대기실·경기를 잇는 실제 화면은 `/`다. 개발 서버의 `/api`·`/socket.io`는 `127.0.0.1:3000`으로 전달한다.
 
