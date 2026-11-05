@@ -86,7 +86,7 @@
 | [IMPL-028](#impl-028-나머지-테마-3종-화풍) | 나머지 테마 3종 화풍 | P1 | IMPL-025 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
 | [IMPL-029](#impl-029-소리배경음악배경-소리효과음) | 소리(배경음악·배경 소리·효과음) | P1 | IMPL-025, IMPL-026 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
 | [IMPL-030](#impl-030-로그인-화면-움직이는-배경과-시안-배치) | 로그인 화면 움직이는 배경과 시안 배치 | P1 | IMPL-019, IMPL-029 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
-| [IMPL-031](#impl-031-로비-명판-꾸미기-버튼) | 로비 명판 꾸미기 버튼 | P2 | IMPL-019 | 진행 중 | Claude — 사용자 요청 수행 | 미생성 |
+| [IMPL-031](#impl-031-로비-명판-꾸미기-버튼) | 로비 명판 꾸미기 버튼 | P2 | IMPL-019 | 진행 중 | Claude — 사용자 요청 수행 | [#103](https://github.com/moguab2808-commits/mini-project-1-1/pull/103) |
 
 ## DOC-001 문서 책임과 구조 재편
 
@@ -921,7 +921,7 @@ Issue·PR: [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/7
 의존성: THEME-001, IMPL-004(로컬 2인), IMPL-005(AI 대전), IMPL-008(방 서버), IMPL-012(방 생성 창·방 카드·대기실)
 범위: [DEC-049](DECISIONS.md#결정-색인)·[DEC-050](DECISIONS.md#결정-색인)·[DEC-052](DECISIONS.md#결정-색인)·[DEC-053](DECISIONS.md#결정-색인)의 방 테마 4종(바·밤 옥상·교실·해변)을 저장·전송·선택·표시·장면에 구현한다. 판·알·의자·캐릭터 모양과 게임 규칙은 바꾸지 않는다.
 관련 문서: [PRD 방 생성](PRD.md#방-생성)·[로비](PRD.md#로비)·[대기실](PRD.md#대기실) / [API 공통 타입](design/API.md#공통-타입) / [DATABASE rooms](design/DATABASE.md#rooms) / [LOCAL](design/LOCAL.md) / [TECH_STACK 에셋](design/TECH_STACK.md#에셋-조달-계획)
-Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
+Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR), [PR #103](https://github.com/moguab2808-commits/mini-project-1-1/pull/103)(온라인 중계, 중간 PR)
 
 수용 기준:
 - [ ] (정상) `shared`에 `ThemeId`(`bar`·`rooftop`·`classroom`·`beach`)와 스키마가 있고, `rooms.theme` 마이그레이션(기본 `bar`)이 기존 행이 있는 DB에 적용된다. `room:create`에 `theme`을 주면 저장되고 생략하면 `bar`다. 방 목록·`room:state`·`game:start`에 같은 값이 담긴다(서버 테스트).
@@ -1434,7 +1434,7 @@ Issue·PR: 미생성
 의존성: [IMPL-019](#impl-019-l-화풍-화면-적용), [DEC-090](DECISIONS.md#결정-색인)
 범위: 로비 프로필 명판(`client/src/app/lobby-screen.tsx`·`app.css`)의 승률 공을 없애고 그 자리에 캐릭터 꾸미기 창을 여는 **꾸미기** 버튼을 둔다. 방 카드·대기실의 승률과 꾸미기 창 자체는 바꾸지 않는다.
 관련 문서: [PRD 로비](PRD.md#로비)·[PRD 캐릭터 변경](PRD.md#캐릭터-변경)
-Issue·PR: 미생성
+Issue·PR: [PR #103](https://github.com/moguab2808-commits/mini-project-1-1/pull/103)
 
 수용 기준:
 
