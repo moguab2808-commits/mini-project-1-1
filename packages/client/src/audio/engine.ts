@@ -43,6 +43,9 @@ export class RequestStack<T> {
   }
 }
 
+/** 효과음 파일을 받지 못했을 때 다시 받기까지 기다리는 시간 */
+const SFX_RETRY_MS = 10_000;
+
 export class AudioEngine {
   private ctx: AudioContext | null = null;
   private buses: Partial<Record<VolumeKind, GainNode>> = {};
@@ -246,7 +249,11 @@ export class AudioEngine {
         })
         .then((a) => ctx.decodeAudioData(a))
         .then((b) => this.buffers.set(key, b))
-        .catch(() => this.buffers.set(key, 'failed'));
+        .catch(() => {
+          // 실패하면 잠시 합성으로 내다가 다시 받는다(음악·배경 소리처럼). 자주 나는 소리라 바로 재시도하지 않는다.
+          this.buffers.set(key, 'failed');
+          setTimeout(() => this.buffers.delete(key), SFX_RETRY_MS);
+        });
     }
     return null;
   }
