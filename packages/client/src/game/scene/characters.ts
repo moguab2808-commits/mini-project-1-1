@@ -12,9 +12,9 @@ import {
 } from '@alkkagi/shared';
 import {
   BoxGeometry,
+  CapsuleGeometry,
   CircleGeometry,
   CylinderGeometry,
-  DoubleSide,
   Group,
   Matrix4,
   Mesh,
@@ -22,8 +22,9 @@ import {
   MeshStandardMaterial,
   Object3D,
   Shape,
-  ShapeGeometry,
+  ExtrudeGeometry,
   SphereGeometry,
+  TorusGeometry,
   Vector3,
   type BufferGeometry,
   type Camera,
@@ -555,9 +556,23 @@ export class CharacterRig {
       else shape.lineTo(Math.cos(a) * r, Math.sin(a) * r);
     }
     shape.closePath();
-    const geo = new ShapeGeometry(shape);
+    // 도톰한 금빛 별(DEC-081): 모서리를 둥글린 입체 별에 광택과 약한 자체 발광
+    const geo = new ExtrudeGeometry(shape, {
+      depth: 0.5,
+      bevelEnabled: true,
+      bevelThickness: 0.3,
+      bevelSize: 0.25,
+      bevelSegments: 2,
+    });
+    geo.center();
     this.geos.push(geo);
-    const mat = new MeshBasicMaterial({ color: 0xffd84a, side: DoubleSide });
+    const mat = new MeshStandardMaterial({
+      color: 0xffc21a,
+      emissive: 0xb06a00,
+      emissiveIntensity: 0.5,
+      roughness: 0.2,
+      metalness: 0.35,
+    });
     this.mats.push(mat);
     for (let i = 0; i < 5; i++) {
       const m = new Mesh(geo, mat);
@@ -619,45 +634,64 @@ export class CharacterRig {
   }
 
   private buildDevices(hand: Group) {
-    const dark = this.std(0x26262c, 0.4);
     const metal = new MeshStandardMaterial({
       color: 0xc9c9cf,
       roughness: 0.25,
       metalness: 0.7,
     });
     this.mats.push(metal);
-    const lens = new MeshBasicMaterial({ color: 0xfff3b0 });
+    const lens = new MeshBasicMaterial({ color: 0xfff0a0 });
     this.mats.push(lens);
-    // 후레쉬: 원통 몸체 + 넓은 머리 + 빛나는 렌즈. 손 +Z 방향을 비춘다
-    const fb = this.mesh(new CylinderGeometry(1.05, 1.05, 8, 12), dark, this.flashlight);
+    // 후레쉬(DEC-081): 장난감 손전등. 빨간 몸체·금빛 띠·노란 머리·빛나는 렌즈
+    const torchBody = this.std(0xe2302a, 0.18);
+    const torchHead = this.std(0xffb81a, 0.2);
+    const fb = this.mesh(new CylinderGeometry(1.05, 1.05, 8, 14), torchBody, this.flashlight);
     fb.rotation.x = Math.PI / 2;
     fb.position.set(0, 1.9, 1.6);
-    const fh = this.mesh(new CylinderGeometry(1.7, 1.15, 2.4, 14), metal, this.flashlight);
+    for (const z of [-1.2, 3.6]) {
+      const band = this.mesh(new TorusGeometry(1.08, 0.18, 6, 16), metal, this.flashlight);
+      band.position.set(0, 1.9, z);
+    }
+    const fh = this.mesh(new CylinderGeometry(1.8, 1.15, 2.4, 16), torchHead, this.flashlight);
     fh.rotation.x = Math.PI / 2;
     fh.position.set(0, 1.9, 6.6);
-    const fl = this.mesh(new CircleGeometry(1.5, 16), lens, this.flashlight);
+    const fl = this.mesh(new CircleGeometry(1.55, 18), lens, this.flashlight);
     fl.position.set(0, 1.9, 7.85);
-    // 물총: 몸체·총열·손잡이·물통
-    const body = this.std(0x2f8be0, 0.35);
+    const btn = this.mesh(new SphereGeometry(0.45, 8, 6), torchHead, this.flashlight);
+    btn.position.set(0, 3, 1.2);
+    // 물총(DEC-080): 장난감 물총. 둥근 파란 몸체·노란 총구·주황 펌프·손잡이, 위에 빛나는 물통
+    const body = this.std(0x1a78e8, 0.15);
+    const accent = this.std(0xffb81a, 0.18);
+    const pump = this.std(0xf06a10, 0.18);
     const tank = new MeshStandardMaterial({
-      color: 0x8fd6ff,
-      roughness: 0.1,
+      color: 0x8fd8ff,
+      roughness: 0.05,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.75,
+      emissive: 0x2a7ad0,
+      emissiveIntensity: 0.6,
     });
     this.mats.push(tank);
-    this.mesh(new BoxGeometry(1.8, 2.6, 6), body, this.waterGun).position.set(0, 2.4, 1.6);
-    const barrel = this.mesh(
-      new CylinderGeometry(0.55, 0.55, 4, 10),
-      this.std(0xffc93a, 0.4),
-      this.waterGun,
-    );
+    const shell = this.mesh(new CapsuleGeometry(1.15, 4.4, 6, 12), body, this.waterGun);
+    shell.rotation.x = Math.PI / 2;
+    shell.position.set(0, 2.4, 2.2);
+    const barrel = this.mesh(new CylinderGeometry(0.5, 0.65, 3.2, 12), accent, this.waterGun);
     barrel.rotation.x = Math.PI / 2;
-    barrel.position.set(0, 2.9, 6.4);
-    const grip = this.mesh(new BoxGeometry(1.4, 3.4, 1.6), body, this.waterGun);
+    barrel.position.set(0, 2.3, 6.8);
+    const tip = this.mesh(new TorusGeometry(0.55, 0.2, 8, 16), accent, this.waterGun);
+    tip.position.set(0, 2.3, 8.3);
+    const slide = this.mesh(new CylinderGeometry(0.7, 0.7, 2.6, 12), pump, this.waterGun);
+    slide.rotation.x = Math.PI / 2;
+    slide.position.set(0, 1.1, 4.6);
+    const grip = this.mesh(new BoxGeometry(1.3, 3.4, 1.6), body, this.waterGun);
     grip.position.set(0, 0.2, -0.6);
     grip.rotation.x = -0.35;
-    this.mesh(new SphereGeometry(1.9, 12, 10), tank, this.waterGun).position.set(0, 5, 0.6);
+    const trigger = this.mesh(new TorusGeometry(0.6, 0.18, 6, 12, Math.PI), accent, this.waterGun);
+    trigger.rotation.set(0, Math.PI / 2, Math.PI);
+    trigger.position.set(0, 1.1, 0.6);
+    this.mesh(new SphereGeometry(1.9, 14, 12), tank, this.waterGun).position.set(0, 4.9, 1.2);
+    const tankCap = this.mesh(new CylinderGeometry(0.6, 0.6, 0.6, 10), pump, this.waterGun);
+    tankCap.position.set(0, 6.9, 1.2);
     hand.add(this.flashlight, this.waterGun, this.muzzle);
     this.muzzle.position.set(0, 2.2, 8.4);
     this.flashlight.visible = false;

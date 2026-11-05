@@ -7,16 +7,18 @@ import {
   CircleGeometry,
   ConeGeometry,
   CylinderGeometry,
+  Float32BufferAttribute,
+  BufferGeometry,
   Group,
   Mesh,
   MeshBasicMaterial,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   PlaneGeometry,
   RepeatWrapping,
   RingGeometry,
   SphereGeometry,
   SRGBColorSpace,
-  type BufferGeometry,
 } from 'three';
 import { flatArrowGeometry } from './arrow-geometry.ts';
 import type { AimRenderState, PlacementRenderState } from './scene-contract.ts';
@@ -167,23 +169,28 @@ export function easeOutBack(p: number): number {
   return 1 + (c + 1) * q * q * q + c * q * q;
 }
 
-/** 벽돌 무늬 텍스처: 단단한 블록으로 보이게 한다 */
+/** 장난감 벽돌 텍스처: 주황·다홍 벽돌과 크림색 줄눈, 위쪽 밝은 모서리(로그인 일러스트의 벽돌 벽, DEC-080) */
 function brickTexture(): CanvasTexture {
   const c = document.createElement('canvas');
   c.width = 256;
-  c.height = 64;
+  c.height = 96;
   const g = c.getContext('2d');
   if (g) {
-    g.fillStyle = '#5b5f6a';
-    g.fillRect(0, 0, 256, 64);
-    for (let row = 0; row < 2; row++) {
+    g.fillStyle = '#f6dcb4';
+    g.fillRect(0, 0, 256, 96);
+    const tones = ['#f86a24', '#ec5a1c', '#ff7c30', '#e04e16'];
+    for (let row = 0; row < 3; row++) {
       for (let i = -1; i < 5; i++) {
         const x = i * 64 + (row % 2) * 32;
-        const shade = 120 + ((i * 37 + row * 53) % 40);
-        g.fillStyle = `rgb(${shade},${shade - 6},${shade - 14})`;
-        g.fillRect(x + 3, row * 32 + 3, 58, 26);
-        g.fillStyle = 'rgba(255,255,255,0.18)';
-        g.fillRect(x + 3, row * 32 + 3, 58, 4);
+        const y = row * 32;
+        g.fillStyle = tones[(i + row * 3 + 8) % tones.length] ?? '#e0703a';
+        g.beginPath();
+        g.roundRect(x + 3, y + 3, 58, 26, 5);
+        g.fill();
+        g.fillStyle = 'rgba(255,230,190,0.45)';
+        g.fillRect(x + 7, y + 5, 50, 3);
+        g.fillStyle = 'rgba(110,30,0,0.25)';
+        g.fillRect(x + 7, y + 25, 50, 3);
       }
     }
   }
@@ -192,6 +199,41 @@ function brickTexture(): CanvasTexture {
   t.wrapS = RepeatWrapping;
   t.repeat.set(2, 1);
   return t;
+}
+
+/**
+ * 슬라임 웅덩이: 가장자리가 울퉁불퉁한 낮은 돔(극좌표 격자). 반지름 1 기준이고 높이는 `h`.
+ * 가장자리 굴곡은 판정 지름 안쪽(0.9~1.0배)에서만 흔들린다.
+ */
+function slimeGeometry(h: number): BufferGeometry {
+  const seg = 48;
+  const rings = 6;
+  const pos: number[] = [];
+  const idx: number[] = [];
+  pos.push(0, h, 0);
+  for (let r = 1; r <= rings; r++) {
+    const f = r / rings;
+    for (let k = 0; k < seg; k++) {
+      const a = (k / seg) * Math.PI * 2;
+      const wob = 0.95 + Math.sin(a * 5 + 0.7) * 0.03 + Math.sin(a * 9 + 2.1) * 0.02;
+      const rr = f * wob;
+      pos.push(Math.cos(a) * rr, h * (1 - f * f) + 0.02, Math.sin(a) * rr);
+    }
+  }
+  for (let k = 0; k < seg; k++) idx.push(0, 1 + ((k + 1) % seg), 1 + k);
+  for (let r = 1; r < rings; r++) {
+    const a0 = 1 + (r - 1) * seg;
+    const b0 = 1 + r * seg;
+    for (let k = 0; k < seg; k++) {
+      const k1 = (k + 1) % seg;
+      idx.push(a0 + k, a0 + k1, b0 + k, a0 + k1, b0 + k1, b0 + k);
+    }
+  }
+  const geo = new BufferGeometry();
+  geo.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  return geo;
 }
 
 interface WallSlot {
@@ -204,8 +246,14 @@ interface StickySlot {
   group: Group;
   disc: Mesh;
   blobs: Mesh[];
+  bubbles: Mesh[];
   shine: Mesh;
 }
+
+/** 장난감 벽돌 윗면 돌기 수 */
+const STUDS = 6;
+/** 슬라임 거품 수 */
+const BUBBLES = 6;
 
 export class HazardLayer {
   readonly group = new Group();
@@ -221,23 +269,43 @@ export class HazardLayer {
     0.4,
     HAZARD_TUNING.wallThickness + 0.3,
   );
-  private readonly discGeo = new CylinderGeometry(STICKY_R, STICKY_R * 1.02, 0.5, 48);
+  private readonly studGeo = new CylinderGeometry(0.22, 0.22, 0.28, 12);
+  private readonly discGeo = slimeGeometry(0.55);
+  private readonly bubbleGeo = new SphereGeometry(1, 12, 8);
   private readonly blobGeo = new SphereGeometry(1, 12, 8);
   private readonly shineGeo = new CircleGeometry(1, 16);
   private readonly brick = brickTexture();
-  private readonly wallMat = new MeshStandardMaterial({
+  private readonly wallMat = new MeshPhysicalMaterial({
     map: this.brick,
-    roughness: 0.6,
-    metalness: 0.15,
+    roughness: 0.4,
+    clearcoat: 0.8,
+    clearcoatRoughness: 0.12,
+    emissive: 0xffffff,
+    emissiveMap: this.brick,
+    emissiveIntensity: 0.12,
   });
-  private readonly capMat = new MeshStandardMaterial({ color: 0xd8d4c8, roughness: 0.4 });
-  private readonly stickyMat = new MeshStandardMaterial({
-    color: 0x86d43a,
-    roughness: 0.05,
-    metalness: 0.1,
+  private readonly capMat = new MeshPhysicalMaterial({
+    color: 0xffb81a,
+    roughness: 0.2,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+  });
+  private readonly stickyMat = new MeshPhysicalMaterial({
+    color: 0x4ed414,
+    roughness: 0.12,
+    clearcoat: 1,
+    clearcoatRoughness: 0.04,
     transparent: true,
-    opacity: 0.82,
-    emissive: 0x1d4a06,
+    opacity: 0.93,
+    emissive: 0x1a6a00,
+  });
+  private readonly bubbleMat = new MeshStandardMaterial({
+    color: 0xb0ff6a,
+    roughness: 0.05,
+    transparent: true,
+    opacity: 0.55,
+    emissive: 0x3a7a10,
+    depthWrite: false,
   });
   private readonly shineMat = new MeshBasicMaterial({
     color: 0xffffff,
@@ -256,6 +324,13 @@ export class HazardLayer {
     cap.position.y = WALL_H + 0.2;
     cap.castShadow = true;
     group.add(block, cap);
+    // 장난감 블록 돌기: 윗면 가운데 줄에 고르게
+    const L = HAZARD_TUNING.wallLength;
+    for (let i = 0; i < STUDS; i++) {
+      const stud = new Mesh(this.studGeo, this.capMat);
+      stud.position.set(-L / 2 + (L / STUDS) * (i + 0.5), WALL_H + 0.54, 0);
+      group.add(stud);
+    }
     group.visible = false;
     this.group.add(group);
     const w = { group, block, cap };
@@ -266,25 +341,38 @@ export class HazardLayer {
   private addSticky(): StickySlot {
     const group = new Group();
     const disc = new Mesh(this.discGeo, this.stickyMat);
-    disc.position.y = 0.25;
+    disc.scale.set(STICKY_R, 1, STICKY_R);
     disc.receiveShadow = true;
     group.add(disc);
+    // 가장자리 방울과 웅덩이 밖으로 튄 작은 방울
     const blobs: Mesh[] = [];
     for (let i = 0; i < BLOBS; i++) {
       const b = new Mesh(this.blobGeo, this.stickyMat);
-      const a = (i / BLOBS) * Math.PI * 2;
-      b.position.set(Math.cos(a) * STICKY_R * 0.97, 0.3, Math.sin(a) * STICKY_R * 0.97);
+      const a = (i / BLOBS) * Math.PI * 2 + 0.3;
+      const out = i % 3 === 0 ? 1.08 : 0.9;
+      b.position.set(Math.cos(a) * STICKY_R * out, 0.12, Math.sin(a) * STICKY_R * out);
+      b.userData.small = i % 3 === 0;
       group.add(b);
       blobs.push(b);
     }
+    const bubbles: Mesh[] = [];
+    for (let i = 0; i < BUBBLES; i++) {
+      const b = new Mesh(this.bubbleGeo, this.bubbleMat);
+      const a = i * 2.3;
+      const r = STICKY_R * (0.2 + ((i * 37) % 60) / 100);
+      b.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+      b.userData.base = 0.55 * (1 - (r / STICKY_R) ** 2);
+      group.add(b);
+      bubbles.push(b);
+    }
     const shine = new Mesh(this.shineGeo, this.shineMat);
     shine.rotation.x = -Math.PI / 2;
-    shine.position.set(-STICKY_R * 0.35, 0.53, -STICKY_R * 0.3);
+    shine.position.set(-STICKY_R * 0.35, 0.5, -STICKY_R * 0.3);
     shine.scale.set(STICKY_R * 0.32, STICKY_R * 0.16, 1);
     group.add(shine);
     group.visible = false;
     this.group.add(group);
-    const s = { group, disc, blobs, shine };
+    const s = { group, disc, blobs, bubbles, shine };
     this.stickies.push(s);
     return s;
   }
@@ -318,8 +406,18 @@ export class HazardLayer {
         for (let k = 0; k < slot.blobs.length; k++) {
           const b = slot.blobs[k];
           if (!b) continue;
-          const q = 1 + Math.sin(ph * 1.7 + k * 1.9) * 0.35;
-          b.scale.set(1.5 * q, 0.55 * q, 1.5 * q);
+          const q = 1 + Math.sin(ph * 1.7 + k * 1.9) * 0.3;
+          const base = b.userData.small ? 0.55 : 1.3;
+          b.scale.set(base * q, base * 0.45 * q, base * q);
+        }
+        // 거품: 부풀었다 톡 터지고 다시 생긴다
+        for (let k = 0; k < slot.bubbles.length; k++) {
+          const b = slot.bubbles[k];
+          if (!b) continue;
+          const u = (timeSec * 0.5 + k * 0.29 + it.seed * 0.13) % 1;
+          const r = u < 0.85 ? 0.15 + u * 0.55 : 0.62 * (1 - (u - 0.85) / 0.15);
+          b.scale.setScalar(Math.max(0.01, r));
+          b.position.y = (b.userData.base as number) + r * 0.3;
         }
         slot.shine.position.x = -STICKY_R * 0.35 + Math.sin(ph * 0.7) * 0.4;
       }
@@ -335,9 +433,18 @@ export class HazardLayer {
   }
 
   dispose() {
-    for (const g of [this.wallGeo, this.capGeo, this.discGeo, this.blobGeo, this.shineGeo])
+    for (const g of [
+      this.wallGeo,
+      this.capGeo,
+      this.studGeo,
+      this.discGeo,
+      this.blobGeo,
+      this.bubbleGeo,
+      this.shineGeo,
+    ])
       g.dispose();
-    for (const m of [this.wallMat, this.capMat, this.stickyMat, this.shineMat]) m.dispose();
+    for (const m of [this.wallMat, this.capMat, this.stickyMat, this.bubbleMat, this.shineMat])
+      m.dispose();
     this.brick.dispose();
   }
 }
