@@ -11,6 +11,7 @@ import {
   MeshStandardMaterial,
   PlaneGeometry,
   SphereGeometry,
+  TorusGeometry,
   type BufferGeometry,
   type Material,
   type Texture,
@@ -19,10 +20,12 @@ import {
   BOARD_LEG,
   BOARD_THICKNESS,
   CHAIR_SEAT_Y,
+  DEFAULT_BOARD_STYLE,
   FLOOR_Y,
   canvasTexture,
   createKit,
   lcg,
+  type BoardStyle,
 } from './stage-kit.ts';
 import { THEMES } from './themes/index.ts';
 
@@ -41,16 +44,19 @@ export {
  * 아래쪽(y<0, 선공 진영)은 따뜻한 색, 위쪽은 차가운 색으로 옅게 칠하고 위쪽 가장자리에 표식을 둬
  * 판이 돌아갔는지 한눈에 보이게 한다.
  */
-export function createBoardTexture(board: BoardId): Texture {
+export function createBoardTexture(
+  board: BoardId,
+  style: BoardStyle = DEFAULT_BOARD_STYLE,
+): Texture {
   const def = BOARDS[board];
   const extent = def.shape === 'square' ? def.size : def.diameter;
   return canvasTexture(1024, (g, s) => {
     const px = s / extent;
     const rnd = lcg(7);
-    g.fillStyle = '#dcae6b';
+    g.fillStyle = style.base;
     g.fillRect(0, 0, s, s);
     for (let i = 0; i < 160; i++) {
-      g.strokeStyle = `rgba(120,70,20,${0.04 + rnd() * 0.06})`;
+      g.strokeStyle = `rgba(${style.grain},${0.04 + rnd() * 0.06})`;
       g.lineWidth = 1 + rnd() * 2;
       const y = rnd() * s;
       g.beginPath();
@@ -69,7 +75,7 @@ export function createBoardTexture(board: BoardId): Texture {
     g.fillRect(0, s / 2, s, s / 2);
     g.fillStyle = 'rgba(80,140,255,0.10)';
     g.fillRect(0, 0, s, s / 2);
-    g.strokeStyle = 'rgba(60,32,10,0.65)';
+    g.strokeStyle = style.line;
     g.lineWidth = 2;
     if (def.shape === 'square') {
       const n = 10;
@@ -102,10 +108,19 @@ export function createBoardTexture(board: BoardId): Texture {
       g.arc(s / 2, s / 2, s / 2 - 4, 0, Math.PI * 2);
       g.stroke();
     }
-    g.fillStyle = 'rgba(60,32,10,0.8)';
-    g.beginPath();
-    g.arc(s / 2, s / 2, 7, 0, Math.PI * 2);
-    g.fill();
+    if (style.star) {
+      g.fillStyle = style.star;
+      star(g, s / 2, s / 2, 16, 7);
+      if (def.shape === 'square') {
+        // 모서리에서 두 번째 교차점마다 작은 별(바둑판 화점 자리)
+        for (const fx of [0.2, 0.8]) for (const fy of [0.2, 0.8]) star(g, s * fx, s * fy, 9, 4);
+      }
+    } else {
+      g.fillStyle = 'rgba(60,32,10,0.8)';
+      g.beginPath();
+      g.arc(s / 2, s / 2, 7, 0, Math.PI * 2);
+      g.fill();
+    }
     // 위쪽(서버 +y) 표식
     g.fillStyle = '#c0392b';
     g.beginPath();
@@ -115,6 +130,18 @@ export function createBoardTexture(board: BoardId): Texture {
     g.closePath();
     g.fill();
   });
+}
+
+/** 다섯 꼭지 별 */
+function star(g: CanvasRenderingContext2D, cx: number, cy: number, ro: number, ri: number) {
+  g.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? ro : ri;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  g.closePath();
+  g.fill();
 }
 
 export interface Stage {
@@ -138,6 +165,7 @@ export function buildStage(board: BoardId, theme: ThemeId = 'bar'): Stage {
   const def = BOARDS[board];
 
   const env = THEMES[theme](k);
+  const bs = env.board ?? DEFAULT_BOARD_STYLE;
   const room = env.room;
   const lamp = env.lamp;
 
@@ -171,7 +199,7 @@ export function buildStage(board: BoardId, theme: ThemeId = 'bar'): Stage {
 
   // 판: 몸체(두께) + 다리. 판 돌리기 연출 때 몸체째 회전한다
   const boardPivot = new Group();
-  const sideWood = k.std(0xc08a4c, 0.5);
+  const sideWood = k.std(bs.side, 0.5);
   const body =
     def.shape === 'square'
       ? k.mesh(new BoxGeometry(def.size, BOARD_THICKNESS, def.size), sideWood)
@@ -182,7 +210,7 @@ export function buildStage(board: BoardId, theme: ThemeId = 'bar'): Stage {
   body.position.y = -BOARD_THICKNESS / 2 - 0.02;
   boardPivot.add(body);
   // 몸체 아래 가장자리를 어둡게 둘러 두께가 보이게 한다
-  const seamMat = k.std(0x6e4522, 0.7);
+  const seamMat = k.std(bs.seam, 0.7);
   const seam =
     def.shape === 'square'
       ? k.mesh(new BoxGeometry(def.size - 1, 0.8, def.size - 1), seamMat)
@@ -192,7 +220,7 @@ export function buildStage(board: BoardId, theme: ThemeId = 'bar'): Stage {
         );
   seam.position.y = -BOARD_THICKNESS - 0.4;
   boardPivot.add(seam);
-  const legWood = k.std(0x8a5a2c, 0.55);
+  const legWood = k.std(bs.leg, 0.55);
   const legGeo = new CylinderGeometry(3, 2, BOARD_LEG, 12);
   k.geos.push(legGeo);
   const legSpots: [number, number][] =
@@ -214,7 +242,18 @@ export function buildStage(board: BoardId, theme: ThemeId = 'bar'): Stage {
     leg.position.set(lx, -BOARD_THICKNESS - BOARD_LEG / 2 - 0.02, lz);
     boardPivot.add(leg);
   }
-  const topTex = createBoardTexture(board);
+  if (bs.rim !== undefined) {
+    // 윗면 가장자리 테: 판 안쪽(놀이 면)을 덮지 않도록 바깥으로 0.9cm 두르고 윗면보다 0.25cm만 높다
+    const rimMat = k.std(bs.rim, 0.3, 0.75);
+    const rim =
+      def.shape === 'square'
+        ? squareRim(k, def.size, rimMat)
+        : k.mesh(new TorusGeometry(def.diameter / 2 + 0.45, 0.55, 8, 96), rimMat, false, true);
+    if (def.shape !== 'square') rim.rotation.x = -Math.PI / 2;
+    if (def.shape !== 'square') rim.position.y = -0.3;
+    boardPivot.add(rim);
+  }
+  const topTex = createBoardTexture(board, bs);
   k.texs.push(topTex);
   const topMat = new MeshStandardMaterial({ map: topTex, roughness: 0.55 });
   k.mats.push(topMat);
@@ -237,6 +276,21 @@ export function buildStage(board: BoardId, theme: ThemeId = 'bar'): Stage {
     background: env.background,
     dispose: k.dispose,
   };
+}
+
+/** 정사각 판 바깥 둘레의 네 막대 테 */
+function squareRim(k: ReturnType<typeof createKit>, size: number, mat: Material): Group {
+  const g = new Group();
+  const w = 0.9;
+  for (const sgn of [1, -1]) {
+    const a = k.mesh(new BoxGeometry(size + w * 2, 0.8, w), mat, false, true);
+    a.position.set(0, -0.15, sgn * (size / 2 + w / 2));
+    g.add(a);
+    const b = k.mesh(new BoxGeometry(w, 0.8, size), mat, false, true);
+    b.position.set(sgn * (size / 2 + w / 2), -0.15, 0);
+    g.add(b);
+  }
+  return g;
 }
 
 export interface StoneKit {
