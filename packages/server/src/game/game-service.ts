@@ -156,6 +156,11 @@ export class GameService {
     return this.#command(userId, (rt, seat) => rt.forfeit(seat, payload as never));
   }
 
+  /** 표시 전용 중계. 좌석은 세션이 정하고 빈도 제한·단계 검사는 런타임이 한다(DEC-063). */
+  sendEmote(userId: number, payload: unknown): Promise<CommandResult> {
+    return this.#command(userId, (rt, seat) => rt.sendEmote(seat, payload as never));
+  }
+
   /** 응답 없는 명령이다. 결과는 무시한다. */
   aimHazard(userId: number, payload: unknown): void {
     const ref = this.#byUser.get(userId);

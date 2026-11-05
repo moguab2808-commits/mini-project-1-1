@@ -108,3 +108,47 @@ describe('시작 준비 중 이탈 경합 (PR #63 리뷰)', () => {
     game.dispose();
   });
 });
+
+describe('온라인 감정표현 중계 (IMPL-017)', () => {
+  it('세션 좌석으로 두 사람에게 중계하고 빈도 제한·비참가자를 거부한다', async () => {
+    const sent: { to: number; type: string; payload: unknown }[] = [];
+    const sockets = new Map(
+      [10, 11].map((to) => [
+        to,
+        {
+          emit: (type: string, payload: unknown) => sent.push({ to, type, payload }),
+          volatile: { emit: () => {} },
+        },
+      ]),
+    );
+    const registry = { get: (id: number) => sockets.get(id) } as unknown as ConnectionRegistry;
+    const game = new GameService({
+      registry,
+      clock,
+      leaveRoom: vi.fn(),
+      onFinished: vi.fn(),
+      logSink: () => {},
+    });
+    await game.hooks.onStarted!(view);
+    const gameId = (sent.find((e) => e.type === 'game:start')!.payload as { gameId: string })
+      .gameId;
+    expect(await game.sendEmote(11, { gameId, emote: 'gg', seat: 0 })).toMatchObject({
+      ok: false,
+      error: { code: 'INVALID_INPUT' },
+    });
+    expect(await game.sendEmote(11, { gameId, emote: 'gg' })).toEqual({ ok: true });
+    const shown = sent.filter((e) => e.type === 'emote:shown');
+    expect(shown.map((e) => e.to).sort()).toEqual([10, 11]);
+    expect(shown[0]!.payload).toMatchObject({ gameId, emote: 'gg', seat: 1 });
+    expect(await game.sendEmote(11, { gameId, emote: 'laugh' })).toMatchObject({
+      ok: false,
+      error: { code: 'EMOTE_COOLDOWN' },
+    });
+    expect(await game.sendEmote(10, { gameId, emote: 'laugh' })).toEqual({ ok: true });
+    expect(await game.sendEmote(99, { gameId, emote: 'gg' })).toMatchObject({
+      ok: false,
+      error: { code: 'GAME_NOT_ACTIVE' },
+    });
+    game.dispose();
+  });
+});

@@ -156,7 +156,7 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return;
       const emote = emoteForKey(e.code);
-      if (emote && session.mode !== 'online') {
+      if (emote) {
         e.preventDefault();
         if (!e.repeat) {
           void emoteController.use(emote);
@@ -206,7 +206,7 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
       window.removeEventListener('contextmenu', onContextMenu);
       window.removeEventListener('blur', onBlur);
     };
-  }, [controller, emoteController, session.mode]);
+  }, [controller, emoteController]);
 
   const { start, view } = state;
   if (!start || !view) {
@@ -260,13 +260,9 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
         nowClientMs={nowServerMs - state.clockOffsetMs}
         emotes={state.emotes}
         emoteRemainingMs={emoteController.remainingMs()}
-        onEmote={
-          session.mode === 'online'
-            ? undefined
-            : (emote: EmoteId) => {
-                void emoteController.use(emote);
-              }
-        }
+        onEmote={(emote: EmoteId) => {
+          void emoteController.use(emote);
+        }}
         onSlotClick={() => controller.onSlotClick()}
         onForfeit={() => {
           void session.forfeit({ gameId: start.gameId });

@@ -131,6 +131,10 @@ describe('온라인 방과 원격 세션', () => {
     socket.fire('game:state', view);
     socket.fire('game:state', { ...view, revision: view.revision - 1 });
     socket.fire('game:state', { ...view, gameId: 'other', revision: 999 });
+    const shown = { gameId: 'g1', seat: 1, emote: 'laugh', atMs: 2000 };
+    socket.fire('emote:shown', shown);
+    socket.fire('emote:shown', { ...shown, gameId: 'other', atMs: 3000 });
+    expect(store.getState().emotes[1]).toMatchObject(shown);
     socket.fire('game:start', first);
     expect(store.getState().view).toBe(view);
     const over = {
@@ -174,6 +178,13 @@ describe('온라인 방과 원격 세션', () => {
       active: false,
     });
     expect(socket.sent.slice(-2).map((e) => e.event)).toEqual(['aim:update', 'hazard:aim']);
+    const emote = session.sendEmote({ gameId: 'g1', emote: 'gg' });
+    expect(socket.sent.at(-1)).toMatchObject({
+      event: 'emote:send',
+      payload: { gameId: 'g1', emote: 'gg' },
+    });
+    socket.sent.at(-1)!.ack!({ ok: true });
+    expect(await emote).toEqual({ ok: true });
     client.dispose();
   });
 

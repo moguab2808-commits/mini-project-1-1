@@ -817,14 +817,15 @@ input {
   color: var(--l-cream-text);
   white-space: nowrap;
 }
-.lobby-rate {
+.lobby-customize {
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  border: 0;
+  border-radius: 18px;
   font-family: var(--l-font-title);
   font-size: 14px;
   color: #6a3a08;
@@ -832,6 +833,27 @@ input {
   box-shadow:
     inset 0 -3px 0 rgba(120, 60, 0, 0.35),
     0 3px 0 #7a4a08;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.lobby-customize:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.lobby-customize:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.lobby-customize:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+.lobby-customize:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* 꾸미기 버튼에 올리면 캐릭터도 빛나 둘이 같은 기능임을 알린다 */
+.lobby-avatar:hover:not(:disabled),
+.lobby-plate:has(.lobby-customize:hover:not(:disabled)) .lobby-avatar {
+  background: radial-gradient(circle at 50% 60%, rgba(255, 230, 160, 0.9), transparent 72%);
 }
 .lobby-plate-btn {
   flex: none;

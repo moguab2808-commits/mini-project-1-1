@@ -51,6 +51,7 @@ export function registerGameHandlers(socket: Socket, userId: number, deps: GameH
   command('hazard:use', (payload) => game.useHazard(userId, payload));
   command('board:rotate', (payload) => game.rotateBoard(userId, payload));
   command('game:forfeit', (payload) => game.forfeit(userId, payload));
+  command('emote:send', (payload) => game.sendEmote(userId, payload));
   command('rematch:request', (payload) => game.requestRematch(userId, payload));
   stream('hazard:aim', (payload) => {
     game.aimHazard(userId, payload);
