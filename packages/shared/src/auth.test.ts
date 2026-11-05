@@ -101,7 +101,9 @@ describe('AppearanceChangeSchema', () => {
     const noHat: Partial<typeof a> = { ...a };
     delete noHat.hat; // 새 항목(DEC-078)이 빠져도 거부
     expect(AppearanceChangeSchema.safeParse({ appearance: noHat }).success).toBe(false);
-    expect(AppearanceChangeSchema.safeParse({ appearance: { ...a, scarf: 1 } }).success).toBe(false);
+    expect(AppearanceChangeSchema.safeParse({ appearance: { ...a, scarf: 1 } }).success).toBe(
+      false,
+    );
     expect(AppearanceChangeSchema.safeParse({ appearance: a, extra: 1 }).success).toBe(false);
   });
 });
