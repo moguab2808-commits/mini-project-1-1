@@ -55,6 +55,7 @@ import {
 } from './rig-math.ts';
 import { AvatarHand } from '../../avatar/avatar-hand.ts';
 import { AvatarHead } from '../../avatar/avatar-head.ts';
+import { addOutfitDetails } from '../../avatar/avatar-outfit.ts';
 import type { FaceEyes, FaceMouth } from '../../avatar/face-paint.ts';
 import { EmoteBubble } from './emote-bubble.ts';
 import { emoteMotion } from './emote-motion.ts';
@@ -63,7 +64,7 @@ import { TABLE_Y } from './stage.ts';
 type Eyes = FaceEyes;
 type Mouth = FaceMouth;
 
-/** 좌석별 옷 색(외형 항목이 아니다. 두 사람을 구분하기 쉽게 좌석으로 정한다) */
+/** 기본 티(옷 항목 0번)의 좌석별 몸통 색. 두 사람을 구분하기 쉽게 좌석으로 정한다. 다른 옷은 부품 정의의 색(DEC-078) */
 const SHIRT: Record<Seat, number> = { 0: 0x3f6fb5, 1: 0xc7506a };
 /** 얼굴 좌표(머리 반지름 50) → 머리 좌표(cm) */
 const FACE_UNIT = RIG.headRadius / 50;
@@ -452,9 +453,11 @@ export class CharacterRig {
     this.avatar = new AvatarHead(appearance, RIG.headRadius);
     const skinColor = this.avatar.parts.skinTone.base;
     const skin = this.fadeStd(skinColor, 0.7);
-    const shirt = this.fadeStd(SHIRT[seat], 0.9);
+    const outfit = this.avatar.parts.outfit;
+    const shirtColor = outfit.color ?? SHIRT[seat];
+    const shirt = this.fadeStd(shirtColor, 0.9);
     const pants = this.fadeStd(0x2b2f3a, 0.85);
-    const armShirt = this.fadeStd(SHIRT[seat], 0.9);
+    const armShirt = this.fadeStd(shirtColor, 0.9);
     // 팔뚝·손은 투명도와 무관하게 늘 보인다(1인칭에서 내 손)
     const armSkin = this.std(skinColor, 0.7);
 
@@ -467,6 +470,18 @@ export class CharacterRig {
     trunk.position.set(0, 21, 2.3);
     trunk.rotation.x = tilt;
     trunk.scale.z = 0.78;
+    // 옷 장식(DEC-078): 몸통과 같은 위치·기울기·납작함의 그룹 안에 붙인다
+    const outfitFrame = new Group();
+    outfitFrame.position.copy(trunk.position);
+    outfitFrame.rotation.x = tilt;
+    outfitFrame.scale.z = trunk.scale.z;
+    this.torso.add(outfitFrame);
+    addOutfitDetails(outfit, {
+      frame: outfitFrame,
+      trunk: { height: 40, rTop: 8, rBottom: 9.5 },
+      material: (c) => this.fadeStd(c, 0.85),
+      mesh: (geo, mat, parent) => this.mesh(geo, mat, parent),
+    });
     const dome = this.mesh(
       new SphereGeometry(8, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
       shirt,

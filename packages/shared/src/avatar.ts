@@ -14,6 +14,9 @@ export const APPEARANCE_KEYS = [
   'nose',
   'lips',
   'skinTone',
+  'glasses',
+  'hat',
+  'outfit',
 ] as const;
 export type AppearanceKey = (typeof APPEARANCE_KEYS)[number];
 
@@ -26,7 +29,7 @@ const choice = z
   .min(0)
   .max(APPEARANCE_CHOICES - 1);
 
-/** 요청 검사용: 7항목 모두 정수 0~4, 여분 필드 거부 */
+/** 요청 검사용: 10항목(DEC-078 안경·모자·옷 포함) 모두 정수 0~4, 여분 필드 거부 */
 export const AppearanceSchema = z.strictObject({
   headShape: choice,
   hair: choice,
@@ -35,6 +38,9 @@ export const AppearanceSchema = z.strictObject({
   nose: choice,
   lips: choice,
   skinTone: choice,
+  glasses: choice,
+  hat: choice,
+  outfit: choice,
 });
 export type Appearance = z.infer<typeof AppearanceSchema>;
 
@@ -47,6 +53,9 @@ export const DEFAULT_APPEARANCE: Readonly<Appearance> = Object.freeze({
   nose: 0,
   lips: 0,
   skinTone: 0,
+  glasses: 0,
+  hat: 0,
+  outfit: 0,
 });
 
 // ───────── 부품 정의 ─────────
@@ -118,6 +127,41 @@ export interface LipPart {
   halfW: number;
   /** 입 중심 y */
   y: number;
+}
+
+/** 안경 모양(DEC-078). none이면 쓰지 않는다 */
+export type GlassesShape = 'none' | 'round' | 'square' | 'sun' | 'heart';
+
+export interface GlassesPart {
+  shape: GlassesShape;
+  /** 오른쪽(+x) 알 경로. 알 중심 기준 좌표. shape가 none이면 null */
+  d: string | null;
+  /** 알 중심은 눈 중심(`EyePart` x, y)이다. 알 너비 절반 */
+  halfW: number;
+  frame: string;
+  /** 알 색. 선글라스는 거의 불투명, 맑은 안경은 옅게 비친다. null이면 칠하지 않는다 */
+  lens: string | null;
+  lensOpacity: number;
+  frameWidth: number;
+}
+
+/** 모자 종류(DEC-078). none이면 쓰지 않는다 */
+export type HatKind = 'none' | 'cap' | 'beanie' | 'straw' | 'wizard';
+
+export interface HatPart {
+  kind: HatKind;
+  color: string;
+  /** 챙·띠·방울 등 포인트 색 */
+  accent: string;
+}
+
+/** 옷 종류(DEC-078). tee가 기본이며 color가 null이면 호출 쪽(게임은 좌석, 전신은 기본)이 몸통 색을 정한다 */
+export type OutfitKind = 'tee' | 'hoodie' | 'shirt' | 'stripe' | 'robe';
+
+export interface OutfitPart {
+  kind: OutfitKind;
+  color: string | null;
+  accent: string;
 }
 
 // 항목마다 5개(DEC-054). 순서가 저장값이므로 바꾸지 않는다(새 선택지는 뒤에 더하고 APPEARANCE_CHOICES를 늘린다).
@@ -218,6 +262,76 @@ const LIPS: LipPart[] = [
   }, // 고양이 입
 ];
 
+// 안경·모자·옷(DEC-078). 0번은 없음·기본 티다. 순서가 저장값이다.
+const GLASSES: GlassesPart[] = [
+  {
+    shape: 'none',
+    d: null,
+    halfW: 0,
+    frame: '#000000',
+    lens: null,
+    lensOpacity: 0,
+    frameWidth: 0,
+  },
+  {
+    shape: 'round',
+    d: 'M-10 0 A10 10 0 1 0 10 0 A10 10 0 1 0 -10 0 Z',
+    halfW: 10,
+    frame: '#2b2430',
+    lens: '#dff3ff',
+    lensOpacity: 0.22,
+    frameWidth: 2.2,
+  },
+  {
+    shape: 'square',
+    d: 'M-10 -7 H10 Q12 -7 12 -5 V5 Q12 7 10 7 H-10 Q-12 7 -12 5 V-5 Q-12 -7 -10 -7 Z',
+    halfW: 12,
+    frame: '#8a4b26',
+    lens: '#dff3ff',
+    lensOpacity: 0.22,
+    frameWidth: 2.4,
+  },
+  {
+    shape: 'sun',
+    d: 'M-12 -7 H12 V3 Q12 9 6 9 H-6 Q-12 9 -12 3 Z',
+    halfW: 12,
+    frame: '#15121a',
+    lens: '#1a1620',
+    lensOpacity: 0.94,
+    frameWidth: 2.4,
+  },
+  {
+    shape: 'heart',
+    d: 'M0 9 C-14 -1 -12 -9 -6 -9 C-3 -9 0 -7 0 -4.5 C0 -7 3 -9 6 -9 C12 -9 14 -1 0 9 Z',
+    halfW: 13,
+    frame: '#c0306a',
+    lens: '#ff7fb0',
+    lensOpacity: 0.85,
+    frameWidth: 2.2,
+  },
+];
+
+const HATS: HatPart[] = [
+  { kind: 'none', color: '#000000', accent: '#000000' },
+  { kind: 'cap', color: '#d6453a', accent: '#8f2a22' },
+  { kind: 'beanie', color: '#3d7fc4', accent: '#f2f0e6' },
+  { kind: 'straw', color: '#e6c86e', accent: '#b4482e' },
+  { kind: 'wizard', color: '#4b2c82', accent: '#f2c14e' },
+];
+
+const OUTFITS: OutfitPart[] = [
+  { kind: 'tee', color: null, accent: '#ffffff' },
+  { kind: 'hoodie', color: '#8c96a6', accent: '#5f6978' },
+  { kind: 'shirt', color: '#f1efe8', accent: '#c4352f' },
+  { kind: 'stripe', color: '#d8483a', accent: '#f6f2ea' },
+  { kind: 'robe', color: '#5a3a96', accent: '#f2c14e' },
+];
+
+/** 모자가 머리카락을 가리는 정도: 모자를 쓰면 짧은 머리·뾰족머리는 통째로 숨기고, 단발·긴 머리는 옆·뒤 머리만 모자 아래로 보인다(DEC-078) */
+export function hairHiddenByHat(hair: HairPart, hat: HatPart): boolean {
+  return hat.kind !== 'none' && (hair.style === 'crop' || hair.style === 'spiky');
+}
+
 export const AVATAR_PARTS = {
   headShape: HEAD_SHAPES,
   hair: HAIRS,
@@ -226,6 +340,9 @@ export const AVATAR_PARTS = {
   nose: NOSES,
   lips: LIPS,
   skinTone: SKIN_TONES,
+  glasses: GLASSES,
+  hat: HATS,
+  outfit: OUTFITS,
 } as const;
 
 export interface ResolvedAvatar {
@@ -236,6 +353,9 @@ export interface ResolvedAvatar {
   nose: NosePart;
   lips: LipPart;
   skinTone: SkinTonePart;
+  glasses: GlassesPart;
+  hat: HatPart;
+  outfit: OutfitPart;
 }
 
 /** 외형 번호를 부품으로 바꾼다. 정의가 없는 번호는 첫 선택지로 읽는다(저장값은 normalizeAppearance로 0~4) */
@@ -249,6 +369,9 @@ export function resolveAvatar(a: Appearance): ResolvedAvatar {
     nose: pick(NOSES, a.nose),
     lips: pick(LIPS, a.lips),
     skinTone: pick(SKIN_TONES, a.skinTone),
+    glasses: pick(GLASSES, a.glasses),
+    hat: pick(HATS, a.hat),
+    outfit: pick(OUTFITS, a.outfit),
   };
 }
 

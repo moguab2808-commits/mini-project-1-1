@@ -7,6 +7,7 @@ import {
   APPEARANCE_KEYS,
   DEFAULT_THEME,
   PASSWORD_MAX,
+  resolveAvatar,
   ROOM_CODE_LENGTH,
   ROOM_TITLE_MAX,
   type BoardId,
@@ -15,6 +16,7 @@ import {
   type RoomCreate,
   type ThemeId,
 } from '@alkkagi/shared';
+import { OutfitSwatch } from '../avatar/AvatarAccessories.tsx';
 import { AvatarFace } from '../avatar/AvatarFace.tsx';
 import { AvatarFigureView } from '../avatar/AvatarFigureView.tsx';
 import type { AiMatchSettings } from '../ai/ai-game-session.ts';
@@ -42,6 +44,9 @@ export const APPEARANCE_LABEL: Record<AppearanceKey, string> = {
   nose: '코',
   lips: '입술',
   skinTone: '피부색',
+  glasses: '안경',
+  hat: '모자',
+  outfit: '옷',
 };
 
 /** 클립보드 복사. 막힌 환경이면 false를 돌려준다. */
@@ -459,7 +464,11 @@ export function AvatarModal({
                     setDraft((d) => ({ ...d, [tab]: i }));
                   }}
                 >
-                  <AvatarFace appearance={{ ...draft, [tab]: i }} size={64} />
+                  {tab === 'outfit' ? (
+                    <OutfitSwatch outfit={resolveAvatar({ ...draft, outfit: i }).outfit} />
+                  ) : (
+                    <AvatarFace appearance={{ ...draft, [tab]: i }} size={64} />
+                  )}
                 </button>
               );
             })}

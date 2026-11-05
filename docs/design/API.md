@@ -17,7 +17,7 @@
 
 | 타입 | 값·필드 | 비고 |
 | --- | --- | --- |
-| `Appearance` | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 요청 검사는 `shared`의 `AppearanceSchema`(7항목 모두 필요, 여분 필드 거부)이고, 선택지 모양 정의(번호 → 부품)는 같은 파일(`avatar.ts`)의 `AVATAR_PARTS` 한 곳에 두고 3D·SVG가 같이 쓴다. 저장값을 읽을 때는 없는 필드·범위 밖 값을 0으로 읽는다(`normalizeAppearance`). 항목이 늘면 필드를 더한다. 동물 6종 `CharacterId`는 [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)에서 지웠다 |
+| `Appearance` | `{ headShape, hair, eyebrows, eyes, nose, lips, skinTone, glasses, hat, outfit }`, 각 값은 정수 0~4 | 사람 아바타 외형([DEC-054](../DECISIONS.md#결정-색인)·[DEC-059](../DECISIONS.md#결정-색인), `glasses`·`hat`·`outfit`은 [DEC-078](../DECISIONS.md#결정-색인)으로 더했다, 구현 [IMPL-024](../TASKS.md#impl-024-아바타-꾸미기-항목-확장안경모자옷)). 고정 기본 외형은 모든 값 0. 머리색은 `hair` 선택지에 딸려 있다. 요청 검사는 `shared`의 `AppearanceSchema`(10항목 모두 필요, 여분 필드 거부)이고, 선택지 모양 정의(번호 → 부품)는 같은 파일(`avatar.ts`)의 `AVATAR_PARTS` 한 곳에 두고 3D·SVG가 같이 쓴다. 저장값을 읽을 때는 없는 필드·범위 밖 값을 0으로 읽는다(`normalizeAppearance`). 항목이 늘면 필드를 더한다. 동물 6종 `CharacterId`는 [IMPL-018](../TASKS.md#impl-018-사람-아바타-구현)에서 지웠다 |
 | `BoardId` | `standard`(기본판)·`circle`(원형판) | [판 목록](../PRD.md#판-board). 판이 늘면 값을 추가한다 |
 | `ThemeId` | `bar`(바, 기본)·`rooftop`(밤 옥상)·`classroom`(교실)·`beach`(해변) | [방 테마](../PRD.md#방-생성)([DEC-052](../DECISIONS.md#결정-색인)·[DEC-053](../DECISIONS.md#결정-색인)). 장면 표시에만 쓴다. `game-core`(`Game`)에는 넘기지 않고 `game-runtime`은 닉네임처럼 `game:start`에 담기만 한다. 테마가 늘면 값을 추가한다. 스키마는 `shared`의 `ThemeIdSchema`([IMPL-015](../TASKS.md#impl-015-방-테마-구현)) |
 | `Seat` | `0` 또는 `1` | 경기 안 좌석. `users.id`를 쓰지 않는다 ([DEC-030](../DECISIONS.md#결정-색인)) |
