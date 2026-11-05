@@ -1,6 +1,13 @@
 // 사람 아바타 2D 얼굴(SVG). 프로필바·방 카드·대기실·결과 화면에 쓴다.
 // 3D 머리의 얼굴 텍스처(face-paint.ts)와 같은 부품 정의(`@alkkagi/shared` AVATAR_PARTS)를 쓴다.
-import { headOutlinePath, jawScale, resolveAvatar, type Appearance } from '@alkkagi/shared';
+import {
+  hairHiddenByHat,
+  headOutlinePath,
+  jawScale,
+  resolveAvatar,
+  type Appearance,
+} from '@alkkagi/shared';
+import { GlassesArt, HAT_VIEWBOX, HatArt } from './AvatarAccessories.tsx';
 
 export function AvatarFace({
   appearance,
@@ -13,11 +20,17 @@ export function AvatarFace({
 }) {
   const p = resolveAvatar(appearance);
   const { headShape: H, hair, eyebrows: B, eyes: E, nose: N, lips: L, skinTone: S } = p;
+  const hat = p.hat;
+  const hideHair = hairHiddenByHat(hair, hat);
   const hairT = `scale(${H.sx} ${H.sy})`;
   const earX = 50 * H.sx * jawScale(0.08, H.jaw) - 1.5;
   return (
     <svg
-      viewBox="-64 -68 128 128"
+      viewBox={
+        hat.kind === 'none'
+          ? '-64 -68 128 128'
+          : `${String(HAT_VIEWBOX.x)} ${String(HAT_VIEWBOX.y)} ${String(HAT_VIEWBOX.size)} ${String(HAT_VIEWBOX.size)}`
+      }
       width={size}
       height={size}
       role={title ? 'img' : undefined}
@@ -49,6 +62,7 @@ export function AvatarFace({
           <circle cx={sx * E.x + E.rx * 0.32} cy={E.y - E.ry * 0.38} r={E.rx * 0.36} fill="#fff" />
         </g>
       ))}
+      <GlassesArt glasses={p.glasses} eyes={E} />
       {B.d &&
         [-1, 1].map((sx) => (
           <path
@@ -63,7 +77,12 @@ export function AvatarFace({
         ))}
       <path d={N.d} fill="none" stroke={S.shade} strokeWidth={N.width} strokeLinecap="round" />
       <path d={L.d} fill="none" stroke={L.color} strokeWidth={L.width} strokeLinecap="round" />
-      {hair.front && <path d={hair.front} transform={hairT} fill={hair.color} />}
+      {hair.front && !hideHair && <path d={hair.front} transform={hairT} fill={hair.color} />}
+      {hat.kind !== 'none' && (
+        <g transform={hairT}>
+          <HatArt hat={hat} />
+        </g>
+      )}
     </svg>
   );
 }

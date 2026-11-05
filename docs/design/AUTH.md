@@ -29,7 +29,7 @@
 
 ### 해시·프록시
 
-- **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 측정 결과는 worklog에 남긴다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스의 측정과 파라미터 조정은 배포 뒤로 옮겼다([IMPL-013](../TASKS.md#impl-013-배포)).
+- **argon2id 파라미터**: `@node-rs/argon2` 기본값 대신 OWASP 최소 권장(메모리 19 MiB, 반복 2, 병렬 1)으로 시작하고 Render 무료 인스턴스의 해시 시간(목표 약 100~300ms)을 측정해 조정한다. 구현 때 이 PC(i5-1335U)에서는 해시 1회가 약 11ms였다. Render 무료 인스턴스에서 서버 안 로그로 11회 잰 결과 중앙값 약 311ms·평균 약 361ms(130~716ms)로 목표 상단에 걸쳐 **파라미터를 올리지 않고 그대로 둔다**([IMPL-013](../TASKS.md#impl-013-배포), [worklog](../worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 더 내리면 OWASP 최소 권장 아래가 된다. 인스턴스 사양이 바뀌면 `argon2_timing` 로그로 다시 확인한다.
 - **프록시 신뢰**: `app.set('trust proxy', 1)`(Render 프록시 1단). `secure` 쿠키와 IP 제한이 이에 의존한다. 운영 설정에서 `X-Forwarded-Proto: https`가 있을 때 세션 쿠키에 `Secure`가 붙는 것을 테스트로 확인했다.
 - **환경 변수**: `SESSION_SECRET`은 32자 이상이어야 서버가 시작한다. 값은 문서·로그에 남기지 않는다([OPERATIONS](OPERATIONS.md)).
 

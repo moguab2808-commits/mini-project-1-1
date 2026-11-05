@@ -22,7 +22,7 @@
 | `id` | serial PK | |
 | `nickname` | varchar(12) not null | 로그인 식별자, 변경 불가. 앱이 NFC로 정규화해 저장한다 |
 | `password` | text not null | **argon2id 해시값을 저장한다(원문 아님).** 컬럼명이 원문처럼 보이므로 스키마에 주석으로 남긴다 |
-| `appearance` | jsonb not null default 기본 외형(모든 항목 0) | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). 마이그레이션 `0002_user_appearance`([IMPL-018](../TASKS.md#impl-018-사람-아바타-구현))가 기본값으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 동물 캐릭터 컬럼 `character_id`를 지웠다. 값 범위는 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 읽을 때 없는 필드는 0으로 읽는다 |
+| `appearance` | jsonb not null default 기본 외형(모든 항목 0) | 사람 아바타 외형([API `Appearance`](API.md#공통-타입), [DEC-059](../DECISIONS.md#결정-색인)). 마이그레이션 `0002_user_appearance`([IMPL-018](../TASKS.md#impl-018-사람-아바타-구현))가 기본값으로 컬럼을 더해 기존 행을 모두 고정 기본 외형으로 채우고 동물 캐릭터 컬럼 `character_id`를 지웠다. 값 범위는 앱(Zod)만 검사하고 DB `CHECK`는 두지 않는다. 읽을 때 없는 필드는 0으로 읽는다. 안경·모자·옷([DEC-078](../DECISIONS.md#결정-색인), [IMPL-024](../TASKS.md#impl-024-아바타-꾸미기-항목-확장안경모자옷))은 새 마이그레이션 없이 기존 행의 없는 필드를 0(없음·기본 티)으로 읽어 채우므로 DB 변경이 없다 |
 | `total_games` | integer not null default 0 | CHECK >= 0. 승·패·무 모두 포함 |
 | `wins` / `losses` | integer not null default 0 | CHECK >= 0, `wins + losses <= total_games`. 무 = `total_games - wins - losses` |
 
