@@ -335,8 +335,8 @@ export class AvatarHead {
         this.add(shell, hairMat);
         const cap = new SphereGeometry(r, 28, 14, 0, Math.PI * 2, 0, 1.0);
         cap.rotateX(-0.2);
+        this.deform(cap, 1.1, 1);
         if (!hatOn) this.add(cap, hairMat);
-        this.add(cap, hairMat);
         return;
       }
     }

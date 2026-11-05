@@ -140,3 +140,10 @@ export function OutfitSwatch({ outfit, size = 64 }: { outfit: OutfitPart; size?:
     </svg>
   );
 }
+
+/**
+ * 모자를 쓴 2D 얼굴의 viewBox(DEC-078). 모자 경로의 바깥 끝(밀짚 챙 가로 ±70, 마법사 모자 끝 위 −92)에
+ * 가장 큰 두상 배율을 곱해도 잘리지 않게 잡는다. 두상 배율은 모자 그룹에도 걸린다.
+ */
+export const HAT_EXTENT = { halfWidth: 70, top: 92 } as const;
+export const HAT_VIEWBOX = { x: -80, y: -102, size: 160 } as const;

@@ -7,7 +7,7 @@ import {
   resolveAvatar,
   type Appearance,
 } from '@alkkagi/shared';
-import { GlassesArt, HatArt } from './AvatarAccessories.tsx';
+import { GlassesArt, HAT_VIEWBOX, HatArt } from './AvatarAccessories.tsx';
 
 export function AvatarFace({
   appearance,
@@ -26,7 +26,11 @@ export function AvatarFace({
   const earX = 50 * H.sx * jawScale(0.08, H.jaw) - 1.5;
   return (
     <svg
-      viewBox={hat.kind === 'none' ? '-64 -68 128 128' : '-76 -92 152 152'}
+      viewBox={
+        hat.kind === 'none'
+          ? '-64 -68 128 128'
+          : `${String(HAT_VIEWBOX.x)} ${String(HAT_VIEWBOX.y)} ${String(HAT_VIEWBOX.size)} ${String(HAT_VIEWBOX.size)}`
+      }
       width={size}
       height={size}
       role={title ? 'img' : undefined}

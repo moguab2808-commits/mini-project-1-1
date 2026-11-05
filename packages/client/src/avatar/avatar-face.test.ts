@@ -2,6 +2,7 @@ import { AVATAR_PARTS, DEFAULT_APPEARANCE, hairHiddenByHat, resolveAvatar } from
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { HAT_EXTENT, HAT_VIEWBOX, HatArt } from './AvatarAccessories.tsx';
 import { AvatarFace } from './AvatarFace.tsx';
 
 const face = (over: Partial<typeof DEFAULT_APPEARANCE>) =>
@@ -45,5 +46,52 @@ describe('2D 얼굴의 안경·모자(DEC-078)', () => {
       expect(face({ outfit: i })).toBe(base);
     });
     expect(resolveAvatar({ ...DEFAULT_APPEARANCE, outfit: 3 }).outfit.kind).toBe('stripe');
+  });
+});
+
+/** 절대 좌표 경로(M·L·C·Q·H·V·Z)의 x·y 범위. 제어점을 포함하므로 실제 끝보다 크거나 같다 */
+function pathBounds(d: string) {
+  const b = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+  const put = (x: number | undefined, y: number | undefined) => {
+    if (x !== undefined) {
+      b.minX = Math.min(b.minX, x);
+      b.maxX = Math.max(b.maxX, x);
+    }
+    if (y !== undefined) {
+      b.minY = Math.min(b.minY, y);
+      b.maxY = Math.max(b.maxY, y);
+    }
+  };
+  for (const m of d.matchAll(/([MLCQHVZ])([^MLCQHVZ]*)/g)) {
+    const nums = (m[2] ?? '').match(/-?\d+(?:\.\d+)?/g)?.map(Number) ?? [];
+    if (m[1] === 'H') nums.forEach((x) => put(x, undefined));
+    else if (m[1] === 'V') nums.forEach((y) => put(undefined, y));
+    else for (let i = 0; i + 1 < nums.length; i += 2) put(nums[i], nums[i + 1]);
+  }
+  return b;
+}
+
+describe('모자를 쓴 2D 얼굴의 viewBox', () => {
+  it('모자 경로의 바깥 끝에 가장 큰 두상 배율을 곱해도 viewBox 안이다(PR #99 리뷰)', () => {
+    const maxSx = Math.max(...AVATAR_PARTS.headShape.map((h) => h.sx));
+    const maxSy = Math.max(...AVATAR_PARTS.headShape.map((h) => h.sy));
+    let halfWidth = 0;
+    let top = 0;
+    for (const hat of AVATAR_PARTS.hat) {
+      if (hat.kind === 'none') continue;
+      const svg = renderToStaticMarkup(createElement(HatArt, { hat }));
+      for (const [, d] of svg.matchAll(/ d="([^"]+)"/g)) {
+        const b = pathBounds(d ?? '');
+        halfWidth = Math.max(halfWidth, Math.abs(b.minX), Math.abs(b.maxX));
+        top = Math.max(top, -b.minY);
+      }
+    }
+    expect(halfWidth).toBeLessThanOrEqual(HAT_EXTENT.halfWidth);
+    expect(top).toBeLessThanOrEqual(HAT_EXTENT.top);
+    const v = HAT_VIEWBOX;
+    expect(v.x).toBeLessThanOrEqual(-HAT_EXTENT.halfWidth * maxSx);
+    expect(v.x + v.size).toBeGreaterThanOrEqual(HAT_EXTENT.halfWidth * maxSx);
+    expect(v.y).toBeLessThanOrEqual(-HAT_EXTENT.top * maxSy);
+    expect(v.y + v.size).toBeGreaterThanOrEqual(50 * maxSy);
   });
 });
