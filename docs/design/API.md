@@ -83,7 +83,7 @@
 | `HAZARD_NOT_USABLE` | 랜덤형 방해요소를 직접 사용함 ([PRD 사용](../PRD.md#사용)). 턴당 1회형을 같은 턴에 다시 사용함([IMPL-016](../TASKS.md#impl-016-방해요소-10종-추가와-턴-교체)). 경기 시작 전·종료 후 입력은 `GAME_NOT_ACTIVE`다 ([GAME 상태 전이](GAME.md#상태-전이와-순서)) |
 | `REMATCH_NOT_AVAILABLE` | 결과 화면이 아니거나 재도전 15초가 지났거나 상대가 나간 뒤의 `rematch:request` |
 | `OUT_OF_REACH` | 손이 닿는 거리 밖의 알로 발사함 ([GAME 방해요소 수치](GAME.md#방해요소-수치)의 손이 닿는 거리, [DEC-036](../DECISIONS.md#결정-색인)). [DEC-063](../DECISIONS.md#결정-색인) 확정 |
-| `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` (로컬·AI 구현, 온라인 후속, [IMPL-017](../TASKS.md#impl-017-감정표현-구현)) |
+| `EMOTE_COOLDOWN` | 감정표현 공통 쿨타임 안의 `emote:send` ([IMPL-017](../TASKS.md#impl-017-감정표현-구현)) |
 | `BOARD_ROTATE_NOT_ALLOWED` | 조준 단계가 아니거나(알 이동 중 등) 기절 중의 `board:rotate` ([DEC-036](../DECISIONS.md#결정-색인)). 상대 턴은 `NOT_YOUR_TURN`. [DEC-063](../DECISIONS.md#결정-색인) 확정 |
 
 방해요소 사용 거부는 `STALE_HAZARD`와 `HAZARD_*` 4종으로 응답한다. "효과가 진행 중"이라는 이유의 거부는 없다([DEC-031](../DECISIONS.md#결정-색인)). `HAZARD_*`와 이 절의 새 코드 이름은 개발자 B가 정했고 개발자 A가 GAME·LOCAL·OPERATIONS와 대조해 확인했다([API-002](../TASKS.md#api-002-api-이름식별자-확인과-private-뷰-필드-확정)). 목록은 이 절 한 곳에서 관리한다.
@@ -121,8 +121,8 @@
 | C → S | `aim:update` | 내 조준·몸짓 상태 `{ gameId, mode, stoneId?, angle?, power?, kind?, target? }`. ack 없음, volatile, 초당 20회 이하 (제안, DEC-036) |
 | S → C | `aim:state` | 상대의 `aim:update`에 `seat`를 붙여 상대에게만 중계 (제안, DEC-036) |
 | S → C | `session:replaced` | 다른 접속으로 대체되어 로그아웃됨 |
-| C → S | `emote:send` | 감정표현 보내기 (로컬·AI 구현, 온라인 후속, [감정표현 필드](#감정표현-필드-emote-001)) |
-| S → C | `emote:shown` | 감정표현 표시 (양쪽, 로컬·AI 구현, 온라인 후속) |
+| C → S | `emote:send` | 감정표현 보내기 (로컬·AI·온라인, [감정표현 필드](#감정표현-필드-emote-001)) |
+| S → C | `emote:shown` | 감정표현 표시 (양쪽, 로컬·AI·온라인) |
 
 `sim:result`(일괄 기록 이벤트)는 두지 않는다. 실시간 진행은 `game:state`로, 방해요소 발동은 `hazard:triggered`로 전달한다 ([ADR-0004](../adr/0004-realtime-hazards.md), [DEC-016](../DECISIONS.md#결정-색인)).
 
@@ -287,6 +287,7 @@ sequenceDiagram
 | 쿨타임 | 클라이언트는 마지막으로 보낸 시각부터 3초 동안 입력을 막는다. 권한 측은 좌석별 마지막 **수락** 시각부터 2.8초 안의 요청을 `EMOTE_COOLDOWN`으로 거부한다. 0.2초 여유는 네트워크 지연 차이로 정상 입력이 거부되지 않게 하는 값이다. 거부된 요청은 마지막 수락 시각을 바꾸지 않는다 |
 | 저장·로그 | 저장하지 않고 `revision`·`game:state`에 넣지 않는다. 재도전으로 새 경기가 시작되면 쿨타임 기록은 새로 시작한다 |
 | 로컬 2인·AI | `GameSession`에 `sendEmote(cmd): Promise<CommandResult>`와 `emote:shown` 구독을 더한다([LOCAL](LOCAL.md#gamesession-시그니처)). AI 컨트롤러는 좌석 1 명령으로 같은 `emote:send`를 보내 같은 쿨타임 검사를 받는다 |
+| 온라인 | 서버 `GameService.sendEmote`가 소켓 세션 사용자의 좌석으로만 바꿔 방의 `RoomRuntime.sendEmote`에 넘긴다(입력의 좌석·사용자 번호는 스키마가 거부). 쿨타임·경기 단계 검사는 로컬과 같은 런타임 코드이고 `emote:shown`은 두 사용자 소켓에 신뢰 전송한다. 경기에 속하지 않은 사용자는 `GAME_NOT_ACTIVE`다 |
 | 비공개 점검 | 보유 방해요소·사용자 번호가 들어갈 필드가 없다. 좌석·종류·시각만 담는다 |
 | 몸짓 | 아바타 몸짓은 [DEC-062](../DECISIONS.md#결정-색인)와 [PRD](../PRD.md#감정표현-dec-056)를 따른다. 이벤트 필드는 몸짓과 관계없다 |
 
@@ -309,7 +310,7 @@ sequenceDiagram
 | `game:over` | `winnerId`, `reason`, `remainingStones`, `rematchDeadlineMs` | 없음. 남은 보유 방해요소를 공개하지 않음 | 통과 |
 | `rematch:state` | 요청 여부, 마감 시각, 결과 | 없음 | 통과 |
 | `session:replaced` | `reason` (본인 연결에만) | 해당 없음 | 통과 |
-| `emote:shown` (로컬·AI 구현, 온라인 후속) | `seat`, `emote`, `atMs` | 없음 | 통과 |
+| `emote:shown` | `seat`, `emote`, `atMs` | 없음 | 통과 |
 
 - 랜덤형 방해요소(`bar_speed`·`wind`)의 자동 발동 시각은 지급 때 시드로 정해지지만 발동 전에는 어떤 이벤트에도 담지 않는다. 발동한 뒤 `hazard:triggered`로만 양쪽에 알린다.
 - 사용자 번호(`users.id`)는 어떤 이벤트·응답에도 담지 않고 좌석 값과 닉네임만 쓴다([DEC-030](../DECISIONS.md#결정-색인)).

@@ -292,9 +292,27 @@ export function LobbyScreen({
             <strong className="lobby-plate-name">{me.nickname}</strong>
             <span className="lobby-plate-record">{formatRecord(me.record)}</span>
           </div>
-          <span className="lobby-rate" aria-label={`승률 ${formatWinRate(me.record)}`}>
-            {formatWinRate(me.record)}
-          </span>
+          <button
+            type="button"
+            className="lobby-customize"
+            title="캐릭터 꾸미기"
+            disabled={locked}
+            onClick={() => {
+              setModal({ t: 'character' });
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M14.5 3.5l6 6-9.8 9.8H4.7v-6z M12.8 5.2l6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span>꾸미기</span>
+          </button>
           <button
             type="button"
             className="l-btn l-btn-cream lobby-plate-btn"
