@@ -72,7 +72,7 @@
 | [EMOTE-001](#emote-001-감정표현-설계) | 감정표현 설계 | P2 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [IMPL-018](#impl-018-사람-아바타-구현) | 사람 아바타 구현 | P1 | CHAR-001, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #82](https://github.com/moguab2808-commits/mini-project-1-1/pull/82) |
 | [IMPL-017](#impl-017-감정표현-구현) | 감정표현 구현 | P2 | EMOTE-001, IMPL-018 | 진행 중 | Codex — 사용자 요청 수행 | 미생성 |
-| [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 진행 중 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
+| [DOC-011](#doc-011-readme-설치실행-절차) | README 설치·실행 절차 | P2 | PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013) | 완료 | 개발자 B·Codex(로컬) | [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13) |
 | [UI-004](#ui-004-디자인-참고-기준을-l-세트로-변경) | 디자인 참고 기준을 L 세트로 변경 | P1 | 없음 | 완료 | Claude — 사용자 요청 수행 | [PR #85](https://github.com/moguab2808-commits/mini-project-1-1/pull/85) |
 | [IMPL-019](#impl-019-l-화풍-화면-적용) | L 화풍 화면 적용 | P1 | UI-004, IMPL-012 | 완료 | 개발자 B | [#86](https://github.com/moguab2808-commits/mini-project-1-1/issues/86) |
 | [IMPL-020](#impl-020-중력-구역-화살표미끄럼-장판-설치형시선시점-조정) | 중력 구역 화살표·미끄럼 장판 설치형·시선·시점 조정 | P1 | IMPL-016 | 완료 | 개발자 A | [#87](https://github.com/moguab2808-commits/mini-project-1-1/issues/87) |
@@ -1097,7 +1097,7 @@ Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 ## DOC-011 README 설치·실행 절차
 
 우선순위: P2
-상태: 진행 중
+상태: 완료
 담당: 개발자 B·Codex(로컬)
 의존성: PLAN-001 이후 실행 구성 구현(IMPL-001·IMPL-013)
 범위: 실행 구성이 생긴 뒤 README에 준비 조건·설치·로컬 실행·테스트·배포 접속 절차를 실제 검증 결과와 함께 추가한다.
@@ -1105,12 +1105,12 @@ Issue·PR: [PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/
 Issue·PR: [#13](https://github.com/moguab2808-commits/mini-project-1-1/issues/13)·[PR #84](https://github.com/moguab2808-commits/mini-project-1-1/pull/84)(중간 PR)
 
 수용 기준:
-- [ ] README의 명령을 새 환경에서 그대로 따라 실행해 확인한 결과가 worklog에 있다.
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] README의 명령을 새 환경에서 그대로 따라 실행해 확인한 결과가 worklog에 있다. (2026-11-05 새 클론에서 확인, DB 접속이 필요한 단계는 제외하고 [DEC-065](DECISIONS.md#결정-색인)의 온라인·DB 확인 범위로 미룬다. 대상은 [IMPL-015](#impl-015-방-테마-구현)·[IMPL-018](#impl-018-사람-아바타-구현)의 DB 테스트와 온라인 두 계정 확인)
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (병합 직후 체크 규칙에 따라 이 PR에서 함께 닫는다)
 
-로컬 진행: README에 서버 없는 AI·로컬 2인 실행·테마·입력·재도전을 정리했다. 별도 임시 폴더에서 오프라인 `npm ci`·빌드·개발 서버 시작·AI 페이지 HTTP 200을 확인했다. 온라인·배포 절차의 새 환경 확인과 PR·병합은 후속이다.
+진행: README에 서버 없는 AI·로컬 2인 실행·테마·입력·재도전을 정리했고(2026-11-03 로컬 확인), 2026-11-05 새 클론에서 `npm ci`·테스트·린트·빌드·개발 서버·서버 환경 변수 오류·운영 접속을 확인해 Windows 줄바꿈 안내와 배포 접속 절을 더했다([worklog](worklogs/2026-11-05.md#doc-011-readme-새-환경-검증)). DB 접속이 필요한 단계는 미확인으로 남겼다.
 
-검증 근거: [DOC-011 로컬 실행 안내 검증](worklogs/2026-11-03.md#doc-011-로컬-설치실행-안내-검증)
+검증 근거: [2026-11-05 worklog DOC-011 새 환경 검증](worklogs/2026-11-05.md#doc-011-readme-새-환경-검증), [2026-11-03 로컬 실행 안내 검증](worklogs/2026-11-03.md#doc-011-로컬-설치실행-안내-검증)
 
 ### IMPL-004 후속 조작 수정 (2026-11-02)
 
