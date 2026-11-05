@@ -1,6 +1,7 @@
 // 개발용 `/local?seat=0|1[&theme=bar|rooftop|classroom|beach]` 화면. 창 2개를 띄워 각자 한 좌석을 맡는다(DEC-020).
 // 방 테마는 먼저 연결한 창의 `theme` 값을 쓰고, 없거나 잘못되면 권한 측이 기본 테마로 바꾼다(DEC-052).
 import type { ThemeId } from '@alkkagi/shared';
+import { useMusic } from '../audio/use-audio.ts';
 import { useEffect, useState } from 'react';
 import { GameScreen } from '../game/GameScreen.tsx';
 import { GameStore } from '../game/game-store.ts';
@@ -32,6 +33,7 @@ function parseSeat(search: string): 0 | 1 | null {
 }
 
 export function LocalPage() {
+  useMusic('lobby');
   const [phase, setPhase] = useState<Phase>(() => {
     if (typeof SharedWorker === 'undefined') return { t: 'unsupported' };
     return parseSeat(window.location.search) === null ? { t: 'badSeat' } : { t: 'connecting' };

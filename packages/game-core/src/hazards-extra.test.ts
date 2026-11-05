@@ -177,6 +177,115 @@ describe('힘을 주는 설치물', () => {
     assert.ok(bent.x > 0.5, `자석 쪽(+x)으로 휜다: ${bent.x}`);
   });
 
+  describe('자석 궤도(DEC-082)', () => {
+    const R = 1.1;
+    /** 발사 뒤 틱마다 알 상태를 기록하며 정지까지 진행한다 */
+    function track(g: Game, t: number, ids: number[]) {
+      const log: { t: number; phase: string; stones: ReturnType<Game['debugState']>['stones'] }[] =
+        [];
+      for (let i = 0; i < 3000 && g.getViewFor(0).phase === 'moving'; i++) {
+        t += 1000 / 120;
+        g.advanceTo(t);
+        const st = g.debugState();
+        log.push({
+          t,
+          phase: g.getViewFor(0).phase,
+          stones: st.stones.filter((x) => ids.includes(x.id)),
+        });
+      }
+      return { t, log };
+    }
+    const orbitSpan = (log: ReturnType<typeof track>['log'], id: number) => {
+      const on = log.filter((e) => e.stones.find((x) => x.id === id)?.orbit);
+      return on.length ? (on[on.length - 1]!.t - on[0]!.t) / 1000 : 0;
+    };
+
+    test('붙잡힌 알은 2초 동안 범위 안에서 돌다가 중심에 멈추고, 그동안 턴이 끝나지 않는다', () => {
+      const g = mk();
+      clearLane(g);
+      assert.equal(code(use(g, 1, T0, 'magnet', { x: 0, y: 0 })), 'OK');
+      assert.equal(shoot(g, T0 + 10, 2, Math.PI / 2, 30).ok, true);
+      const { log } = track(g, T0 + 10, [2]);
+      const span = orbitSpan(log, 2);
+      assert.ok(Math.abs(span - 2) < 0.05, `도는 시간 ${span}s`);
+      const during = log.filter((e) => e.stones[0]?.orbit);
+      assert.ok(during.every((e) => Math.hypot(e.stones[0]!.x, e.stones[0]!.y) <= 8.8 + 1e-6));
+      // 실제로 돈다: 각이 한 바퀴 넘게 바뀐다
+      const angles = during.map((e) => Math.atan2(e.stones[0]!.y, e.stones[0]!.x));
+      let swept = 0;
+      for (let i = 1; i < angles.length; i++) {
+        let d = angles[i]! - angles[i - 1]!;
+        if (d > Math.PI) d -= 2 * Math.PI;
+        if (d < -Math.PI) d += 2 * Math.PI;
+        swept += Math.abs(d);
+      }
+      assert.ok(swept > 2 * Math.PI, `회전량 ${swept}`);
+      const end = stoneOf(g.debugState(), 2);
+      assert.equal(end.alive, true);
+      assert.ok(Math.hypot(end.x, end.y) < 1e-9, `중심: ${end.x}, ${end.y}`);
+    });
+
+    test('두 알이 빨려 들면 각자 2초 돈 뒤 하나는 중심, 하나는 바로 옆에 겹치지 않게 멈추고 튕겨 나가지 않는다', () => {
+      const g = mk();
+      clearLane(g);
+      g.debugSetStone(7, 0, 11.5);
+      assert.equal(code(use(g, 1, T0, 'magnet', { x: 0, y: 0 })), 'OK');
+      assert.equal(shoot(g, T0 + 10, 2, Math.PI / 2, 30).ok, true);
+      g.debugSetStone(7, 0, 11.5, true, 0, -60);
+      const { log } = track(g, T0 + 10, [2, 7]);
+      for (const id of [2, 7]) {
+        const span = orbitSpan(log, id);
+        assert.ok(Math.abs(span - 2) < 0.05, `알 ${id} 도는 시간 ${span}s`);
+      }
+      const st = g.debugState();
+      const a = stoneOf(st, 2);
+      const b = stoneOf(st, 7);
+      assert.ok(a.alive && b.alive);
+      const da = Math.hypot(a.x, a.y);
+      const db = Math.hypot(b.x, b.y);
+      assert.ok(Math.min(da, db) < 1e-9, '하나는 중심');
+      assert.ok(
+        Math.abs(Math.max(da, db) - 2 * R) < 0.01,
+        `다른 하나는 바로 옆: ${Math.max(da, db)}`,
+      );
+      assert.ok(Math.hypot(a.x - b.x, a.y - b.y) >= 2 * R - 1e-6, '겹치지 않는다');
+    });
+
+    test('범위 안에 멈춰 있던 알은 끌려가지 않는다', () => {
+      const g = mk();
+      clearLane(g);
+      g.debugSetStone(7, 14, 8);
+      assert.equal(code(use(g, 1, T0, 'magnet', { x: 10, y: 5 })), 'OK');
+      runShot(g, T0 + 10, 2, Math.PI, 20);
+      const s7 = stoneOf(g.debugState(), 7);
+      assert.deepEqual([s7.x, s7.y], [14, 8]);
+    });
+
+    test('첫 번째로 친 사람 뒤에는 자석이 남고, 두 번째로 친 사람 뒤에는 돈 다음 라운드가 넘어가 사라진다', () => {
+      const g = mk();
+      clearLane(g);
+      assert.equal(code(use(g, 1, T0, 'magnet', { x: 0, y: 0 })), 'OK');
+      const first = runShot(g, T0 + 10, 2, Math.PI / 2, 30);
+      assert.ok((first.t - T0 - 10) / 1000 >= 2, '돈 뒤에 턴이 끝난다');
+      assert.ok(
+        g.getViewFor(0).effects.some((e) => e.kind === 'magnet'),
+        '자석 유지',
+      );
+      // 두 번째 사람(좌석 1)의 알을 자석 쪽으로 보낸다
+      g.debugSetStone(5, 0, 11.5);
+      const t1 = first.t + 10;
+      assert.equal(shoot(g, t1, 5, -Math.PI / 2, 30).ok, true);
+      const { t, log } = track(g, t1, [5]);
+      assert.ok(Math.abs(orbitSpan(log, 5) - 2) < 0.05);
+      assert.ok((t - t1) / 1000 >= 2);
+      assert.equal(
+        g.getViewFor(0).effects.some((e) => e.kind === 'magnet'),
+        false,
+        '라운드가 넘어가 사라진다',
+      );
+    });
+  });
+
   test('중력 구역: 방향을 45° 단위로 반올림하고 그 방향으로 민다', () => {
     let dir = NaN;
     const st = straightShot((g) => {

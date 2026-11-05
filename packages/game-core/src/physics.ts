@@ -13,6 +13,22 @@ export interface Stone {
   vz: number;
   airborne: boolean;
   alive: boolean;
+  /** 자석에 붙잡혀 도는 중(DEC-082). 이 동안 다른 힘·충돌·판정을 받지 않는다 */
+  orbit?: MagnetOrbit;
+}
+
+/** 자석에 붙잡힌 알의 나선 궤도 상태 */
+export interface MagnetOrbit {
+  cx: number;
+  cy: number;
+  /** 붙잡힌 순간 중심과의 거리·각, 높이 */
+  r0: number;
+  a0: number;
+  h0: number;
+  /** 회전 방향(+1 반시계, −1 시계). 들어올 때의 돌던 방향을 따른다 */
+  dir: 1 | -1;
+  /** 붙잡힌 뒤 경과(초) */
+  t: number;
 }
 
 export interface StickyArea {
@@ -87,6 +103,67 @@ function inPit(w: World, s: Stone): boolean {
   return (w.pits ?? []).some((p) => Math.hypot(s.x - p.cx, s.y - p.cy) <= p.radius);
 }
 
+/** 0→1 부드러운 진행 */
+function smooth(u: number): number {
+  return u * u * (3 - 2 * u);
+}
+
+/** 붙잡힌 알을 한 스텝 돌린다. 시간이 다 되면 멈춘다 */
+function advanceOrbit(w: World, s: Stone): void {
+  const o = s.orbit!;
+  o.t += DT;
+  const T = HAZARD_TUNING.magnetOrbitSeconds;
+  if (o.t >= T - 1e-9) {
+    finishOrbit(w, s);
+    return;
+  }
+  const u = o.t / T;
+  const r = o.r0 * (1 - smooth(u));
+  const a = o.a0 + o.dir * 2 * Math.PI * HAZARD_TUNING.magnetOrbitTurnsPerSec * o.t;
+  s.x = o.cx + Math.cos(a) * r;
+  s.y = o.cy + Math.sin(a) * r;
+  s.h = o.h0 * Math.max(0, 1 - o.t / 0.4);
+  s.vx = s.vy = s.vz = 0;
+}
+
+/**
+ * 궤도를 끝내고 중심에 세운다. 중심에 다른 알·벽이 있으면 가까운 빈자리(알 지름 간격의 육각 고리)를
+ * 마지막 회전 각에서부터 찾아 겹치지 않게 둔다. 다른 알은 밀지 않는다.
+ */
+function finishOrbit(w: World, s: Stone): void {
+  const o = s.orbit!;
+  s.orbit = undefined;
+  s.vx = s.vy = s.vz = 0;
+  s.h = 0;
+  s.airborne = false;
+  const R = PHYSICS.stoneRadius;
+  const gap = 2 * R + 1e-3;
+  const others = w.stones.filter((t) => t !== s && t.alive && !t.airborne && !t.orbit);
+  const free = (x: number, y: number) =>
+    insideBoard(w.board, x, y) &&
+    !others.some((t) => Math.hypot(t.x - x, t.y - y) < gap - 1e-6) &&
+    !w.walls.some((wall) => circleVsObb(x, y, R, wall)) &&
+    !inPit(w, { ...s, x, y });
+  const aEnd =
+    o.a0 +
+    o.dir * 2 * Math.PI * HAZARD_TUNING.magnetOrbitTurnsPerSec * HAZARD_TUNING.magnetOrbitSeconds;
+  for (let ring = 0; ring < 8; ring++) {
+    const n = ring === 0 ? 1 : ring * 6;
+    for (let k = 0; k < n; k++) {
+      const a = aEnd + (k * 2 * Math.PI) / n;
+      const x = o.cx + Math.cos(a) * ring * gap;
+      const y = o.cy + Math.sin(a) * ring * gap;
+      if (free(x, y)) {
+        s.x = x;
+        s.y = y;
+        return;
+      }
+    }
+  }
+  s.x = o.cx;
+  s.y = o.cy;
+}
+
 /** 고정 스텝 하나. 제거된 알의 id를 돌려준다. */
 export function stepPhysics(w: World): number[] {
   const removed: number[] = [];
@@ -100,37 +177,33 @@ export function stepPhysics(w: World): number[] {
   );
   const ice = w.iceAreas ?? [];
 
+  // 0. 자석 궤도: 붙잡힌 알은 정해진 나선을 따라 돌고 다 돌면 중심에 멈춘다
+  for (const s of live) {
+    if (s.orbit) advanceOrbit(w, s);
+  }
+
   // 1. 가속(자석·중력 구역)·감속·중력, 2. 이동
   for (const s of live) {
+    if (s.orbit) continue;
     // 자석·중력 구역: 움직이는 지면 알과 떠 있는 알 모두에 적용한다
     if (s.airborne || moving.has(s.id)) {
-      for (const m of w.magnets ?? []) {
-        const dx = m.cx - s.x;
-        const dy = m.cy - s.y;
-        const d = Math.hypot(dx, dy);
-        if (d > m.radius) continue;
-        // 블랙홀: 범위에 닿으면 옆으로 비껴가는 속도를 죽이고 중심 쪽으로 빨아들여 중심에 세운다
-        if (d <= 1e-6) {
-          s.vx = 0;
-          s.vy = 0;
-          continue;
-        }
-        const ux = dx / d;
-        const uy = dy / d;
-        const radial = Math.max(0, s.vx * ux + s.vy * uy) + HAZARD_TUNING.magnetAccel * DT;
-        const keep = Math.max(0, 1 - HAZARD_TUNING.magnetTangentDamping * DT);
-        const tx = (s.vx - (s.vx * ux + s.vy * uy) * ux) * keep;
-        const ty = (s.vy - (s.vx * ux + s.vy * uy) * uy) * keep;
-        if (radial * DT >= d) {
-          // 이번 스텝에 중심을 지나가면 중심에 붙잡는다
-          s.x = m.cx;
-          s.y = m.cy;
-          s.vx = 0;
-          s.vy = 0;
-        } else {
-          s.vx = ux * radial + tx;
-          s.vy = uy * radial + ty;
-        }
+      // 자석(DEC-082): 범위에 닿으면 붙잡아 속도를 버리고 나선 궤도로 돌린다. 이 스텝의 나머지 힘은 받지 않는다
+      const m = (w.magnets ?? []).find((f) => Math.hypot(f.cx - s.x, f.cy - s.y) <= f.radius);
+      if (m) {
+        const rx = s.x - m.cx;
+        const ry = s.y - m.cy;
+        s.orbit = {
+          cx: m.cx,
+          cy: m.cy,
+          r0: Math.hypot(rx, ry),
+          a0: Math.atan2(ry, rx),
+          h0: Math.max(0, s.h),
+          dir: rx * s.vy - ry * s.vx < 0 ? -1 : 1,
+          t: 0,
+        };
+        s.vx = s.vy = s.vz = 0;
+        s.airborne = false;
+        continue;
       }
       for (const g of w.gravityZones ?? []) {
         if (insideObb(s.x, s.y, g.zone)) {
@@ -162,7 +235,8 @@ export function stepPhysics(w: World): number[] {
     s.y += s.vy * DT;
   }
 
-  const ground = live.filter((s) => !s.airborne);
+  // 붙잡혀 도는 알은 벽·알·폭탄·반전·구멍 판정에서 빠진다
+  const ground = live.filter((s) => !s.airborne && !s.orbit);
 
   // 3. 알–벽
   for (const s of ground) {
@@ -295,7 +369,7 @@ export function stepPhysics(w: World): number[] {
 export function allSlow(w: World): boolean {
   for (const s of w.stones) {
     if (!s.alive) continue;
-    if (s.airborne) return false;
+    if (s.airborne || s.orbit) return false;
     if (Math.hypot(s.vx, s.vy) >= PHYSICS.settleSpeed) return false;
   }
   return true;
@@ -304,6 +378,9 @@ export function allSlow(w: World): boolean {
 /** 시간 상한 도달: 모든 알을 정지시키고 떠 있는 알은 그 자리에 착지시킨다. 제거된 알 id를 돌려준다. */
 export function forceStop(w: World): number[] {
   const removed: number[] = [];
+  for (const s of w.stones) {
+    if (s.alive && s.orbit) finishOrbit(w, s);
+  }
   for (const s of w.stones) {
     if (!s.alive) continue;
     s.vx = s.vy = s.vz = 0;

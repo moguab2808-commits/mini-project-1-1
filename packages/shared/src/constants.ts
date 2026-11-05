@@ -157,11 +157,14 @@ export const HAZARD_TUNING = {
   blindDecayPerSec: 0.5,
 
   // ── 추가 10종 (제안값, GAME.md "수치 제안값") ──
-  /** 자석 영향 원 반지름 cm, 중심 쪽 가속 cm/s². 범위에 닿은 알을 블랙홀처럼 중심으로 빨아들여 중심에 세운다. 떠 있는 알에도 적용 */
+  /**
+   * 자석 영향 원 반지름 cm. 범위에 닿은 움직이는(떠 있는 포함) 알은 붙잡혀 중심을 나선으로 돌다가
+   * `magnetOrbitSeconds` 뒤 중심(차 있으면 가장 가까운 빈자리)에 멈춘다(DEC-082)
+   */
   magnetRadius: 8.8,
-  magnetAccel: 5400,
-  /** 자석 범위 안에서 중심과 수직인(비껴가는) 속도를 초당 줄이는 비율. 클수록 곧장 빨려 든다 */
-  magnetTangentDamping: 12,
+  /** 자석에 붙잡힌 알이 도는 시간(초)과 초당 회전 수 */
+  magnetOrbitSeconds: 2,
+  magnetOrbitTurnsPerSec: 1.25,
   /** 중력 구역 정사각 한 변 cm, 가속 cm/s². 방향은 45° 단위 */
   gravityZoneSize: 13.2,
   gravityAccel: 450,
