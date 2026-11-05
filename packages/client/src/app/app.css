@@ -227,45 +227,170 @@ input {
   font-size: clamp(48px, 9vw, 96px);
   line-height: 1;
 }
+/* 로그인(IMPL-030): 움직이는 일러스트 영상 위에 로고·띠를 위, 로그인 창을 아래 가운데에 둔다(시안 PNG 배치).
+   시안은 1280×720 기준이다. --u는 그 기준의 1px이 지금 창에서 몇 px인지(가로·세로 중 작은 비율)라서,
+   창 크기가 달라도 배경 그림과 창·로고의 비율이 시안과 같게 유지된다. 좁은 화면(720px 이하)은 1px로 고정한다. */
+.auth-page {
+  --u: max(0.7px, min(calc(100vw / 1280), calc(100dvh / 720)));
+  isolation: isolate;
+  overflow: hidden;
+  gap: calc(16 * var(--u));
+  padding: calc(20 * var(--u)) calc(20 * var(--u)) calc(33 * var(--u));
+  background: #2a140a url('/images/login-bg-poster.webp') center / cover no-repeat;
+}
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.auth-bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.auth-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(40, 16, 4, 0.5) 0%,
+    rgba(40, 16, 4, 0) 24%,
+    rgba(40, 16, 4, 0) 62%,
+    rgba(30, 12, 4, 0.45) 100%
+  );
+}
 .auth-hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: calc(16 * var(--u));
   text-align: center;
 }
 .auth-logo {
   margin: 0;
-  font-size: clamp(48px, 9vw, 96px);
+  font-size: calc(96 * var(--u));
   line-height: 1;
-  letter-spacing: 2px;
+  letter-spacing: calc(2 * var(--u));
+}
+.auth-tagline {
+  margin: 0;
+  padding: calc(8 * var(--u)) calc(24 * var(--u));
+  font-size: calc(19 * var(--u));
+}
+/* 오른쪽 위 둥근 사각 버튼 두 개(소리·전체 화면). 소리 버튼은 이 화면에서만 같은 모양으로 맞추고 한 줄에 나란히 둔다. */
+.auth-corner {
+  position: fixed;
+  top: calc(18 * var(--u));
+  right: calc(18 * var(--u));
+  z-index: 60;
+  display: flex;
+  gap: calc(8 * var(--u));
+}
+.auth-fullscreen,
+.auth-page .sound-fab {
+  position: static;
+  height: calc(56 * var(--u));
+  min-width: calc(56 * var(--u));
+  border: 0;
+  border-radius: calc(16 * var(--u));
+  color: #fff6d8;
+  font-size: calc(15 * var(--u));
+  background: rgba(50, 22, 8, 0.55);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 225, 175, 0.25),
+    0 0 0 2px var(--l-gold-edge),
+    0 6px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.auth-fullscreen svg,
+.auth-page .sound-fab svg {
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
+}
+.auth-page .sound-fab {
+  justify-content: center;
+}
+/* 소리가 막혀 있으면 빛나며 첫 클릭을 이끈다(DEC-087). 어두운 버튼에 맞춘 금빛 번짐이다. */
+.auth-page .sound-fab.locked {
+  animation: auth-sound-glow 1.6s ease-in-out infinite;
+}
+@keyframes auth-sound-glow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 2px 0 rgba(255, 225, 175, 0.25),
+      0 0 0 2px var(--l-gold-edge),
+      0 0 0 0 rgba(255, 200, 90, 0.7);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 0 rgba(255, 225, 175, 0.25),
+      0 0 0 2px var(--l-gold-edge),
+      0 0 0 10px rgba(255, 200, 90, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-page .sound-fab.locked {
+    animation: none;
+  }
+}
+.auth-fullscreen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.auth-page .sound-pop {
+  top: calc(84 * var(--u));
+  right: calc(18 * var(--u));
+}
+.auth-fullscreen:hover,
+.auth-page .sound-fab:hover {
+  background: rgba(70, 32, 12, 0.7);
+}
+.auth-fullscreen:focus-visible {
+  outline: 3px solid var(--l-focus);
+  outline-offset: 3px;
 }
 .auth-card {
-  width: min(920px, 100%);
+  position: relative;
+  width: min(calc(618 * var(--u)), 100%);
   margin-top: auto;
-  padding: 16px 18px 18px;
+  padding: calc(16 * var(--u)) calc(18 * var(--u)) calc(17 * var(--u));
   box-sizing: border-box;
+  border-radius: calc(28 * var(--u));
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: calc(12 * var(--u));
 }
 .auth-tabs {
-  align-self: flex-start;
+  position: absolute;
+  top: calc(-25 * var(--u));
+  left: calc(30 * var(--u));
+  z-index: 1;
   display: flex;
-  gap: 6px;
-  padding: 5px;
+  gap: calc(6 * var(--u));
+  padding: calc(5 * var(--u));
   border-radius: 999px;
   background: var(--l-wood-deep);
-  box-shadow: 0 0 0 3px var(--l-gold-edge);
+  box-shadow:
+    0 0 0 3px var(--l-gold-edge),
+    0 6px 12px rgba(0, 0, 0, 0.3);
 }
 .auth-tab {
-  height: 44px;
-  padding: 0 22px;
+  height: calc(46 * var(--u));
+  padding: 0 calc(22 * var(--u));
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: #ffdcae;
-  font-size: 19px;
+  font-family: var(--l-font);
+  font-size: calc(17 * var(--u));
   cursor: pointer;
 }
 .auth-tab:focus-visible {
@@ -279,9 +404,24 @@ input {
 }
 .auth-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 240px;
-  gap: 10px 14px;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) calc(240 * var(--u));
+  gap: calc(10 * var(--u)) calc(12 * var(--u));
+  align-items: end;
+  padding: calc(19 * var(--u)) calc(15 * var(--u)) calc(13 * var(--u));
+  border-radius: calc(22 * var(--u));
+  background: rgba(60, 26, 8, 0.6);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+/* 회원등록은 입력이 3칸이라 버튼을 좁혀 입력 칸을 넓힌다. 창 크기·두께는 로그인 탭과 같다. */
+.auth-form-signup {
+  grid-template-columns: minmax(0, 1fr) calc(150 * var(--u));
+}
+.auth-form-signup .auth-submit {
+  font-size: calc(24 * var(--u));
+  letter-spacing: 0;
+}
+.auth-form-signup .auth-field .l-input {
+  padding: 0 calc(12 * var(--u));
 }
 .auth-form > * {
   grid-column: 1 / -1;
@@ -296,39 +436,79 @@ input {
 }
 .auth-fields {
   display: flex;
-  gap: 14px;
-  padding: 14px;
-  border-radius: 24px;
-  background: rgba(60, 26, 8, 0.55);
+  gap: calc(9 * var(--u));
 }
 .auth-field {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: calc(6 * var(--u));
   color: var(--l-cream-text);
-  font-size: 16px;
+  font-size: calc(15 * var(--u));
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+}
+.auth-field .l-input {
+  height: calc(60 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border-radius: calc(16 * var(--u));
+  font-size: calc(18 * var(--u));
+  box-shadow:
+    inset 0 3px 0 rgba(120, 60, 20, 0.15),
+    0 0 0 3px rgba(214, 160, 90, 0.85);
 }
 .auth-submit {
-  min-height: 76px;
-  border-radius: 24px;
-  font-size: 32px;
+  min-height: calc(78 * var(--u));
+  border-radius: calc(24 * var(--u));
+  font-size: calc(30 * var(--u));
+  letter-spacing: calc(1 * var(--u));
+}
+.auth-submit svg {
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+}
+.auth-below {
+  width: min(calc(618 * var(--u)), 100%);
+  height: calc(40 * var(--u));
+  margin-top: calc(-12 * var(--u));
+  box-sizing: border-box;
 }
 .auth-hint {
-  margin: 0 0 0 14px;
+  margin: 0;
+  padding-left: calc(34 * var(--u));
   color: var(--l-cream-text);
-  font-size: 14px;
+  font-size: calc(13 * var(--u));
+  text-shadow:
+    0 1px 0 var(--l-wood-deep),
+    0 0 6px rgba(40, 16, 4, 0.8);
 }
-.auth-card .msg-error {
-  background: rgba(60, 20, 8, 0.75);
+.auth-below .msg {
+  margin: 0 calc(20 * var(--u));
+  padding: calc(7 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(12 * var(--u));
+  font-size: calc(14 * var(--u));
+  box-shadow: 0 0 0 2px var(--l-gold-edge);
+}
+.auth-below .msg-error {
+  background: rgba(60, 20, 8, 0.85);
   color: #ffd0c2;
 }
-.auth-card .msg-info {
-  background: rgba(60, 26, 8, 0.75);
+.auth-below .msg-info {
+  background: rgba(60, 26, 8, 0.85);
   color: var(--l-title);
 }
 @media (max-width: 720px) {
+  .auth-page {
+    --u: 1px;
+    /* 오른쪽 위 버튼과 로고가 겹치지 않게 로고를 내린다 */
+    padding: 84px 16px 24px;
+  }
+  .auth-logo {
+    font-size: clamp(48px, 13vw, 72px);
+  }
+  .auth-tagline {
+    font-size: 14px;
+  }
   .auth-form {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -342,7 +522,17 @@ input {
   }
   .auth-submit {
     min-height: 64px;
-    font-size: 28px;
+    font-size: 26px;
+  }
+  .auth-below {
+    height: auto;
+    margin-top: -4px;
+  }
+  .auth-hint {
+    padding-left: 12px;
+  }
+  .auth-below .msg {
+    margin: 0;
   }
 }
 

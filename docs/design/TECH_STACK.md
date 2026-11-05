@@ -48,6 +48,7 @@
 | 글꼴 | Jua·Black Han Sans(Google Fonts) woff2를 `packages/client/public/fonts/`에 두고 직접 제공 | SIL OFL 1.1(확인일 2026-11-04) | L 세트가 쓰는 글꼴이다([DEC-069](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인)). 한글·영문 woff2 4개(약 590KB)와 라이선스 전문을 `packages/client/public/fonts/`에 두고 `packages/client/src/ui/theme.css`의 `@font-face`로 쓴다. [CREDITS](../CREDITS.md)에 기록했다 |
 | 방 생성 창 캐릭터 전신 | 직접 제작 3D 전신 `packages/client/src/avatar/avatar-figure.ts`(코드 도형, 개발자 B가 만든 것, 손은 `avatar-hand.ts`). 화면에는 `AvatarFigureView.tsx`가 투명 캔버스로 그린다(방 생성 창과 캐릭터 꾸미기 창 왼쪽, [DEC-076](../DECISIONS.md#결정-색인)). WebGL을 쓸 수 없으면 2D 얼굴 `AvatarFace`로 대신 | 해당 없음(직접 제작) | [DEC-074](../DECISIONS.md#결정-색인)(DEC-072 ④·DEC-073의 2D `AvatarFullBody` 대체), [IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용). 인게임 장면은 상반신 유지([DEC-059](../DECISIONS.md#결정-색인)) |
 | 로그인·로비·방 생성 배경 일러스트(L 세트) | 사용자가 직접 만든 이미지. `packages/client/public/images/login-bg.webp`(1536×864, 약 188KB, 사용자가 2026-11-04에 교체한 그림의 PNG에서 변환) | 해당 없음(직접 제작) | [DEC-070](../DECISIONS.md#결정-색인)·[DEC-072](../DECISIONS.md#결정-색인). 직접 제작이라 CREDITS에 적지 않는다. 400KB 이하 목표를 지켰다([IMPL-019](../TASKS.md#impl-019-l-화풍-화면-적용) 첫 PR) |
+| 로그인 배경 영상(L 세트 일러스트를 움직이게 만든 것) | 사용자가 준 영상. `packages/client/public/videos/login-bg.mp4`(1280×720, 24fps, H.264, 소리 없음, 약 690KB)와 첫 장면 포스터 `packages/client/public/images/login-bg-poster.webp`(약 110KB) | 해당 없음(사용자 제공, 직접 제작 일러스트 기반) | [DEC-088](../DECISIONS.md#결정-색인). 로그인 화면만 쓴다. 영상 1MB 이하와 `public/` 전체 5MB 한도를 `client/src/app/assets.test.ts`로 확인한다(반입 시 합계 약 4.7MB) |
 
 ### 라이선스 기록
 
