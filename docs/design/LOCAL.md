@@ -201,4 +201,4 @@ interface GameEventMap {
 
 로컬 2인의 SharedWorker와 AI 전용 Worker는 `emote` 명령을 `RoomRuntime.sendEmote`에 전달하고 `emote:shown`을 양쪽 좌석에 중계한다. 스키마·활성 경기·좌석별 빈도 검사는 [API 계약](API.md#감정표현-필드-emote-001)을 따른다. `GameStore`는 좌석별 최근 이벤트를 표시 상태로만 보관하고 경기 시작·종료 때 지운다. AI는 별도 난수로 상황별 표현을 골라 발사·방해요소 판단 난수를 바꾸지 않는다.
 
-숫자키 1~6과 감정표현 메뉴는 로컬·AI 경기 중에만 활성화된다. 3초 입력 제한, 1.5초 아바타 몸짓·말풍선과 기존 효과음 음량을 따르는 Web Audio 합성 효과음을 쓴다. 조준 중에는 팔 조작을 유지한다. 온라인 `RemoteGameSession.sendEmote`는 서버 연결 전까지 `GAME_NOT_ACTIVE`를 반환하고 온라인 화면은 입력 메뉴를 숨긴다([DEC-065](../DECISIONS.md#결정-색인)).
+숫자키 1~6과 감정표현 메뉴는 로컬·AI 경기 중에만 활성화된다. 3초 입력 제한, 1.5초 아바타 몸짓·말풍선과 효과음 음량을 따르는 소리 엔진(`audio/`, [DEC-084](../DECISIONS.md#결정-색인))의 감정표현 효과음을 쓴다. 조준 중에는 팔 조작을 유지한다. 온라인 `RemoteGameSession.sendEmote`는 서버 연결 전까지 `GAME_NOT_ACTIVE`를 반환하고 온라인 화면은 입력 메뉴를 숨긴다([DEC-065](../DECISIONS.md#결정-색인)).
