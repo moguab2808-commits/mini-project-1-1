@@ -61,10 +61,10 @@ describe('녹음 파일 등록부', () => {
         assert.ok((THEME_IDS as readonly string[]).includes(key.slice(9)), key);
       else {
         assert.ok(key in SFX, key);
-        assert.ok(size <= 100 * 1024, `${key} ${size}B`);
+        assert.ok(size <= 100_000, `${key} ${size}B`);
       }
     }
     // 소리 파일 전체(에셋 전체 5MB 한도 안, TECH_STACK)
-    assert.ok(total < 3.5 * 1024 * 1024, `${total}B`);
+    assert.ok(total < 3_500_000, `${total}B`);
   });
 });
