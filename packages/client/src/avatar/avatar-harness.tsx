@@ -1,12 +1,14 @@
 // 개발용 아바타 화풍 확인 화면. `npm run dev -w @alkkagi/client` 후 /avatar-harness.html 로 연다(운영 빌드 입력 아님).
 // 위 줄은 고른 항목(item)의 선택지 5개, 아래 줄은 무작위 외형(표정 포함), 오른쪽은 같은 외형의 2D SVG 얼굴이다.
 // editor=1이면 꾸미기 창만 띄운다.
-// 쿼리: item=headShape|hair|eyebrows|eyes|nose|lips|skinTone(기본 hair) seed=<정수> yaw=<라디안>(기본 0.35) spin=1
+// 쿼리: item=headShape|hair|eyebrows|eyes|nose|lips|skinTone|glasses|hat|outfit(기본 hair) seed=<정수> yaw=<라디안>(기본 0.35) spin=1
+// base=hair:3,skinTone:1 처럼 위 줄의 나머지 항목을 정한다(모자×머리카락 조합 확인용)
 import {
   APPEARANCE_CHOICES,
   APPEARANCE_KEYS,
   DEFAULT_APPEARANCE,
   randomAppearance,
+  resolveAvatar,
   type Appearance,
   type AppearanceKey,
 } from '@alkkagi/shared';
@@ -30,6 +32,7 @@ import {
   Color,
   SRGBColorSpace,
 } from 'three';
+import { OutfitSwatch } from './AvatarAccessories.tsx';
 import { AvatarFace } from './AvatarFace.tsx';
 import { AvatarHead } from './avatar-head.ts';
 import type { FaceExpression } from './face-paint.ts';
@@ -43,12 +46,19 @@ const ITEM = (APPEARANCE_KEYS as readonly string[]).includes(q.get('item') ?? ''
   ? (q.get('item') as AppearanceKey)
   : 'hair';
 
+const BASE: Partial<Appearance> = {};
+for (const pair of (q.get('base') ?? '').split(',')) {
+  const [k, v] = pair.split(':');
+  if (k && (APPEARANCE_KEYS as readonly string[]).includes(k) && v !== undefined)
+    BASE[k as AppearanceKey] = Number(v);
+}
+
 // 위 줄: 고른 항목의 선택지 5개. 아래 줄: 고정 시드 무작위 외형 5개(표정 포함)
 const LOOKS: { label: string; a: Appearance }[] = Array.from(
   { length: APPEARANCE_CHOICES },
   (_, i) => ({
     label: `${ITEM} ${String(i + 1)}`,
-    a: { ...DEFAULT_APPEARANCE, [ITEM]: i },
+    a: { ...DEFAULT_APPEARANCE, ...BASE, [ITEM]: i },
   }),
 );
 let seed = Number(q.get('seed') ?? '7');
@@ -155,6 +165,13 @@ function Harness() {
             <span>{l.label}</span>
           </div>
         ))}
+        {ITEM === 'outfit' && (
+          <div style={{ display: 'flex', gap: 4, margin: '8px 0' }}>
+            {LOOKS.map((l) => (
+              <OutfitSwatch key={l.label} outfit={resolveAvatar(l.a).outfit} size={52} />
+            ))}
+          </div>
+        )}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {MIXES.map((a, i) => (
             <AvatarFace key={i} appearance={a} size={52} />
@@ -167,7 +184,7 @@ function Harness() {
 
 /** editor=1: 꾸미기 창만 띄운다(저장은 0.3초 뒤 성공으로 흉내 낸다) */
 function EditorHarness() {
-  const [current, setCurrent] = useState<Appearance>(DEFAULT_APPEARANCE);
+  const [current, setCurrent] = useState<Appearance>({ ...DEFAULT_APPEARANCE, ...BASE });
   const [open, setOpen] = useState(true);
   return (
     <ToastProvider>

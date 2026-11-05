@@ -1,9 +1,17 @@
 // 사람 아바타 3D 머리: 코드 도형(두상·귀·머리카락) + 이목구비 캔버스 텍스처(DEC-059).
 // 머리 중심이 원점이고 +Z가 얼굴 앞, +Y가 위다. 반지름 r은 두상 배율 적용 전 기준값이다.
 // 얼굴 텍스처는 앞쪽 구 조각에 정면 평행 투영 UV로 붙여 2D SVG 얼굴과 같은 배치가 되게 한다.
-import { jawScale, resolveAvatar, type Appearance, type ResolvedAvatar } from '@alkkagi/shared';
+import {
+  hairHiddenByHat,
+  jawScale,
+  resolveAvatar,
+  type Appearance,
+  type ResolvedAvatar,
+} from '@alkkagi/shared';
 import {
   CanvasTexture,
+  CylinderGeometry,
+  TorusGeometry,
   ConeGeometry,
   DoubleSide,
   Group,
@@ -79,7 +87,10 @@ export class AvatarHead {
       inner.scale.set(0.4, 1.1, 0.7);
     }
 
-    this.buildHair(hair.style, this.mat(hair.color, 0.55));
+    const hatOn = this.parts.hat.kind !== 'none';
+    if (!hairHiddenByHat(hair, this.parts.hat))
+      this.buildHair(hair.style, this.mat(hair.color, 0.55), hatOn);
+    this.buildHat();
     this.setExpression(NEUTRAL_FACE);
   }
 
@@ -153,7 +164,87 @@ export class AvatarHead {
     uv.needsUpdate = true;
   }
 
-  private buildHair(style: ResolvedAvatar['hair']['style'], hairMat: MeshStandardMaterial) {
+  /**
+   * 모자(DEC-078). 두상 배율에 맞춰 머리에 얹는다. 모자 반지름이 머리카락 껍질(1.14)보다 커서 단발·긴 머리는
+   * 모자 아래로만 보인다. 야구 모자·비니는 뒤로 기울여 쓰고(앞 가장자리가 눈썹 위), 밀짚·마법사 모자는 챙이 눈썹 위에 뜬다.
+   */
+  private buildHat() {
+    const hat = this.parts.hat;
+    if (hat.kind === 'none') return;
+    const r = this.r;
+    const H = this.parts.headShape;
+    const main = this.mat(hat.color, 0.8);
+    const accent = this.mat(hat.accent, 0.7);
+    main.side = DoubleSide;
+    accent.side = DoubleSide;
+    const g = new Group();
+    const k = 1.16;
+    g.scale.set(H.sx * k, H.sy * k, H.sx * k);
+    g.position.y = r * 0.1 * H.sy;
+    const dome = (radius: number, scaleY = 1) => {
+      const geo = new SphereGeometry(radius, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
+      const m = this.add(geo, main, g);
+      m.scale.y = scaleY;
+      return m;
+    };
+    switch (hat.kind) {
+      case 'cap': {
+        g.rotation.x = -0.42;
+        dome(r);
+        // 챙: 앞쪽 반원 판을 살짝 아래로 숙인다
+        const bill = this.add(
+          new CylinderGeometry(r * 0.82, r * 0.82, r * 0.07, 20, 1, false, -Math.PI / 2, Math.PI),
+          accent,
+          g,
+        );
+        bill.position.set(0, r * 0.02, r * 0.6);
+        bill.rotation.x = 0.3;
+        this.add(new SphereGeometry(r * 0.1, 10, 8), accent, g).position.y = r * 1.0;
+        break;
+      }
+      case 'beanie': {
+        g.rotation.x = -0.42;
+        dome(r);
+        const cuff = this.add(new TorusGeometry(r * 1.0, r * 0.13, 8, 32), accent, g);
+        cuff.rotation.x = Math.PI / 2;
+        cuff.position.y = r * 0.02;
+        this.add(new SphereGeometry(r * 0.3, 12, 10), accent, g).position.y = r * 1.04;
+        break;
+      }
+      case 'straw': {
+        g.rotation.x = -0.18;
+        g.position.y += r * 0.1;
+        const brim = this.add(new CylinderGeometry(r * 1.75, r * 1.75, r * 0.05, 32), main, g);
+        brim.position.y = 0;
+        dome(r * 0.92, 0.95);
+        const band = this.add(new TorusGeometry(r * 0.92, r * 0.07, 8, 32), accent, g);
+        band.rotation.x = Math.PI / 2;
+        band.position.y = r * 0.1;
+        break;
+      }
+      case 'wizard': {
+        g.rotation.x = -0.18;
+        g.position.y += r * 0.1;
+        const brim = this.add(new CylinderGeometry(r * 1.9, r * 1.9, r * 0.05, 32), main, g);
+        brim.position.y = 0;
+        const cone = new ConeGeometry(r * 0.95, r * 2.2, 24);
+        cone.translate(0, r * 1.1, 0);
+        this.add(cone, main, g);
+        const band = this.add(new TorusGeometry(r * 0.95, r * 0.08, 8, 32), accent, g);
+        band.rotation.x = Math.PI / 2;
+        band.position.y = r * 0.1;
+        break;
+      }
+    }
+    this.group.add(g);
+  }
+
+  /** hatOn이면 모자 아래로 보이는 옆·뒤 머리만 만든다(정수리 덮개를 만들지 않고 껍질을 귀 높이부터 시작한다, DEC-078) */
+  private buildHair(
+    style: ResolvedAvatar['hair']['style'],
+    hairMat: MeshStandardMaterial,
+    hatOn = false,
+  ) {
     const r = this.r;
     hairMat.side = DoubleSide;
     switch (style) {
@@ -181,14 +272,14 @@ export class AvatarHead {
           18,
           Math.PI / 2 + 0.8,
           Math.PI * 2 - 1.6,
-          0,
-          Math.PI * 0.7,
+          hatOn ? Math.PI * 0.46 : 0,
+          hatOn ? Math.PI * 0.24 : Math.PI * 0.7,
         );
         this.deform(shell, 1.14, 1.02);
         this.add(shell, hairMat);
         const cap = new SphereGeometry(r, 28, 14, 0, Math.PI * 2, 0, 1.22);
         this.deform(cap, 1.1, 1);
-        this.add(cap, hairMat);
+        if (!hatOn) this.add(cap, hairMat);
         return;
       }
       case 'spiky': {
@@ -227,8 +318,8 @@ export class AvatarHead {
           18,
           Math.PI / 2 + 0.7,
           Math.PI * 2 - 1.4,
-          0,
-          Math.PI * 0.72,
+          hatOn ? Math.PI * 0.46 : 0,
+          hatOn ? Math.PI * 0.26 : Math.PI * 0.72,
         );
         this.deform(shell, 1.14, 1.02);
         // 아래쪽을 늘려 어깨까지 내린다
@@ -245,7 +336,7 @@ export class AvatarHead {
         const cap = new SphereGeometry(r, 28, 14, 0, Math.PI * 2, 0, 1.0);
         cap.rotateX(-0.2);
         this.deform(cap, 1.1, 1);
-        this.add(cap, hairMat);
+        if (!hatOn) this.add(cap, hairMat);
         return;
       }
     }

@@ -52,9 +52,9 @@ const themeParam = q.get('theme');
 const themeId: ThemeId = THEME_IDS.find((t) => t === themeParam) ?? 'bar';
 const [look0, look1] = (q.get('looks') ?? '').split(',');
 
-/** 'looks' 쿼리의 7자리 숫자(두상·머리카락·눈썹·눈·코·입술·피부색 순)를 외형으로 읽는다 */
+/** 'looks' 쿼리의 7~10자리 숫자(두상·머리카락·눈썹·눈·코·입술·피부색·안경·모자·옷 순)를 외형으로 읽는다. 빠진 뒤쪽 항목은 0이다 */
 function lookFrom(digits: string | undefined, fallback: Appearance): Appearance {
-  if (!digits || !/^[0-4]{7}$/.test(digits)) return fallback;
+  if (!digits || !/^[0-4]{7,10}$/.test(digits)) return fallback;
   return normalizeAppearance(
     Object.fromEntries(APPEARANCE_KEYS.map((k, i) => [k, Number(digits[i])])),
   );

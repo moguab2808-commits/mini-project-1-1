@@ -1,6 +1,6 @@
 // 내 캐릭터 3D 전신(AvatarFigure)을 투명 배경 캔버스에 그린다. 방 생성 창(IMPL-019, DEC-074)과 캐릭터 꾸미기 창(IMPL-022, DEC-076) 왼쪽에 쓴다.
 // 기본은 저절로 천천히 좌우를 돌아보고, `draggable`이면 끌어서 돌려 본다(꾸미기 창). WebGL을 못 쓰면 2D 얼굴(AvatarFace)로 대신한다.
-import type { Appearance } from '@alkkagi/shared';
+import { resolveAvatar, type Appearance } from '@alkkagi/shared';
 import { useEffect, useRef, useState } from 'react';
 import {
   AmbientLight,
@@ -32,6 +32,8 @@ export function AvatarFigureView({
   const figureRef = useRef<AvatarFigure | null>(null);
   /** 끄는 중이면 그 끌기의 window 리스너를 떼는 함수. 끝나거나 창이 닫히면 비운다 */
   const stopDragRef = useRef<(() => void) | null>(null);
+  /** 키 큰 모자(마법사 모자)는 전신보다 위로 솟아 카메라를 조금 더 물린다(DEC-078) */
+  const zoomRef = useRef(1);
   const [failed, setFailed] = useState(false);
   const look = JSON.stringify(appearance);
 
@@ -67,6 +69,7 @@ export function AvatarFigureView({
     // 마지막으로 맞춘 캔버스 크기. 비율이 같아도 크기가 바뀌면 그림 버퍼를 다시 맞춘다
     let sizedW = 0;
     let sizedH = 0;
+    let baseDist = CAM_DIST;
     let last = performance.now();
     const t0 = last;
     const loop = (now: number) => {
@@ -78,11 +81,11 @@ export function AvatarFigureView({
         renderer.setSize(w, h, false);
         cam.aspect = w / h;
         // 가로가 좁으면 전신이 잘리지 않게 뒤로 물러난다
-        const dist = CAM_DIST * Math.max(1, 0.8 / cam.aspect);
-        cam.position.set(0, centerY + 6, dist);
-        cam.lookAt(0, centerY, 0);
+        baseDist = CAM_DIST * Math.max(1, 0.8 / cam.aspect);
         cam.updateProjectionMatrix();
       }
+      cam.position.set(0, centerY + 6, baseDist * zoomRef.current);
+      cam.lookAt(0, centerY + (zoomRef.current - 1) * 30, 0);
       const dt = Math.min(0.1, (now - last) / 1000);
       const t = (now - t0) / 1000;
       last = now;
@@ -111,7 +114,9 @@ export function AvatarFigureView({
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
-    const figure = new AvatarFigure(JSON.parse(look) as Appearance);
+    const look2 = JSON.parse(look) as Appearance;
+    zoomRef.current = resolveAvatar(look2).hat.kind === 'wizard' ? 1.2 : 1;
+    const figure = new AvatarFigure(look2);
     const old = figureRef.current;
     if (old) {
       scene.remove(old.root);

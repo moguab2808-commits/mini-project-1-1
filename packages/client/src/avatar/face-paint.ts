@@ -102,6 +102,32 @@ export function paintFace(
     }
   }
 
+  // 안경(DEC-078): 눈 위, 눈썹 아래. 2D SVG(AvatarAccessories.tsx)와 같은 알 경로
+  const G = parts.glasses;
+  if (G.d) {
+    const lens = new Path2D(G.d);
+    ctx.lineWidth = G.frameWidth;
+    ctx.strokeStyle = G.frame;
+    for (const sx of [-1, 1]) {
+      ctx.save();
+      ctx.translate(sx * E.x, E.y);
+      ctx.scale(sx, 1);
+      if (G.lens) {
+        ctx.globalAlpha = G.lensOpacity;
+        ctx.fillStyle = G.lens;
+        ctx.fill(lens);
+        ctx.globalAlpha = 1;
+      }
+      ctx.stroke(lens);
+      ctx.restore();
+    }
+    const inner = E.x - G.halfW;
+    ctx.beginPath();
+    ctx.moveTo(-inner, E.y - 1);
+    ctx.quadraticCurveTo(0, E.y - 4, inner, E.y - 1);
+    ctx.stroke();
+  }
+
   // 눈썹
   if (B.d) {
     const path = new Path2D(B.d);

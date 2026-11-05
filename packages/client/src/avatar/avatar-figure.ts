@@ -17,9 +17,10 @@ import {
 } from 'three';
 import { AvatarHand } from './avatar-hand.ts';
 import { AvatarHead } from './avatar-head.ts';
+import { addOutfitDetails } from './avatar-outfit.ts';
 import { NEUTRAL_FACE } from './face-paint.ts';
 
-/** 옷 색(외형 항목이 아니다) */
+/** 기본 티 몸통 색(옷 항목 0번, DEC-078). 다른 옷은 부품 정의의 색을 쓴다 */
 const SHIRT = 0xe2452c;
 const PANTS = 0x3b3f4a;
 const SHOES = 0x2a2c33;
@@ -55,7 +56,8 @@ export class AvatarFigure {
   constructor(appearance: Appearance) {
     this.head = new AvatarHead(appearance, HEAD_R);
     const skin = this.std(this.head.parts.skinTone.base, 0.7);
-    const shirt = this.std(SHIRT, 0.85);
+    const outfit = this.head.parts.outfit;
+    const shirt = this.std(outfit.color ?? SHIRT, 0.85);
     const pants = this.std(PANTS, 0.8);
     const shoes = this.std(SHOES, 0.6);
 
@@ -92,6 +94,17 @@ export class AvatarFigure {
     const trunk = this.mesh(new CylinderGeometry(4.7, 6.1, 14, 20), shirt, this.torso);
     trunk.position.y = 7.6;
     trunk.scale.z = 0.78;
+    // 옷 장식(후드·넥타이·줄무늬·로브, DEC-078): 몸통과 같은 변환의 그룹 안에 붙인다
+    const outfitFrame = new Group();
+    outfitFrame.position.copy(trunk.position);
+    outfitFrame.scale.z = trunk.scale.z;
+    this.torso.add(outfitFrame);
+    addOutfitDetails(outfit, {
+      frame: outfitFrame,
+      trunk: { height: 14, rTop: 4.7, rBottom: 6.1 },
+      material: (c) => this.std(c, 0.8),
+      mesh: (geo, mat, parent) => this.mesh(geo, mat, parent),
+    });
     const chest = this.mesh(
       new SphereGeometry(4.7, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2),
       shirt,
