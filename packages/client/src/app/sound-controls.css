@@ -1,0 +1,134 @@
+/* 소리 설정 칸과 소리 버튼(DEC-087). 로비·경기·AI·로컬 어느 페이지에서도 이 파일만으로 보이도록 스스로 완결한다. */
+.sound-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: var(--l-font);
+}
+.sound-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sound-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--l-cream-text);
+  font-size: 14px;
+  text-shadow: 0 1px 0 var(--l-wood-deep);
+}
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.sound-toggle input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #ffa431;
+  cursor: pointer;
+}
+.sound-field input[type='range'] {
+  width: 100%;
+  accent-color: #ffa431;
+}
+.sound-field input[type='range']:disabled {
+  opacity: 0.4;
+}
+.sound-hint {
+  margin: 0;
+  color: var(--l-cream-text);
+  font-size: 13px;
+}
+
+/* 오른쪽 위 둥근 소리 버튼 */
+.sound-fab {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--l-font);
+  font-size: 15px;
+  color: var(--l-wood-deep);
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  box-shadow:
+    inset 0 3px 0 #fff,
+    inset 0 -4px 0 rgba(180, 110, 40, 0.3),
+    0 4px 0 #9a6a30,
+    0 8px 16px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.sound-fab svg {
+  flex: none;
+}
+.sound-fab:focus-visible {
+  outline: 3px solid var(--l-focus);
+  outline-offset: 3px;
+}
+/* 소리가 아직 막혀 있으면 살짝 빛나며 눈길을 끈다 */
+.sound-fab.locked {
+  animation: sound-fab-glow 1.6s ease-in-out infinite;
+}
+@keyframes sound-fab-glow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 3px 0 #fff,
+      inset 0 -4px 0 rgba(180, 110, 40, 0.3),
+      0 4px 0 #9a6a30,
+      0 0 0 0 rgba(255, 200, 90, 0.7);
+  }
+  50% {
+    box-shadow:
+      inset 0 3px 0 #fff,
+      inset 0 -4px 0 rgba(180, 110, 40, 0.3),
+      0 4px 0 #9a6a30,
+      0 0 0 10px rgba(255, 200, 90, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sound-fab.locked {
+    animation: none;
+  }
+}
+/* 버튼 아래로 펼치는 작은 창 */
+.sound-pop {
+  position: fixed;
+  top: 70px;
+  right: 14px;
+  z-index: 60;
+  width: min(300px, calc(100vw - 28px));
+  box-sizing: border-box;
+  padding: 14px 16px 16px;
+}
+.sound-pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: var(--l-title);
+  font-family: var(--l-font-title);
+  font-size: 18px;
+  text-shadow: 0 2px 0 var(--l-wood-deep);
+}
+.sound-pop-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--l-wood-deep);
+  background: linear-gradient(180deg, #fffaf0, #ffe2b0);
+  cursor: pointer;
+}

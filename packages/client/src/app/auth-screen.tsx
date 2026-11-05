@@ -1,5 +1,6 @@
 // 로그인·회원등록 화면. 같은 화면의 탭으로 전환하고, 가입하면 로그인 탭으로 이동한다(PRD 로그인·회원등록).
 import { useState } from 'react';
+import { SoundButton } from './sound-button.tsx';
 import type { FormEvent } from 'react';
 import { NICKNAME_MAX, NICKNAME_MIN, PASSWORD_MAX, PASSWORD_MIN, type Me } from '@alkkagi/shared';
 import { describeApiError, type Api } from './api.ts';
@@ -68,6 +69,7 @@ export function AuthScreen({ api, notice, onLoggedIn }: AuthScreenProps) {
 
   return (
     <main className="auth-page">
+      <SoundButton />
       <header className="auth-hero">
         <h1 className="l-logo auth-logo">증강 알까기</h1>
       </header>

@@ -30,7 +30,7 @@ import {
   normalizeCodeInput,
   validatePasswordChange,
 } from './logic.ts';
-import { clampVolume, loadVolume, saveVolume } from './settings.ts';
+import { SoundControls } from './sound-controls.tsx';
 import { useToast } from './toast.tsx';
 
 /** 꾸미기 항목 이름(PRD 캐릭터 변경, DEC-054) */
@@ -504,7 +504,6 @@ export function SettingsModal({
   onClose: () => void;
 }) {
   const notify = useToast();
-  const [volume, setVolume] = useState(() => loadVolume());
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -549,21 +548,7 @@ export function SettingsModal({
   return (
     <FloatingWindow title="환경설정" onClose={onClose}>
       <div className="form">
-        <label className="field">
-          <span>효과음 음량 {volume}</span>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onChange={(e) => {
-              const value = clampVolume(Number(e.target.value));
-              setVolume(value);
-              saveVolume(value);
-            }}
-          />
-        </label>
-        <p className="hint">이 브라우저에만 저장돼요.</p>
+        <SoundControls />
 
         <div className="field">
           <span>닉네임·전적</span>

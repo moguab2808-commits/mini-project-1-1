@@ -2,6 +2,7 @@
 // 캐릭터 반응(`ReactionTracker`)을 연결한다. 입력 판단은 모두 `aim/`의 순수 TypeScript 로직이 하고,
 // 이 파일은 이벤트 연결만 맡는다.
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { SoundButton } from '../app/sound-button.tsx';
 import type { EmoteId, Seat } from '@alkkagi/shared';
 import { AimController, type RotateDir } from './aim/aim-controller.ts';
 import type { GameClientState, GameStore } from './game-store.ts';
@@ -10,7 +11,8 @@ import { ReactionTracker } from './reactions.ts';
 import { GameScene } from './scene/GameScene.tsx';
 import type { CharacterPose } from './scene/scene-contract.ts';
 import { EmoteController, emoteForKey } from './emotes.ts';
-import { EmoteAudio } from './emote-audio.ts';
+import { GameAudioDirector } from './game-audio.ts';
+import { audio } from '../audio/engine.ts';
 import { useFrameRecording } from './use-frame-recording.ts';
 import type { GameSession } from '../session/game-session.ts';
 import './hud/hud.css';
@@ -67,7 +69,7 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
         () => performance.now(),
       ),
   );
-  const [emoteAudio] = useState(() => new EmoteAudio());
+  const [sound] = useState(() => new GameAudioDirector(session.playerId));
   emoteController.update(
     state.start?.gameId ?? null,
     state.result ? 'finished' : (state.view?.phase ?? null),
@@ -79,20 +81,34 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
 
   useFrameRecording(state);
 
+  // 소리(DEC-084): 테마 배경음악·배경 소리를 요청하고 경기 이벤트를 효과음으로 바꾼다
+  const theme = state.start?.theme ?? null;
   useEffect(() => {
-    const off = session.on('emote:shown', (event) => {
-      if (event.gameId === store.getState().start?.gameId && !store.getState().result)
-        emoteAudio.play(event.emote);
-    });
-    window.addEventListener('pointerdown', emoteAudio.unlock);
-    window.addEventListener('keydown', emoteAudio.unlock);
+    if (!theme) return;
+    const offMusic = audio.requestMusic(theme, 10);
+    const offAmb = audio.requestAmbience(theme, 10);
     return () => {
-      off();
-      window.removeEventListener('pointerdown', emoteAudio.unlock);
-      window.removeEventListener('keydown', emoteAudio.unlock);
-      emoteAudio.dispose();
+      offMusic();
+      offAmb();
     };
-  }, [session, store, emoteAudio]);
+  }, [theme]);
+  useEffect(() => {
+    const live = () => !store.getState().result;
+    const offs = [
+      session.on('emote:shown', (event) => {
+        if (event.gameId === store.getState().start?.gameId && live()) sound.onEmote(event.emote);
+      }),
+      session.on('game:state', (view) => sound.onView(view, performance.now())),
+      session.on('turn:change', (e) => sound.onTurn(e)),
+      session.on('hazard:granted', () => sound.onGranted()),
+      session.on('hazard:triggered', (e) => sound.onHazard(e)),
+      session.on('game:over', (r) => sound.onGameOver(r)),
+    ];
+    return () => {
+      offs.forEach((off) => off());
+      sound.dispose();
+    };
+  }, [session, store, sound]);
 
   // 새 경기·새 스냅샷을 입력 로직에 전달한다(경기 시작 효과가 먼저 실행되도록 이 순서를 지킨다)
   useEffect(() => {
@@ -126,9 +142,12 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
   }, [controller, playing]);
   useEffect(() => {
     if (!state.start) return;
-    const id = window.setInterval(() => setTick((n) => n + 1), HUD_TICK_MS);
+    const id = window.setInterval(() => {
+      setTick((n) => n + 1);
+      sound.tick(store.getState().view, store.serverNow());
+    }, HUD_TICK_MS);
     return () => window.clearInterval(id);
-  }, [state.start]);
+  }, [state.start, sound, store]);
 
   // 창 단위 키보드·휠·컨텍스트 메뉴 연결.
   // 키는 `code`로 판단해 한글 입력 상태에서도 같다: E 방해요소, R 벽 방향, A·D·←·→ 판 돌리기, ESC 취소.
@@ -140,7 +159,6 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
       if (emote && session.mode !== 'online') {
         e.preventDefault();
         if (!e.repeat) {
-          emoteAudio.unlock();
           void emoteController.use(emote);
         }
         return;
@@ -188,12 +206,13 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
       window.removeEventListener('contextmenu', onContextMenu);
       window.removeEventListener('blur', onBlur);
     };
-  }, [controller, emoteController, emoteAudio, session.mode]);
+  }, [controller, emoteController, session.mode]);
 
   const { start, view } = state;
   if (!start || !view) {
     return (
       <div className="gs-root">
+        <SoundButton />
         <div className="gs-wait" role="status">
           상대 창을 기다리는 중…
         </div>
@@ -208,6 +227,7 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
   const nowServerMs = store.serverNow();
   return (
     <div className="gs-root">
+      <SoundButton />
       <div className="gs-scene">
         <GameScene
           start={start}
@@ -244,7 +264,6 @@ export function GameScreen({ session, store, onExit }: GameScreenProps) {
           session.mode === 'online'
             ? undefined
             : (emote: EmoteId) => {
-                emoteAudio.unlock();
                 void emoteController.use(emote);
               }
         }

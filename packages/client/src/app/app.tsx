@@ -1,6 +1,7 @@
 // 계정·로비·대기실·경기 화면을 잇는 앱 껍데기. 화면 전환은 URL이 아니라 로그인 여부와 방 상태로 정한다.
 // 방 연결과 경기 세션은 `RoomClient`(IMPL-010)가 맡고, 이 파일은 그 상태를 화면으로 옮긴다.
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useMusic } from '../audio/use-audio.ts';
 import type { Me } from '@alkkagi/shared';
 import { startAiGame, type AiGameSession, type AiMatchSettings } from '../ai/ai-game-session.ts';
 import { GameScreen } from '../game/GameScreen.tsx';
@@ -29,6 +30,8 @@ export function App() {
 }
 
 function AppRoot() {
+  // 로그인·로비·대기실 배경음악. 경기 화면은 더 높은 우선순위로 테마 곡을 요청한다
+  useMusic('lobby');
   const api = useMemo(() => createApi(), []);
   const [phase, setPhase] = useState<Phase>({ t: 'boot' });
   const waking = usePendingNotice(phase.t === 'boot');

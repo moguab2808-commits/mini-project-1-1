@@ -38,6 +38,11 @@ import {
   clampVolume,
   hasSeenRules,
   loadVolume,
+  loadVolumeOf,
+  loadSoundOn,
+  saveSoundOn,
+  saveVolumeOf,
+  DEFAULT_VOLUMES,
   markRulesSeen,
   saveVolume,
 } from './settings.ts';
@@ -295,6 +300,18 @@ test('설정 저장: 음량 범위 보정, 저장·복원, 저장소가 없거�
   saveVolume(35, storage);
   assert.equal(loadVolume(storage), 35);
   assert.equal(loadVolume(memoryStorage({ 'alkkagi.volume': 'abc' })), DEFAULT_VOLUME);
+  // 배경음악·배경 소리는 따로 저장하고 기본값이 다르다(DEC-084)
+  assert.equal(loadVolumeOf('music', memoryStorage()), DEFAULT_VOLUMES.music);
+  saveVolumeOf('music', 20, storage);
+  assert.equal(loadVolumeOf('music', storage), 20);
+  assert.equal(loadVolumeOf('sfx', storage), 35);
+  assert.equal(loadVolumeOf('ambience', storage), DEFAULT_VOLUMES.ambience);
+  // 켜기·끄기는 음량과 따로 저장하고 기본은 켜짐
+  assert.equal(loadSoundOn('music', memoryStorage()), true);
+  saveSoundOn('music', false, storage);
+  assert.equal(loadSoundOn('music', storage), false);
+  assert.equal(loadSoundOn('sfx', storage), true);
+  assert.equal(loadVolumeOf('music', storage), 20);
   assert.equal(loadVolume(null), DEFAULT_VOLUME);
   const broken = {
     getItem: () => {

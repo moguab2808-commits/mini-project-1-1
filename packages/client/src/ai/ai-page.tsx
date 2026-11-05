@@ -1,6 +1,8 @@
 // 개발용 `/ai` 화면: AI 대전 설정(판·알 개수) 후 시작. 로비의 방 생성 창(IMPL-012)은
 // `AiSetupForm`과 `startAiGame`을 그대로 쓴다. 서버 요청이 없다(DEC-021).
 import { useEffect, useState, type ReactNode } from 'react';
+import { SoundButton } from '../app/sound-button.tsx';
+import { useMusic } from '../audio/use-audio.ts';
 import {
   BOARD_IDS,
   DEFAULT_THEME,
@@ -129,6 +131,7 @@ type Phase =
   | { t: 'playing'; settings: AiMatchSettings; session: AiGameSession; store: GameStore };
 
 export function AiPage() {
+  useMusic('lobby');
   const [phase, setPhase] = useState<Phase>({ t: 'setup' });
 
   // 경기 화면을 떠나거나 창을 닫으면 워커를 끝낸다
@@ -151,13 +154,16 @@ export function AiPage() {
   }
   if (phase.t === 'setup') {
     return (
-      <AiSetupForm
-        initial={phase.last}
-        onStart={(settings) => {
-          const session = startAiGame(settings);
-          setPhase({ t: 'playing', settings, session, store: new GameStore(session) });
-        }}
-      />
+      <>
+        <SoundButton />
+        <AiSetupForm
+          initial={phase.last}
+          onStart={(settings) => {
+            const session = startAiGame(settings);
+            setPhase({ t: 'playing', settings, session, store: new GameStore(session) });
+          }}
+        />
+      </>
     );
   }
   return (
