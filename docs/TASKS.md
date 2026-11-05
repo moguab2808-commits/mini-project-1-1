@@ -19,7 +19,7 @@
 
 우선순위는 P0(현재 진행을 막는 작업), P1(다음 착수 대상), P2(이후 검토)로 표시한다. 우선순위·작업 등록은 미정 제품 정책·기술안을 승인하는 행위가 아니다.
 
-현재 진행 순서([DEC-065](DECISIONS.md#결정-색인)): 로컬에서 할 수 있는 작업·확인(로컬 2인·AI 대전·하네스)을 먼저 한다. 온라인 관련(서버 Socket.IO 연결, `npm run test:db`·개발 DB 마이그레이션 적용, 온라인 두 계정 확인, 배포)은 뒤로 미루며, 해당 작업의 남은 확인·수용 기준에 남겨 둔다. 대상: [IMPL-013](#impl-013-배포) 배포, [IMPL-015](#impl-015-방-테마-구현) DB 테스트, [IMPL-018](#impl-018-사람-아바타-구현) DB 테스트·온라인 두 계정, [IMPL-017](#impl-017-감정표현-구현) 서버 중계·온라인 확인.
+현재 진행 순서([DEC-065](DECISIONS.md#결정-색인)): 로컬에서 할 수 있는 작업·확인(로컬 2인·AI 대전·하네스)을 먼저 한다. 온라인 관련(서버 Socket.IO 연결, `npm run test:db`·개발 DB 마이그레이션 적용, 온라인 두 계정 확인, 배포)은 뒤로 미루며, 해당 작업의 남은 확인·수용 기준에 남겨 둔다. 대상: [IMPL-015](#impl-015-방-테마-구현) DB 테스트, [IMPL-018](#impl-018-사람-아바타-구현) DB 테스트·온라인 두 계정, [IMPL-017](#impl-017-감정표현-구현) 서버 중계·온라인 확인.
 
 ## 작업 목록
 
@@ -62,7 +62,7 @@
 | [IMPL-010](#impl-010-온라인-대전-클라이언트) | 온라인 대전 (클라이언트) | P0 | API-001, IMPL-003, IMPL-004 | 완료 | 개발자 A | [#44](https://github.com/moguab2808-commits/mini-project-1-1/issues/44)·[PR #64](https://github.com/moguab2808-commits/mini-project-1-1/pull/64) |
 | [IMPL-011](#impl-011-경기-종료-전적) | 경기 종료 전적 | P0 | DB-001, IMPL-009 | 완료 | 개발자 B | [#45](https://github.com/moguab2808-commits/mini-project-1-1/issues/45)·[PR #63](https://github.com/moguab2808-commits/mini-project-1-1/pull/63) |
 | [IMPL-012](#impl-012-계정로비대기실결과-화면) | 계정·로비·대기실·결과 화면 | P0 | UI-002, API-001, IMPL-007, IMPL-008 | 완료 | 개발자 B | [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/46)·[PR #66](https://github.com/moguab2808-commits/mini-project-1-1/pull/66) |
-| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 진행 중 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #68](https://github.com/moguab2808-commits/mini-project-1-1/pull/68)(코드)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR) |
+| [IMPL-013](#impl-013-배포) | 배포 | P1 | OPS-001, IMPL-009, IMPL-011 | 완료 | 개발자 B | [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/47)·[PR #68](https://github.com/moguab2808-commits/mini-project-1-1/pull/68)(코드)·[PR #96](https://github.com/moguab2808-commits/mini-project-1-1/pull/96)(중간 PR) |
 | [CHAR-001](#char-001-사람-아바타-전환과-꾸미기-설계) | 사람 아바타 전환과 꾸미기 설계 | P1 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#69](https://github.com/moguab2808-commits/mini-project-1-1/issues/69)·[PR #79](https://github.com/moguab2808-commits/mini-project-1-1/pull/79) |
 | [THEME-001](#theme-001-방-테마-선택-설계) | 방 테마 선택 설계 | P2 | IMPL-012 | 완료 | Claude — 사용자 요청 수행 | [#72](https://github.com/moguab2808-commits/mini-project-1-1/issues/72) |
 | [IMPL-015](#impl-015-방-테마-구현) | 방 테마 구현 | P2 | THEME-001, IMPL-004, IMPL-005, IMPL-008, IMPL-012 | 진행 중 | Claude — 사용자 요청 수행 | [PR #74](https://github.com/moguab2808-commits/mini-project-1-1/pull/74)(1차) |
@@ -851,7 +851,7 @@ Issue·PR: [#46](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 ## IMPL-013 배포
 
 우선순위: P1
-상태: 진행 중
+상태: 완료
 담당: 개발자 B
 의존성: OPS-001, IMPL-009, IMPL-011
 범위: Render 웹 서비스·Neon 설정, 헬스체크(UptimeRobot), SPA fallback, 구조화 로그, 수동 배포·롤백 절차를 적용한다. 커밋·푸시·배포는 사용자 승인 뒤 단계별로 한다.
@@ -860,14 +860,14 @@ Issue·PR: [#47](https://github.com/moguab2808-commits/mini-project-1-1/issues/4
 
 수용 기준:
 - [x] (정상) 수동 배포 뒤 `/health`가 `200 { status: "ok" }`이고 정적 화면과 Socket.IO 연결이 동작한다.
-- [ ] (정상) 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다. (Auto-Deploy Off는 사용자 전언과 Deploys 화면의 간접 근거(병합 24건에 자동 배포 없음, 최신 트리거 Manual)가 있고, 운영 로그에 비밀값이 없는지는 확인하지 못했다. Settings 화면·로그를 확인해 기록한다)
+- [x] (정상) 자동 배포가 꺼져 있고 환경 변수 값이 문서·로그에 없다. (2026-11-05 사용자가 Render Settings의 Auto-Deploy와 Logs를 직접 확인해 전했다. Claude는 Render 화면·로그를 직접 보지 못했다)
 - [x] (오류) `/api`·`/socket.io`·`/health` 밖 확장자 없는 GET은 `index.html`, 없는 정적 자산은 404를 돌려준다.
-- [ ] (오류) 롤백 절차로 직전 배포를 복원해 확인했다. (직전 배포 `e97b81a`는 마이그레이션 `0002`(`character_id` 삭제) 이전 코드라 지금 롤백하면 계정 API가 깨질 수 있다. 다음 배포의 직전인 `ddc5337`으로 확인한다)
+- [x] (오류) 롤백 절차로 직전 배포를 복원해 확인했다. (2026-11-05 사용자가 Render에서 직접 롤백해 확인했다고 전했다. 롤백 대상 커밋·시각은 전달받지 못했고 Claude는 롤백 장면을 보지 못했다. 같은 날 운영 `/health`는 `200`이다)
 - [x] (예외) 서버 시작 때 `rooms` 정리가 실패하면 서버가 시작하지 않는다. 절전 방지 요청 사용 여부와 Render 로그 보관 기간을 구현 단계에서 정해 기록했다.
 - [x] (예외) argon2id 해시 시간을 Render 무료 인스턴스에서 측정해 worklog에 남기고 목표(약 100~300ms)에 맞게 [AUTH](design/AUTH.md#해시프록시) 파라미터를 조정했다. (IMPL-007에서 옮겨 옴. 2026-11-05 서버 안 로그로 11회 재 중앙값 약 311ms라 조정이 필요 없다고 판단했다. 2026-11-04 약식 측정의 "약 70ms 이하"는 부정확했다)
-- [ ] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다.
+- [x] 변경·검증 결과를 worklog에 기록하고 리뷰 후 기준 브랜치에 병합됐다. (병합 직후 체크 규칙에 따라 이 PR에서 함께 닫는다, [CONTRIBUTING](CONTRIBUTING.md))
 
-진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. 사용자가 Render·Neon 서비스를 만들고(첫 배포 `e97b81a`, Blueprint) `main`을 수동 배포했으며(현재 Live `ddc5337`, PR #95 병합) UptimeRobot 모니터를 2026-11-03에 설정했다. 2026-11-04 Claude가 운영 URL을 읽기 전용으로 점검해 `/health`·정적 화면·SPA fallback·404·Socket.IO 핸드셰이크를, 사용자가 두 계정 PvP·Auto-Deploy Off·UptimeRobot 핑을 확인했다. **남은 것**: Auto-Deploy Off 설정과 운영 로그 비밀값 부재 확인, 롤백 확인(다음 배포에서), Render 로그 보관 7일 적용 확인. 2026-11-05 서버 안 해시 시간 로그(`argon2_timing`, PR #97)를 추가해 Render에서 재 중앙값 약 311ms를 확인했고 파라미터는 그대로 둔다([worklog](worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 같은 날 Deploys 화면에서 병합 `f830224`가 트리거 Auto-Deploy로 배포돼 Auto-Deploy가 켜져 있음을 확인했다(수용 기준 "자동 배포가 꺼져 있다"와 충돌, 정책 결정 필요). 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
+진행: 코드 쪽(`/health`, 정적 파일·SPA fallback, `rooms` 정리 실패 시 종료, `render.yaml`)은 구현·검증했다. 사용자가 Render·Neon 서비스를 만들고(첫 배포 `e97b81a`, Blueprint) `main`을 수동 배포했으며(현재 Live `ddc5337`, PR #95 병합) UptimeRobot 모니터를 2026-11-03에 설정했다. 2026-11-04 Claude가 운영 URL을 읽기 전용으로 점검해 `/health`·정적 화면·SPA fallback·404·Socket.IO 핸드셰이크를, 사용자가 두 계정 PvP·Auto-Deploy Off·UptimeRobot 핑을 확인했다. 2026-11-05 서버 안 해시 시간 로그(`argon2_timing`, PR #97)로 Render에서 중앙값 약 311ms를 확인해 파라미터를 그대로 두었다([worklog](worklogs/2026-11-05.md#impl-013-argon2id-해시-시간-서버-내-로그)). 같은 날 사용자가 Render 화면에서 Auto-Deploy 설정·운영 로그에 비밀값 없음·롤백·로그 보관 7일을 확인해 전했다([worklog](worklogs/2026-11-05.md#impl-013-마무리-사용자-확인)). 절전 방지 요청(10분 간격)과 로그 보관 7일은 [DEC-047](DECISIONS.md#결정-색인)로 정했다.
 
 검증 근거: [2026-11-03 worklog IMPL-013 절](worklogs/2026-11-03.md#impl-013-배포)(코드), [2026-11-04 worklog IMPL-013 운영 배포 확인](worklogs/2026-11-04.md#impl-013-운영-배포-확인)(운영)
 
