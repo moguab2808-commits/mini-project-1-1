@@ -39,6 +39,7 @@
    ├─ CONTRIBUTING.md
    ├─ design/                   # API·DB·인증·게임·로컬·운영·기술 후보
    ├─ adr/                      # 중요한 선택의 근거와 절충
+   ├─ images/                   # README 소개용 게임 화면
    ├─ worklogs/                 # 날짜별 작업·검증 기록
    └─ templates/                # Issue·PR 본문 작성 양식
 ```
